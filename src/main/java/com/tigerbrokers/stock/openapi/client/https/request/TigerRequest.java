@@ -44,12 +44,14 @@ public interface TigerRequest<T extends TigerResponse> {
   void setApiVersion(String apiVersion);
 
   /**
-   * 返回通知地址
+   *
+   * @return 返回通知地址
    */
   String getNotifyUrl();
 
   /**
-   * 设置通知地址
+   *
+   * @param notifyUrl 设置通知地址
    */
   void setNotifyUrl(String notifyUrl);
 }

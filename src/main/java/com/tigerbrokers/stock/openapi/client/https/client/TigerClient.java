@@ -11,7 +11,9 @@ import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 public interface TigerClient {
 
   /**
-   * @throws TigerApiException
+   *
+   * @param request
+   * @return TigerResponse
    */
   <T extends TigerResponse> T execute(TigerRequest<T> request);
 }

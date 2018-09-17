@@ -36,7 +36,7 @@ public class TigerSignature {
 
   /**
    *
-   * @param request
+   * @param request request param
    * @return
    */
   public static String getSignContent(Map<String, Object> request) {
@@ -116,7 +116,7 @@ public class TigerSignature {
    * @param publicKey 公钥
    * @param charset 字符集
    * @return 延签成功
-   * @throws TigerApiException
+   * @throws TigerApiException Api异常
    */
   public static boolean rsaCheckContent(String content, String sign, String publicKey, String charset)
       throws TigerApiException {

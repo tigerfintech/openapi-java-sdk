@@ -3,11 +3,35 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <groupId>com.tigerbrokers</groupId>
+  <groupId>io.github.tigerbrokers</groupId>
   <version>1.0.0</version>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>openapi-client</artifactId>
+  <artifactId>openapi-java-sdk</artifactId>
   <packaging>jar</packaging>
+
+  <name>openapi-java-sdk</name>
+  <description>tiger open-api sdk in java version</description>
+  <licenses>
+    <license>
+      <name>The Apache Software License,Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <name>lijiawen</name>
+      <email>lijiawen@tigerbrokers.com</email>
+      <organization>tiger brokers technologies inc.</organization>
+      <organizationUrl>www.itiger.com</organizationUrl>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git://github.com/tigerbrokers/openapi-java-sdk.git</connection>
+    <developerConnection>scm:git:git@github.com:tigerbrokers/openapi-java-sdk.git</developerConnection>
+    <url>https://github.com/tigerbrokers/openapi-java-sdk</url>
+  </scm>
+
+  <url>https://github.com/tigerbrokers/openapi-java-sdk</url>
 
   <dependencies>
     <dependency>
@@ -37,17 +61,57 @@
           <target>1.8</target>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.2.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9.1</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.6</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
   <distributionManagement>
-    <repository>
-      <id>tiger-oss</id>
-      <url>http://nexus.tigerbrokers.net/repository/maven-releases/</url>
-    </repository>
     <snapshotRepository>
-      <id>tiger-oss</id>
-      <url>http://nexus.tigerbrokers.net/repository/maven-snapshots/</url>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+    </repository>
   </distributionManagement>
 </project>
