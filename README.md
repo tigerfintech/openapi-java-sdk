@@ -22,6 +22,7 @@
 #### Maven地址
 
 ```xml
+
 <dependency>
     <groupId>io.github.tigerbrokers</groupId>
     <artifactId>openapi-java-sdk</artifactId>
