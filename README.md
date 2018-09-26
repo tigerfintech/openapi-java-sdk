@@ -23,7 +23,6 @@
 
 ```xml
 <dependency>
-  <dependency>
     <groupId>io.github.tigerbrokers</groupId>
     <artifactId>openapi-java-sdk</artifactId>
     <version>1.0.0</version>
