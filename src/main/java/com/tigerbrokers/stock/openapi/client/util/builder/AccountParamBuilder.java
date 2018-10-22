@@ -27,47 +27,65 @@ public class AccountParamBuilder {
   }
 
   public AccountParamBuilder conid(String conid) {
-    paramMap.put("conid", conid);
+    if (conid != null) {
+      paramMap.put("conid", conid);
+    }
     return this;
   }
 
   public AccountParamBuilder account(String account) {
-    paramMap.put("account", account);
+    if (account != null) {
+      paramMap.put("account", account);
+    }
     return this;
   }
 
   public AccountParamBuilder subAccounts(List<String> subAccounts) {
-    paramMap.put("sub_accounts", subAccounts);
+    if (subAccounts != null) {
+      paramMap.put("sub_accounts", subAccounts);
+    }
     return this;
   }
 
   public AccountParamBuilder symbol(String symbol) {
-    paramMap.put("symbol", symbol);
+    if (symbol != null) {
+      paramMap.put("symbol", symbol);
+    }
     return this;
   }
 
   public AccountParamBuilder currency(Currency currency) {
-    paramMap.put("currency", currency.name());
+    if (currency != null) {
+      paramMap.put("currency", currency.name());
+    }
     return this;
   }
 
   public AccountParamBuilder exchange(String exchange) {
-    paramMap.put("exchange", exchange);
+    if (exchange != null) {
+      paramMap.put("exchange", exchange);
+    }
     return this;
   }
 
   public AccountParamBuilder market(Market market) {
-    paramMap.put("market", market.name());
+    if (market != null) {
+      paramMap.put("market", market.name());
+    }
     return this;
   }
 
-  public AccountParamBuilder segment(boolean segment) {
-    paramMap.put("segment", segment);
+  public AccountParamBuilder segment(Boolean segment) {
+    if (segment != null) {
+      paramMap.put("segment", segment);
+    }
     return this;
   }
 
-  public AccountParamBuilder marketValue(boolean marketValue) {
-    paramMap.put("market_value", marketValue);
+  public AccountParamBuilder marketValue(Boolean marketValue) {
+    if (marketValue != null) {
+      paramMap.put("market_value", marketValue);
+    }
     return this;
   }
 
@@ -88,35 +106,45 @@ public class AccountParamBuilder {
   }
 
   public AccountParamBuilder setTime(String key, String time, TimeZoneId zoneId) {
-    Date date = DateUtils.setZoneDate(time, zoneId);
+    Date date = DateUtils.getZoneDate(time, zoneId);
     if (date != null) {
       paramMap.put(key, date.getTime());
     }
     return this;
   }
 
-  public AccountParamBuilder limit(int limit) {
-    paramMap.put("limit", limit);
+  public AccountParamBuilder limit(Integer limit) {
+    if (limit != null) {
+      paramMap.put("limit", limit);
+    }
     return this;
   }
 
   public AccountParamBuilder states(List<Integer> statusList) {
-    paramMap.put("states", statusList);
+    if (statusList != null) {
+      paramMap.put("states", statusList);
+    }
     return this;
   }
 
   public AccountParamBuilder secType(SecType secType) {
-    paramMap.put("sec_type", secType.name());
+    if (secType != null) {
+      paramMap.put("sec_type", secType.name());
+    }
     return this;
   }
 
-  public AccountParamBuilder orderId(int orderId) {
-    paramMap.put("order_id", orderId);
+  public AccountParamBuilder orderId(Integer orderId) {
+    if (orderId != null) {
+      paramMap.put("order_id", orderId);
+    }
     return this;
   }
 
-  public AccountParamBuilder isBrief(boolean isBrief) {
-    paramMap.put("is_brief", isBrief);
+  public AccountParamBuilder isBrief(Boolean isBrief) {
+    if (isBrief != null) {
+      paramMap.put("is_brief", isBrief);
+    }
     return this;
   }
 

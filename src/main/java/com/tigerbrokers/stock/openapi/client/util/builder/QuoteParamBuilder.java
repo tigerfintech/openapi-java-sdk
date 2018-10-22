@@ -73,12 +73,16 @@ public class QuoteParamBuilder {
   }
 
   public QuoteParamBuilder symbol(String symbol) {
-    paramMap.put("symbol", symbol);
+    if (symbol != null) {
+      paramMap.put("symbol", symbol);
+    }
     return this;
   }
 
   public QuoteParamBuilder symbols(List<String> symbols) {
-    paramMap.put("symbols", symbols);
+    if (symbols != null) {
+      paramMap.put("symbols", symbols);
+    }
     return this;
   }
 
@@ -99,50 +103,66 @@ public class QuoteParamBuilder {
   }
 
   public QuoteParamBuilder setTime(String key, String time, TimeZoneId zoneId) {
-    Date date = DateUtils.setZoneDate(time, zoneId);
+    Date date = DateUtils.getZoneDate(time, zoneId);
     if (date != null) {
       paramMap.put(key, date.getTime());
     }
     return this;
   }
 
-  public QuoteParamBuilder limit(int limit) {
-    paramMap.put("limit", limit);
+  public QuoteParamBuilder limit(Integer limit) {
+    if (limit != null) {
+      paramMap.put("limit", limit);
+    }
     return this;
   }
 
   public QuoteParamBuilder right(String right) {
-    paramMap.put("right", right);
+    if (right != null) {
+      paramMap.put("right", right);
+    }
     return this;
   }
 
-  public QuoteParamBuilder hourTrading(boolean hourTrading) {
-    paramMap.put("include_hour_trading", hourTrading);
+  public QuoteParamBuilder hourTrading(Boolean hourTrading) {
+    if (hourTrading != null) {
+      paramMap.put("include_hour_trading", hourTrading);
+    }
     return this;
   }
 
-  public QuoteParamBuilder askBid(boolean askBid) {
-    paramMap.put("include_ask_bid", askBid);
+  public QuoteParamBuilder askBid(Boolean askBid) {
+    if (askBid != null) {
+      paramMap.put("include_ask_bid", askBid);
+    }
     return this;
   }
 
   public QuoteParamBuilder market(Market market) {
-    paramMap.put("market", market);
+    if (market != null) {
+      paramMap.put("market", market);
+    }
     return this;
   }
 
-  public QuoteParamBuilder beginIndex(int beginIndex) {
-    paramMap.put("begin_index", beginIndex);
+  public QuoteParamBuilder beginIndex(Integer beginIndex) {
+    if (beginIndex != null) {
+      paramMap.put("begin_index", beginIndex);
+    }
     return this;
   }
 
-  public QuoteParamBuilder endIndex(int endIndex) {
-    paramMap.put("end_index", endIndex);
+  public QuoteParamBuilder endIndex(Integer endIndex) {
+    if (endIndex != null) {
+      paramMap.put("end_index", endIndex);
+    }
     return this;
   }
 
   public QuoteParamBuilder language(Language language) {
-    paramMap.put("lang", language.name());
+    if (language != null) {
+      paramMap.put("lang", language.name());
+    }
     return this;
   }
 
