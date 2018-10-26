@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Web 工具类
  */
-public abstract class HttpUtils {
+public class HttpUtils {
 
   private static final Logger logger = LoggerFactory.getLogger(HttpUtils.class);
 
