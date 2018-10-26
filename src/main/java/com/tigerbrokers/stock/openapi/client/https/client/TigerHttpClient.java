@@ -73,7 +73,7 @@ public class TigerHttpClient implements TigerClient {
         throw new TigerApiException(TigerApiCode.SIGN_CHECK_FAILED);
       }
     } catch (TigerApiException e) {
-      logger.error("client execute api exeception:", e);
+      logger.error("client execute api exception:", e);
       return TigerHttpResponse.errorMsg(e.getApiError());
     } catch (Exception e) {
       logger.error("client execute exception:", e);

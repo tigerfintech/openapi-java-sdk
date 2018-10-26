@@ -25,19 +25,13 @@ import java.util.Map;
  */
 public class TigerSignature {
 
-  /** RSA最大加密明文大小 */
-  private static final int MAX_ENCRYPT_BLOCK = 117;
-
-  /** RSA最大解密密文大小 */
-  private static final int MAX_DECRYPT_BLOCK = 128;
-
   private static final String PRIVATE_KEY_BEGIN = "-----BEGIN PRIVATE KEY-----";
   private static final String PRIVATE_KEY_END = "-----END PRIVATE KEY-----";
 
   /**
-   *
-   * @param request request param
-   * @return
+   * 获取签名内容
+   * @param request 签名字段
+   * @return 签名字符串
    */
   public static String getSignContent(Map<String, Object> request) {
     StringBuffer content = new StringBuffer();
@@ -54,7 +48,7 @@ public class TigerSignature {
         strValue = value.toString();
       }
       if (StringUtils.areNotEmpty(key, strValue)) {
-        content.append((index == 0 ? "" : "&") + key + "=" + value);
+        content.append((index == 0 ? "" : "&")).append(key).append("=").append(value);
         index++;
       }
     }
@@ -68,9 +62,8 @@ public class TigerSignature {
    * @param privateKey 私钥
    * @param charset 字符集，如UTF-8, GBK, GB2312
    * @return 签名后的内容
-   * @throws TigerApiException
    */
-  public static String rsaSign(String content, String privateKey, String charset) throws TigerApiException {
+  public static String rsaSign(String content, String privateKey, String charset) {
     if (privateKey.contains(PRIVATE_KEY_BEGIN)) {
       privateKey = privateKey.replace(PRIVATE_KEY_BEGIN, "");
     }
@@ -78,8 +71,8 @@ public class TigerSignature {
       privateKey = privateKey.replace(PRIVATE_KEY_END, "");
     }
     try {
-      PrivateKey priKey = getPrivateKey(TigerApiConstants.SIGN_TYPE_RSA,
-          new ByteArrayInputStream(privateKey.getBytes()));
+      PrivateKey priKey =
+          getPrivateKey(TigerApiConstants.SIGN_TYPE_RSA, new ByteArrayInputStream(privateKey.getBytes()));
       Signature signature = Signature.getInstance(TigerApiConstants.SIGN_ALGORITHMS);
       signature.initSign(priKey);
 
@@ -108,24 +101,12 @@ public class TigerSignature {
     return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(encodedKey));
   }
 
-  /**
-   * 使用公钥验签
-   *
-   * @param content 原内容
-   * @param sign 加签后的内容
-   * @param publicKey 公钥
-   * @param charset 字符集
-   * @return 延签成功
-   * @throws TigerApiException Api异常
-   */
   public static boolean rsaCheckContent(String content, String sign, String publicKey, String charset)
       throws TigerApiException {
     boolean rsaCheckContent = rsaCheck(content, sign, publicKey, charset);
-    // 针对JSON \/ 和 \" 问题，替换/和"后再尝试做一次验证
     if (!rsaCheckContent && (content.contains("\\/") || content.contains("\\\""))) {
-      String sourceData = content.replace("\\/", "/").replace("\\\"", "\"");
-      boolean jsonCheck = rsaCheck(sourceData, sign, publicKey, charset);
-      return jsonCheck;
+      String source = content.replace("\\/", "/").replace("\\\"", "\"");
+      return rsaCheck(source, sign, publicKey, charset);
     }
 
     return rsaCheckContent;

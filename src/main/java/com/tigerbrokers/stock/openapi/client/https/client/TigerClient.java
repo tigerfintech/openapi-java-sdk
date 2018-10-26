@@ -12,8 +12,8 @@ public interface TigerClient {
 
   /**
    *
-   * @param request
-   * @return TigerResponse
+   * @param request 请求对象
+   * @return TigerResponse 响应对象
    */
   <T extends TigerResponse> T execute(TigerRequest<T> request);
 }
