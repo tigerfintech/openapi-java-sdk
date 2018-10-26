@@ -70,6 +70,7 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
   private Channel channel = null;
   private ChannelFuture future = null;
 
+  private boolean inited = false;
   private volatile ScheduledFuture<?> reconnectExecutorFuture = null;
   private static final ScheduledThreadPoolExecutor reconnectExecutorService = new ScheduledThreadPoolExecutor(2);
 
@@ -123,6 +124,7 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
           }
         });
     apiComposeCallback.client(this);
+    inited = true;
   }
 
   public void connect() {
@@ -147,6 +149,9 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
   private void doConnect() {
     try {
       long start = System.currentTimeMillis();
+      if (!inited) {
+        init();
+      }
       InetSocketAddress address = getServerAddress();
       if (address == null) {
         throw new RuntimeException("get connect address error.");
@@ -211,6 +216,8 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
       group.shutdownGracefully();
     } catch (Throwable t) {
       logger.warn(t.getMessage());
+    } finally {
+      inited = false;
     }
   }
 

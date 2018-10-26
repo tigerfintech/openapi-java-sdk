@@ -57,6 +57,7 @@ public class TigerHttpClient implements TigerClient {
     TigerHttpResponse response;
     try {
       String data = HttpUtils.post(serverUrl, JSONObject.toJSONString(buildParams(request)));
+
       if (StringUtils.isEmpty(data)) {
         return null;
       }
