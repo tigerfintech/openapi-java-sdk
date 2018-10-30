@@ -86,12 +86,26 @@ public class QuoteParamBuilder {
     return this;
   }
 
+  public QuoteParamBuilder beginTime(Long beginTime) {
+    if (beginTime != null && beginTime > 0) {
+      paramMap.put("begin_time", beginTime);
+    }
+    return this;
+  }
+
   public QuoteParamBuilder beginTime(String beginTime) {
     return beginTime(beginTime, TimeZoneId.Shanghai);
   }
 
   public QuoteParamBuilder beginTime(String beginTime, TimeZoneId zoneId) {
     return setTime("begin_time", beginTime, zoneId);
+  }
+
+  public QuoteParamBuilder endTime(Long endTime) {
+    if (endTime != null && endTime > 0) {
+      paramMap.put("end_time", endTime);
+    }
+    return this;
   }
 
   public QuoteParamBuilder endTime(String endTime) {

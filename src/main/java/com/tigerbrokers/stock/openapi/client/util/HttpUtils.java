@@ -30,18 +30,20 @@ public class HttpUtils {
     if (url == null || json == null) {
       return null;
     }
-    RequestBody body = RequestBody.create(JSON, json);
-    okhttp3.Request request = new okhttp3.Request.Builder()
-        .url(url)
-        .post(body)
-        .build();
-
     try {
+      RequestBody body = RequestBody.create(JSON, json);
+      okhttp3.Request request = new okhttp3.Request.Builder()
+          .url(url)
+          .post(body)
+          .build();
+
       Response response = client.newCall(request).execute();
       if (response != null && response.body() != null) {
         return response.body().string();
       }
     } catch (IOException e) {
+      logger.error("HttpUtils execute io exception:{}", e.getMessage(), e);
+    } catch (Exception e) {
       logger.error("HttpUtils execute exception:{}", e.getMessage(), e);
     }
     return null;

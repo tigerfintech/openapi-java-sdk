@@ -83,7 +83,7 @@ public class TigerHttpClient implements TigerClient {
     return response;
   }
 
-  private Map<String, Object> buildParams(TigerHttpRequest request) throws TigerApiException {
+  private Map<String, Object> buildParams(TigerHttpRequest request) {
     Map params = new HashMap<>();
     params.put(METHOD, request.getApiMethodName());
     params.put(VERSION, request.getApiVersion());

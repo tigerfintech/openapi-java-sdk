@@ -89,12 +89,26 @@ public class AccountParamBuilder {
     return this;
   }
 
+  public AccountParamBuilder startDate(Long timestamp) {
+    if (timestamp != null && timestamp > 0) {
+      paramMap.put("start_date", timestamp);
+    }
+    return this;
+  }
+
   public AccountParamBuilder startDate(String startDate) {
     return setTime("start_date", startDate, TimeZoneId.Shanghai);
   }
 
   public AccountParamBuilder startDate(String startDate, TimeZoneId zoneId) {
     return setTime("start_date", startDate, zoneId);
+  }
+
+  public AccountParamBuilder endDate(Long timestamp) {
+    if (timestamp != null && timestamp > 0) {
+      paramMap.put("end_date", timestamp);
+    }
+    return this;
   }
 
   public AccountParamBuilder endDate(String endDate) {

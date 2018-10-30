@@ -30,6 +30,7 @@ public class TigerSignature {
 
   /**
    * 获取签名内容
+   *
    * @param request 签名字段
    * @return 签名字符串
    */
@@ -64,11 +65,13 @@ public class TigerSignature {
    * @return 签名后的内容
    */
   public static String rsaSign(String content, String privateKey, String charset) {
-    if (privateKey.contains(PRIVATE_KEY_BEGIN)) {
-      privateKey = privateKey.replace(PRIVATE_KEY_BEGIN, "");
-    }
-    if (privateKey.contains(PRIVATE_KEY_END)) {
-      privateKey = privateKey.replace(PRIVATE_KEY_END, "");
+    if (privateKey.startsWith("-")) {
+      if (privateKey.contains(PRIVATE_KEY_BEGIN)) {
+        privateKey = privateKey.replace(PRIVATE_KEY_BEGIN, "");
+      }
+      if (privateKey.contains(PRIVATE_KEY_END)) {
+        privateKey = privateKey.replace(PRIVATE_KEY_END, "");
+      }
     }
     try {
       PrivateKey priKey =
@@ -88,8 +91,7 @@ public class TigerSignature {
     }
   }
 
-  public static PrivateKey getPrivateKey(String algorithm, InputStream ins)
-      throws Exception {
+  public static PrivateKey getPrivateKey(String algorithm, InputStream ins) throws Exception {
     if (ins == null || StringUtils.isEmpty(algorithm)) {
       return null;
     }
@@ -112,8 +114,8 @@ public class TigerSignature {
     return rsaCheckContent;
   }
 
-  private static boolean rsaCheck(String content, String sign, String publicKey,
-      String charset) throws TigerApiException {
+  private static boolean rsaCheck(String content, String sign, String publicKey, String charset)
+      throws TigerApiException {
     try {
       PublicKey pubKey = getPublicKey("RSA", new ByteArrayInputStream(publicKey.getBytes()));
       Signature signature = Signature.getInstance(TigerApiConstants.SIGN_ALGORITHMS);
@@ -129,8 +131,7 @@ public class TigerSignature {
     }
   }
 
-  public static PublicKey getPublicKey(String algorithm, InputStream ins)
-      throws Exception {
+  public static PublicKey getPublicKey(String algorithm, InputStream ins) throws Exception {
     KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
     StringWriter writer = new StringWriter();
     StreamUtil.io(new InputStreamReader(ins), writer);
