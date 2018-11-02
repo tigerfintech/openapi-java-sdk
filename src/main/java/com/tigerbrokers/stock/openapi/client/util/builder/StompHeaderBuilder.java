@@ -5,7 +5,6 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import io.netty.handler.codec.stomp.DefaultStompHeaders;
 import io.netty.handler.codec.stomp.StompHeaders;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 /**
