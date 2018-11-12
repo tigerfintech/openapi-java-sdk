@@ -28,6 +28,13 @@ public class TradeParamBuilder {
     return new TradeParamBuilder();
   }
 
+  public TradeParamBuilder id(Long id) {
+    if (id != null) {
+      this.orderParameter.setId(id);
+    }
+    return this;
+  }
+
   public TradeParamBuilder orderId(Integer orderId) {
     if (orderId != null) {
       this.orderParameter.setOrderId(orderId);

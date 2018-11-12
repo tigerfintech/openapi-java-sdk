@@ -32,11 +32,18 @@ public class TigerHttpClient implements TigerClient {
   private String tigerId;
   private String privateKey;
   private String tigerPublicKey;
+
+  private static final String ONLINE_PUBLIC_KEY =
+      "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDNF3G8SoEcCZh2rshUbayDgLLrj6rKgzNMxDL2HSnKcB0+GPOsndqSv+a4IBu9+I3fyBp5hkyMMG2+AXugd9pMpy6VxJxlNjhX1MYbNTZJUT4nudki4uh+LMOkIBHOceGNXjgB+cXqmlUnjlqha/HgboeHSnSgpM3dKSJQlIOsDwIDAQAB";
   private String signType = TigerApiConstants.SIGN_TYPE_RSA;
   private String charset = TigerApiConstants.CHARSET_UTF8;
 
   static {
     Security.setProperty("jdk.certpath.disabledAlgorithms", "");
+  }
+
+  public TigerHttpClient(String serverUrl, String tigerId, String privateKey) {
+    this(serverUrl, tigerId, privateKey, ONLINE_PUBLIC_KEY);
   }
 
   public TigerHttpClient(String serverUrl, String tigerId, String privateKey, String tigerPublicKey) {

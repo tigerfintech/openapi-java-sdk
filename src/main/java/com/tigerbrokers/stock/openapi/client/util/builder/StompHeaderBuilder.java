@@ -54,6 +54,11 @@ public class StompHeaderBuilder {
     return this;
   }
 
+  public StompHeaderBuilder id(int id) {
+    this.stompHeaders.set(StompHeaders.ID, String.valueOf(id));
+    return this;
+  }
+
   public StompHeaderBuilder reqType(int reqType) {
     this.stompHeaders.set(REQ_TYPE, String.valueOf(reqType));
     return this;

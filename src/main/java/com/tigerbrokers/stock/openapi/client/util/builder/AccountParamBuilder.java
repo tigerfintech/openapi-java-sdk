@@ -134,7 +134,7 @@ public class AccountParamBuilder {
     return this;
   }
 
-  public AccountParamBuilder states(List<Integer> statusList) {
+  public AccountParamBuilder states(List<String> statusList) {
     if (statusList != null) {
       paramMap.put("states", statusList);
     }
@@ -144,6 +144,13 @@ public class AccountParamBuilder {
   public AccountParamBuilder secType(SecType secType) {
     if (secType != null) {
       paramMap.put("sec_type", secType.name());
+    }
+    return this;
+  }
+
+  public AccountParamBuilder id(Long id) {
+    if (id != null) {
+      paramMap.put("id", id);
     }
     return this;
   }

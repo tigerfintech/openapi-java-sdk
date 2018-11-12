@@ -21,6 +21,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.stomp.StompFrame;
+import io.netty.handler.codec.stomp.StompHeaders;
 import io.netty.handler.codec.stomp.StompSubframeAggregator;
 import io.netty.handler.codec.stomp.StompSubframeDecoder;
 import io.netty.handler.codec.stomp.StompSubframeEncoder;
@@ -42,6 +44,7 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.net.ssl.SSLException;
@@ -278,241 +281,271 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
     return orderIdPassport.getOrderId();
   }
 
+  @Override
+  public String getOrderNoAsync(String account) {
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("account", account);
+    return sendMessage(ReqProtocolType.ORDER_NO, jsonObject.toJSONString());
+  }
+
   private void nonAsyncWait() {
     if (!async) {
       try {
-        orderNoBarrier.await();
+        orderNoBarrier.await(3, TimeUnit.SECONDS);
       } catch (InterruptedException e) {
         logger.error("connect interrupted exception:", e);
       } catch (BrokenBarrierException e) {
         logger.error("connect broken barrier exception:", e);
+      } catch (TimeoutException e) {
+        logger.error("connect timeout exception:", e);
       }
     }
   }
 
   @Override
-  public void previewOrder(OrderParameter orderParameter) {
-    sendMessage(ReqProtocolType.PREVIEW_ORDER,
+  public String previewOrder(OrderParameter orderParameter) {
+    return sendMessage(ReqProtocolType.PREVIEW_ORDER,
         JSONObject.toJSONString(orderParameter, FastJsonPropertyFilter.getPropertyFilter()));
   }
 
   @Override
-  public void placeOrder(OrderParameter orderParameter) {
-    sendMessage(ReqProtocolType.PLACE_ORDER,
+  public String placeOrder(OrderParameter orderParameter) {
+    return sendMessage(ReqProtocolType.PLACE_ORDER,
         JSONObject.toJSONString(orderParameter, FastJsonPropertyFilter.getPropertyFilter()));
   }
 
   @Override
-  public void cancelOrder(String account, int orderId) {
+  public String cancelOrder(String account, int orderId) {
     Map<String, String> params = new HashMap<>();
     params.put("order_id", orderId + "");
     params.put("account", account);
-    sendMessage(ReqProtocolType.CANCEL_ORDER, JSONObject.toJSONString(params));
+    return sendMessage(ReqProtocolType.CANCEL_ORDER, JSONObject.toJSONString(params));
   }
 
   @Override
-  public void modifyOrder(OrderParameter orderParameter) {
-    sendMessage(ReqProtocolType.MODIFY_ORDER,
+  public String modifyOrder(OrderParameter orderParameter) {
+    return sendMessage(ReqProtocolType.MODIFY_ORDER,
         JSONObject.toJSONString(orderParameter, FastJsonPropertyFilter.getPropertyFilter()));
   }
 
   @Override
-  public void subscribe(Subject subject, List<String> focusKeys) {
+  public String subscribe(Subject subject, List<String> focusKeys) {
     if (!isConnected()) {
       notConnect();
-      return;
+      return null;
     }
-    channel.writeAndFlush(StompMessageUtil.buildSubscribeMessage(subject, new HashSet<>(focusKeys)));
+    StompFrame frame = StompMessageUtil.buildSubscribeMessage(subject, new HashSet<>(focusKeys));
+    channel.writeAndFlush(frame);
     subscribeList.add(subject);
+
+    return frame.headers().getAsString(StompHeaders.ID);
   }
 
   @Override
-  public void subscribe(Subject subject) {
+  public String subscribe(Subject subject) {
     if (!isConnected()) {
       notConnect();
-      return;
+      return null;
     }
-    channel.writeAndFlush(StompMessageUtil.buildSubscribeMessage(subject));
+    StompFrame frame = StompMessageUtil.buildSubscribeMessage(subject);
+    channel.writeAndFlush(frame);
     subscribeList.add(subject);
+
+    return frame.headers().getAsString(StompHeaders.ID);
   }
 
   @Override
-  public void cancelSubscribe(Subject subject) {
+  public String cancelSubscribe(Subject subject) {
     if (!isConnected()) {
       notConnect();
-      return;
+      return null;
     }
-    channel.writeAndFlush(StompMessageUtil.buildUnSubscribeMessage(subject));
+    StompFrame frame = StompMessageUtil.buildUnSubscribeMessage(subject);
+    channel.writeAndFlush(frame);
     subscribeList.remove(subject);
+
+    return frame.headers().getAsString(StompHeaders.ID);
   }
 
   @Override
-  public void getOpenOrders() {
-    sendMessage(ReqProtocolType.REQ_OPEN_ORDERS, null);
+  public String getOpenOrders() {
+    return sendMessage(ReqProtocolType.REQ_OPEN_ORDERS, null);
   }
 
   @Override
-  public void getPosition(PositionParameter position) {
-    sendMessage(ReqProtocolType.REQ_POSITIONS, null);
+  public String getPosition(PositionParameter position) {
+    return sendMessage(ReqProtocolType.REQ_POSITIONS, null);
   }
 
   @Override
-  public void getAsset(AssetParameter asset) {
-    sendMessage(ReqProtocolType.REQ_ASSETS, null);
+  public String getAsset(AssetParameter asset) {
+    return sendMessage(ReqProtocolType.REQ_ASSETS, null);
   }
 
   @Override
-  public void getAccount(String account) {
+  public String getAccount(String account) {
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("account", account);
-    sendMessage(ReqProtocolType.REQ_ACCOUNT, jsonObject.toJSONString());
+    return sendMessage(ReqProtocolType.REQ_ACCOUNT, jsonObject.toJSONString());
   }
 
   @Override
-  public void getMarketState(QuoteParameter parameter) {
+  public String getMarketState(QuoteParameter parameter) {
     if (parameter == null || parameter.getMarket() == null) {
       logger.info("param error:{}", parameter);
-      return;
+      return null;
     }
-    sendMessage(ReqProtocolType.REQ_MARKET_STATE, JSONObject.toJSONString(parameter));
+    return sendMessage(ReqProtocolType.REQ_MARKET_STATE, JSONObject.toJSONString(parameter));
   }
 
   @Override
-  public void getAllSymbols(QuoteParameter parameter) {
+  public String getAllSymbols(QuoteParameter parameter) {
     if (parameter == null || parameter.getMarket() == null) {
       logger.info("param error:{}", parameter);
-      return;
+      return null;
     }
-    sendMessage(ReqProtocolType.REQ_ALL_SYMBOLS, JSONObject.toJSONString(parameter));
+    return sendMessage(ReqProtocolType.REQ_ALL_SYMBOLS, JSONObject.toJSONString(parameter));
   }
 
   @Override
-  public void getAllSymbolNames(QuoteParameter parameter) {
+  public String getAllSymbolNames(QuoteParameter parameter) {
     if (parameter == null || parameter.getMarket() == null) {
       logger.info("param error:{}", parameter);
-      return;
+      return null;
     }
-    sendMessage(ReqProtocolType.REQ_ALL_SYMBOL_NAMES, JSONObject.toJSONString(parameter));
+    return sendMessage(ReqProtocolType.REQ_ALL_SYMBOL_NAMES, JSONObject.toJSONString(parameter));
   }
 
   @Override
-  public void getBriefInfo(QuoteParameter parameter) {
+  public String getBriefInfo(QuoteParameter parameter) {
     if (parameter.getSymbols() == null
         || parameter.getSymbols().isEmpty()
         || parameter.getMarket() == null
         || parameter.getMarket() == Market.ALL) {
       logger.info("param error:{}", parameter);
-      return;
+      return null;
     }
-    sendMessage(ReqProtocolType.REQ_BRIEF_INFO, JSONObject.toJSONString(parameter));
+    return sendMessage(ReqProtocolType.REQ_BRIEF_INFO, JSONObject.toJSONString(parameter));
   }
 
   @Override
-  public void getStockDetail(QuoteParameter parameter) {
+  public String getStockDetail(QuoteParameter parameter) {
     if (parameter.getSymbols() == null
         || parameter.getSymbols().isEmpty()
         || parameter.getMarket() == null
         || parameter.getMarket() == Market.ALL) {
       logger.info("param error:{}", parameter);
-      return;
+      return null;
     }
-    sendMessage(ReqProtocolType.REQ_STOCK_DETAIL, JSONObject.toJSONString(parameter));
+    return sendMessage(ReqProtocolType.REQ_STOCK_DETAIL, JSONObject.toJSONString(parameter));
   }
 
   @Override
-  public void getTimeline(QuoteParameter parameter) {
+  public String getTimeline(QuoteParameter parameter) {
     if (parameter.getSymbols() == null
         || parameter.getSymbols().isEmpty()
         || parameter.getPeriod() == null
         || parameter.getMarket() == null
         || parameter.getMarket() == Market.ALL) {
       logger.info("param error:{}", parameter);
-      return;
+      return null;
     }
-    sendMessage(ReqProtocolType.REQ_TIME_LINE, JSONObject.toJSONString(parameter));
+    return sendMessage(ReqProtocolType.REQ_TIME_LINE, JSONObject.toJSONString(parameter));
   }
 
   @Override
-  public void getHourTradingTimeline(QuoteParameter parameter) {
+  public String getHourTradingTimeline(QuoteParameter parameter) {
     if (parameter.getSymbols() == null
         || parameter.getSymbols().isEmpty()
         || parameter.getMarket() == null
         || parameter.getMarket() == Market.ALL) {
       logger.info("param error:{}", parameter);
-      return;
+      return null;
     }
-    sendMessage(ReqProtocolType.REQ_HOUR_TRADING_TIME_LINE, JSONObject.toJSONString(parameter));
+    return sendMessage(ReqProtocolType.REQ_HOUR_TRADING_TIME_LINE, JSONObject.toJSONString(parameter));
   }
 
   @Override
-  public void getKline(QuoteParameter parameter) {
+  public String getKline(QuoteParameter parameter) {
     if (parameter.getSymbols() == null
         || parameter.getSymbols().isEmpty()
         || parameter.getMarket() == null
         || parameter.getMarket() == Market.ALL) {
       logger.info("param error:{}", parameter);
-      return;
+      return null;
     }
-    sendMessage(ReqProtocolType.REQ_KLINE, JSONObject.toJSONString(parameter));
+    return sendMessage(ReqProtocolType.REQ_KLINE, JSONObject.toJSONString(parameter));
   }
 
   @Override
-  public void getTradeTick(QuoteParameter parameter) {
+  public String getTradeTick(QuoteParameter parameter) {
     if (parameter.getSymbols() == null
         || parameter.getSymbols().isEmpty()
         || parameter.getMarket() == null
         || parameter.getMarket() == Market.ALL) {
       logger.info("param error:{}", parameter);
-      return;
+      return null;
     }
-    sendMessage(ReqProtocolType.REQ_TRADE_TICK, JSONObject.toJSONString(parameter));
+    return sendMessage(ReqProtocolType.REQ_TRADE_TICK, JSONObject.toJSONString(parameter));
   }
 
   @Override
-  public void subscribeQuote(Set<String> symbols) {
+  public String subscribeQuote(Set<String> symbols) {
     if (!isConnected()) {
       notConnect();
-      return;
+      return null;
     }
-    channel.writeAndFlush(StompMessageUtil.buildSubscribeMessage(symbols));
+    StompFrame frame = StompMessageUtil.buildSubscribeMessage(symbols);
+    channel.writeAndFlush(frame);
     subscribeSymbols.addAll(symbols);
     logger.info("send subscribe quote message, symbols:{}", symbols);
+
+    return frame.headers().getAsString(StompHeaders.ID);
   }
 
   @Override
-  public void subscribeQuote(Set<String> symbols, List<String> focusKeys) {
+  public String subscribeQuote(Set<String> symbols, List<String> focusKeys) {
     if (!isConnected()) {
       notConnect();
-      return;
+      return null;
     }
-    channel.writeAndFlush(StompMessageUtil.buildSubscribeMessage(symbols, new HashSet<>(focusKeys)));
+    StompFrame frame = StompMessageUtil.buildSubscribeMessage(symbols, new HashSet<>(focusKeys));
+    channel.writeAndFlush(frame);
     subscribeSymbols.addAll(symbols);
     logger.info("send subscribe quote message, symbols:{},focusKeys:{}", symbols, focusKeys);
+
+    return frame.headers().getAsString(StompHeaders.ID);
   }
 
   @Override
-  public void cancelSubscribeQuote(Set<String> symbols) {
+  public String cancelSubscribeQuote(Set<String> symbols) {
     if (!isConnected()) {
       notConnect();
-      return;
+      return null;
     }
-    channel.writeAndFlush(StompMessageUtil.buildUnSubscribeMessage(symbols));
+    StompFrame frame = StompMessageUtil.buildUnSubscribeMessage(symbols);
+    channel.writeAndFlush(frame);
     subscribeSymbols.removeAll(symbols);
     logger.info("send cancel subscribe quote message, symbols:{}.", symbols);
+
+    return frame.headers().getAsString(StompHeaders.ID);
   }
 
   @Override
-  public void getSubscribedSymbols() {
-    sendMessage(ReqProtocolType.REQ_SUB_SYMBOLS, null);
+  public String getSubscribedSymbols() {
+    return sendMessage(ReqProtocolType.REQ_SUB_SYMBOLS, null);
   }
 
-  private void sendMessage(int reqType, String message) {
+  private String sendMessage(int reqType, String message) {
     if (!isConnected()) {
       notConnect();
-      return;
+      return null;
     }
     logger.info("reqType:{},send message:{}", reqType, message);
-    channel.writeAndFlush(StompMessageUtil.buildSendMessage(reqType, message));
+    StompFrame frame = StompMessageUtil.buildSendMessage(reqType, message);
+    channel.writeAndFlush(frame);
+
+    return frame.headers().getAsString(StompHeaders.ID);
   }
 
   private void notConnect() {

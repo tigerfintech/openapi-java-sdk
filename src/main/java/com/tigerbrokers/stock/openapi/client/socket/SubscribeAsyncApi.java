@@ -15,7 +15,7 @@ public interface SubscribeAsyncApi {
    *
    * @param subject 主题
    */
-  void subscribe(Subject subject);
+  String subscribe(Subject subject);
 
   /**
    * 订阅主题字段
@@ -23,21 +23,21 @@ public interface SubscribeAsyncApi {
    * @param subject 主题
    * @param focusKeys 关注key列表
    */
-  void subscribe(Subject subject, List<String> focusKeys);
+  String subscribe(Subject subject, List<String> focusKeys);
 
   /**
    * 取消订阅主题
    *
    * @param subject 主题
    */
-  void cancelSubscribe(Subject subject);
+  String cancelSubscribe(Subject subject);
 
   /**
    * 订阅行情
    *
    * @param symbols 标的列表
    */
-  void subscribeQuote(Set<String> symbols);
+  String subscribeQuote(Set<String> symbols);
 
   /**
    * 订阅行情字段
@@ -45,17 +45,17 @@ public interface SubscribeAsyncApi {
    * @param symbols 标的列表
    * @param focusKeys 关注key
    */
-  void subscribeQuote(Set<String> symbols, List<String> focusKeys);
+  String subscribeQuote(Set<String> symbols, List<String> focusKeys);
 
   /**
    * 取消订阅行情
    *
    * @param symbols 标的列表
    */
-  void cancelSubscribeQuote(Set<String> symbols);
+  String cancelSubscribeQuote(Set<String> symbols);
 
   /**
    * 查询已订阅symbol列表
    */
-  void getSubscribedSymbols();
+  String getSubscribedSymbols();
 }
