@@ -35,6 +35,9 @@ public interface ApiServiceType {
   String ASSETS = "assets";
   String POSITIONS = "positions";
   String ORDERS = "orders";
+  String ACTIVE_ORDERS = "active_orders";
+  String INACTIVE_ORDERS = "inactive_orders";
+  String FILLED_ORDERS = "filled_orders";
 
   /**
    * 合约

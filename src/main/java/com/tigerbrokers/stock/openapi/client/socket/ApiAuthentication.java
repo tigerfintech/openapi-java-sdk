@@ -1,6 +1,5 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
-import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.util.TigerSignature;
 import com.tigerbrokers.stock.openapi.client.util.builder.StompHeaderBuilder;
