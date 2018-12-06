@@ -1,6 +1,9 @@
 package com.tigerbrokers.stock.openapi.client.https.request.option;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
+import com.tigerbrokers.stock.openapi.client.util.DateUtils;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -60,6 +63,13 @@ public class OptionKlineQueryRequest {
       return expiry;
     }
 
+    public void setExpiry(String expiry) {
+      Date date = DateUtils.getZoneDate(expiry, TimeZoneId.NewYork);
+      if (date != null) {
+        this.expiry = date.getTime();
+      }
+    }
+
     public void setExpiry(Long expiry) {
       this.expiry = expiry;
     }
@@ -76,12 +86,26 @@ public class OptionKlineQueryRequest {
       return beginTime;
     }
 
+    public void setBeginTime(String beginTime) {
+      Date date = DateUtils.getZoneDate(beginTime, TimeZoneId.NewYork);
+      if (date != null) {
+        this.beginTime = date.getTime();
+      }
+    }
+
     public void setBeginTime(Long beginTime) {
       this.beginTime = beginTime;
     }
 
     public Long getEndTime() {
       return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+      Date date = DateUtils.getZoneDate(endTime, TimeZoneId.NewYork);
+      if (date != null) {
+        this.endTime = date.getTime();
+      }
     }
 
     public void setEndTime(Long endTime) {

@@ -1,6 +1,9 @@
 package com.tigerbrokers.stock.openapi.client.https.request.option;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
+import com.tigerbrokers.stock.openapi.client.util.DateUtils;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -57,6 +60,13 @@ public class OptionTradeTickQueryRequest {
 
     public Long getExpiry() {
       return expiry;
+    }
+
+    public void setExpiry(String expiry) {
+      Date date = DateUtils.getZoneDate(expiry, TimeZoneId.NewYork);
+      if (date != null) {
+        this.expiry = date.getTime();
+      }
     }
 
     public void setExpiry(Long expiry) {
