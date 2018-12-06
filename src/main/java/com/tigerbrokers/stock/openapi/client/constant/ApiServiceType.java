@@ -5,6 +5,7 @@ package com.tigerbrokers.stock.openapi.client.constant;
  * Created by lijiawen on 2018/05/31.
  */
 public interface ApiServiceType {
+
   /**
    * 交易
    */
@@ -27,6 +28,15 @@ public interface ApiServiceType {
   String HOUR_TRADING_TIMELINE = "hour_trading_timeline";
   String KLINE = "kline";
   String TRADE_TICK = "trade_tick";
+
+  /**
+   * 期权行情
+   */
+  String OPTION_EXPIRATION = "option_expiration";
+  String OPTION_CHAIN = "option_chain";
+  String OPTION_BRIEF = "option_brief";
+  String OPTION_KLINE = "option_kline";
+  String OPTION_TRADE_TICK = "option_trade_tick";
 
   /**
    * 账户/资产

@@ -2,7 +2,7 @@ package com.tigerbrokers.stock.openapi.client.constant;
 
 public class TigerApiConstants {
 
-  public static final String VERSION_CODE = "1.0";
+  public static final String DEFAULT_VERSION = "1.0";
 
   public static final String SIGN_TYPE = "sign_type";
 
