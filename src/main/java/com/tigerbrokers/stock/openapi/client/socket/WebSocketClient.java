@@ -219,6 +219,7 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
       if (reconnectExecutorFuture != null && !reconnectExecutorFuture.isDone()) {
         reconnectExecutorFuture.cancel(true);
         reconnectExecutorService.purge();
+        reconnectExecutorService.shutdownNow();
       }
     } catch (Throwable e) {
       logger.warn(e.getMessage(), e);
