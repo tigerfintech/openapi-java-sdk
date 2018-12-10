@@ -53,7 +53,7 @@ public class ApiAuthentication {
       String sign = TigerSignature.rsaSign(tigerId, privateKey, TigerApiConstants.CHARSET_UTF8);
       authentication.setSign(sign);
       authentication.setVersion(version);
-    } catch (TigerApiException e) {
+    } catch (Exception e) {
       logger.error("authentication build exception:", e);
       return null;
     }

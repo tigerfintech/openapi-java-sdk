@@ -20,7 +20,12 @@ public class OrderParameter implements Serializable {
   private static final long serialVersionUID = 1L;
 
   /**
-   * 订单ID，不能自己传
+   * 全局唯一的订单ID
+   */
+  private Long id;
+
+  /**
+   * 订单ID(用户账户内唯一)
    */
   @JSONField(name = "order_id")
   private Integer orderId;
@@ -131,6 +136,14 @@ public class OrderParameter implements Serializable {
   private List<TagValue> algoParams;
 
   private String source;
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
 
   public Integer getOrderId() {
     return orderId;

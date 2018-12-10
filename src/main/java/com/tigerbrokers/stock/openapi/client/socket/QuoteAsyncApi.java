@@ -1,8 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.tigerbrokers.stock.openapi.client.struct.param.QuoteParameter;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Description:
@@ -15,61 +13,61 @@ public interface QuoteAsyncApi {
    *
    * @param parameter quote param
    */
-  void getMarketState(QuoteParameter parameter);
+  String getMarketState(QuoteParameter parameter);
 
   /**
    * 获取代号列表
    *
    * @param parameter quote param
    */
-  void getAllSymbols(QuoteParameter parameter);
+  String getAllSymbols(QuoteParameter parameter);
 
   /**
    * 获取代号列表和中文名称
    *
    * @param parameter quote param
    */
-  void getAllSymbolNames(QuoteParameter parameter);
+  String getAllSymbolNames(QuoteParameter parameter);
 
   /**
    * 行情摘要
    *
    * @param parameter quote param
    */
-  void getBriefInfo(QuoteParameter parameter);
+  String getBriefInfo(QuoteParameter parameter);
 
   /**
    * 股票详情
    *
    * @param parameter quote param
    */
-  void getStockDetail(QuoteParameter parameter);
+  String getStockDetail(QuoteParameter parameter);
 
   /**
    * 分时数据
    *
    * @param parameter quote param
    */
-  void getTimeline(QuoteParameter parameter);
+  String getTimeline(QuoteParameter parameter);
 
   /**
    * 盘前盘后分时数据
    *
    * @param parameter quote param
    */
-  void getHourTradingTimeline(QuoteParameter parameter);
+  String getHourTradingTimeline(QuoteParameter parameter);
 
   /**
    * K线数据
    *
    * @param parameter quote param
    */
-  void getKline(QuoteParameter parameter);
+  String getKline(QuoteParameter parameter);
 
   /**
    * 逐笔数据
    *
    * @param parameter quote param
    */
-  void getTradeTick(QuoteParameter parameter);
+  String getTradeTick(QuoteParameter parameter);
 }

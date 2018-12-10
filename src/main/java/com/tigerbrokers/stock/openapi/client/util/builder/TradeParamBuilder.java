@@ -28,128 +28,185 @@ public class TradeParamBuilder {
     return new TradeParamBuilder();
   }
 
-  public TradeParamBuilder orderId(int orderId) {
-    this.orderParameter.setOrderId(orderId);
+  public TradeParamBuilder id(Long id) {
+    if (id != null) {
+      this.orderParameter.setId(id);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder orderId(Integer orderId) {
+    if (orderId != null) {
+      this.orderParameter.setOrderId(orderId);
+    }
     return this;
   }
 
   public TradeParamBuilder symbol(String symbol) {
-    this.orderParameter.setSymbol(symbol);
+    if (symbol != null) {
+      this.orderParameter.setSymbol(symbol);
+    }
     return this;
   }
 
   public TradeParamBuilder orderType(OrderType orderType) {
-    this.orderParameter.setOrderType(orderType);
+    if (orderType != null) {
+      this.orderParameter.setOrderType(orderType);
+    }
     return this;
   }
 
   public TradeParamBuilder limitPrice(Double limitPrice) {
-    this.orderParameter.setLimitPrice(limitPrice);
+    if (limitPrice != null) {
+      this.orderParameter.setLimitPrice(limitPrice);
+    }
     return this;
   }
 
   public TradeParamBuilder auxPrice(Double auxPrice) {
-    this.orderParameter.setAuxPrice(auxPrice);
+    if (auxPrice != null) {
+      this.orderParameter.setAuxPrice(auxPrice);
+    }
     return this;
   }
 
   public TradeParamBuilder trailingPercent(Double trailingPercent) {
-    this.orderParameter.setTrailingPercent(trailingPercent);
+    if (trailingPercent != null) {
+      this.orderParameter.setTrailingPercent(trailingPercent);
+    }
     return this;
   }
 
   public TradeParamBuilder secType(SecType secType) {
-    this.orderParameter.setSecType(secType);
+    if (secType != null) {
+      this.orderParameter.setSecType(secType);
+    }
     return this;
   }
 
   public TradeParamBuilder outsideRth(Boolean outsideRth) {
-    this.orderParameter.setOutsideRth(outsideRth);
+    if (outsideRth != null) {
+      this.orderParameter.setOutsideRth(outsideRth);
+    }
     return this;
   }
 
   public TradeParamBuilder totalQuantity(Integer totalQuantity) {
-    this.orderParameter.setTotalQuantity(totalQuantity);
+    if (totalQuantity != null) {
+      this.orderParameter.setTotalQuantity(totalQuantity);
+    }
     return this;
   }
 
   public TradeParamBuilder action(ActionType action) {
-    this.orderParameter.setAction(action);
+    if (action != null) {
+      this.orderParameter.setAction(action);
+    }
     return this;
   }
 
   public TradeParamBuilder currency(Currency currency) {
-    this.orderParameter.setCurrency(currency);
+    if (currency != null) {
+      this.orderParameter.setCurrency(currency);
+    }
     return this;
   }
 
   public TradeParamBuilder timeInForce(TimeInForce timeInForce) {
-    this.orderParameter.setTimeInForce(timeInForce);
+    if (timeInForce != null) {
+      this.orderParameter.setTimeInForce(timeInForce);
+    }
     return this;
   }
 
   public TradeParamBuilder account(String account) {
-    this.orderParameter.setAccount(account);
+    if (account != null) {
+      this.orderParameter.setAccount(account);
+    }
     return this;
   }
 
   public TradeParamBuilder market(Market market) {
-    this.orderParameter.setMarket(market.name());
+    if (market != null) {
+      this.orderParameter.setMarket(market.name());
+    }
     return this;
   }
 
   public TradeParamBuilder exchange(String exchange) {
-    this.orderParameter.setExchange(exchange);
+    if (exchange != null) {
+      this.orderParameter.setExchange(exchange);
+    }
     return this;
   }
 
   public TradeParamBuilder expiry(String expiry) {
-    this.orderParameter.setExpiry(expiry);
+    if (expiry != null) {
+      this.orderParameter.setExpiry(expiry);
+    }
     return this;
   }
 
   public TradeParamBuilder strike(String strike) {
-    this.orderParameter.setStrike(strike);
+    if (strike != null) {
+      this.orderParameter.setStrike(strike);
+    }
     return this;
   }
 
   public TradeParamBuilder right(String right) {
-    this.orderParameter.setRight(right);
+    if (right != null) {
+      this.orderParameter.setRight(right);
+    }
     return this;
   }
 
   public TradeParamBuilder multiplier(Float multiplier) {
-    this.orderParameter.setMultiplier(multiplier);
+    if (multiplier != null) {
+      this.orderParameter.setMultiplier(multiplier);
+    }
     return this;
   }
 
   public TradeParamBuilder localSymbol(String localSymbol) {
-    this.orderParameter.setLocalSymbol(localSymbol);
+    if (localSymbol != null) {
+      this.orderParameter.setLocalSymbol(localSymbol);
+    }
     return this;
   }
 
   public TradeParamBuilder allocAccounts(List<String> allocAccounts) {
-    this.orderParameter.setAllocAccounts(allocAccounts);
+    if (allocAccounts != null) {
+      this.orderParameter.setAllocAccounts(allocAccounts);
+    }
     return this;
   }
 
   public TradeParamBuilder allocShares(List<Double> allocShares) {
-    this.orderParameter.setAllocShares(allocShares);
+    if (allocShares != null) {
+      this.orderParameter.setAllocShares(allocShares);
+    }
     return this;
   }
 
   public TradeParamBuilder algoStrategy(String algoStrategy) {
-    this.orderParameter.setAlgoStrategy(algoStrategy);
+    if (algoStrategy != null) {
+      this.orderParameter.setAlgoStrategy(algoStrategy);
+    }
     return this;
   }
 
   public TradeParamBuilder algoParams(List<TagValue> algoParams) {
-    this.orderParameter.setAlgoParams(algoParams);
+    if (algoParams != null) {
+      this.orderParameter.setAlgoParams(algoParams);
+    }
     return this;
   }
 
   public TradeParamBuilder source(String source) {
-    this.orderParameter.setSource(source);
+    if (source != null) {
+      this.orderParameter.setSource(source);
+    }
     return this;
   }
 

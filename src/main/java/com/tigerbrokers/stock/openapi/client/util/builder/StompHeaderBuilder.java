@@ -5,7 +5,6 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import io.netty.handler.codec.stomp.DefaultStompHeaders;
 import io.netty.handler.codec.stomp.StompHeaders;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -52,6 +51,11 @@ public class StompHeaderBuilder {
 
   public StompHeaderBuilder passcode(String passcode) {
     this.stompHeaders.set(StompHeaders.PASSCODE, passcode);
+    return this;
+  }
+
+  public StompHeaderBuilder id(int id) {
+    this.stompHeaders.set(StompHeaders.ID, String.valueOf(id));
     return this;
   }
 

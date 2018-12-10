@@ -26,8 +26,8 @@ public class DateUtils {
     }
   }
 
-  public static Date setZoneDate(String time, TimeZoneId zoneId) {
-    if (time == null || (time.length() != 10 && time.length() != 19)) {
+  public static Date getZoneDate(String time, TimeZoneId zoneId) {
+    if (time == null || (time.length() != 10 && time.length() != 19) || zoneId == null) {
       return null;
     }
     String formatString = time.length() == 10 ? DateUtils.FORMAT_YYYYMMDD : DateUtils.FORMAT_FULL;
