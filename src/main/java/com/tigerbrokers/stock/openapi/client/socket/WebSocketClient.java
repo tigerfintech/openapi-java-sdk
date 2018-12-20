@@ -11,6 +11,9 @@ import com.tigerbrokers.stock.openapi.client.struct.param.QuoteParameter;
 import com.tigerbrokers.stock.openapi.client.util.FastJsonPropertyFilter;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
+import com.tigerbrokers.stock.openapi.client.websocket.WebSocketHandshakerHandler;
+import com.tigerbrokers.stock.openapi.client.websocket.WebSocketStompFrameDecoder;
+import com.tigerbrokers.stock.openapi.client.websocket.WebSocketStompFrameEncoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -21,6 +24,13 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.HttpClientCodec;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
+import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
+import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.codec.stomp.StompFrame;
 import io.netty.handler.codec.stomp.StompHeaders;
 import io.netty.handler.codec.stomp.StompSubframeAggregator;
@@ -112,18 +122,42 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
     final WebSocketHandler handler =
         new WebSocketHandler(authentication, apiComposeCallback, async, orderNoBarrier, orderIdPassport);
 
+    final int port = address.getPort();
     bootstrap.group(group).option(ChannelOption.TCP_NODELAY, true)
         .channel(NioSocketChannel.class)
         .handler(new ChannelInitializer<SocketChannel>() {
           protected void initChannel(SocketChannel ch) throws SSLException {
+
             ChannelPipeline p = ch.pipeline();
             SslContext sslCtx =
                 SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
             p.addLast(sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
-            p.addLast("stompEncoder", new StompSubframeEncoder());
-            p.addLast("stompDecoder", new StompSubframeDecoder());
-            p.addLast("aggregator", new StompSubframeAggregator(65535));
-            p.addLast("webSocketHandler", handler);
+            if (port == 8885){
+              try {
+                URI uri = new URI(url);
+                WebSocketHandshakerHandler webSocketHandshakerHandler = new WebSocketHandshakerHandler(authentication, apiComposeCallback, async, orderNoBarrier, orderIdPassport);
+                HttpHeaders httpHeaders = new DefaultHttpHeaders();
+                WebSocketClientHandshaker
+                    handshaker = WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, true, httpHeaders);
+                webSocketHandshakerHandler.setHandshaker(handshaker);
+
+                p.addLast("websocket_codec", new HttpClientCodec());
+                p.addLast("websocket_aggregator", new HttpObjectAggregator(65535));
+                p.addLast( "websocket-stomp-decoder", new WebSocketStompFrameDecoder() );
+                p.addLast( "websocket-stomp-encoder", new WebSocketStompFrameEncoder() );
+                p.addLast("stomp_aggregator", new StompSubframeAggregator(65535));
+                p.addLast("handshaker_handler", webSocketHandshakerHandler);
+              } catch (URISyntaxException e) {
+                logger.error("URISyntaxException,{}", e.getMessage(), e);
+              }
+
+            }else{
+              p.addLast("stompEncoder", new StompSubframeEncoder());
+              p.addLast("stompDecoder", new StompSubframeDecoder());
+              p.addLast("aggregator", new StompSubframeAggregator(65535));
+              p.addLast("webSocketHandler", handler);
+            }
+
           }
         });
     apiComposeCallback.client(this);
@@ -173,6 +207,15 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
           }
         } finally {
           this.channel = newChannel;
+          WebSocketHandshakerHandler handler = (WebSocketHandshakerHandler)channel.pipeline().get("handshaker_handler");
+          if (handler.getHandshaker() != null){
+            handler.getHandshaker().handshake(this.channel);
+            try {
+              handler.getHandshakeFuture().sync();
+            } catch (InterruptedException e) {
+              logger.error(e.getMessage(),e);
+            }
+          }
         }
       } else if (future.cause() != null) {
         throw new Exception("client failed to connect to server, error message is:" + future.cause().getMessage(),

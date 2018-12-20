@@ -1,11 +1,11 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
+import com.tigerbrokers.stock.openapi.client.util.ApiCallbackDecoderUtils;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.stomp.StompFrame;
-import java.nio.charset.Charset;
 import java.util.concurrent.CyclicBarrier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +15,8 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
 
   private static Logger logger = LoggerFactory.getLogger(WebSocketHandler.class);
 
-  private ApiAuthentication authentication;
-  private ApiCallbackDecoder decoder;
+  protected ApiAuthentication authentication;
+  protected ApiCallbackDecoder decoder;
 
   public WebSocketHandler(ApiAuthentication authentication, ApiComposeCallback callback, boolean async,
       CyclicBarrier cyclicBarrier,
@@ -47,31 +47,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
   public void channelRead0(ChannelHandlerContext ctx, StompFrame frame) throws Exception {
     logger.debug("received frame from server: {}", frame);
 
-    switch (frame.command()) {
-      case CONNECTED:
-        if (decoder.getCallback() != null) {
-          decoder.getCallback().connectAck();
-        }
-        break;
-      case MESSAGE:
-        decoder.handle(frame);
-        break;
-      case RECEIPT:
-        break;
-      case ERROR:
-        if (decoder.getCallback() != null) {
-          decoder.getCallback().error(frame.content().toString(Charset.defaultCharset()));
-        }
-        break;
-      case DISCONNECT:
-        if (decoder.getCallback() != null) {
-          decoder.getCallback().connectionClosed();
-        }
-        ctx.close();
-        break;
-      default:
-        break;
-    }
+    ApiCallbackDecoderUtils.executor(ctx,frame, decoder);
   }
 
   @Override
