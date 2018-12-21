@@ -20,6 +20,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.ChannelPromise;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -39,6 +40,8 @@ import io.netty.handler.codec.stomp.StompSubframeEncoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.internal.ConcurrentSet;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -119,8 +122,7 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
     }
     group = new NioEventLoopGroup(1);
     bootstrap = new Bootstrap();
-    final WebSocketHandler handler =
-        new WebSocketHandler(authentication, apiComposeCallback, async, orderNoBarrier, orderIdPassport);
+
 
     final int port = address.getPort();
     bootstrap.group(group).option(ChannelOption.TCP_NODELAY, true)
@@ -132,26 +134,25 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
             SslContext sslCtx =
                 SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
             p.addLast(sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
-            if (port == 8885){
-              try {
-                URI uri = new URI(url);
-                WebSocketHandshakerHandler webSocketHandshakerHandler = new WebSocketHandshakerHandler(authentication, apiComposeCallback, async, orderNoBarrier, orderIdPassport);
-                HttpHeaders httpHeaders = new DefaultHttpHeaders();
-                WebSocketClientHandshaker
-                    handshaker = WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, true, httpHeaders);
-                webSocketHandshakerHandler.setHandshaker(handshaker);
+            if (8885 == port){
+              //URI uri = new URI(url);
+              //WebSocketHandshakerHandler webSocketHandshakerHandler = new WebSocketHandshakerHandler(authentication, apiComposeCallback, async, orderNoBarrier, orderIdPassport);
+              //HttpHeaders httpHeaders = new DefaultHttpHeaders();
+              //WebSocketClientHandshaker
+              //    handshaker = WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, true, httpHeaders);
+              //webSocketHandshakerHandler.setHandshaker(handshaker);
 
-                p.addLast("websocket_codec", new HttpClientCodec());
-                p.addLast("websocket_aggregator", new HttpObjectAggregator(65535));
-                p.addLast( "websocket-stomp-decoder", new WebSocketStompFrameDecoder() );
-                p.addLast( "websocket-stomp-encoder", new WebSocketStompFrameEncoder() );
-                p.addLast("stomp_aggregator", new StompSubframeAggregator(65535));
-                p.addLast("handshaker_handler", webSocketHandshakerHandler);
-              } catch (URISyntaxException e) {
-                logger.error("URISyntaxException,{}", e.getMessage(), e);
-              }
+              p.addLast("websocket_codec", new HttpClientCodec());
+              p.addLast("websocket_aggregator", new HttpObjectAggregator(65535));
+              p.addLast( "websocket-stomp-decoder", new WebSocketStompFrameDecoder() );
+              p.addLast( "websocket-stomp-encoder", new WebSocketStompFrameEncoder() );
+              p.addLast("stomp_aggregator", new StompSubframeAggregator(65535));
+              //p.addLast("handshaker_handler", webSocketHandshakerHandler);
 
             }else{
+              final WebSocketHandler handler =
+                new WebSocketHandler(authentication, apiComposeCallback, async, orderNoBarrier, orderIdPassport);
+
               p.addLast("stompEncoder", new StompSubframeEncoder());
               p.addLast("stompDecoder", new StompSubframeDecoder());
               p.addLast("aggregator", new StompSubframeAggregator(65535));
@@ -160,6 +161,7 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
 
           }
         });
+
     apiComposeCallback.client(this);
     inited = true;
   }
@@ -199,7 +201,9 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
 
       if (completed && future.isSuccess()) {
         Channel newChannel = future.channel();
+        URI uri = null;
         try {
+          uri = new URI(url);
           Channel oldChannel = this.channel;
           if (oldChannel != null) {
             logger.info("close old netty channel:{} , create new netty channel:{} ", oldChannel, newChannel);
@@ -207,13 +211,18 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
           }
         } finally {
           this.channel = newChannel;
-          WebSocketHandshakerHandler handler = (WebSocketHandshakerHandler)channel.pipeline().get("handshaker_handler");
-          if (handler.getHandshaker() != null){
-            handler.getHandshaker().handshake(this.channel);
-            try {
-              handler.getHandshakeFuture().sync();
-            } catch (InterruptedException e) {
-              logger.error(e.getMessage(),e);
+          logger.info("is connect:{}", this.channel.isActive());
+          if (address.getPort() == 8885){
+            synchronized (this.channel){
+              WebSocketHandshakerHandler webSocketHandshakerHandler = new WebSocketHandshakerHandler(authentication, apiComposeCallback, async, orderNoBarrier, orderIdPassport);
+              HttpHeaders httpHeaders = new DefaultHttpHeaders();
+              WebSocketClientHandshaker
+                  handshaker = WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, true, httpHeaders);
+              webSocketHandshakerHandler.setHandshaker(handshaker);
+              channel.pipeline().addLast("handshaker_handler", webSocketHandshakerHandler);
+              webSocketHandshakerHandler.setHandshaker(handshaker);
+              ChannelPromise channelFuture = (ChannelPromise)handshaker.handshake(this.channel);
+              channelFuture.sync();
             }
           }
         }
@@ -291,6 +300,7 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
       Runnable reconnectCommand = () -> {
         try {
           if (!isConnected()) {
+            logger.info("initReconnectCommand not connected,{}", this.channel == null? "" : this.channel.id());
             connect();
           } else {
             lastConnectedTime = System.currentTimeMillis();
@@ -311,7 +321,7 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
         }
       };
       reconnectExecutorFuture =
-          reconnectExecutorService.scheduleWithFixedDelay(reconnectCommand, 2 * 1000, 10 * 1000,
+          reconnectExecutorService.scheduleWithFixedDelay(reconnectCommand, 10 * 1000, 10 * 1000,
               TimeUnit.MILLISECONDS);
     }
   }

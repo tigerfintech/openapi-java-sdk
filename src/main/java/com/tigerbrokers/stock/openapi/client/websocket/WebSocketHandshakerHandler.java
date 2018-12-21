@@ -9,13 +9,13 @@ import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
-import io.netty.handler.codec.http.websocketx.WebSocketHandshakeException;
 import io.netty.handler.codec.stomp.StompFrame;
 import io.netty.util.CharsetUtil;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import java.util.concurrent.CyclicBarrier;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,7 +32,6 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
   private ApiCallbackDecoder decoder;
 
   private WebSocketClientHandshaker handshaker;
-  private ChannelPromise handshakeFuture;
 
   public WebSocketHandshakerHandler(ApiAuthentication authentication, ApiComposeCallback callback, boolean async,
       CyclicBarrier cyclicBarrier,
@@ -43,7 +42,6 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
 
   @Override
   public void handlerAdded(ChannelHandlerContext ctx) {
-    handshakeFuture = ctx.newPromise();
   }
 
   public void setHandshaker(WebSocketClientHandshaker handshaker){
@@ -52,14 +50,6 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
 
   public WebSocketClientHandshaker getHandshaker(){
     return this.handshaker;
-  }
-
-  public ChannelPromise getHandshakeFuture(){
-    return this.handshakeFuture;
-  }
-
-  public void setHandshakeFuture(ChannelPromise handshakeFuture){
-    this.handshakeFuture = handshakeFuture;
   }
 
   @Override
@@ -88,18 +78,11 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
     FullHttpResponse response;
     if(!this.handshaker.isHandshakeComplete()){
       response = (FullHttpResponse)msg;
-      try {
-        //握手协议返回，设置结束握手
-        this.handshaker.finishHandshake(ch, response);
-        //设置成功
-        this.handshakeFuture.setSuccess();
-        log.info("WebSocket Client connected! response headers[sec-websocket-extensions]:{}", response.headers());
-        //发送stomp connect请求
-        ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),authentication.getVersion()));
-      } catch (WebSocketHandshakeException var7) {
-        String errorMsg = String.format("WebSocket Client failed to connect,status:%s,reason:%s", response.status(), response.content().toString(CharsetUtil.UTF_8));
-        this.handshakeFuture.setFailure(new Exception(errorMsg));
-      }
+      //握手协议返回，设置结束握手
+      handshaker.finishHandshake(ch, response);
+      //发送stomp connect请求
+      ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),authentication.getVersion()));//.addListener(
+      log.info("WebSocket Client connected! response headers[sec-websocket-extensions]:{}", response.headers());
     }else if(msg instanceof FullHttpResponse){
       response = (FullHttpResponse)msg;
       throw new IllegalStateException("Unexpected FullHttpResponse (getStatus=" + response.status() + ", content=" + response.content().toString(CharsetUtil.UTF_8) + ')');
