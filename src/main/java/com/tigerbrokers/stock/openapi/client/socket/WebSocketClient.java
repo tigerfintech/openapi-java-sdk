@@ -135,19 +135,12 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
                 SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
             p.addLast(sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
             if (8885 == port){
-              //URI uri = new URI(url);
-              //WebSocketHandshakerHandler webSocketHandshakerHandler = new WebSocketHandshakerHandler(authentication, apiComposeCallback, async, orderNoBarrier, orderIdPassport);
-              //HttpHeaders httpHeaders = new DefaultHttpHeaders();
-              //WebSocketClientHandshaker
-              //    handshaker = WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, true, httpHeaders);
-              //webSocketHandshakerHandler.setHandshaker(handshaker);
-
               p.addLast("websocket_codec", new HttpClientCodec());
               p.addLast("websocket_aggregator", new HttpObjectAggregator(65535));
               p.addLast( "websocket-stomp-decoder", new WebSocketStompFrameDecoder() );
               p.addLast( "websocket-stomp-encoder", new WebSocketStompFrameEncoder() );
               p.addLast("stomp_aggregator", new StompSubframeAggregator(65535));
-              //p.addLast("handshaker_handler", webSocketHandshakerHandler);
+              //p.addLast("handshaker_handler", webSocketHandshakerHandler); add by doconnect()
 
             }else{
               final WebSocketHandler handler =
@@ -211,7 +204,6 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
           }
         } finally {
           this.channel = newChannel;
-          logger.info("is connect:{}", this.channel.isActive());
           if (address.getPort() == 8885){
             synchronized (this.channel){
               WebSocketHandshakerHandler webSocketHandshakerHandler = new WebSocketHandshakerHandler(authentication, apiComposeCallback, async, orderNoBarrier, orderIdPassport);
@@ -300,7 +292,6 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
       Runnable reconnectCommand = () -> {
         try {
           if (!isConnected()) {
-            logger.info("initReconnectCommand not connected,{}", this.channel == null? "" : this.channel.id());
             connect();
           } else {
             lastConnectedTime = System.currentTimeMillis();
