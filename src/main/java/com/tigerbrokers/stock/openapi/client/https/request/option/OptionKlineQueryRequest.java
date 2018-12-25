@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.request.option;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 import java.util.ArrayList;
@@ -62,7 +63,9 @@ public class OptionKlineQueryRequest {
     private String right;
     private Long expiry;
     private String strike;
+    @JSONField(name = "begin_time")
     private Long beginTime;
+    @JSONField(name = "end_time")
     private Long endTime;
 
     public String getSymbol() {

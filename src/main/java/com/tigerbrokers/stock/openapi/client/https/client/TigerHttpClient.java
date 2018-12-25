@@ -3,23 +3,28 @@ package com.tigerbrokers.stock.openapi.client.https.client;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
-import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
-import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
-import com.tigerbrokers.stock.openapi.client.util.TigerSignature;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
-import com.tigerbrokers.stock.openapi.client.https.response.TigerHttpResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
+import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
-
+import com.tigerbrokers.stock.openapi.client.util.TigerSignature;
 import java.security.Security;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.*;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.BIZ_CONTENT;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.CHARSET;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.METHOD;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN_TYPE;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TIGER_ID;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TIMESTAMP;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.VERSION;
 
 /**
  * HTTP客户端
@@ -54,21 +59,14 @@ public class TigerHttpClient implements TigerClient {
   }
 
   public <T extends TigerResponse> T execute(TigerRequest<T> request) {
-    if (request instanceof TigerHttpRequest) {
-      return (T) execute((TigerHttpRequest) request);
-    }
-    return null;
-  }
-
-  public TigerHttpResponse execute(TigerHttpRequest request) {
-    TigerHttpResponse response;
+    T response;
     try {
       String data = HttpUtils.post(serverUrl, JSONObject.toJSONString(buildParams(request)));
 
       if (StringUtils.isEmpty(data)) {
         return null;
       }
-      response = JSON.parseObject(data, TigerHttpResponse.class);
+      response = JSON.parseObject(data, request.getResponseClass());
 
       if (StringUtils.isEmpty(this.tigerPublicKey) || response.getSign() == null) {
         return response;
@@ -81,21 +79,25 @@ public class TigerHttpClient implements TigerClient {
       }
     } catch (TigerApiException e) {
       logger.error("client execute api exception:", e);
-      return TigerHttpResponse.errorMsg(e.getApiError());
+      throw new RuntimeException("api exception,errorCode:" + e.getErrCode() + ",errorMessage:" + e.getErrMsg());
     } catch (Exception e) {
-      logger.error("client execute exception:", e);
-      return TigerHttpResponse.errorMsg(TigerApiCode.CLIENT_API_ERROR);
+      logger.error("client execute exception:", e.getMessage(), e);
+      throw new RuntimeException("api exception,errorMessage:" + e.getMessage());
     }
 
     return response;
   }
 
-  private Map<String, Object> buildParams(TigerHttpRequest request) {
+  private Map<String, Object> buildParams(TigerRequest request) {
     Map params = new HashMap<>();
     params.put(METHOD, request.getApiMethodName());
     params.put(VERSION, request.getApiVersion());
+    if (request instanceof TigerHttpRequest) {
+      params.put(BIZ_CONTENT, ((TigerHttpRequest) request).getBizContent());
+    } else {
+      params.put(BIZ_CONTENT, JSONObject.toJSONString(request.getApiModel()));
+    }
     params.put(TIMESTAMP, request.getTimestamp());
-    params.put(BIZ_CONTENT, request.getBizContent());
     params.put(CHARSET, this.charset);
     params.put(TIGER_ID, this.tigerId);
     params.put(SIGN_TYPE, this.signType);

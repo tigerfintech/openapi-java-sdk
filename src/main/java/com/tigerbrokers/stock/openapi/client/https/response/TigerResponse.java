@@ -15,6 +15,8 @@ public abstract class TigerResponse implements Serializable {
 
   private long timestamp;
 
+  private String sign;
+
   public int getCode() {
     return code;
   }
@@ -37,5 +39,13 @@ public abstract class TigerResponse implements Serializable {
 
   public void setTimestamp(long timestamp) {
     this.timestamp = timestamp;
+  }
+
+  public String getSign() {
+    return sign;
+  }
+
+  public void setSign(String sign) {
+    this.sign = sign;
   }
 }

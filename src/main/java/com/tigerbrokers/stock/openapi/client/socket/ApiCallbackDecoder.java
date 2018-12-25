@@ -10,7 +10,32 @@ import java.util.concurrent.CyclicBarrier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.*;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.CANCEL_ORDER_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.END_CONN;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_ACCOUNT_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_ALL_SYMBOLS_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_ALL_SYMBOL_NAMES_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_ASSET_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_BRIEF_INFO_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_CANCEL_SUBSCRIBE_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_HOUR_TRADING_TIME_LINE_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_KLINE_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_MARKET_STATE_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_ORDER_NO_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_POSITION_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_QUOTE_CHANGE_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_STOCK_DETAIL_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUBSCRIBE_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUB_SYMBOLS_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_TIME_LINE_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_TRADING_TICK_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.MODIFY_ORDER_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.PLACE_ORDER_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.PREVIEW_ORDER_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.RET_HEADER;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ASSET;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ORDER_STATUS;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_POSITION;
 
 /**
  * Description:

@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.request;
 
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
+import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerHttpResponse;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,6 +26,11 @@ public class TigerHttpRequest implements TigerRequest<TigerHttpResponse> {
 
   public String getApiVersion() {
     return apiVersion;
+  }
+
+  @Override
+  public Class<TigerHttpResponse> getResponseClass() {
+    return TigerHttpResponse.class;
   }
 
   public void setApiVersion(String apiVersion) {
@@ -69,6 +75,16 @@ public class TigerHttpRequest implements TigerRequest<TigerHttpResponse> {
 
   public String getTimestamp() {
     return timestamp;
+  }
+
+  @Override
+  public void setApiModel(ApiModel apiModel) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public ApiModel getApiModel() {
+    return null;
   }
 
   public void setTimestamp(String timestamp) {
