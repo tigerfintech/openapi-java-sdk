@@ -1,11 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.https.response;
 
+import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import java.io.Serializable;
 
 /**
  * API基础响应信息。
  */
-public abstract class TigerResponse implements Serializable {
+public class TigerResponse implements Serializable {
 
   private static final long serialVersionUID = 5014379068811962022L;
 
@@ -47,5 +48,9 @@ public abstract class TigerResponse implements Serializable {
 
   public void setSign(String sign) {
     this.sign = sign;
+  }
+
+  public boolean isSuccess() {
+    return code == TigerApiCode.SUCCESS.getCode();
   }
 }

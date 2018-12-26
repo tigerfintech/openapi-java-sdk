@@ -60,8 +60,9 @@ public class TigerHttpClient implements TigerClient {
 
   public <T extends TigerResponse> T execute(TigerRequest<T> request) {
     T response;
+    String data = null;
     try {
-      String data = HttpUtils.post(serverUrl, JSONObject.toJSONString(buildParams(request)));
+      data = HttpUtils.post(serverUrl, JSONObject.toJSONString(buildParams(request)));
 
       if (StringUtils.isEmpty(data)) {
         return null;
@@ -77,15 +78,44 @@ public class TigerHttpClient implements TigerClient {
       if (!signSuccess) {
         throw new TigerApiException(TigerApiCode.SIGN_CHECK_FAILED);
       }
+      return response;
     } catch (TigerApiException e) {
-      logger.error("client execute api exception:", e);
-      throw new RuntimeException("api exception,errorCode:" + e.getErrCode() + ",errorMessage:" + e.getErrMsg());
+      logger.error("client execute api exception,request:{},response:{},error:{}", request, data, e.getMessage(), e);
+      return errorResponse(request, e);
     } catch (Exception e) {
-      logger.error("client execute exception:", e.getMessage(), e);
-      throw new RuntimeException("api exception,errorMessage:" + e.getMessage());
+      logger.error("client execute exception,request:{},response:{},error:{}", request, data, e.getMessage(), e);
+      return errorResponse(request, e);
     }
+  }
 
-    return response;
+  private <T extends TigerResponse> T errorResponse(TigerRequest<T> request, TigerApiException e) {
+    T response;
+    try {
+      response = request.getResponseClass().newInstance();
+      response.setCode(e.getErrCode());
+      response.setMessage(e.getErrMsg());
+      return response;
+    } catch (InstantiationException e1) {
+      logger.error("instantiationException:", e1.getMessage(), e1);
+    } catch (IllegalAccessException e1) {
+      logger.error("illegalAccessException:", e1.getMessage(), e1);
+    }
+    return null;
+  }
+
+  private <T extends TigerResponse> T errorResponse(TigerRequest<T> request, Exception e) {
+    T response;
+    try {
+      response = request.getResponseClass().newInstance();
+      response.setCode(TigerApiCode.CLIENT_API_ERROR.getCode());
+      response.setMessage(TigerApiCode.CLIENT_API_ERROR.getMessage() + "(" + e.getMessage() + ")");
+      return response;
+    } catch (InstantiationException e1) {
+      logger.error("instantiationException:", e1.getMessage(), e1);
+    } catch (IllegalAccessException e1) {
+      logger.error("illegalAccessException:", e1.getMessage(), e1);
+    }
+    return null;
   }
 
   private Map<String, Object> buildParams(TigerRequest request) {
