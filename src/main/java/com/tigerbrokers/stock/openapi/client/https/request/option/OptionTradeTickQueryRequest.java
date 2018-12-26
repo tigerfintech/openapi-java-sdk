@@ -1,106 +1,61 @@
 package com.tigerbrokers.stock.openapi.client.https.request.option;
 
-import com.alibaba.fastjson.JSONObject;
-import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
-import com.tigerbrokers.stock.openapi.client.util.DateUtils;
+import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
+import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
+import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionCommonModel;
+import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
+import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
+import com.tigerbrokers.stock.openapi.client.https.response.option.OptionTradeTickResponse;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
  * Description:
  * Created by lijiawen on 2018/12/06.
  */
-public class OptionTradeTickQueryRequest {
+public class OptionTradeTickQueryRequest extends TigerCommonRequest implements TigerRequest<OptionTradeTickResponse> {
 
-  private List<Item> items;
+  private List<OptionCommonModel> items;
 
-  public OptionTradeTickQueryRequest(List<Item> items) {
-    this.items = items;
+  public OptionTradeTickQueryRequest() {
+    setApiVersion(TigerApiConstants.DEFAULT_VERSION);
+    setApiMethodName(ApiServiceType.OPTION_TRADE_TICK);
   }
 
-  public static OptionTradeTickQueryRequest of(List<Item> items) {
+  public OptionTradeTickQueryRequest(List<OptionCommonModel> items) {
+    this();
+    setApiModel(new BatchApiModel(items));
+  }
+
+  public static OptionTradeTickQueryRequest of(List<OptionCommonModel> items) {
     return new OptionTradeTickQueryRequest(items);
   }
 
-  public static OptionTradeTickQueryRequest of(Item item) {
-    List<Item> items = new ArrayList<>();
-    items.add(item);
+  public static OptionTradeTickQueryRequest of(OptionCommonModel item1) {
+    List<OptionCommonModel> items = new ArrayList<>();
+    items.add(item1);
     return new OptionTradeTickQueryRequest(items);
   }
 
-  public static OptionTradeTickQueryRequest of(Item item1, Item item2) {
-    List<Item> items = new ArrayList<>();
+  public static OptionTradeTickQueryRequest of(OptionCommonModel item1, OptionCommonModel item2) {
+    List<OptionCommonModel> items = new ArrayList<>();
     items.add(item1);
     items.add(item2);
     return new OptionTradeTickQueryRequest(items);
   }
 
-  public static OptionTradeTickQueryRequest of(Item item1, Item item2, Item item3) {
-    List<Item> items = new ArrayList<>();
+  public static OptionTradeTickQueryRequest of(OptionCommonModel item1,
+      OptionCommonModel item2, OptionCommonModel item3) {
+    List<OptionCommonModel> items = new ArrayList<>();
     items.add(item1);
     items.add(item2);
     items.add(item3);
     return new OptionTradeTickQueryRequest(items);
   }
 
-  public String toJson() {
-    return JSONObject.toJSONString(this);
-  }
-
-  public List<Item> getItems() {
-    return items;
-  }
-
-  public void setItems(
-      List<Item> items) {
-    this.items = items;
-  }
-
-  public static class Item {
-
-    private String symbol;
-    private String right;
-    private Long expiry;
-    private String strike;
-
-    public String getSymbol() {
-      return symbol;
-    }
-
-    public void setSymbol(String symbol) {
-      this.symbol = symbol;
-    }
-
-    public String getRight() {
-      return right;
-    }
-
-    public void setRight(String right) {
-      this.right = right;
-    }
-
-    public Long getExpiry() {
-      return expiry;
-    }
-
-    public void setExpiry(String expiry) {
-      Date date = DateUtils.getZoneDate(expiry, TimeZoneId.NewYork);
-      if (date != null) {
-        this.expiry = date.getTime();
-      }
-    }
-
-    public void setExpiry(Long expiry) {
-      this.expiry = expiry;
-    }
-
-    public String getStrike() {
-      return strike;
-    }
-
-    public void setStrike(String strike) {
-      this.strike = strike;
-    }
+  @Override
+  public Class<OptionTradeTickResponse> getResponseClass() {
+    return OptionTradeTickResponse.class;
   }
 }

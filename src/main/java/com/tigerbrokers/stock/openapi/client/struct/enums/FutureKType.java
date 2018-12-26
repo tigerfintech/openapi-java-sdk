@@ -10,9 +10,17 @@ public enum FutureKType {
   hour2("2hour"), hour3("3hour"), hour4("4hour"), hour6("6hour"),
   day("day"), week("week"), month("month");
 
-  private String desc;
+  private String value;
 
-  FutureKType(String desc) {
-    this.desc = desc;
+  FutureKType(String value) {
+    this.value = value;
+  }
+
+  public String getValue() {
+    return value;
+  }
+
+  public void setValue(String value) {
+    this.value = value;
   }
 }

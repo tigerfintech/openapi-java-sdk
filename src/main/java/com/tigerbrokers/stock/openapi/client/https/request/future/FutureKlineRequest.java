@@ -14,22 +14,27 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.FutureKType;
  */
 public class FutureKlineRequest extends TigerCommonRequest implements TigerRequest<FutureKlineResponse> {
 
+  private static final long DEFAULT_TIME_RANGE = 7 * 24 * 3600 * 1000;
+
   public FutureKlineRequest() {
     setApiVersion(TigerApiConstants.DEFAULT_VERSION);
     setApiMethodName(ApiServiceType.FUTURE_KLINE);
   }
 
   public static FutureKlineRequest newRequest(String contractCode) {
-    return newRequest(contractCode, FutureKType.day, null, null);
+    return newRequest(contractCode, FutureKType.day, System.currentTimeMillis() - DEFAULT_TIME_RANGE,
+        System.currentTimeMillis());
   }
 
   public static FutureKlineRequest newRequest(String contractCode, FutureKType kType) {
-    return newRequest(contractCode, kType, null, null);
+    return newRequest(contractCode, kType, System.currentTimeMillis() - DEFAULT_TIME_RANGE, System.currentTimeMillis());
   }
 
   public static FutureKlineRequest newRequest(String contractCode, FutureKType kType, Long beginTime, Long endTime) {
     FutureKlineRequest request = new FutureKlineRequest();
-    FutureKlineModel model = new FutureKlineModel(contractCode, kType, beginTime, endTime);
+    FutureKlineModel model =
+        new FutureKlineModel(contractCode, kType != null ? kType.getValue() : FutureKType.day.getValue(), beginTime,
+            endTime);
     request.setApiModel(model);
     return request;
   }

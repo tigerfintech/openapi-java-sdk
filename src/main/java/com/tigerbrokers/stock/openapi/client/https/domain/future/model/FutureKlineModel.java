@@ -2,7 +2,6 @@ package com.tigerbrokers.stock.openapi.client.https.domain.future.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
-import com.tigerbrokers.stock.openapi.client.struct.enums.FutureKType;
 
 /**
  * Description:
@@ -12,7 +11,8 @@ public class FutureKlineModel extends ApiModel {
 
   @JSONField(name = "contract_code")
   private String contractCode;
-  private FutureKType period;
+  @JSONField(name = "period")
+  private String period;
   @JSONField(name = "begin_time")
   private Long beginTime;
   @JSONField(name = "end_time")
@@ -21,12 +21,12 @@ public class FutureKlineModel extends ApiModel {
   public FutureKlineModel() {
   }
 
-  public FutureKlineModel(String contractCode, FutureKType kType) {
+  public FutureKlineModel(String contractCode, String kType) {
     this.contractCode = contractCode;
     this.period = kType;
   }
 
-  public FutureKlineModel(String contractCode, FutureKType kType, Long beginTime, Long endTime) {
+  public FutureKlineModel(String contractCode, String kType, Long beginTime, Long endTime) {
     this.contractCode = contractCode;
     this.period = kType;
     this.beginTime = beginTime;
@@ -41,11 +41,11 @@ public class FutureKlineModel extends ApiModel {
     this.contractCode = contractCode;
   }
 
-  public FutureKType getPeriod() {
+  public String getPeriod() {
     return period;
   }
 
-  public void setPeriod(FutureKType period) {
+  public void setPeriod(String period) {
     this.period = period;
   }
 
