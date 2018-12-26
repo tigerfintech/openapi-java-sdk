@@ -2,15 +2,17 @@ package com.tigerbrokers.stock.openapi.client.https.domain.future.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 
 /**
  * Description:
  * Created by lijiawen on 2018/12/25.
  */
 public class FutureContractByConCodeModel extends ApiModel {
+
   @JSONField(name = "contract_code")
   private String contractCode;
-  private String lang;
+  private Language lang;
 
   public FutureContractByConCodeModel() {
   }
@@ -19,7 +21,7 @@ public class FutureContractByConCodeModel extends ApiModel {
     this.contractCode = contractCode;
   }
 
-  public FutureContractByConCodeModel(String contractCode, String lang) {
+  public FutureContractByConCodeModel(String contractCode, Language lang) {
     this.contractCode = contractCode;
     this.lang = lang;
   }
@@ -32,11 +34,11 @@ public class FutureContractByConCodeModel extends ApiModel {
     this.contractCode = contractCode;
   }
 
-  public String getLang() {
+  public Language getLang() {
     return lang;
   }
 
-  public void setLang(String lang) {
+  public void setLang(Language lang) {
     this.lang = lang;
   }
 }

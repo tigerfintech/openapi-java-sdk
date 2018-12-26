@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.https.domain.future.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 
 /**
  * Description:
@@ -11,7 +12,7 @@ public class FutureContractByExchCodeModel extends ApiModel {
 
   @JSONField(name = "exchange_code")
   private String exchangeCode;
-  private String lang;
+  private Language lang;
 
   public FutureContractByExchCodeModel() {
   }
@@ -20,7 +21,7 @@ public class FutureContractByExchCodeModel extends ApiModel {
     this.exchangeCode = exchangeCode;
   }
 
-  public FutureContractByExchCodeModel(String exchangeCode, String lang) {
+  public FutureContractByExchCodeModel(String exchangeCode, Language lang) {
     this.exchangeCode = exchangeCode;
     this.lang = lang;
   }
@@ -33,11 +34,11 @@ public class FutureContractByExchCodeModel extends ApiModel {
     this.exchangeCode = exchangeCode;
   }
 
-  public String getLang() {
+  public Language getLang() {
     return lang;
   }
 
-  public void setLang(String lang) {
+  public void setLang(Language lang) {
     this.lang = lang;
   }
 }

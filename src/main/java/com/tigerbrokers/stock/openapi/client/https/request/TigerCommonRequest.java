@@ -21,6 +21,8 @@ public class TigerCommonRequest {
   protected ApiModel apiModel;
   protected String sign;
 
+  public static final String V2_0 = "2.0";
+
   public TigerCommonRequest() {
     timestamp = new SimpleDateFormat(DATE_TIME_FORMAT).format(new Date());
   }

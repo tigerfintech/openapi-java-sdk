@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.future.model;
 
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 
 /**
  * Description:
@@ -9,7 +10,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 public class FutureContinuousContractModel extends ApiModel {
 
   private String type;
-  private String lang;
+  private Language lang;
 
   public FutureContinuousContractModel() {
   }
@@ -18,7 +19,7 @@ public class FutureContinuousContractModel extends ApiModel {
     this.type = type;
   }
 
-  public FutureContinuousContractModel(String type, String lang) {
+  public FutureContinuousContractModel(String type, Language lang) {
     this.type = type;
     this.lang = lang;
   }
@@ -31,11 +32,11 @@ public class FutureContinuousContractModel extends ApiModel {
     this.type = type;
   }
 
-  public String getLang() {
+  public Language getLang() {
     return lang;
   }
 
-  public void setLang(String lang) {
+  public void setLang(Language lang) {
     this.lang = lang;
   }
 }

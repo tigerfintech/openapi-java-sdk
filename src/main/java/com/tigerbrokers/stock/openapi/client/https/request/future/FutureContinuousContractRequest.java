@@ -6,6 +6,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureCon
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.future.FutureContractResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 
 /**
  * Description:
@@ -23,7 +24,7 @@ public class FutureContinuousContractRequest extends TigerCommonRequest
     return newRequest(type, null);
   }
 
-  public static FutureContinuousContractRequest newRequest(String type, String lang) {
+  public static FutureContinuousContractRequest newRequest(String type, Language lang) {
     FutureContinuousContractRequest request = new FutureContinuousContractRequest();
     FutureContinuousContractModel model = new FutureContinuousContractModel(type, lang);
     request.setApiModel(model);

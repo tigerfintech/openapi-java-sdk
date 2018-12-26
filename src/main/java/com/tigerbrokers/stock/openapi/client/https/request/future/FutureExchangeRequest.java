@@ -6,6 +6,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureExc
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.future.FutureExchangeResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 
 /**
  * Description:
@@ -22,7 +23,7 @@ public class FutureExchangeRequest extends TigerCommonRequest implements TigerRe
     return newRequest(secType, null);
   }
 
-  public static FutureExchangeRequest newRequest(String secType, String lang) {
+  public static FutureExchangeRequest newRequest(String secType, Language lang) {
     FutureExchangeRequest request = new FutureExchangeRequest();
     FutureExchangeModel model = new FutureExchangeModel(secType, lang);
     request.setApiModel(model);
