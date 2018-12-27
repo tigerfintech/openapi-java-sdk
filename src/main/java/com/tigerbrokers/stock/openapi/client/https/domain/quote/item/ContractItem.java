@@ -48,7 +48,8 @@ public class ContractItem extends ApiModel {
     this.items = items;
   }
 
-  @Override public String toString() {
+  @Override
+  public String toString() {
     return "ContractItem{" +
         "symbol='" + symbol + '\'' +
         ", secType='" + secType + '\'' +

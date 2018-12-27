@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.quote.item;
 
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.struct.enums.StockStatus;
 
 /**
  * Description:
@@ -77,7 +78,7 @@ public class RealTimeQuoteItem extends ApiModel {
    * 个股状态：
    * 0: 正常 3: 停牌 4: 退市 7: 新股 8: 变更
    */
-  private Double status;
+  private StockStatus status;
 
   public String getSymbol() {
     return symbol;
@@ -183,11 +184,11 @@ public class RealTimeQuoteItem extends ApiModel {
     this.volume = volume;
   }
 
-  public Double getStatus() {
+  public StockStatus getStatus() {
     return status;
   }
 
-  public void setStatus(Double status) {
+  public void setStatus(StockStatus status) {
     this.status = status;
   }
 
