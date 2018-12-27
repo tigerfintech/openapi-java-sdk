@@ -16,7 +16,7 @@ public class QuoteRealTimeQuoteRequest extends TigerCommonRequest implements Tig
 
   public QuoteRealTimeQuoteRequest() {
     setApiVersion(V2_0);
-    setApiMethodName(ApiServiceType.REAL_TIME_QUOTE);
+    setApiMethodName(ApiServiceType.QUOTE_REAL_TIME);
   }
 
   public static QuoteRealTimeQuoteRequest newRequest(List<String> symbols) {

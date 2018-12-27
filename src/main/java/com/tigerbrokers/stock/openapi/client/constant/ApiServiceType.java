@@ -24,13 +24,14 @@ public interface ApiServiceType {
   String ALL_SYMBOL_NAMES = "all_symbol_names";
   String BRIEF = "brief";
   String STOCK_DETAIL = "stock_detail";
-  String TIMELINE = "timeline";
   String HOUR_TRADING_TIMELINE = "hour_trading_timeline";
+
+  String TIMELINE = "timeline";
   String KLINE = "kline";
   String TRADE_TICK = "trade_tick";
-  String WAR_CONTRACT = "war_contract";
-  String REAL_TIME_QUOTE = "real_time_quote";
-  String SHORTABLE_STOCKS = "shortable_stocks";
+  String QUOTE_CONTRACT = "quote_contract";
+  String QUOTE_REAL_TIME = "quote_real_time";
+  String QUOTE_SHORTABLE_STOCKS = "quote_shortable_stocks";
 
 
   /**

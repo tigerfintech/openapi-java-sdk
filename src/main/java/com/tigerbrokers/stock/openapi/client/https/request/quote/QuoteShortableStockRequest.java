@@ -17,7 +17,7 @@ public class QuoteShortableStockRequest extends TigerCommonRequest
 
   public QuoteShortableStockRequest() {
     setApiVersion(V2_0);
-    setApiMethodName(ApiServiceType.SHORTABLE_STOCKS);
+    setApiMethodName(ApiServiceType.QUOTE_SHORTABLE_STOCKS);
   }
 
   public static QuoteShortableStockRequest newRequest(List<String> symbols) {

@@ -17,7 +17,7 @@ public class QuoteContractRequest extends TigerCommonRequest implements TigerReq
 
   public QuoteContractRequest() {
     setApiVersion(V2_0);
-    setApiMethodName(ApiServiceType.WAR_CONTRACT);
+    setApiMethodName(ApiServiceType.QUOTE_CONTRACT);
   }
 
   public static QuoteContractRequest newRequest(List<String> symbols) {
