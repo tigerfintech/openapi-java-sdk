@@ -7,7 +7,7 @@ import java.util.List;
  * Description:
  * Created by lijiawen on 2018/12/25.
  */
-public class WarrantItem extends ApiModel {
+public class ContractItem extends ApiModel {
 
   /**
    * 对应的正股股票代码
@@ -20,9 +20,9 @@ public class WarrantItem extends ApiModel {
   private String secType;
 
   /**
-   * 涡轮牛熊证数据列表
+   * 合约数据列表
    */
-  private List<WarrantContract> items;
+  private List<QuoteContract> items;
 
   public String getSymbol() {
     return symbol;
@@ -40,16 +40,16 @@ public class WarrantItem extends ApiModel {
     this.secType = secType;
   }
 
-  public List<WarrantContract> getItems() {
+  public List<QuoteContract> getItems() {
     return items;
   }
 
-  public void setItems(List<WarrantContract> items) {
+  public void setItems(List<QuoteContract> items) {
     this.items = items;
   }
 
   @Override public String toString() {
-    return "WarrantItem{" +
+    return "ContractItem{" +
         "symbol='" + symbol + '\'' +
         ", secType='" + secType + '\'' +
         ", items=" + items +

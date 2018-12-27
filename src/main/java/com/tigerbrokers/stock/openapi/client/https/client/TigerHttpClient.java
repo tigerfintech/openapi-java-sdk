@@ -79,6 +79,9 @@ public class TigerHttpClient implements TigerClient {
         throw new TigerApiException(TigerApiCode.SIGN_CHECK_FAILED);
       }
       return response;
+    } catch (RuntimeException e) {
+      logger.error("client execute runtime exception,request:{},response:{},error:{}", request, data, e.getMessage());
+      return errorResponse(request, e);
     } catch (TigerApiException e) {
       logger.error("client execute api exception,request:{},response:{},error:{}", request, data, e.getMessage(), e);
       return errorResponse(request, e);

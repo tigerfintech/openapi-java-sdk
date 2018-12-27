@@ -37,7 +37,7 @@ public class QuoteKlineRequest extends TigerCommonRequest implements TigerReques
   }
 
   public static QuoteKlineRequest newRequest(List<String> symbols, KType kType, String beginTime, String endTime) {
-    return newRequest(symbols, kType, beginTime, endTime, TimeZoneId.Shanghai);
+    return newRequest(symbols, kType, beginTime, endTime, TimeZoneId.NewYork);
   }
 
   public static QuoteKlineRequest newRequest(List<String> symbols, KType kType, String beginTime, String endTime,

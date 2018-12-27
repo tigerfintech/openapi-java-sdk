@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Description:
  * Created by lijiawen on 2018/12/25.
  */
-public class ContractBase implements Serializable {
+public class QuoteContract implements Serializable {
 
   /**
    * 合约代码
@@ -52,6 +52,11 @@ public class ContractBase implements Serializable {
    * 每手数量
    */
   protected Double multiplier;
+
+  /**
+   * 期权方向（PUT/CALL)
+   */
+  private String right;
 
   public String getSymbol() {
     return symbol;
@@ -125,9 +130,17 @@ public class ContractBase implements Serializable {
     this.multiplier = multiplier;
   }
 
+  public String getRight() {
+    return right;
+  }
+
+  public void setRight(String right) {
+    this.right = right;
+  }
+
   @Override
   public String toString() {
-    return "ContractBase{" +
+    return "QuoteContract{" +
         "symbol='" + symbol + '\'' +
         ", name='" + name + '\'' +
         ", exchange='" + exchange + '\'' +
@@ -137,6 +150,7 @@ public class ContractBase implements Serializable {
         ", expiry='" + expiry + '\'' +
         ", strike='" + strike + '\'' +
         ", multiplier=" + multiplier +
+        ", right='" + right + '\'' +
         '}';
   }
 }
