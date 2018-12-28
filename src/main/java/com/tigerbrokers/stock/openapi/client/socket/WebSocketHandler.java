@@ -6,7 +6,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.stomp.StompFrame;
 import java.nio.charset.Charset;
-import java.util.concurrent.CyclicBarrier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,11 +17,9 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
   private ApiAuthentication authentication;
   private ApiCallbackDecoder decoder;
 
-  public WebSocketHandler(ApiAuthentication authentication, ApiComposeCallback callback, boolean async,
-      CyclicBarrier cyclicBarrier,
-      OrderIdPassport orderIdPassport) {
+  public WebSocketHandler(ApiAuthentication authentication, ApiComposeCallback callback) {
     this.authentication = authentication;
-    this.decoder = new ApiCallbackDecoder(callback, async, cyclicBarrier, orderIdPassport);
+    this.decoder = new ApiCallbackDecoder(callback);
   }
 
   @Override

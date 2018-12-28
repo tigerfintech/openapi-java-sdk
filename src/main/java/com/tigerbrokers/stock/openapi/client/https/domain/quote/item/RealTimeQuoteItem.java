@@ -80,6 +80,8 @@ public class RealTimeQuoteItem extends ApiModel {
    */
   private StockStatus status;
 
+  private HourTrading hourTrading;
+
   public String getSymbol() {
     return symbol;
   }
@@ -192,6 +194,14 @@ public class RealTimeQuoteItem extends ApiModel {
     this.status = status;
   }
 
+  public HourTrading getHourTrading() {
+    return hourTrading;
+  }
+
+  public void setHourTrading(HourTrading hourTrading) {
+    this.hourTrading = hourTrading;
+  }
+
   @Override
   public String toString() {
     return "RealTimeQuoteItem{" +
@@ -209,6 +219,7 @@ public class RealTimeQuoteItem extends ApiModel {
         ", bidSize=" + bidSize +
         ", volume=" + volume +
         ", status=" + status +
+        ", hourTrading=" + hourTrading +
         '}';
   }
 }

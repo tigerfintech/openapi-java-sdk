@@ -20,12 +20,16 @@ public class QuoteRealTimeQuoteRequest extends TigerCommonRequest implements Tig
   }
 
   public static QuoteRealTimeQuoteRequest newRequest(List<String> symbols) {
-    return newRequest(symbols, null);
+    return newRequest(symbols, false);
   }
 
-  public static QuoteRealTimeQuoteRequest newRequest(List<String> symbols, Language lang) {
+  public static QuoteRealTimeQuoteRequest newRequest(List<String> symbols, boolean includeHourTrading) {
+    return newRequest(symbols, includeHourTrading, Language.en_US);
+  }
+
+  public static QuoteRealTimeQuoteRequest newRequest(List<String> symbols, boolean includeHourTrading, Language lang) {
     QuoteRealTimeQuoteRequest request = new QuoteRealTimeQuoteRequest();
-    QuoteSymbolModel model = new QuoteSymbolModel(symbols, lang);
+    QuoteSymbolModel model = new QuoteSymbolModel(symbols, includeHourTrading, lang);
     request.setApiModel(model);
     return request;
   }

@@ -17,6 +17,8 @@ public interface SubscribeApiCallback {
 
   void quoteChange(JSONObject jsonObject);
 
+  void optionChange(JSONObject jsonObject);
+
   void subscribeEnd(JSONObject jsonObject);
 
   void cancelSubscribeEnd(JSONObject jsonObject);

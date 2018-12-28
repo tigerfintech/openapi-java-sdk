@@ -14,6 +14,7 @@ public class QuoteTimelineModel extends QuoteSymbolModel {
   private Long beginTime;
 
   public QuoteTimelineModel() {
+
   }
 
   public QuoteTimelineModel(List<String> symbols) {
@@ -25,8 +26,13 @@ public class QuoteTimelineModel extends QuoteSymbolModel {
     this.beginTime = beginTime;
   }
 
-  public QuoteTimelineModel(List<String> symbols, Long beginTime, Language language) {
-    super(symbols, language);
+  public QuoteTimelineModel(List<String> symbols, Long beginTime, boolean includeHourTrading) {
+    super(symbols, includeHourTrading);
+    this.beginTime = beginTime;
+  }
+
+  public QuoteTimelineModel(List<String> symbols, Long beginTime, boolean includeHourTrading, Language language) {
+    super(symbols, includeHourTrading, language);
     this.beginTime = beginTime;
   }
 

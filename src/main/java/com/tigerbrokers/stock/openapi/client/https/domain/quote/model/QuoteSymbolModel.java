@@ -12,6 +12,8 @@ import java.util.List;
 public class QuoteSymbolModel extends ApiModel {
 
   private List<String> symbols;
+  @JSONField(name = "include_hour_trading")
+  private Boolean includeHourTrading;
   @JSONField(name = "lang")
   private Language lang;
 
@@ -19,11 +21,20 @@ public class QuoteSymbolModel extends ApiModel {
   }
 
   public QuoteSymbolModel(List<String> symbols) {
-    this.symbols = symbols;
+    this(symbols, false);
   }
 
   public QuoteSymbolModel(List<String> symbols, Language lang) {
+    this(symbols, null, lang);
+  }
+
+  public QuoteSymbolModel(List<String> symbols, Boolean includeHourTrading) {
+    this(symbols, includeHourTrading, Language.en_US);
+  }
+
+  public QuoteSymbolModel(List<String> symbols, Boolean includeHourTrading, Language lang) {
     this.symbols = symbols;
+    this.includeHourTrading = includeHourTrading;
     this.lang = lang;
   }
 
@@ -33,6 +44,14 @@ public class QuoteSymbolModel extends ApiModel {
 
   public void setSymbols(List<String> symbols) {
     this.symbols = symbols;
+  }
+
+  public Boolean isIncludeHourTrading() {
+    return includeHourTrading;
+  }
+
+  public void setIncludeHourTrading(Boolean includeHourTrading) {
+    this.includeHourTrading = includeHourTrading;
   }
 
   public Language getLang() {

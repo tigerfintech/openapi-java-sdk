@@ -20,12 +20,17 @@ public class QuoteTimelineRequest extends TigerCommonRequest implements TigerReq
   }
 
   public static QuoteTimelineRequest newRequest(List<String> symbols, Long beginTime) {
-    return newRequest(symbols, beginTime, null);
+    return newRequest(symbols, beginTime, false);
   }
 
-  public static QuoteTimelineRequest newRequest(List<String> symbols, Long beginTime, Language lang) {
+  public static QuoteTimelineRequest newRequest(List<String> symbols, Long beginTime, boolean includeHourTrading) {
+    return newRequest(symbols, beginTime, includeHourTrading, Language.en_US);
+  }
+
+  public static QuoteTimelineRequest newRequest(List<String> symbols, Long beginTime, boolean includeHourTrading,
+      Language lang) {
     QuoteTimelineRequest request = new QuoteTimelineRequest();
-    QuoteTimelineModel model = new QuoteTimelineModel(symbols, beginTime, lang);
+    QuoteTimelineModel model = new QuoteTimelineModel(symbols, beginTime, includeHourTrading, lang);
     request.setApiModel(model);
     return request;
   }

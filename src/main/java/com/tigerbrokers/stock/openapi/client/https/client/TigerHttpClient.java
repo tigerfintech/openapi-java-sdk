@@ -8,14 +8,13 @@ import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
+import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import com.tigerbrokers.stock.openapi.client.util.TigerSignature;
 import java.security.Security;
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.BIZ_CONTENT;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.CHARSET;
@@ -30,8 +29,6 @@ import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.V
  * HTTP客户端
  */
 public class TigerHttpClient implements TigerClient {
-
-  private static final Logger logger = LoggerFactory.getLogger(TigerHttpClient.class);
 
   private String serverUrl;
   private String tigerId;
@@ -60,9 +57,11 @@ public class TigerHttpClient implements TigerClient {
 
   public <T extends TigerResponse> T execute(TigerRequest<T> request) {
     T response;
+    String param = null;
     String data = null;
     try {
-      data = HttpUtils.post(serverUrl, JSONObject.toJSONString(buildParams(request)));
+      param = JSONObject.toJSONString(buildParams(request));
+      data = HttpUtils.post(serverUrl, param);
 
       if (StringUtils.isEmpty(data)) {
         return null;
@@ -80,18 +79,18 @@ public class TigerHttpClient implements TigerClient {
       }
       return response;
     } catch (RuntimeException e) {
-      logger.error("client execute runtime exception,request:{},response:{},error:{}", request, data, e.getMessage());
-      return errorResponse(request, e);
+      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), param, data, e);
+      return errorResponse(tigerId, request, e);
     } catch (TigerApiException e) {
-      logger.error("client execute api exception,request:{},response:{},error:{}", request, data, e.getMessage(), e);
-      return errorResponse(request, e);
+      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), param, data, e);
+      return errorResponse(tigerId, request, e);
     } catch (Exception e) {
-      logger.error("client execute exception,request:{},response:{},error:{}", request, data, e.getMessage(), e);
-      return errorResponse(request, e);
+      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), param, data, e);
+      return errorResponse(tigerId, request, e);
     }
   }
 
-  private <T extends TigerResponse> T errorResponse(TigerRequest<T> request, TigerApiException e) {
+  private <T extends TigerResponse> T errorResponse(String tigerId, TigerRequest<T> request, TigerApiException e) {
     T response;
     try {
       response = request.getResponseClass().newInstance();
@@ -99,14 +98,14 @@ public class TigerHttpClient implements TigerClient {
       response.setMessage(e.getErrMsg());
       return response;
     } catch (InstantiationException e1) {
-      logger.error("instantiationException:", e1.getMessage(), e1);
+      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), null, null, e);
     } catch (IllegalAccessException e1) {
-      logger.error("illegalAccessException:", e1.getMessage(), e1);
+      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), null, null, e);
     }
     return null;
   }
 
-  private <T extends TigerResponse> T errorResponse(TigerRequest<T> request, Exception e) {
+  private <T extends TigerResponse> T errorResponse(String tigerId, TigerRequest<T> request, Exception e) {
     T response;
     try {
       response = request.getResponseClass().newInstance();
@@ -114,9 +113,9 @@ public class TigerHttpClient implements TigerClient {
       response.setMessage(TigerApiCode.CLIENT_API_ERROR.getMessage() + "(" + e.getMessage() + ")");
       return response;
     } catch (InstantiationException e1) {
-      logger.error("instantiationException:", e1.getMessage(), e1);
+      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), null, null, e);
     } catch (IllegalAccessException e1) {
-      logger.error("illegalAccessException:", e1.getMessage(), e1);
+      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), null, null, e);
     }
     return null;
   }
