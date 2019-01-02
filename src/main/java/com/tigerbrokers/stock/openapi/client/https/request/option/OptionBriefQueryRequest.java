@@ -1,105 +1,70 @@
 package com.tigerbrokers.stock.openapi.client.https.request.option;
 
-import com.alibaba.fastjson.JSONObject;
-import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
-import com.tigerbrokers.stock.openapi.client.util.DateUtils;
+import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
+import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
+import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionCommonModel;
+import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
+import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
+import com.tigerbrokers.stock.openapi.client.https.response.option.OptionBriefResponse;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
  * Description:
  * Created by lijiawen on 2018/12/06.
  */
-public class OptionBriefQueryRequest {
+public class OptionBriefQueryRequest extends TigerCommonRequest implements TigerRequest<OptionBriefResponse> {
 
-  private List<Item> items;
+  private List<OptionCommonModel> items;
 
-  public OptionBriefQueryRequest(List<Item> items) {
-    this.items = items;
+  public OptionBriefQueryRequest() {
+    setApiVersion(TigerApiConstants.DEFAULT_VERSION);
+    setApiMethodName(ApiServiceType.OPTION_BRIEF);
   }
 
-  public static OptionBriefQueryRequest of(List<Item> items) {
+  public OptionBriefQueryRequest(List<OptionCommonModel> items) {
+    this();
+    setApiModel(new BatchApiModel(items));
+  }
+
+  public static OptionBriefQueryRequest of(List<OptionCommonModel> items) {
     return new OptionBriefQueryRequest(items);
   }
 
-  public static OptionBriefQueryRequest of(Item item) {
-    List<Item> items = new ArrayList<>();
+  public static OptionBriefQueryRequest of(OptionCommonModel item) {
+    List<OptionCommonModel> items = new ArrayList<>();
     items.add(item);
     return new OptionBriefQueryRequest(items);
   }
 
-  public static OptionBriefQueryRequest of(Item item1, Item item2) {
-    List<Item> items = new ArrayList<>();
+  public static OptionBriefQueryRequest of(OptionCommonModel item1, OptionCommonModel item2) {
+    List<OptionCommonModel> items = new ArrayList<>();
     items.add(item1);
     items.add(item2);
     return new OptionBriefQueryRequest(items);
   }
 
-  public static OptionBriefQueryRequest of(Item item1, Item item2, Item item3) {
-    List<Item> items = new ArrayList<>();
+  public static OptionBriefQueryRequest of(OptionCommonModel item1, OptionCommonModel item2, OptionCommonModel item3) {
+    List<OptionCommonModel> items = new ArrayList<>();
     items.add(item1);
     items.add(item2);
     items.add(item3);
     return new OptionBriefQueryRequest(items);
   }
 
-  public String toJson() {
-    return JSONObject.toJSONString(this);
+  public static OptionBriefQueryRequest of(OptionCommonModel item1, OptionCommonModel item2, OptionCommonModel item3,
+      OptionCommonModel item4) {
+    List<OptionCommonModel> items = new ArrayList<>();
+    items.add(item1);
+    items.add(item2);
+    items.add(item3);
+    items.add(item4);
+    return new OptionBriefQueryRequest(items);
   }
 
-  public List<Item> getItems() {
-    return items;
-  }
-
-  public void setItems(List<Item> items) {
-    this.items = items;
-  }
-
-  public static class Item {
-
-    private String symbol;
-    private String right;
-    private Long expiry;
-    private String strike;
-
-    public String getSymbol() {
-      return symbol;
-    }
-
-    public void setSymbol(String symbol) {
-      this.symbol = symbol;
-    }
-
-    public String getRight() {
-      return right;
-    }
-
-    public void setRight(String right) {
-      this.right = right;
-    }
-
-    public Long getExpiry() {
-      return expiry;
-    }
-
-    public void setExpiry(String expiry) {
-      Date date = DateUtils.getZoneDate(expiry, TimeZoneId.NewYork);
-      if (date != null) {
-        this.expiry = date.getTime();
-      }
-    }
-
-    public void setExpiry(Long expiry) {
-      this.expiry = expiry;
-    }
-
-    public String getStrike() {
-      return strike;
-    }
-
-    public void setStrike(String strike) {
-      this.strike = strike;
-    }
+  @Override
+  public Class<OptionBriefResponse> getResponseClass() {
+    return OptionBriefResponse.class;
   }
 }

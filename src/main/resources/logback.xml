@@ -1,20 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+  <property resource="tiger.properties"/>
+
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
       <pattern>%d{HH:mm:ss.SSS} %thread %X{username} %-5level %logger - %message%n%ex</pattern>
     </encoder>
   </appender>
 
-  <logger name="com.tigerbrokers.stock.openapi.client" level="INFO" additivity="false">
-    <appender-ref ref="STDOUT" />
-    <appender-ref ref="FILE" />
-  </logger>
-
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>/opt/data/openapi/logs/stdout.log</file>
+    <file>${TIGER_HOME}/stdout.log</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-      <fileNamePattern>/opt/data/openapi/logs/stdout.%d{yyyy-MM-dd}%i.log</fileNamePattern>
+      <fileNamePattern>${TIGER_HOME}/stdout.%d{yyyy-MM-dd}%i.log</fileNamePattern>
       <maxHistory>30</maxHistory>
       <maxFileSize>200MB</maxFileSize>
       <totalSizeCap>5GB</totalSizeCap>
@@ -25,9 +22,14 @@
     </encoder>
   </appender>
 
+  <logger name="com.tigerbrokers.openapi.client" level="DEBUG" additivity="false">
+    <appender-ref ref="STDOUT"/>
+    <appender-ref ref="FILE"/>
+  </logger>
+
   <root level="INFO">
-    <appender-ref ref="STDOUT" />
-    <appender-ref ref="FILE" />
+    <appender-ref ref="STDOUT"/>
+    <appender-ref ref="FILE"/>
   </root>
 
 </configuration>

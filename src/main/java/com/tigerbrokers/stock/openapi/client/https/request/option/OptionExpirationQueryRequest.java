@@ -1,33 +1,40 @@
 package com.tigerbrokers.stock.openapi.client.https.request.option;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
+import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
+import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
+import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionExpirationModel;
+import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
+import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
+import com.tigerbrokers.stock.openapi.client.https.response.option.OptionExpirationResponse;
 import java.util.List;
 
 /**
  * Description:
  * Created by lijiawen on 2018/12/06.
  */
-public class OptionExpirationQueryRequest {
+public class OptionExpirationQueryRequest extends TigerCommonRequest implements TigerRequest<OptionExpirationResponse> {
 
-  private List<String> symbols;
+  @JSONField(name = "symbols")
+  private OptionExpirationModel optionExpirationModel = new OptionExpirationModel();
+
+  public OptionExpirationQueryRequest() {
+    setApiVersion(TigerApiConstants.DEFAULT_VERSION);
+    setApiMethodName(ApiServiceType.OPTION_EXPIRATION);
+    setApiModel(optionExpirationModel);
+  }
 
   public OptionExpirationQueryRequest(List<String> symbols) {
-    this.symbols = symbols;
+    this();
+    optionExpirationModel.setSymbols(symbols);
   }
 
   public static OptionExpirationQueryRequest of(List<String> symbols) {
     return new OptionExpirationQueryRequest(symbols);
   }
 
-  public String toJson() {
-    return JSONObject.toJSONString(this);
-  }
-
-  public List<String> getSymbols() {
-    return symbols;
-  }
-
-  public void setSymbols(List<String> symbols) {
-    this.symbols = symbols;
+  @Override
+  public Class<OptionExpirationResponse> getResponseClass() {
+    return OptionExpirationResponse.class;
   }
 }

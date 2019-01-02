@@ -1,18 +1,15 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
+import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.TigerSignature;
 import com.tigerbrokers.stock.openapi.client.util.builder.StompHeaderBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Description:
  * Created by lijiawen on 2018/06/06.
  */
 public class ApiAuthentication {
-
-  private static Logger logger = LoggerFactory.getLogger(ApiAuthentication.class);
 
   private String tigerId;
   private String sign;
@@ -53,7 +50,7 @@ public class ApiAuthentication {
       authentication.setSign(sign);
       authentication.setVersion(version);
     } catch (Exception e) {
-      logger.error("authentication build exception:", e);
+      ApiLogger.error("authentication build exception:{}", e.getMessage(), e);
       return null;
     }
     return authentication;

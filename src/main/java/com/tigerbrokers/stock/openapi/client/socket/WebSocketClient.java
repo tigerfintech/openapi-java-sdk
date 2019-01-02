@@ -1,14 +1,9 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
-import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
-import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
-import com.tigerbrokers.stock.openapi.client.struct.param.AssetParameter;
-import com.tigerbrokers.stock.openapi.client.struct.param.OrderParameter;
-import com.tigerbrokers.stock.openapi.client.struct.param.PositionParameter;
+import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
-import com.tigerbrokers.stock.openapi.client.struct.param.QuoteParameter;
-import com.tigerbrokers.stock.openapi.client.util.FastJsonPropertyFilter;
+import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import io.netty.bootstrap.Bootstrap;
@@ -33,40 +28,28 @@ import io.netty.util.internal.ConcurrentSet;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.net.ssl.SSLException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Description:
  * Created by lijiawen on 2018/05/16.
  */
-public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeAsyncApi {
-
-  private static Logger logger = LoggerFactory.getLogger(WebSocketClient.class);
+public class WebSocketClient implements SubscribeAsyncApi {
 
   private String url;
-  private boolean async;
   private ApiAuthentication authentication;
   private ApiComposeCallback apiComposeCallback;
   private Set<Subject> subscribeList = new CopyOnWriteArraySet<>();
   private Set<String> subscribeSymbols = new ConcurrentSet<>();
-  private CyclicBarrier orderNoBarrier = new CyclicBarrier(2);
-  public OrderIdPassport orderIdPassport = new OrderIdPassport();
 
   private EventLoopGroup group = null;
   private Bootstrap bootstrap = null;
@@ -89,16 +72,6 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
     this.url = url;
     this.authentication = authentication;
     this.apiComposeCallback = apiComposeCallback;
-    async = true;
-    init();
-  }
-
-  public WebSocketClient(String url, ApiAuthentication authentication, ApiComposeCallback apiComposeCallback,
-      boolean async) {
-    this.url = url;
-    this.authentication = authentication;
-    this.apiComposeCallback = apiComposeCallback;
-    this.async = async;
     init();
   }
 
@@ -109,8 +82,7 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
     }
     group = new NioEventLoopGroup(1);
     bootstrap = new Bootstrap();
-    final WebSocketHandler handler =
-        new WebSocketHandler(authentication, apiComposeCallback, async, orderNoBarrier, orderIdPassport);
+    final WebSocketHandler handler = new WebSocketHandler(authentication, apiComposeCallback);
 
     bootstrap.group(group).option(ChannelOption.TCP_NODELAY, true)
         .channel(NioSocketChannel.class)
@@ -140,12 +112,12 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
       if (!isConnected()) {
         throw new Exception("Failed connect to server.");
       }
-      logger.info("Success connect to server, channel is: {}", channel);
+      ApiLogger.info("Success connect to server, channel is: {}", channel);
 
       reconnectCount.set(0);
       reconnectErrorLogFlag.set(false);
     } catch (Throwable e) {
-      logger.error("Failed connect to server, cause: ", e);
+      ApiLogger.error("Failed connect to server, cause:{} ", e.getMessage(), e);
     }
   }
 
@@ -168,7 +140,7 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
         try {
           Channel oldChannel = this.channel;
           if (oldChannel != null) {
-            logger.info("close old netty channel:{} , create new netty channel:{} ", oldChannel, newChannel);
+            ApiLogger.info("close old netty channel:{} , create new netty channel:{} ", oldChannel, newChannel);
             oldChannel.close();
           }
         } finally {
@@ -182,7 +154,7 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
             "client failed to connect to server, client-side timeout: " + (System.currentTimeMillis() - start) + "ms ");
       }
     } catch (Exception e) {
-      logger.error("client failed to connect to server: ", e);
+      ApiLogger.error("client failed to connect to server: {}", e.getMessage(), e);
     } finally {
       if (!isConnected()) {
         future.cancel(true);
@@ -192,14 +164,14 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
 
   private InetSocketAddress getServerAddress() {
     if (StringUtils.isEmpty(url)) {
-      logger.error("url is empty.");
+      ApiLogger.error("url is empty.");
       return null;
     }
     URI uri;
     try {
       uri = new URI(url);
     } catch (URISyntaxException e) {
-      logger.error("uri syntax exception:", e);
+      ApiLogger.error("uri syntax exception:{}", e.getMessage(), e);
       return null;
     }
     return new InetSocketAddress(uri.getHost(), uri.getPort());
@@ -212,13 +184,13 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
         channel.close();
       }
     } catch (Throwable e) {
-      logger.warn(e.getMessage(), e);
+      ApiLogger.error("disconnect error:{}", e.getMessage(), e);
     }
 
     try {
       group.shutdownGracefully();
     } catch (Throwable t) {
-      logger.warn(t.getMessage());
+      ApiLogger.error("group shutdown error:{}", t.getMessage(), t);
     } finally {
       inited = false;
     }
@@ -232,7 +204,7 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
         reconnectExecutorService.shutdownNow();
       }
     } catch (Throwable e) {
-      logger.warn(e.getMessage(), e);
+      ApiLogger.error("destroy reconnect task error:{}", e.getMessage(), e);
     }
   }
 
@@ -256,13 +228,14 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
           if (System.currentTimeMillis() - lastConnectedTime > SHUTDOWN_TIMEOUT) {
             if (!reconnectErrorLogFlag.get()) {
               reconnectErrorLogFlag.set(true);
-              logger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}", lastConnectedTime,
+              ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}",
+                  lastConnectedTime,
                   System.currentTimeMillis(), t);
               return;
             }
           }
           if (reconnectCount.getAndIncrement() % RECONNECT_WARNING_PERIOD == 0) {
-            logger.warn("client reconnect to server error, lastConnectedTime:{}, currentTime:{}", lastConnectedTime,
+            ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}", lastConnectedTime,
                 System.currentTimeMillis(), t);
           }
         }
@@ -271,62 +244,6 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
           reconnectExecutorService.scheduleWithFixedDelay(reconnectCommand, 2 * 1000, 10 * 1000,
               TimeUnit.MILLISECONDS);
     }
-  }
-
-  @Override
-  public int getOrderNo(String account) {
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("account", account);
-    sendMessage(ReqProtocolType.ORDER_NO, jsonObject.toJSONString());
-    nonAsyncWait();
-    return orderIdPassport.getOrderId();
-  }
-
-  @Override
-  public String getOrderNoAsync(String account) {
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("account", account);
-    return sendMessage(ReqProtocolType.ORDER_NO, jsonObject.toJSONString());
-  }
-
-  private void nonAsyncWait() {
-    if (!async) {
-      try {
-        orderNoBarrier.await(3, TimeUnit.SECONDS);
-      } catch (InterruptedException e) {
-        logger.error("connect interrupted exception:", e);
-      } catch (BrokenBarrierException e) {
-        logger.error("connect broken barrier exception:", e);
-      } catch (TimeoutException e) {
-        logger.error("connect timeout exception:", e);
-      }
-    }
-  }
-
-  @Override
-  public String previewOrder(OrderParameter orderParameter) {
-    return sendMessage(ReqProtocolType.PREVIEW_ORDER,
-        JSONObject.toJSONString(orderParameter, FastJsonPropertyFilter.getPropertyFilter()));
-  }
-
-  @Override
-  public String placeOrder(OrderParameter orderParameter) {
-    return sendMessage(ReqProtocolType.PLACE_ORDER,
-        JSONObject.toJSONString(orderParameter, FastJsonPropertyFilter.getPropertyFilter()));
-  }
-
-  @Override
-  public String cancelOrder(String account, int orderId) {
-    Map<String, String> params = new HashMap<>();
-    params.put("order_id", orderId + "");
-    params.put("account", account);
-    return sendMessage(ReqProtocolType.CANCEL_ORDER, JSONObject.toJSONString(params));
-  }
-
-  @Override
-  public String modifyOrder(OrderParameter orderParameter) {
-    return sendMessage(ReqProtocolType.MODIFY_ORDER,
-        JSONObject.toJSONString(orderParameter, FastJsonPropertyFilter.getPropertyFilter()));
   }
 
   @Override
@@ -369,137 +286,15 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
   }
 
   @Override
-  public String getOpenOrders() {
-    return sendMessage(ReqProtocolType.REQ_OPEN_ORDERS, null);
-  }
-
-  @Override
-  public String getPosition(PositionParameter position) {
-    return sendMessage(ReqProtocolType.REQ_POSITIONS, null);
-  }
-
-  @Override
-  public String getAsset(AssetParameter asset) {
-    return sendMessage(ReqProtocolType.REQ_ASSETS, null);
-  }
-
-  @Override
-  public String getAccount(String account) {
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("account", account);
-    return sendMessage(ReqProtocolType.REQ_ACCOUNT, jsonObject.toJSONString());
-  }
-
-  @Override
-  public String getMarketState(QuoteParameter parameter) {
-    if (parameter == null || parameter.getMarket() == null) {
-      logger.info("param error:{}", parameter);
-      return null;
-    }
-    return sendMessage(ReqProtocolType.REQ_MARKET_STATE, JSONObject.toJSONString(parameter));
-  }
-
-  @Override
-  public String getAllSymbols(QuoteParameter parameter) {
-    if (parameter == null || parameter.getMarket() == null) {
-      logger.info("param error:{}", parameter);
-      return null;
-    }
-    return sendMessage(ReqProtocolType.REQ_ALL_SYMBOLS, JSONObject.toJSONString(parameter));
-  }
-
-  @Override
-  public String getAllSymbolNames(QuoteParameter parameter) {
-    if (parameter == null || parameter.getMarket() == null) {
-      logger.info("param error:{}", parameter);
-      return null;
-    }
-    return sendMessage(ReqProtocolType.REQ_ALL_SYMBOL_NAMES, JSONObject.toJSONString(parameter));
-  }
-
-  @Override
-  public String getBriefInfo(QuoteParameter parameter) {
-    if (parameter.getSymbols() == null
-        || parameter.getSymbols().isEmpty()
-        || parameter.getMarket() == null
-        || parameter.getMarket() == Market.ALL) {
-      logger.info("param error:{}", parameter);
-      return null;
-    }
-    return sendMessage(ReqProtocolType.REQ_BRIEF_INFO, JSONObject.toJSONString(parameter));
-  }
-
-  @Override
-  public String getStockDetail(QuoteParameter parameter) {
-    if (parameter.getSymbols() == null
-        || parameter.getSymbols().isEmpty()
-        || parameter.getMarket() == null
-        || parameter.getMarket() == Market.ALL) {
-      logger.info("param error:{}", parameter);
-      return null;
-    }
-    return sendMessage(ReqProtocolType.REQ_STOCK_DETAIL, JSONObject.toJSONString(parameter));
-  }
-
-  @Override
-  public String getTimeline(QuoteParameter parameter) {
-    if (parameter.getSymbols() == null
-        || parameter.getSymbols().isEmpty()
-        || parameter.getPeriod() == null
-        || parameter.getMarket() == null
-        || parameter.getMarket() == Market.ALL) {
-      logger.info("param error:{}", parameter);
-      return null;
-    }
-    return sendMessage(ReqProtocolType.REQ_TIME_LINE, JSONObject.toJSONString(parameter));
-  }
-
-  @Override
-  public String getHourTradingTimeline(QuoteParameter parameter) {
-    if (parameter.getSymbols() == null
-        || parameter.getSymbols().isEmpty()
-        || parameter.getMarket() == null
-        || parameter.getMarket() == Market.ALL) {
-      logger.info("param error:{}", parameter);
-      return null;
-    }
-    return sendMessage(ReqProtocolType.REQ_HOUR_TRADING_TIME_LINE, JSONObject.toJSONString(parameter));
-  }
-
-  @Override
-  public String getKline(QuoteParameter parameter) {
-    if (parameter.getSymbols() == null
-        || parameter.getSymbols().isEmpty()
-        || parameter.getMarket() == null
-        || parameter.getMarket() == Market.ALL) {
-      logger.info("param error:{}", parameter);
-      return null;
-    }
-    return sendMessage(ReqProtocolType.REQ_KLINE, JSONObject.toJSONString(parameter));
-  }
-
-  @Override
-  public String getTradeTick(QuoteParameter parameter) {
-    if (parameter.getSymbols() == null
-        || parameter.getSymbols().isEmpty()
-        || parameter.getMarket() == null
-        || parameter.getMarket() == Market.ALL) {
-      logger.info("param error:{}", parameter);
-      return null;
-    }
-    return sendMessage(ReqProtocolType.REQ_TRADE_TICK, JSONObject.toJSONString(parameter));
-  }
-
-  @Override
   public String subscribeQuote(Set<String> symbols) {
     if (!isConnected()) {
       notConnect();
       return null;
     }
-    StompFrame frame = StompMessageUtil.buildSubscribeMessage(symbols);
+    StompFrame frame = StompMessageUtil.buildSubscribeMessage(symbols, QuoteSubject.Quote);
     channel.writeAndFlush(frame);
     subscribeSymbols.addAll(symbols);
-    logger.info("send subscribe quote message, symbols:{}", symbols);
+    ApiLogger.info("send subscribe quote message, symbols:{}", symbols);
 
     return frame.headers().getAsString(StompHeaders.ID);
   }
@@ -513,7 +308,21 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
     StompFrame frame = StompMessageUtil.buildSubscribeMessage(symbols, new HashSet<>(focusKeys));
     channel.writeAndFlush(frame);
     subscribeSymbols.addAll(symbols);
-    logger.info("send subscribe quote message, symbols:{},focusKeys:{}", symbols, focusKeys);
+    ApiLogger.info("send subscribe quote message, symbols:{},focusKeys:{}", symbols, focusKeys);
+
+    return frame.headers().getAsString(StompHeaders.ID);
+  }
+
+  @Override
+  public String subscribeOption(Set<String> symbols) {
+    if (!isConnected()) {
+      notConnect();
+      return null;
+    }
+    StompFrame frame = StompMessageUtil.buildSubscribeMessage(symbols, QuoteSubject.Option);
+    channel.writeAndFlush(frame);
+    subscribeSymbols.addAll(symbols);
+    ApiLogger.info("send subscribe option message, symbols:{}", symbols);
 
     return frame.headers().getAsString(StompHeaders.ID);
   }
@@ -527,7 +336,7 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
     StompFrame frame = StompMessageUtil.buildUnSubscribeMessage(symbols);
     channel.writeAndFlush(frame);
     subscribeSymbols.removeAll(symbols);
-    logger.info("send cancel subscribe quote message, symbols:{}.", symbols);
+    ApiLogger.info("send cancel subscribe quote message, symbols:{}.", symbols);
 
     return frame.headers().getAsString(StompHeaders.ID);
   }
@@ -542,7 +351,7 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
       notConnect();
       return null;
     }
-    logger.info("reqType:{},send message:{}", reqType, message);
+    ApiLogger.info("reqType:{},send message:{}", reqType, message);
     StompFrame frame = StompMessageUtil.buildSendMessage(reqType, message);
     channel.writeAndFlush(frame);
 
@@ -550,6 +359,6 @@ public class WebSocketClient implements TradeAsyncApi, QuoteAsyncApi, SubscribeA
   }
 
   private void notConnect() {
-    logger.info("connection is closed.");
+    ApiLogger.info("connection is closed.");
   }
 }

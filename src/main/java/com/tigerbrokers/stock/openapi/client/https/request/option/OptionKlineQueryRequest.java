@@ -1,137 +1,60 @@
 package com.tigerbrokers.stock.openapi.client.https.request.option;
 
-import com.alibaba.fastjson.JSONObject;
-import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
-import com.tigerbrokers.stock.openapi.client.util.DateUtils;
+import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
+import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
+import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionKlineModel;
+import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
+import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
+import com.tigerbrokers.stock.openapi.client.https.response.option.OptionKlineResponse;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
  * Description:
  * Created by lijiawen on 2018/12/06.
  */
-public class OptionKlineQueryRequest {
+public class OptionKlineQueryRequest extends TigerCommonRequest implements TigerRequest<OptionKlineResponse> {
 
-  private List<Item> items;
+  private List<OptionKlineModel> items;
 
-  public OptionKlineQueryRequest(List<Item> items) {
-    this.items = items;
+  public OptionKlineQueryRequest() {
+    setApiVersion(TigerApiConstants.DEFAULT_VERSION);
+    setApiMethodName(ApiServiceType.OPTION_KLINE);
   }
 
-  public static OptionKlineQueryRequest of(List<Item> items) {
+  public OptionKlineQueryRequest(List<OptionKlineModel> items) {
+    this();
+    setApiModel(new BatchApiModel(items));
+  }
+
+  public static OptionKlineQueryRequest of(List<OptionKlineModel> item1) {
+    return new OptionKlineQueryRequest(item1);
+  }
+
+  public static OptionKlineQueryRequest of(OptionKlineModel item1) {
+    List<OptionKlineModel> items = new ArrayList<>();
+    items.add(item1);
     return new OptionKlineQueryRequest(items);
   }
 
-  public static OptionKlineQueryRequest of(Item item) {
-    List<Item> items = new ArrayList<>();
-    items.add(item);
-    return new OptionKlineQueryRequest(items);
-  }
-
-  public static OptionKlineQueryRequest of(Item item1, Item item2) {
-    List<Item> items = new ArrayList<>();
+  public static OptionKlineQueryRequest of(OptionKlineModel item1, OptionKlineModel item2) {
+    List<OptionKlineModel> items = new ArrayList<>();
     items.add(item1);
     items.add(item2);
     return new OptionKlineQueryRequest(items);
   }
 
-  public static OptionKlineQueryRequest of(Item item1, Item item2, Item item3) {
-    List<Item> items = new ArrayList<>();
+  public static OptionKlineQueryRequest of(OptionKlineModel item1, OptionKlineModel item2, OptionKlineModel item3) {
+    List<OptionKlineModel> items = new ArrayList<>();
     items.add(item1);
     items.add(item2);
     items.add(item3);
     return new OptionKlineQueryRequest(items);
   }
 
-  public String toJson() {
-    return JSONObject.toJSONString(this);
-  }
-
-  public List<Item> getItems() {
-    return items;
-  }
-
-  public void setItems(List<Item> items) {
-    this.items = items;
-  }
-
-  public static class Item {
-
-    private String symbol;
-    private String right;
-    private Long expiry;
-    private String strike;
-    private Long beginTime;
-    private Long endTime;
-
-    public String getSymbol() {
-      return symbol;
-    }
-
-    public void setSymbol(String symbol) {
-      this.symbol = symbol;
-    }
-
-    public String getRight() {
-      return right;
-    }
-
-    public void setRight(String right) {
-      this.right = right;
-    }
-
-    public Long getExpiry() {
-      return expiry;
-    }
-
-    public void setExpiry(String expiry) {
-      Date date = DateUtils.getZoneDate(expiry, TimeZoneId.NewYork);
-      if (date != null) {
-        this.expiry = date.getTime();
-      }
-    }
-
-    public void setExpiry(Long expiry) {
-      this.expiry = expiry;
-    }
-
-    public String getStrike() {
-      return strike;
-    }
-
-    public void setStrike(String strike) {
-      this.strike = strike;
-    }
-
-    public Long getBeginTime() {
-      return beginTime;
-    }
-
-    public void setBeginTime(String beginTime) {
-      Date date = DateUtils.getZoneDate(beginTime, TimeZoneId.NewYork);
-      if (date != null) {
-        this.beginTime = date.getTime();
-      }
-    }
-
-    public void setBeginTime(Long beginTime) {
-      this.beginTime = beginTime;
-    }
-
-    public Long getEndTime() {
-      return endTime;
-    }
-
-    public void setEndTime(String endTime) {
-      Date date = DateUtils.getZoneDate(endTime, TimeZoneId.NewYork);
-      if (date != null) {
-        this.endTime = date.getTime();
-      }
-    }
-
-    public void setEndTime(Long endTime) {
-      this.endTime = endTime;
-    }
+  @Override
+  public Class<OptionKlineResponse> getResponseClass() {
+    return OptionKlineResponse.class;
   }
 }
