@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.socket;
 import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
+import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import io.netty.bootstrap.Bootstrap;
@@ -37,16 +38,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.net.ssl.SSLException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Description:
  * Created by lijiawen on 2018/05/16.
  */
 public class WebSocketClient implements SubscribeAsyncApi {
-
-  private static Logger logger = LoggerFactory.getLogger(WebSocketClient.class);
 
   private String url;
   private ApiAuthentication authentication;
@@ -115,12 +112,12 @@ public class WebSocketClient implements SubscribeAsyncApi {
       if (!isConnected()) {
         throw new Exception("Failed connect to server.");
       }
-      logger.info("Success connect to server, channel is: {}", channel);
+      ApiLogger.info("Success connect to server, channel is: {}", channel);
 
       reconnectCount.set(0);
       reconnectErrorLogFlag.set(false);
     } catch (Throwable e) {
-      logger.error("Failed connect to server, cause: ", e);
+      ApiLogger.error("Failed connect to server, cause:{} ", e.getMessage(), e);
     }
   }
 
@@ -143,7 +140,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
         try {
           Channel oldChannel = this.channel;
           if (oldChannel != null) {
-            logger.info("close old netty channel:{} , create new netty channel:{} ", oldChannel, newChannel);
+            ApiLogger.info("close old netty channel:{} , create new netty channel:{} ", oldChannel, newChannel);
             oldChannel.close();
           }
         } finally {
@@ -157,7 +154,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
             "client failed to connect to server, client-side timeout: " + (System.currentTimeMillis() - start) + "ms ");
       }
     } catch (Exception e) {
-      logger.error("client failed to connect to server: ", e);
+      ApiLogger.error("client failed to connect to server: {}", e.getMessage(), e);
     } finally {
       if (!isConnected()) {
         future.cancel(true);
@@ -167,14 +164,14 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   private InetSocketAddress getServerAddress() {
     if (StringUtils.isEmpty(url)) {
-      logger.error("url is empty.");
+      ApiLogger.error("url is empty.");
       return null;
     }
     URI uri;
     try {
       uri = new URI(url);
     } catch (URISyntaxException e) {
-      logger.error("uri syntax exception:", e);
+      ApiLogger.error("uri syntax exception:{}", e.getMessage(), e);
       return null;
     }
     return new InetSocketAddress(uri.getHost(), uri.getPort());
@@ -187,13 +184,13 @@ public class WebSocketClient implements SubscribeAsyncApi {
         channel.close();
       }
     } catch (Throwable e) {
-      logger.warn(e.getMessage(), e);
+      ApiLogger.error("disconnect error:{}", e.getMessage(), e);
     }
 
     try {
       group.shutdownGracefully();
     } catch (Throwable t) {
-      logger.warn(t.getMessage());
+      ApiLogger.error("group shutdown error:{}", t.getMessage(), t);
     } finally {
       inited = false;
     }
@@ -207,7 +204,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
         reconnectExecutorService.shutdownNow();
       }
     } catch (Throwable e) {
-      logger.warn(e.getMessage(), e);
+      ApiLogger.error("destroy reconnect task error:{}", e.getMessage(), e);
     }
   }
 
@@ -231,13 +228,14 @@ public class WebSocketClient implements SubscribeAsyncApi {
           if (System.currentTimeMillis() - lastConnectedTime > SHUTDOWN_TIMEOUT) {
             if (!reconnectErrorLogFlag.get()) {
               reconnectErrorLogFlag.set(true);
-              logger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}", lastConnectedTime,
+              ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}",
+                  lastConnectedTime,
                   System.currentTimeMillis(), t);
               return;
             }
           }
           if (reconnectCount.getAndIncrement() % RECONNECT_WARNING_PERIOD == 0) {
-            logger.warn("client reconnect to server error, lastConnectedTime:{}, currentTime:{}", lastConnectedTime,
+            ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}", lastConnectedTime,
                 System.currentTimeMillis(), t);
           }
         }
@@ -296,7 +294,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     StompFrame frame = StompMessageUtil.buildSubscribeMessage(symbols, QuoteSubject.Quote);
     channel.writeAndFlush(frame);
     subscribeSymbols.addAll(symbols);
-    logger.info("send subscribe quote message, symbols:{}", symbols);
+    ApiLogger.info("send subscribe quote message, symbols:{}", symbols);
 
     return frame.headers().getAsString(StompHeaders.ID);
   }
@@ -310,7 +308,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     StompFrame frame = StompMessageUtil.buildSubscribeMessage(symbols, new HashSet<>(focusKeys));
     channel.writeAndFlush(frame);
     subscribeSymbols.addAll(symbols);
-    logger.info("send subscribe quote message, symbols:{},focusKeys:{}", symbols, focusKeys);
+    ApiLogger.info("send subscribe quote message, symbols:{},focusKeys:{}", symbols, focusKeys);
 
     return frame.headers().getAsString(StompHeaders.ID);
   }
@@ -324,7 +322,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     StompFrame frame = StompMessageUtil.buildSubscribeMessage(symbols, QuoteSubject.Option);
     channel.writeAndFlush(frame);
     subscribeSymbols.addAll(symbols);
-    logger.info("send subscribe option message, symbols:{}", symbols);
+    ApiLogger.info("send subscribe option message, symbols:{}", symbols);
 
     return frame.headers().getAsString(StompHeaders.ID);
   }
@@ -338,7 +336,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     StompFrame frame = StompMessageUtil.buildUnSubscribeMessage(symbols);
     channel.writeAndFlush(frame);
     subscribeSymbols.removeAll(symbols);
-    logger.info("send cancel subscribe quote message, symbols:{}.", symbols);
+    ApiLogger.info("send cancel subscribe quote message, symbols:{}.", symbols);
 
     return frame.headers().getAsString(StompHeaders.ID);
   }
@@ -353,7 +351,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
       notConnect();
       return null;
     }
-    logger.info("reqType:{},send message:{}", reqType, message);
+    ApiLogger.info("reqType:{},send message:{}", reqType, message);
     StompFrame frame = StompMessageUtil.buildSendMessage(reqType, message);
     channel.writeAndFlush(frame);
 
@@ -361,6 +359,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   private void notConnect() {
-    logger.info("connection is closed.");
+    ApiLogger.info("connection is closed.");
   }
 }

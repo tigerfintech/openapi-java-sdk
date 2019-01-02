@@ -3,10 +3,9 @@ package com.tigerbrokers.stock.openapi.client.socket;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
+import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import io.netty.handler.codec.stomp.StompFrame;
 import java.nio.charset.Charset;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.END_CONN;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_CANCEL_SUBSCRIBE_END;
@@ -24,8 +23,6 @@ import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUB
  * Created by lijiawen on 2018/05/23.
  */
 public class ApiCallbackDecoder {
-
-  private static Logger logger = LoggerFactory.getLogger(ApiCallbackDecoder.class);
 
   private ApiComposeCallback callback;
   private StompFrame stompFrame;
@@ -122,6 +119,6 @@ public class ApiCallbackDecoder {
   }
 
   private void processDefault() {
-    logger.info("ret-type:{} cannot be processed.", retType);
+    ApiLogger.info("ret-type:{} cannot be processed.", retType);
   }
 }

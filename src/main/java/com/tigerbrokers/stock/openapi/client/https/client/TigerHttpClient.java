@@ -61,6 +61,8 @@ public class TigerHttpClient implements TigerClient {
     String data = null;
     try {
       param = JSONObject.toJSONString(buildParams(request));
+      ApiLogger.debug("request param:{}", param);
+
       data = HttpUtils.post(serverUrl, param);
 
       if (StringUtils.isEmpty(data)) {
