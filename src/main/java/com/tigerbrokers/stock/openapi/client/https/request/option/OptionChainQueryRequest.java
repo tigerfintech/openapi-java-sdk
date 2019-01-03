@@ -16,8 +16,6 @@ import java.util.List;
  */
 public class OptionChainQueryRequest extends TigerCommonRequest implements TigerRequest<OptionChainResponse> {
 
-  private List<OptionChainModel> items;
-
   public OptionChainQueryRequest() {
     setApiVersion(TigerApiConstants.DEFAULT_VERSION);
     setApiMethodName(ApiServiceType.OPTION_CHAIN);
