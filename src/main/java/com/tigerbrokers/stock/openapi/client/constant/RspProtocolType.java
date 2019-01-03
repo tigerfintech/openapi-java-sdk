@@ -41,4 +41,5 @@ public interface RspProtocolType {
   int GET_SUB_SYMBOLS_END = 111;
   int GET_SUBSCRIBE_END = 112;
   int GET_CANCEL_SUBSCRIBE_END = 113;
+  int GET_OPTION_CHANGE_END = 114;
 }

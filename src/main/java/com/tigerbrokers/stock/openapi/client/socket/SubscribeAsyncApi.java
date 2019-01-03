@@ -48,6 +48,13 @@ public interface SubscribeAsyncApi {
   String subscribeQuote(Set<String> symbols, List<String> focusKeys);
 
   /**
+   * 订阅期权最新价
+   *
+   * @param symbols 标的列表
+   */
+  String subscribeOption(Set<String> symbols);
+
+  /**
    * 取消订阅行情
    *
    * @param symbols 标的列表

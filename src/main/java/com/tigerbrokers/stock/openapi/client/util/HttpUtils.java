@@ -6,15 +6,11 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Web 工具类
  */
 public class HttpUtils {
-
-  private static final Logger logger = LoggerFactory.getLogger(HttpUtils.class);
 
   public static final int CONNECT_TIMEOUT = 10000;
   public static final int SOCKET_TIMEOUT = 10000;
@@ -42,9 +38,9 @@ public class HttpUtils {
         return response.body().string();
       }
     } catch (IOException e) {
-      logger.error("HttpUtils execute io exception:{}", e.getMessage(), e);
+      ApiLogger.error("HttpUtils execute io exception:{}", e.getMessage(), e);
     } catch (Exception e) {
-      logger.error("HttpUtils execute exception:{}", e.getMessage(), e);
+      ApiLogger.error("HttpUtils execute exception:{}", e.getMessage(), e);
     }
     return null;
   }

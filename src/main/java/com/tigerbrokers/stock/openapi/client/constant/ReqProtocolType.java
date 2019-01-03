@@ -34,4 +34,5 @@ public interface ReqProtocolType {
   int REQ_KLINE = 108;
   int REQ_TRADE_TICK = 109;
   int REQ_SUB_SYMBOLS = 110;
+  int REQ_SUB_OPTION = 110;
 }

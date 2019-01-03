@@ -1,9 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.request;
 
-
-
+import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
-import java.util.Map;
 
 /**
  * 请求接口。
@@ -19,15 +17,11 @@ public interface TigerRequest<T extends TigerResponse> {
   String getApiMethodName();
 
   /**
-   * 获取所有的Key-Value形式的文本请求参数集合。其中：
-   * <ul>
-   * <li>Key: 请求参数名</li>
-   * <li>Value: 请求参数值</li>
-   * </ul>
+   * 设置当前接口的版本
    *
-   * @return 文本请求参数集合
+   * @param apiVersion API版本
    */
-  Map<String, String> getTextParams();
+  void setApiVersion(String apiVersion);
 
   /**
    * 得到当前接口的版本
@@ -37,21 +31,37 @@ public interface TigerRequest<T extends TigerResponse> {
   String getApiVersion();
 
   /**
-   * 设置当前API的版本信息
+   * 得到当前API的响应结果类型
    *
-   * @param apiVersion API版本
+   * @return 响应类型
    */
-  void setApiVersion(String apiVersion);
+  Class<T> getResponseClass();
 
   /**
+   * 设置请求时间
    *
-   * @return 返回通知地址
+   * @param timestamp 请求时间
    */
-  String getNotifyUrl();
+  void setTimestamp(String timestamp);
 
   /**
+   * 得到请求时间
    *
-   * @param notifyUrl 设置通知地址
+   * @return 请求时间
    */
-  void setNotifyUrl(String notifyUrl);
+  String getTimestamp();
+
+  /**
+   * 设置请求业务参数
+   *
+   * @param apiModel 业务参数
+   */
+  void setApiModel(ApiModel apiModel);
+
+  /**
+   * 得到请求业务参数
+   *
+   * @return 业务参数
+   */
+  ApiModel getApiModel();
 }
