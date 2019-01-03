@@ -3,8 +3,8 @@ package com.tigerbrokers.stock.openapi.client.websocket;
 import com.tigerbrokers.stock.openapi.client.socket.ApiAuthentication;
 import com.tigerbrokers.stock.openapi.client.socket.ApiCallbackDecoder;
 import com.tigerbrokers.stock.openapi.client.socket.ApiComposeCallback;
-import com.tigerbrokers.stock.openapi.client.socket.OrderIdPassport;
 import com.tigerbrokers.stock.openapi.client.util.ApiCallbackDecoderUtils;
+import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
@@ -14,17 +14,12 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.stomp.StompFrame;
 import io.netty.util.CharsetUtil;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
-import java.util.concurrent.CyclicBarrier;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @创建人 zhaolei
  * @创建时间 2018/12/20
  * 描述
  */
-@Slf4j
 @ChannelHandler.Sharable
 public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Object> {
 
@@ -33,11 +28,9 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
 
   private WebSocketClientHandshaker handshaker;
 
-  public WebSocketHandshakerHandler(ApiAuthentication authentication, ApiComposeCallback callback, boolean async,
-      CyclicBarrier cyclicBarrier,
-      OrderIdPassport orderIdPassport) {
+  public WebSocketHandshakerHandler(ApiAuthentication authentication, ApiComposeCallback callback) {
     this.authentication = authentication;
-    this.decoder = new ApiCallbackDecoder(callback, async, cyclicBarrier, orderIdPassport);
+    this.decoder = new ApiCallbackDecoder(callback);
   }
 
   @Override
@@ -59,20 +52,20 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
 
   @Override
   public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-    log.info("netty channel inactive!，channel:{}", ctx.channel());
+    ApiLogger.info("netty channel inactive!，channel:{}", ctx.channel());
     super.channelInactive(ctx);
     ctx.close();
   }
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-    log.error("handler exception caught:", cause);
+    ApiLogger.error("handler exception caught:", cause);
     ctx.close();
   }
 
   @Override
   protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-    log.info("WebSocketHandshakerHandler channelRead0  {}", this.handshaker.isHandshakeComplete());
+    ApiLogger.info("WebSocketHandshakerHandler channelRead0  {}", this.handshaker.isHandshakeComplete());
 
     Channel ch = ctx.channel();
     FullHttpResponse response;
@@ -82,13 +75,13 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
       handshaker.finishHandshake(ch, response);
       //发送stomp connect请求
       ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),authentication.getVersion()));//.addListener(
-      log.info("WebSocket Client connected! response headers[sec-websocket-extensions]:{}", response.headers());
+      ApiLogger.info("WebSocket Client connected! response headers[sec-websocket-extensions]:{}", response.headers());
     }else if(msg instanceof FullHttpResponse){
       response = (FullHttpResponse)msg;
       throw new IllegalStateException("Unexpected FullHttpResponse (getStatus=" + response.status() + ", content=" + response.content().toString(CharsetUtil.UTF_8) + ')');
     }else{
       StompFrame stompFrame = (StompFrame)msg;
-      log.debug("received stop frame from server: {}", stompFrame);
+      ApiLogger.debug("received stop frame from server: {}", stompFrame);
       ApiCallbackDecoderUtils.executor(ctx, stompFrame, decoder);
     }
   }

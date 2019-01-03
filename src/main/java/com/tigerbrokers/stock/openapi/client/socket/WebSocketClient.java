@@ -35,29 +35,20 @@ import io.netty.handler.codec.stomp.StompSubframeEncoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.internal.ConcurrentSet;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.net.ssl.SSLException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Description:
@@ -108,6 +99,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     bootstrap.group(group).option(ChannelOption.TCP_NODELAY, true)
         .channel(NioSocketChannel.class)
         .handler(new ChannelInitializer<SocketChannel>() {
+          @Override
           protected void initChannel(SocketChannel ch) throws SSLException {
             ChannelPipeline p = ch.pipeline();
             SslContext sslCtx =
@@ -119,8 +111,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
               p.addLast( "websocket-stomp-decoder", new WebSocketStompFrameDecoder() );
               p.addLast( "websocket-stomp-encoder", new WebSocketStompFrameEncoder() );
               p.addLast("stomp_aggregator", new StompSubframeAggregator(65535));
-              //p.addLast("handshaker_handler", webSocketHandshakerHandler); add by doconnect()
-
             }else{
               final WebSocketHandler handler = new WebSocketHandler(authentication, apiComposeCallback);
 
@@ -147,12 +137,12 @@ public class WebSocketClient implements SubscribeAsyncApi {
       if (!isConnected()) {
         throw new Exception("Failed connect to server.");
       }
-      logger.info("Success connect to server, channel is: {}", channel);
+      ApiLogger.info("Success connect to server, channel is: {}", channel);
 
       reconnectCount.set(0);
       reconnectErrorLogFlag.set(false);
     } catch (Throwable e) {
-      logger.error("Failed connect to server, cause: ", e);
+      ApiLogger.error("Failed connect to server, cause: ", e);
     }
   }
 
@@ -177,14 +167,14 @@ public class WebSocketClient implements SubscribeAsyncApi {
           uri = new URI(url);
           Channel oldChannel = this.channel;
           if (oldChannel != null) {
-            logger.info("close old netty channel:{} , create new netty channel:{} ", oldChannel, newChannel);
+            ApiLogger.info("close old netty channel:{} , create new netty channel:{} ", oldChannel, newChannel);
             oldChannel.close();
           }
         } finally {
           this.channel = newChannel;
           if (address.getPort() == 8885){
             synchronized (this.channel){
-              WebSocketHandshakerHandler webSocketHandshakerHandler = new WebSocketHandshakerHandler(authentication, apiComposeCallback, async, orderNoBarrier, orderIdPassport);
+              WebSocketHandshakerHandler webSocketHandshakerHandler = new WebSocketHandshakerHandler(authentication, apiComposeCallback);
               HttpHeaders httpHeaders = new DefaultHttpHeaders();
               WebSocketClientHandshaker
                   handshaker = WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, true, httpHeaders);
@@ -204,7 +194,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
             "client failed to connect to server, client-side timeout: " + (System.currentTimeMillis() - start) + "ms ");
       }
     } catch (Exception e) {
-      logger.error("client failed to connect to server: ", e);
+      ApiLogger.error("client failed to connect to server: ", e);
     } finally {
       if (!isConnected()) {
         future.cancel(true);
@@ -214,14 +204,14 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   private InetSocketAddress getServerAddress() {
     if (StringUtils.isEmpty(url)) {
-      logger.error("url is empty.");
+      ApiLogger.error("url is empty.");
       return null;
     }
     URI uri;
     try {
       uri = new URI(url);
     } catch (URISyntaxException e) {
-      logger.error("uri syntax exception:", e);
+      ApiLogger.error("uri syntax exception:", e);
       return null;
     }
     return new InetSocketAddress(uri.getHost(), uri.getPort());
@@ -234,13 +224,13 @@ public class WebSocketClient implements SubscribeAsyncApi {
         channel.close();
       }
     } catch (Throwable e) {
-      logger.warn(e.getMessage(), e);
+      ApiLogger.error(e.getMessage(), e);
     }
 
     try {
       group.shutdownGracefully();
     } catch (Throwable t) {
-      logger.warn(t.getMessage());
+      ApiLogger.error(t.getMessage());
     } finally {
       inited = false;
     }
@@ -254,7 +244,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
         reconnectExecutorService.shutdownNow();
       }
     } catch (Throwable e) {
-      logger.warn(e.getMessage(), e);
+      ApiLogger.error(e.getMessage(), e);
     }
   }
 
@@ -278,13 +268,13 @@ public class WebSocketClient implements SubscribeAsyncApi {
           if (System.currentTimeMillis() - lastConnectedTime > SHUTDOWN_TIMEOUT) {
             if (!reconnectErrorLogFlag.get()) {
               reconnectErrorLogFlag.set(true);
-              logger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}", lastConnectedTime,
+              ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}", lastConnectedTime,
                   System.currentTimeMillis(), t);
               return;
             }
           }
           if (reconnectCount.getAndIncrement() % RECONNECT_WARNING_PERIOD == 0) {
-            logger.warn("client reconnect to server error, lastConnectedTime:{}, currentTime:{}", lastConnectedTime,
+            ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}", lastConnectedTime,
                 System.currentTimeMillis(), t);
           }
         }
@@ -343,7 +333,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     StompFrame frame = StompMessageUtil.buildSubscribeMessage(symbols, QuoteSubject.Quote);
     channel.writeAndFlush(frame);
     subscribeSymbols.addAll(symbols);
-    logger.info("send subscribe quote message, symbols:{}", symbols);
+    ApiLogger.info("send subscribe quote message, symbols:{}", symbols);
 
     return frame.headers().getAsString(StompHeaders.ID);
   }
@@ -357,7 +347,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     StompFrame frame = StompMessageUtil.buildSubscribeMessage(symbols, new HashSet<>(focusKeys));
     channel.writeAndFlush(frame);
     subscribeSymbols.addAll(symbols);
-    logger.info("send subscribe quote message, symbols:{},focusKeys:{}", symbols, focusKeys);
+    ApiLogger.info("send subscribe quote message, symbols:{},focusKeys:{}", symbols, focusKeys);
 
     return frame.headers().getAsString(StompHeaders.ID);
   }
@@ -385,7 +375,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     StompFrame frame = StompMessageUtil.buildUnSubscribeMessage(symbols);
     channel.writeAndFlush(frame);
     subscribeSymbols.removeAll(symbols);
-    logger.info("send cancel subscribe quote message, symbols:{}.", symbols);
+    ApiLogger.info("send cancel subscribe quote message, symbols:{}.", symbols);
 
     return frame.headers().getAsString(StompHeaders.ID);
   }
@@ -400,7 +390,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
       notConnect();
       return null;
     }
-    logger.info("reqType:{},send message:{}", reqType, message);
+    ApiLogger.info("reqType:{},send message:{}", reqType, message);
     StompFrame frame = StompMessageUtil.buildSendMessage(reqType, message);
     channel.writeAndFlush(frame);
 
@@ -408,6 +398,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   private void notConnect() {
-    logger.info("connection is closed.");
+    ApiLogger.info("connection is closed.");
   }
 }
