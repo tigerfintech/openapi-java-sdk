@@ -20,7 +20,7 @@ public class QuoteMarketRequest extends TigerCommonRequest implements TigerReque
   }
 
   public static QuoteMarketRequest newRequest(Market market) {
-    return newRequest(market, null);
+    return newRequest(market, Language.en_US);
   }
 
   public static QuoteMarketRequest newRequest(Market market, Language lang) {

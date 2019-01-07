@@ -21,7 +21,7 @@ public class FutureContractByExchCodeRequest extends TigerCommonRequest
   }
 
   public static FutureContractByExchCodeRequest newRequest(String exchangeCode) {
-    return newRequest(exchangeCode, null);
+    return newRequest(exchangeCode, Language.en_US);
   }
 
   public static FutureContractByExchCodeRequest newRequest(String exchangeCode, Language lang) {

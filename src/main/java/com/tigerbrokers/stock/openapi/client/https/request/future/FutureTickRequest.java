@@ -19,7 +19,7 @@ public class FutureTickRequest extends TigerCommonRequest implements TigerReques
   }
 
   public static FutureTickRequest newRequest(String contractCode) {
-    return newRequest(contractCode, null, null);
+    return newRequest(contractCode, 0, 500);
   }
 
   public static FutureTickRequest newRequest(String contractCode, Integer beginIndex, Integer endIndex) {

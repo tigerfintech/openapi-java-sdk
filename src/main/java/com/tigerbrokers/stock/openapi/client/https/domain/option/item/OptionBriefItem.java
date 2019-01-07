@@ -15,7 +15,6 @@ public class OptionBriefItem extends ApiModel {
   private Double askPrice;
   private Integer askSize;
   private Double latestPrice;
-  private String latestTime;
   private Integer volume;
   private Double high;
   private Double low;
@@ -24,7 +23,6 @@ public class OptionBriefItem extends ApiModel {
   private Integer openInterest;
   private Double change;
   private Integer multiplier;
-  private String marketStatus;
   private String right;
   private String volatility;
   private Long expiry;
@@ -83,14 +81,6 @@ public class OptionBriefItem extends ApiModel {
 
   public void setLatestPrice(Double latestPrice) {
     this.latestPrice = latestPrice;
-  }
-
-  public String getLatestTime() {
-    return latestTime;
-  }
-
-  public void setLatestTime(String latestTime) {
-    this.latestTime = latestTime;
   }
 
   public Integer getVolume() {
@@ -157,14 +147,6 @@ public class OptionBriefItem extends ApiModel {
     this.multiplier = multiplier;
   }
 
-  public String getMarketStatus() {
-    return marketStatus;
-  }
-
-  public void setMarketStatus(String marketStatus) {
-    this.marketStatus = marketStatus;
-  }
-
   public String getRight() {
     return right;
   }
@@ -199,7 +181,6 @@ public class OptionBriefItem extends ApiModel {
         ", askPrice=" + askPrice +
         ", askSize=" + askSize +
         ", latestPrice=" + latestPrice +
-        ", latestTime='" + latestTime + '\'' +
         ", volume=" + volume +
         ", high=" + high +
         ", low=" + low +
@@ -208,7 +189,6 @@ public class OptionBriefItem extends ApiModel {
         ", openInterest=" + openInterest +
         ", change=" + change +
         ", multiplier=" + multiplier +
-        ", marketStatus='" + marketStatus + '\'' +
         ", right='" + right + '\'' +
         ", volatility='" + volatility + '\'' +
         ", expiry=" + expiry +

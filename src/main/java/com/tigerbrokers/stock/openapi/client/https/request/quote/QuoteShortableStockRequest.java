@@ -21,7 +21,7 @@ public class QuoteShortableStockRequest extends TigerCommonRequest
   }
 
   public static QuoteShortableStockRequest newRequest(List<String> symbols) {
-    return newRequest(symbols, null);
+    return newRequest(symbols, Language.en_US);
   }
 
   public static QuoteShortableStockRequest newRequest(List<String> symbols, Language lang) {
