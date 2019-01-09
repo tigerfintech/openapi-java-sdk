@@ -10,6 +10,7 @@ public class FutureContractItem extends ApiModel {
 
   private String type;
   private String name;
+  private String ibCode;
   private String contractCode;
   private String contractMonth;
   private String lastTradingDate;
@@ -33,6 +34,14 @@ public class FutureContractItem extends ApiModel {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public String getIbCode() {
+    return ibCode;
+  }
+
+  public void setIbCode(String ibCode) {
+    this.ibCode = ibCode;
   }
 
   public String getContractCode() {
@@ -104,6 +113,7 @@ public class FutureContractItem extends ApiModel {
     return "FutureContractItem{" +
         "type='" + type + '\'' +
         ", name='" + name + '\'' +
+        ", ibCode='" + ibCode + '\'' +
         ", contractCode='" + contractCode + '\'' +
         ", contractMonth='" + contractMonth + '\'' +
         ", lastTradingDate='" + lastTradingDate + '\'' +

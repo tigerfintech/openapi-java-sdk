@@ -6,6 +6,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureRea
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.future.FutureRealTimeQuoteResponse;
+import java.util.List;
 
 /**
  * Description:
@@ -19,9 +20,9 @@ public class FutureRealTimeQuoteRequest extends TigerCommonRequest
     setApiMethodName(ApiServiceType.FUTURE_REAL_TIME_QUOTE);
   }
 
-  public static FutureRealTimeQuoteRequest newRequest(String contractCode) {
+  public static FutureRealTimeQuoteRequest newRequest(List<String> contractCodes) {
     FutureRealTimeQuoteRequest request = new FutureRealTimeQuoteRequest();
-    FutureRealTimeQuoteModel model = new FutureRealTimeQuoteModel(contractCode);
+    FutureRealTimeQuoteModel model = new FutureRealTimeQuoteModel(contractCodes);
     request.setApiModel(model);
     return request;
   }

@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.https.domain.future.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import java.util.List;
 
 /**
  * Description:
@@ -9,36 +10,39 @@ import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
  */
 public class FutureKlineModel extends ApiModel {
 
-  @JSONField(name = "contract_code")
-  private String contractCode;
+  @JSONField(name = "contract_codes")
+  private List<String> contractCodes;
   @JSONField(name = "period")
   private String period;
   @JSONField(name = "begin_time")
   private Long beginTime;
   @JSONField(name = "end_time")
   private Long endTime;
+  @JSONField(name = "limit")
+  private Integer limit;
 
   public FutureKlineModel() {
   }
 
-  public FutureKlineModel(String contractCode, String kType) {
-    this.contractCode = contractCode;
+  public FutureKlineModel(List<String> contractCodes, String kType) {
+    this.contractCodes = contractCodes;
     this.period = kType;
   }
 
-  public FutureKlineModel(String contractCode, String kType, Long beginTime, Long endTime) {
-    this.contractCode = contractCode;
+  public FutureKlineModel(List<String> contractCodes, String kType, Long beginTime, Long endTime, Integer limit) {
+    this.contractCodes = contractCodes;
     this.period = kType;
     this.beginTime = beginTime;
     this.endTime = endTime;
+    this.limit = limit;
   }
 
-  public String getContractCode() {
-    return contractCode;
+  public List<String> getContractCodes() {
+    return contractCodes;
   }
 
-  public void setContractCode(String contractCode) {
-    this.contractCode = contractCode;
+  public void setContractCodes(List<String> contractCodes) {
+    this.contractCodes = contractCodes;
   }
 
   public String getPeriod() {
@@ -63,5 +67,13 @@ public class FutureKlineModel extends ApiModel {
 
   public void setEndTime(Long endTime) {
     this.endTime = endTime;
+  }
+
+  public Integer getLimit() {
+    return limit;
+  }
+
+  public void setLimit(Integer limit) {
+    this.limit = limit;
   }
 }

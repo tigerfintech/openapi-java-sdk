@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.https.response.future;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.item.FutureRealTimeItem;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
+import java.util.List;
 
 /**
  * Description:
@@ -11,13 +12,13 @@ import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 public class FutureRealTimeQuoteResponse extends TigerResponse {
 
   @JSONField(name = "data")
-  private FutureRealTimeItem futureRealTimeItem;
+  private List<FutureRealTimeItem> futureRealTimeItems;
 
-  public FutureRealTimeItem getFutureRealTimeItem() {
-    return futureRealTimeItem;
+  public List<FutureRealTimeItem> getFutureRealTimeItems() {
+    return futureRealTimeItems;
   }
 
-  public void setFutureRealTimeItem(FutureRealTimeItem futureRealTimeItem) {
-    this.futureRealTimeItem = futureRealTimeItem;
+  public void setFutureRealTimeItems(List<FutureRealTimeItem> futureRealTimeItems) {
+    this.futureRealTimeItems = futureRealTimeItems;
   }
 }

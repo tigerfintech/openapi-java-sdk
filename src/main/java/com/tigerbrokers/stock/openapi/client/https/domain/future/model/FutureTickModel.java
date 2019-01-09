@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.https.domain.future.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import java.util.List;
 
 /**
  * Description:
@@ -9,8 +10,8 @@ import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
  */
 public class FutureTickModel extends ApiModel {
 
-  @JSONField(name = "contract_code")
-  private String contractCode;
+  @JSONField(name = "contract_codes")
+  private List<String> contractCodes;
   @JSONField(name = "begin_index")
   private Integer beginIndex;
   @JSONField(name = "end_index")
@@ -19,22 +20,22 @@ public class FutureTickModel extends ApiModel {
   public FutureTickModel() {
   }
 
-  public FutureTickModel(String contractCode) {
-    this.contractCode = contractCode;
+  public FutureTickModel(List<String> contractCodes) {
+    this.contractCodes = contractCodes;
   }
 
-  public FutureTickModel(String contractCode, Integer beginIndex, Integer endIndex) {
-    this.contractCode = contractCode;
+  public FutureTickModel(List<String> contractCodes, Integer beginIndex, Integer endIndex) {
+    this.contractCodes = contractCodes;
     this.beginIndex = beginIndex;
     this.endIndex = endIndex;
   }
 
-  public String getContractCode() {
-    return contractCode;
+  public List<String> getContractCodes() {
+    return contractCodes;
   }
 
-  public void setContractCode(String contractCode) {
-    this.contractCode = contractCode;
+  public void setContractCodes(List<String> contractCodes) {
+    this.contractCodes = contractCodes;
   }
 
   public Integer getBeginIndex() {

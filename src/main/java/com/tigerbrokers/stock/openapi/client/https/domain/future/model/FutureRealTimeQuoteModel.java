@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.https.domain.future.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import java.util.List;
 
 /**
  * Description:
@@ -9,21 +10,21 @@ import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
  */
 public class FutureRealTimeQuoteModel extends ApiModel {
 
-  @JSONField(name = "contract_code")
-  private String contractCode;
+  @JSONField(name = "contract_codes")
+  private List<String> contractCodes;
 
   public FutureRealTimeQuoteModel() {
   }
 
-  public FutureRealTimeQuoteModel(String contractCode) {
-    this.contractCode = contractCode;
+  public FutureRealTimeQuoteModel(List<String> contractCodes) {
+    this.contractCodes = contractCodes;
   }
 
-  public String getContractCode() {
-    return contractCode;
+  public List<String> getContractCodes() {
+    return contractCodes;
   }
 
-  public void setContractCode(String contractCode) {
-    this.contractCode = contractCode;
+  public void setContractCodes(List<String> contractCodes) {
+    this.contractCodes = contractCodes;
   }
 }
