@@ -1,12 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
+import com.tigerbrokers.stock.openapi.client.util.ApiCallbackDecoderUtils;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.stomp.StompFrame;
-import java.nio.charset.Charset;
 
 @ChannelHandler.Sharable
 public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
@@ -41,31 +41,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
   public void channelRead0(ChannelHandlerContext ctx, StompFrame frame) throws Exception {
     ApiLogger.debug("received frame from server: {}", frame);
 
-    switch (frame.command()) {
-      case CONNECTED:
-        if (decoder.getCallback() != null) {
-          decoder.getCallback().connectAck();
-        }
-        break;
-      case MESSAGE:
-        decoder.handle(frame);
-        break;
-      case RECEIPT:
-        break;
-      case ERROR:
-        if (decoder.getCallback() != null) {
-          decoder.getCallback().error(frame.content().toString(Charset.defaultCharset()));
-        }
-        break;
-      case DISCONNECT:
-        if (decoder.getCallback() != null) {
-          decoder.getCallback().connectionClosed();
-        }
-        ctx.close();
-        break;
-      default:
-        break;
-    }
+    ApiCallbackDecoderUtils.executor(ctx, frame, decoder);
   }
 
   @Override

@@ -6,16 +6,27 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
+import com.tigerbrokers.stock.openapi.client.websocket.WebSocketHandshakerHandler;
+import com.tigerbrokers.stock.openapi.client.websocket.WebSocketStompFrameDecoder;
+import com.tigerbrokers.stock.openapi.client.websocket.WebSocketStompFrameEncoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.ChannelPromise;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.HttpClientCodec;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
+import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
+import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.codec.stomp.StompFrame;
 import io.netty.handler.codec.stomp.StompHeaders;
 import io.netty.handler.codec.stomp.StompSubframeAggregator;
@@ -82,22 +93,34 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
     group = new NioEventLoopGroup(1);
     bootstrap = new Bootstrap();
-    final WebSocketHandler handler = new WebSocketHandler(authentication, apiComposeCallback);
 
+    final int port = address.getPort();
     bootstrap.group(group).option(ChannelOption.TCP_NODELAY, true)
         .channel(NioSocketChannel.class)
         .handler(new ChannelInitializer<SocketChannel>() {
+          @Override
           protected void initChannel(SocketChannel ch) throws SSLException {
             ChannelPipeline p = ch.pipeline();
             SslContext sslCtx =
                 SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
             p.addLast(sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
-            p.addLast("stompEncoder", new StompSubframeEncoder());
-            p.addLast("stompDecoder", new StompSubframeDecoder());
-            p.addLast("aggregator", new StompSubframeAggregator(65535));
-            p.addLast("webSocketHandler", handler);
+            if (8885 == port) {
+              p.addLast("websocket_codec", new HttpClientCodec());
+              p.addLast("websocket_aggregator", new HttpObjectAggregator(65535));
+              p.addLast("websocket-stomp-decoder", new WebSocketStompFrameDecoder());
+              p.addLast("websocket-stomp-encoder", new WebSocketStompFrameEncoder());
+              p.addLast("stomp_aggregator", new StompSubframeAggregator(65535));
+            } else {
+              final WebSocketHandler handler = new WebSocketHandler(authentication, apiComposeCallback);
+
+              p.addLast("stompEncoder", new StompSubframeEncoder());
+              p.addLast("stompDecoder", new StompSubframeDecoder());
+              p.addLast("aggregator", new StompSubframeAggregator(65535));
+              p.addLast("webSocketHandler", handler);
+            }
           }
         });
+
     apiComposeCallback.client(this);
     inited = true;
   }
@@ -117,7 +140,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
       reconnectCount.set(0);
       reconnectErrorLogFlag.set(false);
     } catch (Throwable e) {
-      ApiLogger.error("Failed connect to server, cause:{} ", e.getMessage(), e);
+      ApiLogger.error("Failed connect to server, cause: ", e);
     }
   }
 
@@ -137,7 +160,9 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
       if (completed && future.isSuccess()) {
         Channel newChannel = future.channel();
+        URI uri = null;
         try {
+          uri = new URI(url);
           Channel oldChannel = this.channel;
           if (oldChannel != null) {
             ApiLogger.info("close old netty channel:{} , create new netty channel:{} ", oldChannel, newChannel);
@@ -145,6 +170,21 @@ public class WebSocketClient implements SubscribeAsyncApi {
           }
         } finally {
           this.channel = newChannel;
+          if (address.getPort() == 8885) {
+            synchronized (this.channel) {
+              WebSocketHandshakerHandler webSocketHandshakerHandler =
+                  new WebSocketHandshakerHandler(authentication, apiComposeCallback);
+              HttpHeaders httpHeaders = new DefaultHttpHeaders();
+              WebSocketClientHandshaker
+                  handshaker =
+                  WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, true, httpHeaders);
+              webSocketHandshakerHandler.setHandshaker(handshaker);
+              channel.pipeline().addLast("handshaker_handler", webSocketHandshakerHandler);
+              webSocketHandshakerHandler.setHandshaker(handshaker);
+              ChannelPromise channelFuture = (ChannelPromise) handshaker.handshake(this.channel);
+              channelFuture.sync();
+            }
+          }
         }
       } else if (future.cause() != null) {
         throw new Exception("client failed to connect to server, error message is:" + future.cause().getMessage(),
@@ -154,7 +194,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
             "client failed to connect to server, client-side timeout: " + (System.currentTimeMillis() - start) + "ms ");
       }
     } catch (Exception e) {
-      ApiLogger.error("client failed to connect to server: {}", e.getMessage(), e);
+      ApiLogger.error("client failed to connect to server: ", e);
     } finally {
       if (!isConnected()) {
         future.cancel(true);
@@ -171,7 +211,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     try {
       uri = new URI(url);
     } catch (URISyntaxException e) {
-      ApiLogger.error("uri syntax exception:{}", e.getMessage(), e);
+      ApiLogger.error("uri syntax exception:", e);
       return null;
     }
     return new InetSocketAddress(uri.getHost(), uri.getPort());
@@ -184,13 +224,13 @@ public class WebSocketClient implements SubscribeAsyncApi {
         channel.close();
       }
     } catch (Throwable e) {
-      ApiLogger.error("disconnect error:{}", e.getMessage(), e);
+      ApiLogger.error(e.getMessage(), e);
     }
 
     try {
       group.shutdownGracefully();
     } catch (Throwable t) {
-      ApiLogger.error("group shutdown error:{}", t.getMessage(), t);
+      ApiLogger.error(t.getMessage());
     } finally {
       inited = false;
     }
@@ -204,7 +244,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
         reconnectExecutorService.shutdownNow();
       }
     } catch (Throwable e) {
-      ApiLogger.error("destroy reconnect task error:{}", e.getMessage(), e);
+      ApiLogger.error(e.getMessage(), e);
     }
   }
 

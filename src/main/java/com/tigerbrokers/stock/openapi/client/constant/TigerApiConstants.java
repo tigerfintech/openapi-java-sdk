@@ -41,5 +41,4 @@ public class TigerApiConstants {
   public static final String DATA = "data";
 
   public static final String ACCOUNT = "account";
-
 }
