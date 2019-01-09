@@ -7,13 +7,9 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.stomp.StompFrame;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ChannelHandler.Sharable
 public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
-
-  private static Logger logger = LoggerFactory.getLogger(WebSocketHandler.class);
 
   private ApiAuthentication authentication;
   private ApiCallbackDecoder decoder;
