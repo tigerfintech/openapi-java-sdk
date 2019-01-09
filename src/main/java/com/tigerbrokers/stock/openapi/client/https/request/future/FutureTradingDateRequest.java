@@ -19,7 +19,7 @@ public class FutureTradingDateRequest extends TigerCommonRequest implements Tige
   }
 
   public static FutureTradingDateRequest newRequest(String contractCode) {
-    return newRequest(contractCode, null);
+    return newRequest(contractCode, System.currentTimeMillis());
   }
 
   public static FutureTradingDateRequest newRequest(String contractCode, Long tradingDate) {

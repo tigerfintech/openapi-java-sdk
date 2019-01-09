@@ -20,7 +20,7 @@ public class FutureContractByConCodeRequest extends TigerCommonRequest implement
   }
 
   public static FutureContractByConCodeRequest newRequest(String contractCode) {
-    return newRequest(contractCode, null);
+    return newRequest(contractCode, Language.en_US);
   }
 
   public static FutureContractByConCodeRequest newRequest(String contractCode, Language lang) {

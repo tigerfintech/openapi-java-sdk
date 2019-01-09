@@ -9,6 +9,7 @@ import java.math.BigDecimal;
  */
 public class FutureRealTimeItem extends ApiModel {
 
+  private String contractCode;
   private BigDecimal latestPrice;
   private Long latestSize;
   private Long latestTime;
@@ -24,6 +25,14 @@ public class FutureRealTimeItem extends ApiModel {
   private BigDecimal settlement;
   private BigDecimal limitUp;
   private BigDecimal limitDown;
+
+  public String getContractCode() {
+    return contractCode;
+  }
+
+  public void setContractCode(String contractCode) {
+    this.contractCode = contractCode;
+  }
 
   public BigDecimal getLatestPrice() {
     return latestPrice;

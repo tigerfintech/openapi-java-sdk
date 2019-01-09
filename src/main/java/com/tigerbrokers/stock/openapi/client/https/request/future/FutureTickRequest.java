@@ -6,6 +6,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureTic
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.future.FutureTickResponse;
+import java.util.List;
 
 /**
  * Description:
@@ -18,13 +19,13 @@ public class FutureTickRequest extends TigerCommonRequest implements TigerReques
     setApiMethodName(ApiServiceType.FUTURE_TICK);
   }
 
-  public static FutureTickRequest newRequest(String contractCode) {
-    return newRequest(contractCode, null, null);
+  public static FutureTickRequest newRequest(List<String> contractCodes) {
+    return newRequest(contractCodes, 0, 500);
   }
 
-  public static FutureTickRequest newRequest(String contractCode, Integer beginIndex, Integer endIndex) {
+  public static FutureTickRequest newRequest(List<String> contractCodes, Integer beginIndex, Integer endIndex) {
     FutureTickRequest request = new FutureTickRequest();
-    FutureTickModel model = new FutureTickModel(contractCode, beginIndex, endIndex);
+    FutureTickModel model = new FutureTickModel(contractCodes, beginIndex, endIndex);
     request.setApiModel(model);
     return request;
   }

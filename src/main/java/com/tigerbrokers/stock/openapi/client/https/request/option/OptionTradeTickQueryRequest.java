@@ -16,8 +16,6 @@ import java.util.List;
  */
 public class OptionTradeTickQueryRequest extends TigerCommonRequest implements TigerRequest<OptionTradeTickResponse> {
 
-  private List<OptionCommonModel> items;
-
   public OptionTradeTickQueryRequest() {
     setApiVersion(TigerApiConstants.DEFAULT_VERSION);
     setApiMethodName(ApiServiceType.OPTION_TRADE_TICK);

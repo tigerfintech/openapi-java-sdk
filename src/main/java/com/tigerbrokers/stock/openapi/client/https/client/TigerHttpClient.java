@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
+import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
@@ -129,7 +131,12 @@ public class TigerHttpClient implements TigerClient {
     if (request instanceof TigerHttpRequest) {
       params.put(BIZ_CONTENT, ((TigerHttpRequest) request).getBizContent());
     } else {
-      params.put(BIZ_CONTENT, JSONObject.toJSONString(request.getApiModel()));
+      ApiModel apiModel = request.getApiModel();
+      if (apiModel instanceof BatchApiModel) {
+        params.put(BIZ_CONTENT, JSONObject.toJSONString(((BatchApiModel) apiModel).getItems()));
+      } else {
+        params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel));
+      }
     }
     params.put(TIMESTAMP, request.getTimestamp());
     params.put(CHARSET, this.charset);

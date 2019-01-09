@@ -1,7 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.quote.item;
 
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
-import java.util.List;
 
 /**
  * Description:
@@ -27,7 +26,7 @@ public class TimelineItem extends ApiModel {
   /**
    * 分时数据,当天分时数据没有endTime
    */
-  private List<TimelineRange> items;
+  private TimelineRange intraday;
 
   /**
    * 盘前交易分时数据（仅美股）
@@ -63,12 +62,12 @@ public class TimelineItem extends ApiModel {
     this.preClose = preClose;
   }
 
-  public List<TimelineRange> getItems() {
-    return items;
+  public TimelineRange getIntraday() {
+    return intraday;
   }
 
-  public void setItems(List<TimelineRange> items) {
-    this.items = items;
+  public void setIntraday(TimelineRange intraday) {
+    this.intraday = intraday;
   }
 
   public TimelineRange getPreMarket() {
@@ -93,7 +92,7 @@ public class TimelineItem extends ApiModel {
         "symbol='" + symbol + '\'' +
         ", period='" + period + '\'' +
         ", preClose=" + preClose +
-        ", items=" + items +
+        ", intraday=" + intraday +
         ", preMarket=" + preMarket +
         ", afterHours=" + afterHours +
         '}';

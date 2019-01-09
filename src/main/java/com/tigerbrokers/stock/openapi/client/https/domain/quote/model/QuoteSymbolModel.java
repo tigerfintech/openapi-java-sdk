@@ -25,7 +25,7 @@ public class QuoteSymbolModel extends ApiModel {
   }
 
   public QuoteSymbolModel(List<String> symbols, Language lang) {
-    this(symbols, null, lang);
+    this(symbols, false, lang);
   }
 
   public QuoteSymbolModel(List<String> symbols, Boolean includeHourTrading) {
@@ -35,7 +35,7 @@ public class QuoteSymbolModel extends ApiModel {
   public QuoteSymbolModel(List<String> symbols, Boolean includeHourTrading, Language lang) {
     this.symbols = symbols;
     this.includeHourTrading = includeHourTrading;
-    this.lang = lang;
+    this.lang = lang ;
   }
 
   public List<String> getSymbols() {

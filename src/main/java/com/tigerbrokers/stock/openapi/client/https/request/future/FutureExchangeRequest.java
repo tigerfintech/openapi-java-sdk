@@ -20,7 +20,7 @@ public class FutureExchangeRequest extends TigerCommonRequest implements TigerRe
   }
 
   public static FutureExchangeRequest newRequest(String secType) {
-    return newRequest(secType, null);
+    return newRequest(secType, Language.en_US);
   }
 
   public static FutureExchangeRequest newRequest(String secType, Language lang) {

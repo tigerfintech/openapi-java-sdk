@@ -21,7 +21,7 @@ public class FutureContinuousContractRequest extends TigerCommonRequest
   }
 
   public static FutureContinuousContractRequest newRequest(String type) {
-    return newRequest(type, null);
+    return newRequest(type, Language.en_US);
   }
 
   public static FutureContinuousContractRequest newRequest(String type, Language lang) {

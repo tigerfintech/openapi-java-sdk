@@ -16,8 +16,6 @@ import java.util.List;
  */
 public class OptionBriefQueryRequest extends TigerCommonRequest implements TigerRequest<OptionBriefResponse> {
 
-  private List<OptionCommonModel> items;
-
   public OptionBriefQueryRequest() {
     setApiVersion(TigerApiConstants.DEFAULT_VERSION);
     setApiMethodName(ApiServiceType.OPTION_BRIEF);

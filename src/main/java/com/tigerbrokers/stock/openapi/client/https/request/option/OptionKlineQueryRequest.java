@@ -16,8 +16,6 @@ import java.util.List;
  */
 public class OptionKlineQueryRequest extends TigerCommonRequest implements TigerRequest<OptionKlineResponse> {
 
-  private List<OptionKlineModel> items;
-
   public OptionKlineQueryRequest() {
     setApiVersion(TigerApiConstants.DEFAULT_VERSION);
     setApiMethodName(ApiServiceType.OPTION_KLINE);

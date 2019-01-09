@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.response.future;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.tigerbrokers.stock.openapi.client.https.domain.future.item.FutureTickBatchItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.item.FutureTickItem;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 import java.util.List;
@@ -12,13 +13,13 @@ import java.util.List;
 public class FutureTickResponse extends TigerResponse {
 
   @JSONField(name = "data")
-  private List<FutureTickItem> futureTickItems;
+  private List<FutureTickBatchItem> futureTickItems;
 
-  public List<FutureTickItem> getFutureTickItems() {
+  public List<FutureTickBatchItem> getFutureTickItems() {
     return futureTickItems;
   }
 
-  public void setFutureTickItems(List<FutureTickItem> futureTickItems) {
+  public void setFutureTickItems(List<FutureTickBatchItem> futureTickItems) {
     this.futureTickItems = futureTickItems;
   }
 }
