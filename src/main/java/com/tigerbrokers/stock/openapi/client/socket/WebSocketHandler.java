@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.tigerbrokers.stock.openapi.client.util.ApiCallbackDecoderUtils;
+import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -35,21 +36,21 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
 
   @Override
   public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-    logger.info("netty channel inactive!");
+    ApiLogger.info("netty channel inactive!");
     super.channelInactive(ctx);
     ctx.close();
   }
 
   @Override
   public void channelRead0(ChannelHandlerContext ctx, StompFrame frame) throws Exception {
-    logger.debug("received frame from server: {}", frame);
+    ApiLogger.debug("received frame from server: {}", frame);
 
     ApiCallbackDecoderUtils.executor(ctx, frame, decoder);
   }
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-    logger.error("handler exception caught:", cause);
+    ApiLogger.error("handler exception caught:", cause);
     ctx.close();
   }
 }

@@ -75,7 +75,7 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
       handshaker.finishHandshake(ch, response);
       //发送stomp connect请求
       ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
-          authentication.getVersion()));//.addListener(
+          authentication.getVersion()));
       ApiLogger.info("WebSocket Client connected! response headers[sec-websocket-extensions]:{}", response.headers());
     } else if (msg instanceof FullHttpResponse) {
       response = (FullHttpResponse) msg;
