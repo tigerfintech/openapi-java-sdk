@@ -11,8 +11,10 @@ import java.nio.charset.Charset;
  * 描述
  */
 public class ApiCallbackDecoderUtils {
-  public static void executor(ChannelHandlerContext ctx, StompFrame frame, ApiCallbackDecoder decoder) throws Exception {
-    if (null == decoder || null == ctx){
+
+  public static void executor(ChannelHandlerContext ctx, StompFrame frame, ApiCallbackDecoder decoder)
+      throws Exception {
+    if (null == decoder || null == ctx) {
       return;
     }
 

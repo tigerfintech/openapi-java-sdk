@@ -37,11 +37,11 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
   public void handlerAdded(ChannelHandlerContext ctx) {
   }
 
-  public void setHandshaker(WebSocketClientHandshaker handshaker){
+  public void setHandshaker(WebSocketClientHandshaker handshaker) {
     this.handshaker = handshaker;
   }
 
-  public WebSocketClientHandshaker getHandshaker(){
+  public WebSocketClientHandshaker getHandshaker() {
     return this.handshaker;
   }
 
@@ -69,18 +69,21 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
 
     Channel ch = ctx.channel();
     FullHttpResponse response;
-    if(!this.handshaker.isHandshakeComplete()){
-      response = (FullHttpResponse)msg;
+    if (!this.handshaker.isHandshakeComplete()) {
+      response = (FullHttpResponse) msg;
       //握手协议返回，设置结束握手
       handshaker.finishHandshake(ch, response);
       //发送stomp connect请求
-      ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),authentication.getVersion()));//.addListener(
+      ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
+          authentication.getVersion()));//.addListener(
       ApiLogger.info("WebSocket Client connected! response headers[sec-websocket-extensions]:{}", response.headers());
-    }else if(msg instanceof FullHttpResponse){
-      response = (FullHttpResponse)msg;
-      throw new IllegalStateException("Unexpected FullHttpResponse (getStatus=" + response.status() + ", content=" + response.content().toString(CharsetUtil.UTF_8) + ')');
-    }else{
-      StompFrame stompFrame = (StompFrame)msg;
+    } else if (msg instanceof FullHttpResponse) {
+      response = (FullHttpResponse) msg;
+      throw new IllegalStateException(
+          "Unexpected FullHttpResponse (getStatus=" + response.status() + ", content=" + response.content()
+              .toString(CharsetUtil.UTF_8) + ')');
+    } else {
+      StompFrame stompFrame = (StompFrame) msg;
       ApiLogger.debug("received stop frame from server: {}", stompFrame);
       ApiCallbackDecoderUtils.executor(ctx, stompFrame, decoder);
     }

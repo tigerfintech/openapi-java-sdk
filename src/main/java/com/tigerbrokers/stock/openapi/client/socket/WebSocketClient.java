@@ -94,7 +94,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
     group = new NioEventLoopGroup(1);
     bootstrap = new Bootstrap();
 
-
     final int port = address.getPort();
     bootstrap.group(group).option(ChannelOption.TCP_NODELAY, true)
         .channel(NioSocketChannel.class)
@@ -105,13 +104,13 @@ public class WebSocketClient implements SubscribeAsyncApi {
             SslContext sslCtx =
                 SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
             p.addLast(sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
-            if (8885 == port){
+            if (8885 == port) {
               p.addLast("websocket_codec", new HttpClientCodec());
               p.addLast("websocket_aggregator", new HttpObjectAggregator(65535));
-              p.addLast( "websocket-stomp-decoder", new WebSocketStompFrameDecoder() );
-              p.addLast( "websocket-stomp-encoder", new WebSocketStompFrameEncoder() );
+              p.addLast("websocket-stomp-decoder", new WebSocketStompFrameDecoder());
+              p.addLast("websocket-stomp-encoder", new WebSocketStompFrameEncoder());
               p.addLast("stomp_aggregator", new StompSubframeAggregator(65535));
-            }else{
+            } else {
               final WebSocketHandler handler = new WebSocketHandler(authentication, apiComposeCallback);
 
               p.addLast("stompEncoder", new StompSubframeEncoder());
@@ -119,7 +118,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
               p.addLast("aggregator", new StompSubframeAggregator(65535));
               p.addLast("webSocketHandler", handler);
             }
-
           }
         });
 
@@ -172,16 +170,18 @@ public class WebSocketClient implements SubscribeAsyncApi {
           }
         } finally {
           this.channel = newChannel;
-          if (address.getPort() == 8885){
-            synchronized (this.channel){
-              WebSocketHandshakerHandler webSocketHandshakerHandler = new WebSocketHandshakerHandler(authentication, apiComposeCallback);
+          if (address.getPort() == 8885) {
+            synchronized (this.channel) {
+              WebSocketHandshakerHandler webSocketHandshakerHandler =
+                  new WebSocketHandshakerHandler(authentication, apiComposeCallback);
               HttpHeaders httpHeaders = new DefaultHttpHeaders();
               WebSocketClientHandshaker
-                  handshaker = WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, true, httpHeaders);
+                  handshaker =
+                  WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, true, httpHeaders);
               webSocketHandshakerHandler.setHandshaker(handshaker);
               channel.pipeline().addLast("handshaker_handler", webSocketHandshakerHandler);
               webSocketHandshakerHandler.setHandshaker(handshaker);
-              ChannelPromise channelFuture = (ChannelPromise)handshaker.handshake(this.channel);
+              ChannelPromise channelFuture = (ChannelPromise) handshaker.handshake(this.channel);
               channelFuture.sync();
             }
           }
@@ -268,7 +268,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
           if (System.currentTimeMillis() - lastConnectedTime > SHUTDOWN_TIMEOUT) {
             if (!reconnectErrorLogFlag.get()) {
               reconnectErrorLogFlag.set(true);
-              ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}", lastConnectedTime,
+              ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}",
+                  lastConnectedTime,
                   System.currentTimeMillis(), t);
               return;
             }

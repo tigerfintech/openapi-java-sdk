@@ -6,6 +6,7 @@ package com.tigerbrokers.stock.openapi.client.websocket;
  * 描述 协议中的常量 与ASCII对应
  */
 public class StompConstants {
+
   //carriage return 回车
   static final byte CR = 13;
   //line feed character 换行
@@ -15,5 +16,6 @@ public class StompConstants {
   //colon 冒号
   static final byte COLON = 58;
 
-  private StompConstants() { }
+  private StompConstants() {
+  }
 }

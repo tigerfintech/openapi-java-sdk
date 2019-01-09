@@ -44,7 +44,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
   public void channelRead0(ChannelHandlerContext ctx, StompFrame frame) throws Exception {
     logger.debug("received frame from server: {}", frame);
 
-    ApiCallbackDecoderUtils.executor(ctx,frame, decoder);
+    ApiCallbackDecoderUtils.executor(ctx, frame, decoder);
   }
 
   @Override

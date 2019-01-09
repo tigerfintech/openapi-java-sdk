@@ -31,7 +31,7 @@ import static io.netty.buffer.ByteBufUtil.readBytes;
  */
 public class WebSocketStompFrameDecoder extends MessageToMessageDecoder<WebSocketFrame> {
 
-  private static final Charset UTF_8 = Charset.forName( "UTF-8" );
+  private static final Charset UTF_8 = Charset.forName("UTF-8");
 
   private static final int DEFAULT_CHUNK_SIZE = 8132;
   private static final int DEFAULT_MAX_LINE_LENGTH = 1024;
@@ -205,7 +205,7 @@ public class WebSocketStompFrameDecoder extends MessageToMessageDecoder<WebSocke
 
   private WebSocketStompFrameDecoder.State readHeaders(ByteBuf buffer, StompHeaders headers) {
     AppendableCharSequence buf = new AppendableCharSequence(128);
-    for (;;) {
+    for (; ; ) {
       boolean headerRead = readHeader(headers, buf, buffer);
       if (!headerRead) {
         if (headers.contains(StompHeaders.CONTENT_LENGTH)) {
@@ -236,7 +236,7 @@ public class WebSocketStompFrameDecoder extends MessageToMessageDecoder<WebSocke
 
   private static void skipControlCharacters(ByteBuf buffer) {
     byte b;
-    for (;;) {
+    for (; ; ) {
       b = buffer.readByte();
       if (b != StompConstants.CR && b != StompConstants.LF) {
         buffer.readerIndex(buffer.readerIndex() - 1);
@@ -248,7 +248,7 @@ public class WebSocketStompFrameDecoder extends MessageToMessageDecoder<WebSocke
   private String readLine(ByteBuf buffer, int initialBufferSize) {
     AppendableCharSequence buf = new AppendableCharSequence(initialBufferSize);
     int lineLength = 0;
-    for (;;) {
+    for (; ; ) {
       byte nextByte = buffer.readByte();
       if (nextByte == StompConstants.CR) {
         //do nothing
@@ -258,7 +258,7 @@ public class WebSocketStompFrameDecoder extends MessageToMessageDecoder<WebSocke
         if (lineLength >= maxLineLength) {
           invalidLineLength();
         }
-        lineLength ++;
+        lineLength++;
         buf.append((char) nextByte);
       }
     }
@@ -269,7 +269,7 @@ public class WebSocketStompFrameDecoder extends MessageToMessageDecoder<WebSocke
     int lineLength = 0;
     String key = null;
     boolean valid = false;
-    for (;;) {
+    for (; ; ) {
       byte nextByte = buffer.readByte();
 
       if (nextByte == StompConstants.COLON && key == null) {
@@ -294,7 +294,7 @@ public class WebSocketStompFrameDecoder extends MessageToMessageDecoder<WebSocke
         if (nextByte == StompConstants.COLON && key != null) {
           valid = false;
         }
-        lineLength ++;
+        lineLength++;
         buf.append((char) nextByte);
       }
     }
@@ -325,5 +325,4 @@ public class WebSocketStompFrameDecoder extends MessageToMessageDecoder<WebSocke
     checkpoint = buf.readerIndex();
     this.state = state;
   }
-
 }

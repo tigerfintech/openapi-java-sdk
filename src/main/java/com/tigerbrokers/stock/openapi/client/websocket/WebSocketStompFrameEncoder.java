@@ -21,28 +21,30 @@ import java.util.Map;
  */
 public class WebSocketStompFrameEncoder extends MessageToMessageEncoder<StompSubframe> {
 
-  @Override protected void encode(ChannelHandlerContext channelHandlerContext, StompSubframe stompSubframe, List<Object> list)
+  @Override
+  protected void encode(ChannelHandlerContext channelHandlerContext, StompSubframe stompSubframe, List<Object> list)
       throws Exception {
-    if (stompSubframe instanceof DefaultStompFrame){
-        DefaultStompFrame frame = (DefaultStompFrame) stompSubframe;
-        ByteBuf frameBuf = encodeFrameAndContent(frame, channelHandlerContext);
-        list.add(new BinaryWebSocketFrame(true,0, frameBuf));
+    if (stompSubframe instanceof DefaultStompFrame) {
+      DefaultStompFrame frame = (DefaultStompFrame) stompSubframe;
+      ByteBuf frameBuf = encodeFrameAndContent(frame, channelHandlerContext);
+      list.add(new BinaryWebSocketFrame(true, 0, frameBuf));
     }
   }
 
-  private static ByteBuf encodeFrameAndContent(DefaultStompFrame frame, ChannelHandlerContext ctx){
+  private static ByteBuf encodeFrameAndContent(DefaultStompFrame frame, ChannelHandlerContext ctx) {
     ByteBuf buf = ctx.alloc().buffer();//TODO 可优化
     //head
     buf.writeCharSequence(frame.command().toString(), CharsetUtil.US_ASCII);
     buf.writeByte(StompConstants.LF);
     AsciiHeadersEncoder
-        headersEncoder = new AsciiHeadersEncoder(buf, AsciiHeadersEncoder.SeparatorType.COLON, AsciiHeadersEncoder.NewlineType.LF);
+        headersEncoder =
+        new AsciiHeadersEncoder(buf, AsciiHeadersEncoder.SeparatorType.COLON, AsciiHeadersEncoder.NewlineType.LF);
     for (Map.Entry<CharSequence, CharSequence> entry : frame.headers()) {
       headersEncoder.encode(entry);
     }
     buf.writeByte(StompConstants.LF);
     //content
-    if (frame.content() != null){
+    if (frame.content() != null) {
       buf.writeBytes(frame.content());
     }
     buf.writeByte(StompConstants.NUL);
@@ -66,7 +68,8 @@ public class WebSocketStompFrameEncoder extends MessageToMessageEncoder<StompSub
     buf.writeCharSequence(frame.command().toString(), CharsetUtil.US_ASCII);
     buf.writeByte(StompConstants.LF);
     AsciiHeadersEncoder
-        headersEncoder = new AsciiHeadersEncoder(buf, AsciiHeadersEncoder.SeparatorType.COLON, AsciiHeadersEncoder.NewlineType.LF);
+        headersEncoder =
+        new AsciiHeadersEncoder(buf, AsciiHeadersEncoder.SeparatorType.COLON, AsciiHeadersEncoder.NewlineType.LF);
     for (Map.Entry<CharSequence, CharSequence> entry : frame.headers()) {
       headersEncoder.encode(entry);
     }
