@@ -15,9 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 创建人 zhaolei
- * 创建时间 2018/12/18
- * 描述
+ * @author  zhaolei
+ * create at 2018/12/20
  */
 public class WebSocketStompFrameEncoder extends MessageToMessageEncoder<StompSubframe> {
 

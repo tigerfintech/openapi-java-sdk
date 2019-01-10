@@ -16,9 +16,9 @@ import io.netty.handler.codec.stomp.StompFrame;
 import io.netty.util.CharsetUtil;
 
 /**
- * @创建人 zhaolei
- * @创建时间 2018/12/20
- * 描述
+ * @author  zhaolei
+ * create at 2018/12/20
+ *
  */
 @ChannelHandler.Sharable
 public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Object> {

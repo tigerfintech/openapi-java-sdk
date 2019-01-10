@@ -1,9 +1,8 @@
 package com.tigerbrokers.stock.openapi.client.websocket;
 
 /**
- * 创建人 zhaolei
- * 创建时间 2018/12/19
- * 描述 协议中的常量 与ASCII对应
+ * @author  zhaolei
+ * create at 2018/12/20
  */
 public class StompConstants {
 
