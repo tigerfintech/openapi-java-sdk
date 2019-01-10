@@ -104,15 +104,14 @@ public class WebSocketClient implements SubscribeAsyncApi {
             SslContext sslCtx =
                 SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
             p.addLast(sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
-            if (8885 == port) {
-              p.addLast("websocket_codec", new HttpClientCodec());
-              p.addLast("websocket_aggregator", new HttpObjectAggregator(65535));
-              p.addLast("websocket-stomp-decoder", new WebSocketStompFrameDecoder());
-              p.addLast("websocket-stomp-encoder", new WebSocketStompFrameEncoder());
-              p.addLast("stomp_aggregator", new StompSubframeAggregator(65535));
+            if (port == 8887 || port == 8889) {
+              p.addLast("websocketCodec", new HttpClientCodec());
+              p.addLast("websocketAggregator", new HttpObjectAggregator(65535));
+              p.addLast("websocketStompDecoder", new WebSocketStompFrameDecoder());
+              p.addLast("websocketStompEncoder", new WebSocketStompFrameEncoder());
+              p.addLast("stompAggregator", new StompSubframeAggregator(65535));
             } else {
               final WebSocketHandler handler = new WebSocketHandler(authentication, apiComposeCallback);
-
               p.addLast("stompEncoder", new StompSubframeEncoder());
               p.addLast("stompDecoder", new StompSubframeDecoder());
               p.addLast("aggregator", new StompSubframeAggregator(65535));
@@ -170,16 +169,14 @@ public class WebSocketClient implements SubscribeAsyncApi {
           }
         } finally {
           this.channel = newChannel;
-          if (address.getPort() == 8885) {
+          if (address.getPort() == 8887 || address.getPort() == 8889) {
             synchronized (this.channel) {
               WebSocketHandshakerHandler webSocketHandshakerHandler =
                   new WebSocketHandshakerHandler(authentication, apiComposeCallback);
               HttpHeaders httpHeaders = new DefaultHttpHeaders();
-              WebSocketClientHandshaker
-                  handshaker =
-                  WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, true, httpHeaders);
+              WebSocketClientHandshaker handshaker = WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, true, httpHeaders);
               webSocketHandshakerHandler.setHandshaker(handshaker);
-              channel.pipeline().addLast("handshaker_handler", webSocketHandshakerHandler);
+              channel.pipeline().addLast("handshakerHandler", webSocketHandshakerHandler);
               webSocketHandshakerHandler.setHandshaker(handshaker);
               ChannelPromise channelFuture = (ChannelPromise) handshaker.handshake(this.channel);
               channelFuture.sync();
