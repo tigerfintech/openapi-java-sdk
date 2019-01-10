@@ -43,6 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -61,6 +62,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private ApiComposeCallback apiComposeCallback;
   private Set<Subject> subscribeList = new CopyOnWriteArraySet<>();
   private Set<String> subscribeSymbols = new ConcurrentSet<>();
+  public static CountDownLatch connectCountDown = new CountDownLatch(1);
 
   private EventLoopGroup group = null;
   private Bootstrap bootstrap = null;
@@ -174,7 +176,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
               WebSocketHandshakerHandler webSocketHandshakerHandler =
                   new WebSocketHandshakerHandler(authentication, apiComposeCallback);
               HttpHeaders httpHeaders = new DefaultHttpHeaders();
-              WebSocketClientHandshaker handshaker = WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, true, httpHeaders);
+              WebSocketClientHandshaker handshaker =
+                  WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, true, httpHeaders);
               webSocketHandshakerHandler.setHandshaker(handshaker);
               channel.pipeline().addLast("handshakerHandler", webSocketHandshakerHandler);
               webSocketHandshakerHandler.setHandshaker(handshaker);
@@ -182,6 +185,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
               channelFuture.sync();
             }
           }
+          connectCountDown.await(5000, TimeUnit.MILLISECONDS);
         }
       } else if (future.cause() != null) {
         throw new Exception("client failed to connect to server, error message is:" + future.cause().getMessage(),

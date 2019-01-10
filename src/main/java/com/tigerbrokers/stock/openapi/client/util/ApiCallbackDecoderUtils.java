@@ -5,6 +5,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.stomp.StompFrame;
 import java.nio.charset.Charset;
 
+import static com.tigerbrokers.stock.openapi.client.socket.WebSocketClient.connectCountDown;
+
 /**
  * 创建人 zhaolei
  * 创建时间 2018/12/20
@@ -23,6 +25,7 @@ public class ApiCallbackDecoderUtils {
         if (decoder.getCallback() != null) {
           decoder.getCallback().connectAck();
         }
+        connectCountDown.countDown();
         break;
       case MESSAGE:
         decoder.handle(frame);
