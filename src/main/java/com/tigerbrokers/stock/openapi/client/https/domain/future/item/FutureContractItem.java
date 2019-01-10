@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.future.item;
 
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import java.math.BigDecimal;
 
 /**
  * Description:
@@ -13,6 +14,8 @@ public class FutureContractItem extends ApiModel {
   private String ibCode;
   private String contractCode;
   private String contractMonth;
+  private String exchange;
+  private BigDecimal multiplier;
   private String lastTradingDate;
   private String firstNoticeDate;
   private long lastBiddingCloseTime;
@@ -58,6 +61,22 @@ public class FutureContractItem extends ApiModel {
 
   public void setContractMonth(String contractMonth) {
     this.contractMonth = contractMonth;
+  }
+
+  public String getExchange() {
+    return exchange;
+  }
+
+  public void setExchange(String exchange) {
+    this.exchange = exchange;
+  }
+
+  public BigDecimal getMultiplier() {
+    return multiplier;
+  }
+
+  public void setMultiplier(BigDecimal multiplier) {
+    this.multiplier = multiplier;
   }
 
   public String getLastTradingDate() {
@@ -116,6 +135,8 @@ public class FutureContractItem extends ApiModel {
         ", ibCode='" + ibCode + '\'' +
         ", contractCode='" + contractCode + '\'' +
         ", contractMonth='" + contractMonth + '\'' +
+        ", exchange='" + exchange + '\'' +
+        ", multiplier=" + multiplier +
         ", lastTradingDate='" + lastTradingDate + '\'' +
         ", firstNoticeDate='" + firstNoticeDate + '\'' +
         ", lastBiddingCloseTime=" + lastBiddingCloseTime +
