@@ -8,6 +8,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
  */
 public class OptionBriefItem extends ApiModel {
 
+  private String identifier;
   private String symbol;
   private String strike;
   private Double bidPrice;
@@ -26,6 +27,14 @@ public class OptionBriefItem extends ApiModel {
   private String right;
   private String volatility;
   private Long expiry;
+
+  public String getIdentifier() {
+    return identifier;
+  }
+
+  public void setIdentifier(String identifier) {
+    this.identifier = identifier;
+  }
 
   public String getSymbol() {
     return symbol;
@@ -174,7 +183,8 @@ public class OptionBriefItem extends ApiModel {
   @Override
   public String toString() {
     return "OptionBriefItem{" +
-        "symbol='" + symbol + '\'' +
+        "identifier='" + identifier + '\'' +
+        ", symbol='" + symbol + '\'' +
         ", strike='" + strike + '\'' +
         ", bidPrice=" + bidPrice +
         ", bidSize=" + bidSize +

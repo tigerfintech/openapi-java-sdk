@@ -71,4 +71,10 @@ public interface ApiServiceType {
    * 合约
    */
   String CONTRACT = "contract";
+
+  /**
+   * 基础数据
+   */
+  String FINANCIAL_DAILY = "financial_daily";
+  String FINANCIAL_REPORT = "financial_report";
 }
