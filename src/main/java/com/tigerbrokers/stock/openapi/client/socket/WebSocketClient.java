@@ -282,7 +282,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
         }
       };
       reconnectExecutorFuture =
-          reconnectExecutorService.scheduleWithFixedDelay(reconnectCommand, 2 * 1000, 10 * 1000,
+          reconnectExecutorService.scheduleWithFixedDelay(reconnectCommand, 3 * 1000, 10 * 1000,
               TimeUnit.MILLISECONDS);
     }
   }
