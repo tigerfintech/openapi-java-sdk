@@ -14,7 +14,7 @@ public class FutureContractItem extends ApiModel {
   private String ibCode;
   private String contractCode;
   private String contractMonth;
-  private String exchange;
+  private String exchangeCode;
   private BigDecimal multiplier;
   private String lastTradingDate;
   private String firstNoticeDate;
@@ -63,12 +63,12 @@ public class FutureContractItem extends ApiModel {
     this.contractMonth = contractMonth;
   }
 
-  public String getExchange() {
-    return exchange;
+  public String getExchangeCode() {
+    return exchangeCode;
   }
 
-  public void setExchange(String exchange) {
-    this.exchange = exchange;
+  public void setExchangeCode(String exchangeCode) {
+    this.exchangeCode = exchangeCode;
   }
 
   public BigDecimal getMultiplier() {
@@ -135,7 +135,7 @@ public class FutureContractItem extends ApiModel {
         ", ibCode='" + ibCode + '\'' +
         ", contractCode='" + contractCode + '\'' +
         ", contractMonth='" + contractMonth + '\'' +
-        ", exchange='" + exchange + '\'' +
+        ", exchangeCode='" + exchangeCode + '\'' +
         ", multiplier=" + multiplier +
         ", lastTradingDate='" + lastTradingDate + '\'' +
         ", firstNoticeDate='" + firstNoticeDate + '\'' +
