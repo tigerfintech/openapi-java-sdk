@@ -1,12 +1,13 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.option.item;
 
-import com.tigerbrokers.stock.openapi.client.https.domain.quote.item.KlineItem;
+import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import java.util.List;
 
 /**
  * Description:
  * Created by lijiawen on 2019/01/07.
  */
-public class OptionKlineItem extends KlineItem {
+public class OptionKlineItem extends ApiModel {
 
   /**
    * 股票代码
@@ -29,16 +30,19 @@ public class OptionKlineItem extends KlineItem {
   private String strike;
 
   /**
-   * 未平仓量
+   * K线周期
    */
-  private Integer openInterest;
+  private String period;
 
-  @Override
+  /**
+   * K线数组
+   */
+  private List<OptionKlinePoint> items;
+
   public String getSymbol() {
     return symbol;
   }
 
-  @Override
   public void setSymbol(String symbol) {
     this.symbol = symbol;
   }
@@ -67,12 +71,20 @@ public class OptionKlineItem extends KlineItem {
     this.strike = strike;
   }
 
-  public Integer getOpenInterest() {
-    return openInterest;
+  public String getPeriod() {
+    return period;
   }
 
-  public void setOpenInterest(Integer openInterest) {
-    this.openInterest = openInterest;
+  public void setPeriod(String period) {
+    this.period = period;
+  }
+
+  public List<OptionKlinePoint> getItems() {
+    return items;
+  }
+
+  public void setItems(List<OptionKlinePoint> items) {
+    this.items = items;
   }
 
   @Override
@@ -82,7 +94,8 @@ public class OptionKlineItem extends KlineItem {
         ", expiry=" + expiry +
         ", right='" + right + '\'' +
         ", strike='" + strike + '\'' +
-        ", openInterest=" + openInterest +
+        ", period='" + period + '\'' +
+        ", items=" + items +
         '}';
   }
 }

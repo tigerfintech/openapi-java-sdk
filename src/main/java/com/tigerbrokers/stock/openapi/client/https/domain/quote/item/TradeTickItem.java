@@ -13,6 +13,8 @@ public class TradeTickItem extends ApiModel {
 
   private Long endIndex;
 
+  private String symbol;
+
   private List<TickPoint> items;
 
   public Long getBeginIndex() {
@@ -31,6 +33,14 @@ public class TradeTickItem extends ApiModel {
     this.endIndex = endIndex;
   }
 
+  public String getSymbol() {
+    return symbol;
+  }
+
+  public void setSymbol(String symbol) {
+    this.symbol = symbol;
+  }
+
   public List<TickPoint> getItems() {
     return items;
   }
@@ -44,6 +54,7 @@ public class TradeTickItem extends ApiModel {
     return "TradeTickItem{" +
         "beginIndex=" + beginIndex +
         ", endIndex=" + endIndex +
+        ", symbol='" + symbol + '\'' +
         ", items=" + items +
         '}';
   }
