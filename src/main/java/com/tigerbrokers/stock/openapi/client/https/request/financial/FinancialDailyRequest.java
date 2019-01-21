@@ -7,6 +7,8 @@ import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.financial.FinancialDailyResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
+import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 import java.util.Date;
 import java.util.List;
 
@@ -24,6 +26,12 @@ public class FinancialDailyRequest extends TigerCommonRequest implements TigerRe
   public static FinancialDailyRequest newRequest(List<String> symbols, List<String> fields, Date beginDate,
       Date endDate) {
     return newRequest(symbols, Market.US, fields, beginDate, endDate);
+  }
+
+  public static FinancialDailyRequest newRequest(List<String> symbols, List<String> fields, String beginDate,
+      String endDate) {
+    return newRequest(symbols, Market.US, fields, DateUtils.getZoneDate(beginDate, TimeZoneId.Shanghai),
+        DateUtils.getZoneDate(endDate, TimeZoneId.Shanghai));
   }
 
   public static FinancialDailyRequest newRequest(List<String> symbols, Market market, List<String> fields,
