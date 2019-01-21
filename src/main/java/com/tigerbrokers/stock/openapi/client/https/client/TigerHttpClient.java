@@ -95,33 +95,31 @@ public class TigerHttpClient implements TigerClient {
   }
 
   private <T extends TigerResponse> T errorResponse(String tigerId, TigerRequest<T> request, TigerApiException e) {
-    T response;
     try {
-      response = request.getResponseClass().newInstance();
+      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), e);
+
+      T response = request.getResponseClass().newInstance();
       response.setCode(e.getErrCode());
       response.setMessage(e.getErrMsg());
       return response;
-    } catch (InstantiationException e1) {
-      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), null, null, e);
-    } catch (IllegalAccessException e1) {
-      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), null, null, e);
+    } catch (Exception e1) {
+      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), e1);
+      return null;
     }
-    return null;
   }
 
   private <T extends TigerResponse> T errorResponse(String tigerId, TigerRequest<T> request, Exception e) {
-    T response;
     try {
-      response = request.getResponseClass().newInstance();
+      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), e);
+
+      T response = request.getResponseClass().newInstance();
       response.setCode(TigerApiCode.CLIENT_API_ERROR.getCode());
       response.setMessage(TigerApiCode.CLIENT_API_ERROR.getMessage() + "(" + e.getMessage() + ")");
       return response;
-    } catch (InstantiationException e1) {
-      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), null, null, e);
-    } catch (IllegalAccessException e1) {
-      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), null, null, e);
+    } catch (Exception e1) {
+      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), e1);
+      return null;
     }
-    return null;
   }
 
   private Map<String, Object> buildParams(TigerRequest request) {

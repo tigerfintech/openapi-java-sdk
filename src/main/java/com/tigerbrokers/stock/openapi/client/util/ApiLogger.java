@@ -38,6 +38,10 @@ public class ApiLogger {
     ApiLogger.errorEnabled = errorEnabled;
   }
 
+  public static void error(String appKey, String method, String version, Exception e) {
+    error(appKey, method, version, null, null, e);
+  }
+
   public static void error(String appKey, String method, String version, String bizContent, String responseData,
       Exception e) {
     if (!enabled || !errorEnabled) {
