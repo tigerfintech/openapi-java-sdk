@@ -328,56 +328,70 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   @Override
   public String subscribeQuote(Set<String> symbols) {
-    if (!isConnected()) {
-      notConnect();
-      return null;
-    }
-    StompFrame frame = StompMessageUtil.buildSubscribeMessage(symbols, QuoteSubject.Quote);
-    channel.writeAndFlush(frame);
-    subscribeSymbols.addAll(symbols);
-    ApiLogger.info("send subscribe quote message, symbols:{}", symbols);
-
-    return frame.headers().getAsString(StompHeaders.ID);
+    return subscribeQuote(symbols, QuoteSubject.Quote);
   }
 
   @Override
   public String subscribeQuote(Set<String> symbols, List<String> focusKeys) {
-    if (!isConnected()) {
-      notConnect();
-      return null;
-    }
-    StompFrame frame = StompMessageUtil.buildSubscribeMessage(symbols, new HashSet<>(focusKeys));
-    channel.writeAndFlush(frame);
-    subscribeSymbols.addAll(symbols);
-    ApiLogger.info("send subscribe quote message, symbols:{},focusKeys:{}", symbols, focusKeys);
-
-    return frame.headers().getAsString(StompHeaders.ID);
-  }
-
-  @Override
-  public String subscribeOption(Set<String> symbols) {
-    if (!isConnected()) {
-      notConnect();
-      return null;
-    }
-    StompFrame frame = StompMessageUtil.buildSubscribeMessage(symbols, QuoteSubject.Option);
-    channel.writeAndFlush(frame);
-    subscribeSymbols.addAll(symbols);
-    ApiLogger.info("send subscribe option message, symbols:{}", symbols);
-
-    return frame.headers().getAsString(StompHeaders.ID);
+    return subscribeQuote(symbols, QuoteSubject.Quote, focusKeys);
   }
 
   @Override
   public String cancelSubscribeQuote(Set<String> symbols) {
+    return cancelSubscribeQuote(symbols, QuoteSubject.Quote);
+  }
+
+  @Override
+  public String subscribeOption(Set<String> symbols) {
+    return subscribeQuote(symbols, QuoteSubject.Option);
+  }
+
+  @Override
+  public String cancelSubscribeOption(Set<String> symbols) {
+    return cancelSubscribeQuote(symbols, QuoteSubject.Option);
+  }
+
+  @Override
+  public String subscribeFuture(Set<String> symbols) {
+    return subscribeQuote(symbols, QuoteSubject.Future);
+  }
+
+  @Override
+  public String cancelSubscribeFuture(Set<String> symbols) {
+    return cancelSubscribeQuote(symbols, QuoteSubject.Future);
+  }
+
+  private String subscribeQuote(Set<String> symbols, QuoteSubject subject) {
+    return subscribeQuote(symbols, subject, null);
+  }
+
+  private String subscribeQuote(Set<String> symbols, QuoteSubject subject, List<String> focusKeys) {
     if (!isConnected()) {
       notConnect();
       return null;
     }
-    StompFrame frame = StompMessageUtil.buildUnSubscribeMessage(symbols);
+    StompFrame frame;
+    if (focusKeys == null) {
+      frame = StompMessageUtil.buildSubscribeMessage(symbols, subject);
+    } else {
+      frame = StompMessageUtil.buildSubscribeMessage(symbols, subject, new HashSet<>(focusKeys));
+    }
+    channel.writeAndFlush(frame);
+    subscribeSymbols.addAll(symbols);
+    ApiLogger.info("send subscribe [{}] message, symbols:{},focusKeys:{}", subject, symbols, focusKeys);
+
+    return frame.headers().getAsString(StompHeaders.ID);
+  }
+
+  private String cancelSubscribeQuote(Set<String> symbols, QuoteSubject subject) {
+    if (!isConnected()) {
+      notConnect();
+      return null;
+    }
+    StompFrame frame = StompMessageUtil.buildUnSubscribeMessage(symbols, subject);
     channel.writeAndFlush(frame);
     subscribeSymbols.removeAll(symbols);
-    ApiLogger.info("send cancel subscribe quote message, symbols:{}.", symbols);
+    ApiLogger.info("send cancel subscribe [{}] message, symbols:{}.", subject, symbols);
 
     return frame.headers().getAsString(StompHeaders.ID);
   }

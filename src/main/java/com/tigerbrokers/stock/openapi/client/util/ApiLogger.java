@@ -110,6 +110,13 @@ public class ApiLogger {
     logger.info(message, value1, value2);
   }
 
+  public static void info(String message, Object value1, Object value2, Object value3) {
+    if (!enabled || !infoEnabled) {
+      return;
+    }
+    logger.info(message, value1, value2, value3);
+  }
+
   public static void debug(String message, Object value) {
     if (!enabled || !debugEnabled) {
       return;

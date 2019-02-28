@@ -53,20 +53,26 @@ public class StompMessageUtil {
     return stompFrame;
   }
 
-  public static StompFrame buildSubscribeMessage(Set<String> symbols, QuoteSubject subjectName) {
+  public static StompFrame buildSubscribeMessage(Set<String> symbols, QuoteSubject subject) {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
     int id = increment.addAndGet(1);
     StompHeaders headers =
-        StompHeaderBuilder.instance().id(id).version().host().subject(subjectName.name()).symbols(symbols).build();
+        StompHeaderBuilder.instance().id(id).version().host().subject(subject.name()).symbols(symbols).build();
     stompFrame.headers().set(headers);
     return stompFrame;
   }
 
-  public static StompFrame buildSubscribeMessage(Set<String> symbols, Set<String> focusKeys) {
+  public static StompFrame buildSubscribeMessage(Set<String> symbols, QuoteSubject subject, Set<String> focusKeys) {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
     int id = increment.addAndGet(1);
     StompHeaders headers =
-        StompHeaderBuilder.instance().id(id).version().host().subject("Quote").symbols(symbols).focusKeys(focusKeys)
+        StompHeaderBuilder.instance()
+            .id(id)
+            .version()
+            .host()
+            .subject(subject.name())
+            .symbols(symbols)
+            .focusKeys(focusKeys)
             .build();
     stompFrame.headers().set(headers);
     return stompFrame;
@@ -89,11 +95,11 @@ public class StompMessageUtil {
     return stompFrame;
   }
 
-  public static StompFrame buildUnSubscribeMessage(Set<String> symbols) {
+  public static StompFrame buildUnSubscribeMessage(Set<String> symbols, QuoteSubject subject) {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.UNSUBSCRIBE);
     int id = increment.addAndGet(1);
     StompHeaders headers =
-        StompHeaderBuilder.instance().id(id).version().host().subject("Quote").symbols(symbols).build();
+        StompHeaderBuilder.instance().id(id).version().host().subject(subject.name()).symbols(symbols).build();
     stompFrame.headers().set(headers);
     return stompFrame;
   }

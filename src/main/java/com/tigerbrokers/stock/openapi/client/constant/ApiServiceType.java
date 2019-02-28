@@ -77,4 +77,5 @@ public interface ApiServiceType {
    */
   String FINANCIAL_DAILY = "financial_daily";
   String FINANCIAL_REPORT = "financial_report";
+  String CORPORATE_ACTION = "corporate_action";
 }
