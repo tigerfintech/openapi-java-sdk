@@ -238,7 +238,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
   }
 
-  private synchronized void sendDisconnectFrame(){
+  private synchronized void sendDisconnectFrame() {
     if (!isConnected()) {
       notConnect();
       return;

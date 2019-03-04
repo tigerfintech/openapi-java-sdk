@@ -104,7 +104,7 @@ public class StompMessageUtil {
     return stompFrame;
   }
 
-  public static StompFrame buildDisconnectMessage(String login){
+  public static StompFrame buildDisconnectMessage(String login) {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.DISCONNECT);
     StompHeaders headers = StompHeaderBuilder.instance().login(login).version().host().build();
     stompFrame.headers().set(headers);
