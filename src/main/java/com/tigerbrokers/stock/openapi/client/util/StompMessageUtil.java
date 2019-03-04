@@ -103,4 +103,11 @@ public class StompMessageUtil {
     stompFrame.headers().set(headers);
     return stompFrame;
   }
+
+  public static StompFrame buildDisconnectMessage(String login){
+    StompFrame stompFrame = new DefaultStompFrame(StompCommand.DISCONNECT);
+    StompHeaders headers = StompHeaderBuilder.instance().login(login).version().host().build();
+    stompFrame.headers().set(headers);
+    return stompFrame;
+  }
 }
