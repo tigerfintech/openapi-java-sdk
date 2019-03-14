@@ -97,15 +97,19 @@ public class WebSocketClient implements SubscribeAsyncApi {
     init();
   }
 
-  public WebSocketClient(String url, ApiAuthentication authentication, ApiComposeCallback apiComposeCallback, final ClientHeartBeatData clientHeartBeatData){
+  public WebSocketClient(String url, ApiAuthentication authentication, ApiComposeCallback apiComposeCallback,
+      final ClientHeartBeatData clientHeartBeatData) {
     this.url = url;
     this.authentication = authentication;
     this.apiComposeCallback = apiComposeCallback;
-    if (clientHeartBeatData.getSendInterval() >= 0){
-      this.clientSendInterval = clientHeartBeatData.getSendInterval() >= CLIENT_SEND_INTERVAL_MIN ? clientHeartBeatData.getSendInterval() : CLIENT_SEND_INTERVAL_MIN;
+    if (clientHeartBeatData.getSendInterval() >= 0) {
+      this.clientSendInterval =
+          clientHeartBeatData.getSendInterval() >= CLIENT_SEND_INTERVAL_MIN ? clientHeartBeatData.getSendInterval()
+              : CLIENT_SEND_INTERVAL_MIN;
     }
-    if (clientHeartBeatData.getReceiveInterval() >= 0){
-      this.clientReceiveInterval = clientHeartBeatData.getReceiveInterval() >= CLIENT_RECEIVE_INTERVAL_MIN ? clientHeartBeatData.getReceiveInterval() : CLIENT_RECEIVE_INTERVAL_MIN;
+    if (clientHeartBeatData.getReceiveInterval() >= 0) {
+      this.clientReceiveInterval = clientHeartBeatData.getReceiveInterval() >= CLIENT_RECEIVE_INTERVAL_MIN
+          ? clientHeartBeatData.getReceiveInterval() : CLIENT_RECEIVE_INTERVAL_MIN;
     }
     init();
   }
@@ -135,7 +139,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
               p.addLast(STOMP_DECODER, new WebSocketStompFrameEncoder());
               p.addLast("stompAggregator", new StompSubframeAggregator(65535));
             } else {
-              final WebSocketHandler handler = new WebSocketHandler(authentication, apiComposeCallback,clientSendInterval , clientReceiveInterval);
+              final WebSocketHandler handler =
+                  new WebSocketHandler(authentication, apiComposeCallback, clientSendInterval, clientReceiveInterval);
               p.addLast(STOMP_ENCODER, new StompSubframeEncoder());
               p.addLast(STOMP_DECODER, new StompSubframeDecoder());
               p.addLast("aggregator", new StompSubframeAggregator(65535));
@@ -196,7 +201,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
           if (address.getPort() == 8887 || address.getPort() == 8889) {
             synchronized (this.channel) {
               WebSocketHandshakerHandler webSocketHandshakerHandler =
-                  new WebSocketHandshakerHandler(authentication, apiComposeCallback, clientSendInterval, clientReceiveInterval);
+                  new WebSocketHandshakerHandler(authentication, apiComposeCallback, clientSendInterval,
+                      clientReceiveInterval);
               HttpHeaders httpHeaders = new DefaultHttpHeaders();
               WebSocketClientHandshaker handshaker =
                   WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, true, httpHeaders);

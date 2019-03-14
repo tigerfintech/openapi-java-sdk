@@ -8,7 +8,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.stomp.StompFrame;
 
-
 @ChannelHandler.Sharable
 public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
 
@@ -23,7 +22,8 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
     this.decoder = new ApiCallbackDecoder(callback);
   }
 
-  public WebSocketHandler(ApiAuthentication authentication, ApiComposeCallback callback, int sendInterval, int receiveInterval){
+  public WebSocketHandler(ApiAuthentication authentication, ApiComposeCallback callback, int sendInterval,
+      int receiveInterval) {
     this.authentication = authentication;
     this.decoder = new ApiCallbackDecoder(callback);
     this.clientSendInterval = sendInterval;
@@ -32,13 +32,13 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
 
   @Override
   public void channelActive(ChannelHandlerContext ctx) throws Exception {
-    if (0 == this.clientSendInterval && 0 == this.clientReceiveInterval){
+    if (0 == this.clientSendInterval && 0 == this.clientReceiveInterval) {
       ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
           authentication.getVersion()));
-    }else{
+    } else {
       ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
           authentication.getVersion(), this.clientSendInterval == 0 ? 0 : this.clientSendInterval + HEART_BEAT_SPAN,
-          this.clientReceiveInterval == 0 ? 0 : this.clientReceiveInterval - HEART_BEAT_SPAN ));
+          this.clientReceiveInterval == 0 ? 0 : this.clientReceiveInterval - HEART_BEAT_SPAN));
     }
     super.channelActive(ctx);
   }

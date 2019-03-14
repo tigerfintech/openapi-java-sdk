@@ -17,9 +17,8 @@ public interface ApiComposeCallback extends SubscribeApiCallback {
   void connectAck();
 
   /**
-   *
-   * @param serverSendInterval      server保证发送心跳的最小间隔，0代表server不发送心跳
-   * @param serverReceiveInterval   server希望收到client心跳的间隔，0表示server不希望收到client的心跳
+   * @param serverSendInterval server保证发送心跳的最小间隔，0代表server不发送心跳
+   * @param serverReceiveInterval server希望收到client心跳的间隔，0表示server不希望收到client的心跳
    */
   void connectAck(int serverSendInterval, int serverReceiveInterval);
 

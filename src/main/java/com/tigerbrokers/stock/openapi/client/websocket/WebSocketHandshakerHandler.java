@@ -17,9 +17,8 @@ import io.netty.handler.codec.stomp.StompFrame;
 import io.netty.util.CharsetUtil;
 
 /**
- * @author  zhaolei
+ * @author zhaolei
  * create at 2018/12/20
- *
  */
 @ChannelHandler.Sharable
 public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Object> {
@@ -37,7 +36,8 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
     this.decoder = new ApiCallbackDecoder(callback);
   }
 
-  public WebSocketHandshakerHandler(ApiAuthentication authentication, ApiComposeCallback callback, int sendInterval, int receiveInterval){
+  public WebSocketHandshakerHandler(ApiAuthentication authentication, ApiComposeCallback callback, int sendInterval,
+      int receiveInterval) {
     this.authentication = authentication;
     this.decoder = new ApiCallbackDecoder(callback);
     this.clientSendInterval = sendInterval;
@@ -85,12 +85,13 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
       //握手协议返回，设置结束握手
       handshaker.finishHandshake(ch, response);
       //发送stomp connect请求
-      if (0 == this.clientReceiveInterval && 0 == this.clientSendInterval){
+      if (0 == this.clientReceiveInterval && 0 == this.clientSendInterval) {
         ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
             authentication.getVersion()));
-      }else{
+      } else {
         ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
-            authentication.getVersion(), this.clientSendInterval == 0 ? 0 : this.clientSendInterval + WebSocketHandler.HEART_BEAT_SPAN ,
+            authentication.getVersion(),
+            this.clientSendInterval == 0 ? 0 : this.clientSendInterval + WebSocketHandler.HEART_BEAT_SPAN,
             this.clientReceiveInterval == 0 ? 0 : this.clientReceiveInterval - WebSocketHandler.HEART_BEAT_SPAN));
       }
 

@@ -17,7 +17,7 @@ public class IdleTriggerHandler extends ChannelInboundHandlerAdapter {
 
   private ApiCallbackDecoder apiCallbackDecoder = null;
 
-  public IdleTriggerHandler(ApiCallbackDecoder decoder){
+  public IdleTriggerHandler(ApiCallbackDecoder decoder) {
     this.apiCallbackDecoder = decoder;
   }
 
@@ -29,7 +29,7 @@ public class IdleTriggerHandler extends ChannelInboundHandlerAdapter {
         ctx.channel().writeAndFlush(StompMessageUtil.buildCommonSendMessage("Heart_Beat"));
       } else if (IdleState.READER_IDLE == state) {
         log.warn("server time out:{}", ctx.channel().id().asLongText());
-        if (this.apiCallbackDecoder != null){
+        if (this.apiCallbackDecoder != null) {
           this.apiCallbackDecoder.serverHeartBeatTimeOut(ctx.channel().id().asLongText());
         }
       }

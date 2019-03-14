@@ -36,7 +36,7 @@ public class ApiCallbackDecoder {
 
   public synchronized void handle(StompFrame stompFrame) {
     String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    if (!StringUtils.isEmpty(content) && "Heart_Beat".equals(content)){
+    if (!StringUtils.isEmpty(content) && "Heart_Beat".equals(content)) {
       processHeartBeat(content);
       return;
     }
@@ -128,11 +128,11 @@ public class ApiCallbackDecoder {
     ApiLogger.info("ret-type:{} cannot be processed.", retType);
   }
 
-  private void  processHeartBeat(final String content){
+  private void processHeartBeat(final String content) {
     callback.hearBeat(content);
   }
 
-  public void serverHeartBeatTimeOut(String channelId){
+  public void serverHeartBeatTimeOut(String channelId) {
     callback.serverHeartBeatTimeOut(channelId);
   }
 }

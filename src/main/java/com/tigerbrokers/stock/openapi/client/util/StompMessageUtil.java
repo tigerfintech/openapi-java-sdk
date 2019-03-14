@@ -28,18 +28,23 @@ public class StompMessageUtil {
   }
 
   /**
-   *
-   * @param sendInterval     client能保证发送心跳的最小间隔，0代表client不发送心跳
-   * @param receiveInterval  client希望收到server心跳的间隔，0代表client不希望收到server的心跳
-   * @return
+   * @param sendInterval client能保证发送心跳的最小间隔，0代表client不发送心跳
+   * @param receiveInterval client希望收到server心跳的间隔，0代表client不希望收到server的心跳
    */
-  public static StompFrame buildConnectMessage(String login, String passcode, String version, int sendInterval, int receiveInterval){
-    if (sendInterval < 0 || receiveInterval < 0){
+  public static StompFrame buildConnectMessage(String login, String passcode, String version, int sendInterval,
+      int receiveInterval) {
+    if (sendInterval < 0 || receiveInterval < 0) {
       throw new RuntimeException("sendInterval < 0 or receiveInterval < 0");
     }
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.CONNECT);
     stompFrame.headers()
-        .set(StompHeaderBuilder.instance().version(version).host().login(login).passcode(passcode).heartBeat(sendInterval,receiveInterval).build());
+        .set(StompHeaderBuilder.instance()
+            .version(version)
+            .host()
+            .login(login)
+            .passcode(passcode)
+            .heartBeat(sendInterval, receiveInterval)
+            .build());
     return stompFrame;
   }
 
@@ -61,7 +66,7 @@ public class StompMessageUtil {
     return stompFrame;
   }
 
-  public static StompFrame buildCommonSendMessage(String message){
+  public static StompFrame buildCommonSendMessage(String message) {
     StompFrame stompFrame;
     int id = increment.addAndGet(1);
     if (message != null) {

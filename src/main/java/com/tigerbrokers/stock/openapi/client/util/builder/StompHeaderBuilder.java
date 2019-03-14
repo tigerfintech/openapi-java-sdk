@@ -86,8 +86,8 @@ public class StompHeaderBuilder {
     return this;
   }
 
-  public StompHeaderBuilder heartBeat(int cx, int cy){
-    String value = String.format("%d,%d", cx,cy);
+  public StompHeaderBuilder heartBeat(int cx, int cy) {
+    String value = String.format("%d,%d", cx, cy);
     this.stompHeaders.set(HEART_BEAT, value);
     return this;
   }
