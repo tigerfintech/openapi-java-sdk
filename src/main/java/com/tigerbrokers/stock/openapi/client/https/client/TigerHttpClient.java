@@ -9,6 +9,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
@@ -18,6 +19,8 @@ import java.security.Security;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCESS_TOKEN;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCOUNT_TYPE;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.BIZ_CONTENT;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.CHARSET;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.METHOD;
@@ -25,6 +28,7 @@ import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.S
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN_TYPE;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TIGER_ID;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TIMESTAMP;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TRADE_TOKEN;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.VERSION;
 
 /**
@@ -36,6 +40,9 @@ public class TigerHttpClient implements TigerClient {
   private String tigerId;
   private String privateKey;
   private String tigerPublicKey;
+  private String accessToken;
+  private String tradeToken;
+  private String accountType;
 
   private static final String ONLINE_PUBLIC_KEY =
       "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDNF3G8SoEcCZh2rshUbayDgLLrj6rKgzNMxDL2HSnKcB0+GPOsndqSv+a4IBu9+I3fyBp5hkyMMG2+AXugd9pMpy6VxJxlNjhX1MYbNTZJUT4nudki4uh+LMOkIBHOceGNXjgB+cXqmlUnjlqha/HgboeHSnSgpM3dKSJQlIOsDwIDAQAB";
@@ -55,6 +62,41 @@ public class TigerHttpClient implements TigerClient {
     this.tigerId = tigerId;
     this.privateKey = privateKey;
     this.tigerPublicKey = tigerPublicKey;
+  }
+
+  public TigerHttpClient(String serverUrl) {
+    this.serverUrl = serverUrl;
+  }
+
+  public TigerHttpClient(String serverUrl, String accessToken) {
+    this.serverUrl = serverUrl;
+    this.accessToken = accessToken;
+  }
+
+  public String getAccessToken() {
+    return accessToken;
+  }
+
+  public void setAccessToken(String accessToken) {
+    this.accessToken = accessToken;
+  }
+
+  public void setTradeToken(String tradeToken) {
+    this.tradeToken = tradeToken;
+  }
+
+  public String getTradeToken() {
+    return tradeToken;
+  }
+
+  public void setAccountType(AccountType accountType) {
+    if (accountType != null) {
+      this.accountType = accountType.name();
+    }
+  }
+
+  public String getAccountType() {
+    return accountType;
   }
 
   public <T extends TigerResponse> T execute(TigerRequest<T> request) {
@@ -140,10 +182,21 @@ public class TigerHttpClient implements TigerClient {
     params.put(CHARSET, this.charset);
     params.put(TIGER_ID, this.tigerId);
     params.put(SIGN_TYPE, this.signType);
+    if (this.accessToken != null) {
+      params.put(ACCESS_TOKEN, this.accessToken);
+    }
+    if (this.tradeToken != null) {
+      params.put(TRADE_TOKEN, this.tradeToken);
+    }
+    if (this.accountType != null) {
+      params.put(ACCOUNT_TYPE, this.accountType);
+    }
+    if (this.tigerId != null) {
+      String signContent = TigerSignature.getSignContent(params);
+      String sign = TigerSignature.rsaSign(signContent, privateKey, charset);
+      params.put(SIGN, sign);
+    }
 
-    String signContent = TigerSignature.getSignContent(params);
-    String sign = TigerSignature.rsaSign(signContent, privateKey, charset);
-    params.put(SIGN, sign);
     return params;
   }
 }

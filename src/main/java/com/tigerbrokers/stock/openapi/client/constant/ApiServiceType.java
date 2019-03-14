@@ -78,4 +78,10 @@ public interface ApiServiceType {
   String FINANCIAL_DAILY = "financial_daily";
   String FINANCIAL_REPORT = "financial_report";
   String CORPORATE_ACTION = "corporate_action";
+
+  /**
+   * 用户
+   */
+  String USER_LOGIN = "user_login";
+  String USER_TRADE_TOKEN = "user_trade_token";
 }

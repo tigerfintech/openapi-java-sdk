@@ -12,6 +12,12 @@ public class TigerApiConstants {
 
   public static final String TIGER_ID = "tiger_id";
 
+  public static final String ACCESS_TOKEN = "access_token";
+
+  public static final String TRADE_TOKEN = "trade_token";
+
+  public static final String ACCOUNT_TYPE = "account_type";
+
   public static final String METHOD = "method";
 
   public static final String TIMESTAMP = "timestamp";
