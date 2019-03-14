@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.https.domain.user.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.struct.enums.GrantType;
 
 /**
  * Description:
@@ -15,9 +16,20 @@ public class UserLoginModel extends ApiModel {
   @JSONField(name = "login_password")
   private String password;
 
+  @JSONField(name = "grant_type")
+  private String grantType = GrantType.phone.name();
+
   public UserLoginModel(String userName, String password) {
     this.userName = userName;
     this.password = password;
+  }
+
+  public UserLoginModel(String userName, String password, GrantType grantType) {
+    this.userName = userName;
+    this.password = password;
+    if (grantType != null) {
+      this.grantType = grantType.name();
+    }
   }
 
   public String getUserName() {
@@ -34,5 +46,13 @@ public class UserLoginModel extends ApiModel {
 
   public void setPassword(String password) {
     this.password = password;
+  }
+
+  public String getGrantType() {
+    return grantType;
+  }
+
+  public void setGrantType(String grantType) {
+    this.grantType = grantType;
   }
 }

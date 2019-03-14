@@ -5,6 +5,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.user.model.UserLoginMo
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.user.UserLoginResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.GrantType;
 
 /**
  * Description:
@@ -19,6 +20,13 @@ public class UserLoginRequest extends TigerCommonRequest implements TigerRequest
   public static UserLoginRequest newRequest(String userName, String password) {
     UserLoginRequest request = new UserLoginRequest();
     UserLoginModel model = new UserLoginModel(userName, password);
+    request.setApiModel(model);
+    return request;
+  }
+
+  public static UserLoginRequest newRequest(String userName, String password, GrantType grantType) {
+    UserLoginRequest request = new UserLoginRequest();
+    UserLoginModel model = new UserLoginModel(userName, password, grantType);
     request.setApiModel(model);
     return request;
   }
