@@ -94,6 +94,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     this.url = url;
     this.authentication = authentication;
     this.apiComposeCallback = apiComposeCallback;
+    this.clientSendInterval = 10000;
     init();
   }
 
