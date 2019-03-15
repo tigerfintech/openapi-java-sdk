@@ -9,6 +9,7 @@ import java.nio.charset.Charset;
 
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.END_CONN;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_CANCEL_SUBSCRIBE_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_FUTURE_CHANGE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_OPTION_CHANGE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_QUOTE_CHANGE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUBSCRIBE_END;
@@ -51,6 +52,9 @@ public class ApiCallbackDecoder {
         break;
       case GET_OPTION_CHANGE_END:
         processSubscribeOptionEnd();
+        break;
+      case GET_FUTURE_CHANGE_END:
+        processSubscribeFutureEnd();
         break;
       case GET_SUB_SYMBOLS_END:
         processGetSubscribedSymbols();
@@ -116,6 +120,11 @@ public class ApiCallbackDecoder {
   private void processSubscribeOptionEnd() {
     String content = stompFrame.content().toString(DEFAULT_CHARSET);
     callback.optionChange(JSONObject.parseObject(content));
+  }
+
+  private void processSubscribeFutureEnd() {
+    String content = stompFrame.content().toString(DEFAULT_CHARSET);
+    callback.futureChange(JSONObject.parseObject(content));
   }
 
   private void processDefault() {
