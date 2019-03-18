@@ -3,30 +3,34 @@ package com.tigerbrokers.stock.openapi.client.https.client;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
-import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
-import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
-import com.tigerbrokers.stock.openapi.client.util.TigerSignature;
+import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
-import com.tigerbrokers.stock.openapi.client.https.response.TigerHttpResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
+import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
+import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
-
+import com.tigerbrokers.stock.openapi.client.util.TigerSignature;
 import java.security.Security;
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.*;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.BIZ_CONTENT;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.CHARSET;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.METHOD;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN_TYPE;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TIGER_ID;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TIMESTAMP;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.VERSION;
 
 /**
  * HTTP客户端
  */
 public class TigerHttpClient implements TigerClient {
-
-  private static final Logger logger = LoggerFactory.getLogger(TigerHttpClient.class);
 
   private String serverUrl;
   private String tigerId;
@@ -54,21 +58,19 @@ public class TigerHttpClient implements TigerClient {
   }
 
   public <T extends TigerResponse> T execute(TigerRequest<T> request) {
-    if (request instanceof TigerHttpRequest) {
-      return (T) execute((TigerHttpRequest) request);
-    }
-    return null;
-  }
-
-  public TigerHttpResponse execute(TigerHttpRequest request) {
-    TigerHttpResponse response;
+    T response;
+    String param = null;
+    String data = null;
     try {
-      String data = HttpUtils.post(serverUrl, JSONObject.toJSONString(buildParams(request)));
+      param = JSONObject.toJSONString(buildParams(request));
+      ApiLogger.debug("request param:{}", param);
+
+      data = HttpUtils.post(serverUrl, param);
 
       if (StringUtils.isEmpty(data)) {
         return null;
       }
-      response = JSON.parseObject(data, TigerHttpResponse.class);
+      response = JSON.parseObject(data, request.getResponseClass());
 
       if (StringUtils.isEmpty(this.tigerPublicKey) || response.getSign() == null) {
         return response;
@@ -79,23 +81,62 @@ public class TigerHttpClient implements TigerClient {
       if (!signSuccess) {
         throw new TigerApiException(TigerApiCode.SIGN_CHECK_FAILED);
       }
+      return response;
+    } catch (RuntimeException e) {
+      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), param, data, e);
+      return errorResponse(tigerId, request, e);
     } catch (TigerApiException e) {
-      logger.error("client execute api exception:", e);
-      return TigerHttpResponse.errorMsg(e.getApiError());
+      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), param, data, e);
+      return errorResponse(tigerId, request, e);
     } catch (Exception e) {
-      logger.error("client execute exception:", e);
-      return TigerHttpResponse.errorMsg(TigerApiCode.CLIENT_API_ERROR);
+      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), param, data, e);
+      return errorResponse(tigerId, request, e);
     }
-
-    return response;
   }
 
-  private Map<String, Object> buildParams(TigerHttpRequest request) {
+  private <T extends TigerResponse> T errorResponse(String tigerId, TigerRequest<T> request, TigerApiException e) {
+    try {
+      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), e);
+
+      T response = request.getResponseClass().newInstance();
+      response.setCode(e.getErrCode());
+      response.setMessage(e.getErrMsg());
+      return response;
+    } catch (Exception e1) {
+      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), e1);
+      return null;
+    }
+  }
+
+  private <T extends TigerResponse> T errorResponse(String tigerId, TigerRequest<T> request, Exception e) {
+    try {
+      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), e);
+
+      T response = request.getResponseClass().newInstance();
+      response.setCode(TigerApiCode.CLIENT_API_ERROR.getCode());
+      response.setMessage(TigerApiCode.CLIENT_API_ERROR.getMessage() + "(" + e.getMessage() + ")");
+      return response;
+    } catch (Exception e1) {
+      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), e1);
+      return null;
+    }
+  }
+
+  private Map<String, Object> buildParams(TigerRequest request) {
     Map params = new HashMap<>();
     params.put(METHOD, request.getApiMethodName());
     params.put(VERSION, request.getApiVersion());
+    if (request instanceof TigerHttpRequest) {
+      params.put(BIZ_CONTENT, ((TigerHttpRequest) request).getBizContent());
+    } else {
+      ApiModel apiModel = request.getApiModel();
+      if (apiModel instanceof BatchApiModel) {
+        params.put(BIZ_CONTENT, JSONObject.toJSONString(((BatchApiModel) apiModel).getItems()));
+      } else {
+        params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel));
+      }
+    }
     params.put(TIMESTAMP, request.getTimestamp());
-    params.put(BIZ_CONTENT, request.getBizContent());
     params.put(CHARSET, this.charset);
     params.put(TIGER_ID, this.tigerId);
     params.put(SIGN_TYPE, this.signType);

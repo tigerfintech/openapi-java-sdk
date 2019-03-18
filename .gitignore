@@ -1,0 +1,24 @@
+#Built application files
+*.apk
+*.ap_
+ 
+# Files for the Dalvik VM
+*.dex
+ 
+# Java class files
+*.class
+
+# Generated files
+target/
+
+
+# Log Files
+*.log
+
+# Intellij
+*.iml
+
+
+#some local files
+.idea/
+.DS_Store

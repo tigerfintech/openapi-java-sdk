@@ -8,7 +8,7 @@ public interface CodeEnumType {
 
   int getCode();
 
-  static  <E extends Enum<?> & CodeEnumType> E codeOf(Class<E> enumClazz, int code) {
+  static <E extends Enum<?> & CodeEnumType> E codeOf(Class<E> enumClazz, int code) {
     E[] enums = enumClazz.getEnumConstants();
     for (E e : enums) {
       if (e.getCode() == code) {

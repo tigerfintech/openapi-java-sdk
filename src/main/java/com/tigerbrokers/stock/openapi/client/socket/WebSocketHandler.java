@@ -1,82 +1,65 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
+import com.tigerbrokers.stock.openapi.client.util.ApiCallbackDecoderUtils;
+import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.stomp.StompFrame;
-import java.nio.charset.Charset;
-import java.util.concurrent.CyclicBarrier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ChannelHandler.Sharable
 public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
 
-  private static Logger logger = LoggerFactory.getLogger(WebSocketHandler.class);
-
   private ApiAuthentication authentication;
   private ApiCallbackDecoder decoder;
+  private int clientSendInterval = 0;
+  private int clientReceiveInterval = 0;
+  public final static int HEART_BEAT_SPAN = 1000;
 
-  public WebSocketHandler(ApiAuthentication authentication, ApiComposeCallback callback, boolean async,
-      CyclicBarrier cyclicBarrier,
-      OrderIdPassport orderIdPassport) {
+  public WebSocketHandler(ApiAuthentication authentication, ApiComposeCallback callback) {
     this.authentication = authentication;
-    this.decoder = new ApiCallbackDecoder(callback, async, cyclicBarrier, orderIdPassport);
+    this.decoder = new ApiCallbackDecoder(callback);
   }
 
-  @Override
-  public void handlerAdded(ChannelHandlerContext ctx) {
+  public WebSocketHandler(ApiAuthentication authentication, ApiComposeCallback callback, int sendInterval,
+      int receiveInterval) {
+    this.authentication = authentication;
+    this.decoder = new ApiCallbackDecoder(callback);
+    this.clientSendInterval = sendInterval;
+    this.clientReceiveInterval = receiveInterval;
   }
 
   @Override
   public void channelActive(ChannelHandlerContext ctx) throws Exception {
-    ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
-        authentication.getVersion()));
+    if (0 == this.clientSendInterval && 0 == this.clientReceiveInterval) {
+      ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
+          authentication.getVersion()));
+    } else {
+      ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
+          authentication.getVersion(), this.clientSendInterval == 0 ? 0 : this.clientSendInterval + HEART_BEAT_SPAN,
+          this.clientReceiveInterval == 0 ? 0 : this.clientReceiveInterval - HEART_BEAT_SPAN));
+    }
     super.channelActive(ctx);
   }
 
   @Override
   public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-    logger.info("netty channel inactive!");
+    ApiLogger.info("netty channel inactive!");
     super.channelInactive(ctx);
     ctx.close();
   }
 
   @Override
   public void channelRead0(ChannelHandlerContext ctx, StompFrame frame) throws Exception {
-    logger.debug("received frame from server: {}", frame);
+    ApiLogger.debug("received frame from server: {}", frame);
 
-    switch (frame.command()) {
-      case CONNECTED:
-        if (decoder.getCallback() != null) {
-          decoder.getCallback().connectAck();
-        }
-        break;
-      case MESSAGE:
-        decoder.handle(frame);
-        break;
-      case RECEIPT:
-        break;
-      case ERROR:
-        if (decoder.getCallback() != null) {
-          decoder.getCallback().error(frame.content().toString(Charset.defaultCharset()));
-        }
-        break;
-      case DISCONNECT:
-        if (decoder.getCallback() != null) {
-          decoder.getCallback().connectionClosed();
-        }
-        ctx.close();
-        break;
-      default:
-        break;
-    }
+    ApiCallbackDecoderUtils.executor(ctx, frame, decoder);
   }
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-    logger.error("handler exception caught:", cause);
+    ApiLogger.error("handler exception caught:", cause);
     ctx.close();
   }
 }

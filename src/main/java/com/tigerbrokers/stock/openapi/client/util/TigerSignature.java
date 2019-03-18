@@ -1,8 +1,8 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
-import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.util.codec.Base64;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -15,7 +15,6 @@ import java.security.Signature;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

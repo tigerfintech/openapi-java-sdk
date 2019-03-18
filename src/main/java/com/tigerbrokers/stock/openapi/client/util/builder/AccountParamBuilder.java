@@ -89,6 +89,27 @@ public class AccountParamBuilder {
     return this;
   }
 
+  public AccountParamBuilder strike(Double strike) {
+    if (strike != null) {
+      paramMap.put("strike", strike);
+    }
+    return this;
+  }
+
+  public AccountParamBuilder expiry(String expiry) {
+    if (expiry != null) {
+      paramMap.put("expiry", expiry);
+    }
+    return this;
+  }
+
+  public AccountParamBuilder right(String right) {
+    if (right != null) {
+      paramMap.put("right", right);
+    }
+    return this;
+  }
+
   public AccountParamBuilder startDate(Long timestamp) {
     if (timestamp != null && timestamp > 0) {
       paramMap.put("start_date", timestamp);
