@@ -219,6 +219,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   public void disconnect() {
+    sendDisconnectFrame();
     destroyConnectCommand();
     try {
       if (channel != null) {
@@ -234,6 +235,21 @@ public class WebSocketClient implements SubscribeAsyncApi {
       ApiLogger.error(t.getMessage());
     } finally {
       inited = false;
+    }
+  }
+
+  private synchronized void sendDisconnectFrame() {
+    if (!isConnected()) {
+      notConnect();
+      return;
+    }
+    StompFrame disconnectFrame = StompMessageUtil.buildDisconnectMessage(authentication.getTigerId());
+    ChannelFuture channelFuture = channel.writeAndFlush(disconnectFrame);
+    try {
+      channelFuture.sync();
+      ApiLogger.info("sendDisconnectFrame finished, tiger id:{}", authentication.getTigerId());
+    } catch (InterruptedException e) {
+      ApiLogger.error("sendDisconnectFrame error, tiger id:{}", authentication.getTigerId(), e);
     }
   }
 
