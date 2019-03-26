@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author  zhaolei
+ * @author zhaolei
  * create at 2018/12/20
  */
 public class WebSocketStompFrameEncoder extends MessageToMessageEncoder<StompSubframe> {

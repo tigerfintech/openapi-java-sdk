@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
+import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import io.netty.handler.codec.stomp.StompFrame;
 import java.nio.charset.Charset;
 
@@ -35,6 +36,11 @@ public class ApiCallbackDecoder {
   }
 
   public synchronized void handle(StompFrame stompFrame) {
+    String content = stompFrame.content().toString(DEFAULT_CHARSET);
+    if (!StringUtils.isEmpty(content) && "Heart_Beat".equals(content)) {
+      processHeartBeat(content);
+      return;
+    }
     init(stompFrame);
 
     switch (retType) {
@@ -129,5 +135,13 @@ public class ApiCallbackDecoder {
 
   private void processDefault() {
     ApiLogger.info("ret-type:{} cannot be processed.", retType);
+  }
+
+  private void processHeartBeat(final String content) {
+    callback.hearBeat(content);
+  }
+
+  public void serverHeartBeatTimeOut(String channelId) {
+    callback.serverHeartBeatTimeOut(channelId);
   }
 }

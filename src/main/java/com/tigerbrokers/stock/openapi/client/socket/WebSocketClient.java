@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
+import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
@@ -35,6 +36,7 @@ import io.netty.handler.codec.stomp.StompSubframeEncoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.internal.ConcurrentSet;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -57,6 +59,8 @@ import javax.net.ssl.SSLException;
  */
 public class WebSocketClient implements SubscribeAsyncApi {
 
+  public final static String STOMP_ENCODER = "stompEncoder";
+  public final static String STOMP_DECODER = "stompDecoder";
   private String url;
   private ApiAuthentication authentication;
   private ApiComposeCallback apiComposeCallback;
@@ -81,10 +85,33 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private static final long SHUTDOWN_TIMEOUT = 1000 * 60 * 15;
   private static final int RECONNECT_WARNING_PERIOD = 1800;
 
+  private int clientSendInterval = 0;
+  private int clientReceiveInterval = 0;
+  private static final int CLIENT_SEND_INTERVAL_MIN = 3000;
+  private static final int CLIENT_RECEIVE_INTERVAL_MIN = 5000;
+
   public WebSocketClient(String url, ApiAuthentication authentication, ApiComposeCallback apiComposeCallback) {
     this.url = url;
     this.authentication = authentication;
     this.apiComposeCallback = apiComposeCallback;
+    this.clientSendInterval = 10000;
+    init();
+  }
+
+  public WebSocketClient(String url, ApiAuthentication authentication, ApiComposeCallback apiComposeCallback,
+      final ClientHeartBeatData clientHeartBeatData) {
+    this.url = url;
+    this.authentication = authentication;
+    this.apiComposeCallback = apiComposeCallback;
+    if (clientHeartBeatData.getSendInterval() >= 0) {
+      this.clientSendInterval =
+          clientHeartBeatData.getSendInterval() >= CLIENT_SEND_INTERVAL_MIN ? clientHeartBeatData.getSendInterval()
+              : CLIENT_SEND_INTERVAL_MIN;
+    }
+    if (clientHeartBeatData.getReceiveInterval() >= 0) {
+      this.clientReceiveInterval = clientHeartBeatData.getReceiveInterval() >= CLIENT_RECEIVE_INTERVAL_MIN
+          ? clientHeartBeatData.getReceiveInterval() : CLIENT_RECEIVE_INTERVAL_MIN;
+    }
     init();
   }
 
@@ -109,13 +136,14 @@ public class WebSocketClient implements SubscribeAsyncApi {
             if (port == 8887 || port == 8889) {
               p.addLast("websocketCodec", new HttpClientCodec());
               p.addLast("websocketAggregator", new HttpObjectAggregator(65535));
-              p.addLast("websocketStompDecoder", new WebSocketStompFrameDecoder());
-              p.addLast("websocketStompEncoder", new WebSocketStompFrameEncoder());
+              p.addLast(STOMP_ENCODER, new WebSocketStompFrameDecoder());
+              p.addLast(STOMP_DECODER, new WebSocketStompFrameEncoder());
               p.addLast("stompAggregator", new StompSubframeAggregator(65535));
             } else {
-              final WebSocketHandler handler = new WebSocketHandler(authentication, apiComposeCallback);
-              p.addLast("stompEncoder", new StompSubframeEncoder());
-              p.addLast("stompDecoder", new StompSubframeDecoder());
+              final WebSocketHandler handler =
+                  new WebSocketHandler(authentication, apiComposeCallback, clientSendInterval, clientReceiveInterval);
+              p.addLast(STOMP_ENCODER, new StompSubframeEncoder());
+              p.addLast(STOMP_DECODER, new StompSubframeDecoder());
               p.addLast("aggregator", new StompSubframeAggregator(65535));
               p.addLast("webSocketHandler", handler);
             }
@@ -174,7 +202,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
           if (address.getPort() == 8887 || address.getPort() == 8889) {
             synchronized (this.channel) {
               WebSocketHandshakerHandler webSocketHandshakerHandler =
-                  new WebSocketHandshakerHandler(authentication, apiComposeCallback);
+                  new WebSocketHandshakerHandler(authentication, apiComposeCallback, clientSendInterval,
+                      clientReceiveInterval);
               HttpHeaders httpHeaders = new DefaultHttpHeaders();
               WebSocketClientHandshaker handshaker =
                   WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, true, httpHeaders);

@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.websocket;
 import com.tigerbrokers.stock.openapi.client.socket.ApiAuthentication;
 import com.tigerbrokers.stock.openapi.client.socket.ApiCallbackDecoder;
 import com.tigerbrokers.stock.openapi.client.socket.ApiComposeCallback;
+import com.tigerbrokers.stock.openapi.client.socket.WebSocketHandler;
 import com.tigerbrokers.stock.openapi.client.util.ApiCallbackDecoderUtils;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
@@ -16,9 +17,8 @@ import io.netty.handler.codec.stomp.StompFrame;
 import io.netty.util.CharsetUtil;
 
 /**
- * @author  zhaolei
+ * @author zhaolei
  * create at 2018/12/20
- *
  */
 @ChannelHandler.Sharable
 public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Object> {
@@ -28,9 +28,20 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
 
   private WebSocketClientHandshaker handshaker;
 
+  private int clientSendInterval = 0;
+  private int clientReceiveInterval = 0;
+
   public WebSocketHandshakerHandler(ApiAuthentication authentication, ApiComposeCallback callback) {
     this.authentication = authentication;
     this.decoder = new ApiCallbackDecoder(callback);
+  }
+
+  public WebSocketHandshakerHandler(ApiAuthentication authentication, ApiComposeCallback callback, int sendInterval,
+      int receiveInterval) {
+    this.authentication = authentication;
+    this.decoder = new ApiCallbackDecoder(callback);
+    this.clientSendInterval = sendInterval;
+    this.clientReceiveInterval = receiveInterval;
   }
 
   @Override
@@ -74,8 +85,16 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
       //握手协议返回，设置结束握手
       handshaker.finishHandshake(ch, response);
       //发送stomp connect请求
-      ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
-          authentication.getVersion()));
+      if (0 == this.clientReceiveInterval && 0 == this.clientSendInterval) {
+        ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
+            authentication.getVersion()));
+      } else {
+        ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
+            authentication.getVersion(),
+            this.clientSendInterval == 0 ? 0 : this.clientSendInterval + WebSocketHandler.HEART_BEAT_SPAN,
+            this.clientReceiveInterval == 0 ? 0 : this.clientReceiveInterval - WebSocketHandler.HEART_BEAT_SPAN));
+      }
+
       ApiLogger.info("WebSocket Client connected! response headers[sec-websocket-extensions]:{}", response.headers());
     } else if (msg instanceof FullHttpResponse) {
       response = (FullHttpResponse) msg;
