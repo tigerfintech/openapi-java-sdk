@@ -8,8 +8,8 @@ import io.netty.handler.timeout.IdleStateEvent;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @创建人 zhaolei
- * @创建时间 2019/3/13
+ * @author  zhaolei
+ * @since  2019/3/13
  * 描述
  */
 @Slf4j

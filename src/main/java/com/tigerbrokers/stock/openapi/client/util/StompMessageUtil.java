@@ -28,6 +28,9 @@ public class StompMessageUtil {
   }
 
   /**
+   * @param login login
+   * @param passcode passcode
+   * @param version version
    * @param sendInterval client能保证发送心跳的最小间隔，0代表client不发送心跳
    * @param receiveInterval client希望收到server心跳的间隔，0代表client不希望收到server的心跳
    */

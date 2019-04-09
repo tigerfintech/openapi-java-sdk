@@ -5,8 +5,8 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 /**
- * @创建人 zhaolei
- * @创建时间 2019/3/12
+ * @author  zhaolei
+ * @since  2019/3/12
  * 描述
  */
 @Data

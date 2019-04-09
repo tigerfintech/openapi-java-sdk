@@ -317,6 +317,8 @@ public class WebSocketStompFrameDecoder extends MessageToMessageDecoder<WebSocke
   }
 
   /**
+   * @param state state
+   * @param buf buffer
    * Stores the internal cumulative buffer's reader position and updates
    * the current decoder state.
    */

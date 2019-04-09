@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.socket;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
+import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import io.netty.handler.codec.stomp.StompFrame;
@@ -10,8 +11,6 @@ import java.nio.charset.Charset;
 
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.END_CONN;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_CANCEL_SUBSCRIBE_END;
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_FUTURE_CHANGE_END;
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_OPTION_CHANGE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_QUOTE_CHANGE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUBSCRIBE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUB_SYMBOLS_END;
@@ -56,12 +55,6 @@ public class ApiCallbackDecoder {
       case GET_QUOTE_CHANGE_END:
         processSubscribeQuoteChange();
         break;
-      case GET_OPTION_CHANGE_END:
-        processSubscribeOptionEnd();
-        break;
-      case GET_FUTURE_CHANGE_END:
-        processSubscribeFutureEnd();
-        break;
       case GET_SUB_SYMBOLS_END:
         processGetSubscribedSymbols();
         break;
@@ -105,7 +98,26 @@ public class ApiCallbackDecoder {
 
   private void processSubscribeQuoteChange() {
     String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    callback.quoteChange(JSONObject.parseObject(content));
+    if (content == null) {
+      return;
+    }
+    JSONObject jsonObject = JSONObject.parseObject(content);
+    if (jsonObject == null) {
+      return;
+    }
+    String type = jsonObject.getString("type");
+    if (type == null) {
+      return;
+    }
+    if (type.equals(QuoteSubject.Quote.name())) {
+      callback.quoteChange(jsonObject);
+    } else if (type.equals(QuoteSubject.Option.name())) {
+      callback.optionChange(jsonObject);
+    } else if (type.equals(QuoteSubject.Future.name())) {
+      callback.futureChange(jsonObject);
+    } else {
+      callback.quoteChange(jsonObject);
+    }
   }
 
   private void processGetSubscribedSymbols() {
@@ -121,16 +133,6 @@ public class ApiCallbackDecoder {
   private void processCancelSubscribeEnd() {
     String content = stompFrame.content().toString(DEFAULT_CHARSET);
     callback.cancelSubscribeEnd(JSONObject.parseObject(content));
-  }
-
-  private void processSubscribeOptionEnd() {
-    String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    callback.optionChange(JSONObject.parseObject(content));
-  }
-
-  private void processSubscribeFutureEnd() {
-    String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    callback.futureChange(JSONObject.parseObject(content));
   }
 
   private void processDefault() {

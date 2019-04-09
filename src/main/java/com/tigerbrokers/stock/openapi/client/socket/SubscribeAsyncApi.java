@@ -14,6 +14,7 @@ public interface SubscribeAsyncApi {
    * 订阅主题
    *
    * @param subject 主题
+   * @return string id
    */
   String subscribe(Subject subject);
 
@@ -22,6 +23,7 @@ public interface SubscribeAsyncApi {
    *
    * @param subject 主题
    * @param focusKeys 关注key列表
+   * @return string id
    */
   String subscribe(Subject subject, List<String> focusKeys);
 
@@ -29,6 +31,7 @@ public interface SubscribeAsyncApi {
    * 取消订阅主题
    *
    * @param subject 主题
+   * @return string id
    */
   String cancelSubscribe(Subject subject);
 
@@ -36,6 +39,7 @@ public interface SubscribeAsyncApi {
    * 订阅行情
    *
    * @param symbols 标的列表
+   * @return string id
    */
   String subscribeQuote(Set<String> symbols);
 
@@ -44,6 +48,7 @@ public interface SubscribeAsyncApi {
    *
    * @param symbols 标的列表
    * @param focusKeys 关注key
+   * @return string id
    */
   String subscribeQuote(Set<String> symbols, List<String> focusKeys);
 
@@ -51,6 +56,7 @@ public interface SubscribeAsyncApi {
    * 取消订阅行情
    *
    * @param symbols 标的列表
+   * @return string id
    */
   String cancelSubscribeQuote(Set<String> symbols);
 
@@ -58,6 +64,7 @@ public interface SubscribeAsyncApi {
    * 订阅期权数据
    *
    * @param symbols 标的列表
+   * @return string id
    */
   String subscribeOption(Set<String> symbols);
 
@@ -65,6 +72,7 @@ public interface SubscribeAsyncApi {
    * 取消订阅期权数据
    *
    * @param symbols 标的列表
+   * @return string id
    */
   String cancelSubscribeOption(Set<String> symbols);
 
@@ -72,6 +80,7 @@ public interface SubscribeAsyncApi {
    * 订阅期货数据
    *
    * @param symbols 标的列表
+   * @return string id
    */
   String subscribeFuture(Set<String> symbols);
 
@@ -79,11 +88,13 @@ public interface SubscribeAsyncApi {
    * 取消订单期货数据
    *
    * @param symbols 标的列表
+   * @return string id
    */
   String cancelSubscribeFuture(Set<String> symbols);
 
   /**
    * 查询已订阅symbol列表
+   * @return string id
    */
   String getSubscribedSymbols();
 }

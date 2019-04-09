@@ -14,8 +14,8 @@ import static com.tigerbrokers.stock.openapi.client.socket.WebSocketClient.conne
 import static io.netty.handler.codec.stomp.StompHeaders.HEART_BEAT;
 
 /**
- * 创建人 zhaolei
- * 创建时间 2018/12/20
+ * @author  zhaolei
+ * @since  2018/12/20
  * 描述
  */
 public class ApiCallbackDecoderUtils {
