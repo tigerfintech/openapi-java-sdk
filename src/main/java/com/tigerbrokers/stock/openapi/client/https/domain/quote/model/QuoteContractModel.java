@@ -14,6 +14,36 @@ public class QuoteContractModel extends QuoteSymbolModel {
   @JSONField(name = "sec_type")
   private SecType secType;
 
+  private String right;
+
+  private String strike;
+
+  private Long expiry;
+
+  public Long getExpiry() {
+    return expiry;
+  }
+
+  public void setExpiry(Long expiry) {
+    this.expiry = expiry;
+  }
+
+  public String getRight() {
+    return right;
+  }
+
+  public void setRight(String right) {
+    this.right = right;
+  }
+
+  public String getStrike() {
+    return strike;
+  }
+
+  public void setStrike(String strike) {
+    this.strike = strike;
+  }
+
   public QuoteContractModel() {
   }
 
@@ -29,6 +59,22 @@ public class QuoteContractModel extends QuoteSymbolModel {
   public QuoteContractModel(List<String> symbols, SecType secType, Language lang) {
     super(symbols, lang);
     this.secType = secType;
+  }
+
+  public QuoteContractModel(List<String> symbols, SecType secType, Long expiry) {
+    this(symbols,secType);
+    this.expiry = expiry;
+  }
+
+  public QuoteContractModel(List<String> symbols, SecType secType, Long expiry, Language lang) {
+    this(symbols,secType,expiry);
+    this.setLang(lang);
+  }
+
+  public QuoteContractModel(List<String> symbols, SecType secType, Long expiry, String right, String strike) {
+    this(symbols,secType,expiry);
+    this.setRight(right);
+    this.setStrike(strike);
   }
 
   public SecType getSecType() {
