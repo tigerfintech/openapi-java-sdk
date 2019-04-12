@@ -66,7 +66,6 @@ public interface ApiServiceType {
   String ACTIVE_ORDERS = "active_orders";
   String INACTIVE_ORDERS = "inactive_orders";
   String FILLED_ORDERS = "filled_orders";
-  String USER_TRANSACTIONS = "user_transactions";
 
   /**
    * 合约
