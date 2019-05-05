@@ -6,6 +6,7 @@ import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteTimelineResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TimeLineType;
 import java.util.List;
 
 /**
@@ -20,17 +21,31 @@ public class QuoteTimelineRequest extends TigerCommonRequest implements TigerReq
   }
 
   public static QuoteTimelineRequest newRequest(List<String> symbols, Long beginTime) {
-    return newRequest(symbols, beginTime, false);
+    return newRequest(symbols, beginTime, false, TimeLineType.day);
   }
 
   public static QuoteTimelineRequest newRequest(List<String> symbols, Long beginTime, boolean includeHourTrading) {
-    return newRequest(symbols, beginTime, includeHourTrading, Language.en_US);
+    return newRequest(symbols, beginTime, includeHourTrading, TimeLineType.day, Language.en_US);
   }
 
   public static QuoteTimelineRequest newRequest(List<String> symbols, Long beginTime, boolean includeHourTrading,
       Language lang) {
+    return newRequest(symbols, beginTime, includeHourTrading, TimeLineType.day, lang);
+  }
+
+  public static QuoteTimelineRequest newRequest(List<String> symbols, Long beginTime, TimeLineType timeLineType) {
+    return newRequest(symbols, beginTime, true, timeLineType);
+  }
+
+  public static QuoteTimelineRequest newRequest(List<String> symbols, Long beginTime, boolean includeHourTrading,
+      TimeLineType timeLineType) {
+    return newRequest(symbols, beginTime, includeHourTrading, timeLineType, Language.en_US);
+  }
+
+  public static QuoteTimelineRequest newRequest(List<String> symbols, Long beginTime, boolean includeHourTrading,
+      TimeLineType timeLineType, Language lang) {
     QuoteTimelineRequest request = new QuoteTimelineRequest();
-    QuoteTimelineModel model = new QuoteTimelineModel(symbols, beginTime, includeHourTrading, lang);
+    QuoteTimelineModel model = new QuoteTimelineModel(symbols, beginTime, includeHourTrading, timeLineType, lang);
     request.setApiModel(model);
     return request;
   }
