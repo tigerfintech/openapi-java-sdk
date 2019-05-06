@@ -9,23 +9,11 @@ import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
  */
 public class UserTradePasswordVerifyModel extends ApiModel {
 
-  @JSONField(name = "access_token")
-  private String accessToken;
-
   @JSONField(name = "id_no")
   private String idNo;
 
-  public UserTradePasswordVerifyModel(String accessToken, String idNo) {
-    this.accessToken = accessToken;
+  public UserTradePasswordVerifyModel(String idNo) {
     this.idNo = idNo;
-  }
-
-  public String getAccessToken() {
-    return accessToken;
-  }
-
-  public void setAccessToken(String accessToken) {
-    this.accessToken = accessToken;
   }
 
   public String getIdNo() {

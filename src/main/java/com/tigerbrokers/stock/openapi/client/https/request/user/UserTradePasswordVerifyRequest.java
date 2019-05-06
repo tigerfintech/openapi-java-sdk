@@ -17,9 +17,9 @@ public class UserTradePasswordVerifyRequest extends TigerCommonRequest
     setApiMethodName(ApiServiceType.USER_TRADE_PASSWORD_VERIFY);
   }
 
-  public static UserTradePasswordVerifyRequest newRequest(String accessToken, String idNo) {
+  public static UserTradePasswordVerifyRequest newRequest(String idNo) {
     UserTradePasswordVerifyRequest request = new UserTradePasswordVerifyRequest();
-    UserTradePasswordVerifyModel model = new UserTradePasswordVerifyModel(accessToken, idNo);
+    UserTradePasswordVerifyModel model = new UserTradePasswordVerifyModel(idNo);
     request.setApiModel(model);
     return request;
   }

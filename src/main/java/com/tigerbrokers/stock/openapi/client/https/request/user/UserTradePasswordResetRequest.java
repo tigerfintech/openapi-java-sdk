@@ -17,9 +17,9 @@ public class UserTradePasswordResetRequest extends TigerCommonRequest implements
     setApiMethodName(ApiServiceType.USER_TRADE_PASSWORD_RESET);
   }
 
-  public static UserTradePasswordResetRequest newRequest(String accessToken, String idNo, String tradePassword, String verifyCode) {
+  public static UserTradePasswordResetRequest newRequest(String idNo, String tradePassword, String verifyCode) {
     UserTradePasswordResetRequest request = new UserTradePasswordResetRequest();
-    UserTradePasswordResetModel model = new UserTradePasswordResetModel(accessToken,idNo,tradePassword,verifyCode);
+    UserTradePasswordResetModel model = new UserTradePasswordResetModel(idNo, tradePassword, verifyCode);
     request.setApiModel(model);
     return request;
   }
