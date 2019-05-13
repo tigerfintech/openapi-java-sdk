@@ -20,6 +20,10 @@ public class QuoteTimelineRequest extends TigerCommonRequest implements TigerReq
     setApiMethodName(ApiServiceType.TIMELINE);
   }
 
+  public static QuoteTimelineRequest newRequest(List<String> symbols) {
+    return newRequest(symbols, null);
+  }
+
   public static QuoteTimelineRequest newRequest(List<String> symbols, Long beginTime) {
     return newRequest(symbols, beginTime, false, TimeLineType.day);
   }
