@@ -18,13 +18,13 @@ public class QuoteContractModel extends QuoteSymbolModel {
 
   private String strike;
 
-  private Long expiry;
+  private String expiry;
 
-  public Long getExpiry() {
+  public String getExpiry() {
     return expiry;
   }
 
-  public void setExpiry(Long expiry) {
+  public void setExpiry(String expiry) {
     this.expiry = expiry;
   }
 
@@ -61,17 +61,17 @@ public class QuoteContractModel extends QuoteSymbolModel {
     this.secType = secType;
   }
 
-  public QuoteContractModel(List<String> symbols, SecType secType, Long expiry) {
+  public QuoteContractModel(List<String> symbols, SecType secType, String expiry) {
     this(symbols,secType);
     this.expiry = expiry;
   }
 
-  public QuoteContractModel(List<String> symbols, SecType secType, Long expiry, Language lang) {
+  public QuoteContractModel(List<String> symbols, SecType secType, String expiry, Language lang) {
     this(symbols,secType,expiry);
     this.setLang(lang);
   }
 
-  public QuoteContractModel(List<String> symbols, SecType secType, Long expiry, String right, String strike) {
+  public QuoteContractModel(List<String> symbols, SecType secType, String expiry, String right, String strike) {
     this(symbols,secType,expiry);
     this.setRight(right);
     this.setStrike(strike);

@@ -35,7 +35,7 @@ public class QuoteContractRequest extends TigerCommonRequest implements TigerReq
     return request;
   }
 
-  public static QuoteContractRequest newRequest(List<String> symbols, SecType secType, Long expiry) {
+  public static QuoteContractRequest newRequest(List<String> symbols, SecType secType, String expiry) {
     QuoteContractRequest request = new QuoteContractRequest();
     QuoteContractModel model = new QuoteContractModel(symbols, secType, expiry);
     request.setApiModel(model);
