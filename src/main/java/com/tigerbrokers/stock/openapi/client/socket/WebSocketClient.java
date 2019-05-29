@@ -36,7 +36,6 @@ import io.netty.handler.codec.stomp.StompSubframeEncoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.internal.ConcurrentSet;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -404,6 +403,16 @@ public class WebSocketClient implements SubscribeAsyncApi {
   @Override
   public String cancelSubscribeFuture(Set<String> symbols) {
     return cancelSubscribeQuote(symbols, QuoteSubject.Future);
+  }
+
+  @Override
+  public String subscribeAskBid(Set<String> symbols) {
+    return subscribeQuote(symbols, QuoteSubject.AskBid);
+  }
+
+  @Override
+  public String cancelSubscribeAskBid(Set<String> symbols) {
+    return cancelSubscribeQuote(symbols, QuoteSubject.AskBid);
   }
 
   private String subscribeQuote(Set<String> symbols, QuoteSubject subject) {

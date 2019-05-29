@@ -115,6 +115,8 @@ public class ApiCallbackDecoder {
       callback.optionChange(jsonObject);
     } else if (type.equals(QuoteSubject.Future.name())) {
       callback.futureChange(jsonObject);
+    } else if (type.equals(QuoteSubject.AskBid.name())) {
+      callback.askBidChange(jsonObject);
     } else {
       callback.quoteChange(jsonObject);
     }

@@ -93,7 +93,24 @@ public interface SubscribeAsyncApi {
   String cancelSubscribeFuture(Set<String> symbols);
 
   /**
+   * 订阅买卖盘数据
+   *
+   * @param symbols 标的列表
+   * @return string id
+   */
+  String subscribeAskBid(Set<String> symbols);
+
+  /**
+   * 取消订阅买卖盘数据
+   *
+   * @param symbols 标的列表
+   * @return string id
+   */
+  String cancelSubscribeAskBid(Set<String> symbols);
+
+  /**
    * 查询已订阅symbol列表
+   *
    * @return string id
    */
   String getSubscribedSymbols();
