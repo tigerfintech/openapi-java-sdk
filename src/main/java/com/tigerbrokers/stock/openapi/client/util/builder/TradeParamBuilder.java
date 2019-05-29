@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.util.builder;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tigerbrokers.stock.openapi.client.struct.Contract;
 import com.tigerbrokers.stock.openapi.client.struct.TagValue;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
@@ -207,6 +208,33 @@ public class TradeParamBuilder {
     if (source != null) {
       this.orderParameter.setSource(source);
     }
+    return this;
+  }
+
+  public TradeParamBuilder contract(Contract contract) {
+    symbol(contract.getSymbol())
+        .right(contract.getRight())
+        .expiry(contract.getExpiry())
+        .localSymbol(contract.getLocalSymbol())
+        .strike(contract.getStrike() + "")
+        .exchange(contract.getExchange());
+
+    if (contract.getSecType() != null) {
+      this.orderParameter.setSecType(SecType.valueOf(contract.getSecType()));
+    }
+
+    if (contract.getMarket() != null) {
+      this.orderParameter.setMarket(contract.getMarket());
+    }
+
+    if (contract.getCurrency() != null) {
+      this.orderParameter.setCurrency(Currency.valueOf(contract.getCurrency()));
+    }
+
+    if (contract.getMultiplier() != null) {
+      this.orderParameter.setMultiplier(contract.getMultiplier().floatValue());
+    }
+
     return this;
   }
 
