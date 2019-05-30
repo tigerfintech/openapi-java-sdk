@@ -5,5 +5,5 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
  * Created by lijiawen on 2018/07/06.
  */
 public enum Exchange {
-  SMART, SEHK, SEHKNTL, SEHKSZSE;
+  ARCA, TOTAL_VIEW
 }

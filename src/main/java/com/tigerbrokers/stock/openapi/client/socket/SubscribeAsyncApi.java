@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
+import com.tigerbrokers.stock.openapi.client.struct.enums.Exchange;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import java.util.List;
 import java.util.Set;
@@ -98,7 +99,7 @@ public interface SubscribeAsyncApi {
    * @param symbols 标的列表
    * @return string id
    */
-  String subscribeAskBid(Set<String> symbols);
+  String subscribeAskBid(Set<String> symbols, Exchange exchange);
 
   /**
    * 取消订阅买卖盘数据

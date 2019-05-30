@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Exchange;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
@@ -406,8 +407,17 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   @Override
-  public String subscribeAskBid(Set<String> symbols) {
-    return subscribeQuote(symbols, QuoteSubject.AskBid);
+  public String subscribeAskBid(Set<String> symbols, Exchange exchange) {
+    if (!isConnected()) {
+      notConnect();
+      return null;
+    }
+    StompFrame frame = StompMessageUtil.buildSubscribeMessage(symbols, exchange, QuoteSubject.AskBid);
+    channel.writeAndFlush(frame);
+    subscribeSymbols.addAll(symbols);
+    ApiLogger.info("send subscribe [{}] message, symbols:{}", QuoteSubject.AskBid, symbols);
+
+    return frame.headers().getAsString(StompHeaders.ID);
   }
 
   @Override
