@@ -216,8 +216,10 @@ public class TradeParamBuilder {
         .right(contract.getRight())
         .expiry(contract.getExpiry())
         .localSymbol(contract.getLocalSymbol())
-        .strike(contract.getStrike() + "")
         .exchange(contract.getExchange());
+    if (contract.getStrike() != null) {
+      this.orderParameter.setStrike(contract.getStrike().toString());
+    }
 
     if (contract.getSecType() != null) {
       this.orderParameter.setSecType(SecType.valueOf(contract.getSecType()));
