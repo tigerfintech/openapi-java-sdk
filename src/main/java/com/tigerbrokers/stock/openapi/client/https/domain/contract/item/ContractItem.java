@@ -1,4 +1,4 @@
-package com.tigerbrokers.stock.openapi.client.struct;
+package com.tigerbrokers.stock.openapi.client.https.domain.contract.item;
 
 import java.io.Serializable;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Contract implements Serializable{
+public class ContractItem implements Serializable{
   private Integer contractId;
   private String identifier;
   private String symbol;

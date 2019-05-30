@@ -2,7 +2,7 @@ package com.tigerbrokers.stock.openapi.client.https.response.contract;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
-import com.tigerbrokers.stock.openapi.client.struct.Contract;
+import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import java.util.List;
 import lombok.Data;
 
@@ -15,5 +15,5 @@ import lombok.Data;
 public class ContractResponse extends TigerResponse {
 
   @JSONField(name = "data")
-  private List<Contract> contractItems;
+  private List<ContractItem> contractItems;
 }

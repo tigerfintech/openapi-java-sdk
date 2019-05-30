@@ -1,7 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.util.builder;
 
 import com.alibaba.fastjson.JSONObject;
-import com.tigerbrokers.stock.openapi.client.struct.Contract;
+import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.struct.TagValue;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
@@ -211,7 +211,7 @@ public class TradeParamBuilder {
     return this;
   }
 
-  public TradeParamBuilder contract(Contract contract) {
+  public TradeParamBuilder contract(ContractItem contract) {
     symbol(contract.getSymbol())
         .right(contract.getRight())
         .expiry(contract.getExpiry())
