@@ -11,8 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class Contract implements Serializable{
-  private Integer conid;
-  private String stockId;
+  private Integer contractId;
   private String identifier;
   private String symbol;
   private String secType;
@@ -23,17 +22,17 @@ public class Contract implements Serializable{
   private Double multiplier;
   private String exchange;
   private String market;
-  private String primaryExch;
+  private String primaryExchange;
   private String currency;
   private String localSymbol;
   private String tradingClass;
   private String name;
-  private boolean forexConversion;
   private int status;
   private Double minTick;
 
   private String lastTradingDate;
   private String firstNoticeDate;
   private Long lastBiddingCloseTime;
+  private boolean trade;
   private boolean continuous;
 }
