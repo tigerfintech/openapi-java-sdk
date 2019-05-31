@@ -20,7 +20,7 @@ public class FinancialDailyRequest extends TigerCommonRequest implements TigerRe
 
   public FinancialDailyRequest() {
     setApiMethodName(ApiServiceType.FINANCIAL_DAILY);
-    setApiVersion(TigerApiConstants.DEFAULT_VERSION);
+    setApiVersion(V2_0);
   }
 
   public static FinancialDailyRequest newRequest(List<String> symbols, List<String> fields, Date beginDate,

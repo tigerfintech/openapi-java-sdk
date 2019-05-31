@@ -1,7 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.request.financial;
 
 import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
-import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.financial.model.FinancialReportModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
@@ -18,7 +17,7 @@ public class FinancialReportRequest extends TigerCommonRequest implements TigerR
 
   public FinancialReportRequest() {
     setApiMethodName(ApiServiceType.FINANCIAL_REPORT);
-    setApiVersion(TigerApiConstants.DEFAULT_VERSION);
+    setApiVersion(V2_0);
   }
 
   public static FinancialReportRequest newRequest(List<String> symbols, List<String> fields) {
