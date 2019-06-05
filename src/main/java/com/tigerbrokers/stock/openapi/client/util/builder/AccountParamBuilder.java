@@ -54,6 +54,20 @@ public class AccountParamBuilder {
     return this;
   }
 
+  public AccountParamBuilder symbols(List<String> symbols) {
+    if (symbols != null) {
+      paramMap.put("symbols", symbols);
+    }
+    return this;
+  }
+
+  public AccountParamBuilder continuous(Boolean continuous) {
+    if (continuous != null) {
+      paramMap.put("continuous", continuous);
+    }
+    return this;
+  }
+
   public AccountParamBuilder currency(Currency currency) {
     if (currency != null) {
       paramMap.put("currency", currency.name());

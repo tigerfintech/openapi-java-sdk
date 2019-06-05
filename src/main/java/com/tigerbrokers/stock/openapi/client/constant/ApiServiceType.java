@@ -71,6 +71,7 @@ public interface ApiServiceType {
    * 合约
    */
   String CONTRACT = "contract";
+  String CONTRACTS = "contracts";
 
   /**
    * 基础数据
