@@ -27,6 +27,7 @@ public class OptionBriefItem extends ApiModel {
   private String right;
   private String volatility;
   private Long expiry;
+  protected Double ratesBonds;
 
   public String getIdentifier() {
     return identifier;
@@ -180,6 +181,14 @@ public class OptionBriefItem extends ApiModel {
     this.expiry = expiry;
   }
 
+  public Double getRatesBonds() {
+    return ratesBonds;
+  }
+
+  public void setRatesBonds(Double ratesBonds) {
+    this.ratesBonds = ratesBonds;
+  }
+
   @Override
   public String toString() {
     return "OptionBriefItem{" +
@@ -202,6 +211,7 @@ public class OptionBriefItem extends ApiModel {
         ", right='" + right + '\'' +
         ", volatility='" + volatility + '\'' +
         ", expiry=" + expiry +
+        ", ratesBonds=" + ratesBonds +
         '}';
   }
 }
