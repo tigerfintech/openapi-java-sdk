@@ -495,7 +495,7 @@ public enum FinancialReportField {
   leveredFreeCashFlowMargin("levered_free_cash_flow_margin", 4436L, 0),
   unleveredFreeCashFlowMargin("unlevered_free_cash_flow_margin", 4437L, 0),
   normalizedNetIncomeMargin("normalized_net_income_margin", 4420L, 0),
-  floatPrecent("float_precent", 4170L, 0);
+  floatPercent("float_percent", 4170L, 0);
 
   private String field;
   private long dataItemId;

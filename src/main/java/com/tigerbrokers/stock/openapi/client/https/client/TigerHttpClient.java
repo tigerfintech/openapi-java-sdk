@@ -46,6 +46,10 @@ public class TigerHttpClient implements TigerClient {
 
   private static final String ONLINE_PUBLIC_KEY =
       "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDNF3G8SoEcCZh2rshUbayDgLLrj6rKgzNMxDL2HSnKcB0+GPOsndqSv+a4IBu9+I3fyBp5hkyMMG2+AXugd9pMpy6VxJxlNjhX1MYbNTZJUT4nudki4uh+LMOkIBHOceGNXjgB+cXqmlUnjlqha/HgboeHSnSgpM3dKSJQlIOsDwIDAQAB";
+
+  private static final String SANDBOX_PUBLIC_KEY =
+      "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCbm21i11hgAENGd3/f280PSe4g9YGkS3TEXBYMidihTvHHf+tJ0PYD0o3PruI0hl3qhEjHTAxb75T5YD3SGK4IBhHn/Rk6mhqlGgI+bBrBVYaXixmHfRo75RpUUuWACyeqQkZckgR0McxuW9xRMIa2cXZOoL1E4SL4lXKGhKoWbwIDAQAB";
+
   private String signType = TigerApiConstants.SIGN_TYPE_RSA;
   private String charset = TigerApiConstants.CHARSET_UTF8;
 
@@ -54,14 +58,23 @@ public class TigerHttpClient implements TigerClient {
   }
 
   public TigerHttpClient(String serverUrl, String tigerId, String privateKey) {
-    this(serverUrl, tigerId, privateKey, ONLINE_PUBLIC_KEY);
-  }
-
-  public TigerHttpClient(String serverUrl, String tigerId, String privateKey, String tigerPublicKey) {
+    if (serverUrl == null) {
+      throw new RuntimeException("serverUrl is empty.");
+    }
+    if (tigerId == null) {
+      throw new RuntimeException("tigerId is empty.");
+    }
+    if (privateKey == null) {
+      throw new RuntimeException("privateKey is empty.");
+    }
     this.serverUrl = serverUrl;
     this.tigerId = tigerId;
     this.privateKey = privateKey;
-    this.tigerPublicKey = tigerPublicKey;
+    if (!serverUrl.contains("sandbox")) {
+      this.tigerPublicKey = ONLINE_PUBLIC_KEY;
+    } else {
+      this.tigerPublicKey = SANDBOX_PUBLIC_KEY;
+    }
   }
 
   public TigerHttpClient(String serverUrl) {
