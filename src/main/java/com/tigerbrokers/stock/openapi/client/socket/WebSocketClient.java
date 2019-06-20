@@ -61,6 +61,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   public final static String STOMP_ENCODER = "stompEncoder";
   public final static String STOMP_DECODER = "stompDecoder";
+  private static final String[] PROTOCOLS = new String[] {"TLSv1.1", "TLSv1.2", "TLSv1.3"};
+
   private String url;
   private ApiAuthentication authentication;
   private ApiComposeCallback apiComposeCallback;
@@ -131,7 +133,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
           protected void initChannel(SocketChannel ch) throws SSLException {
             ChannelPipeline p = ch.pipeline();
             SslContext sslCtx =
-                SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+                SslContextBuilder.forClient().protocols(PROTOCOLS)
+                    .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
             p.addLast(sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
             if (port == 8887 || port == 8889) {
               p.addLast("websocketCodec", new HttpClientCodec());
