@@ -8,7 +8,7 @@ public interface RspProtocolType {
 
   String RET_HEADER = "ret-type";
 
-  int END_CONN = -1;
+  int CONNECTION_END = -1;
 
   /**
    * 交易

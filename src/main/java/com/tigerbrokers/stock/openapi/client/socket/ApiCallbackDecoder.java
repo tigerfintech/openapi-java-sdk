@@ -6,11 +6,9 @@ import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
-import io.netty.handler.codec.stomp.StompCommand;
 import io.netty.handler.codec.stomp.StompFrame;
 import java.nio.charset.Charset;
 
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.END_CONN;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.ERROR_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_CANCEL_SUBSCRIBE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_QUOTE_CHANGE_END;
@@ -31,6 +29,7 @@ public class ApiCallbackDecoder {
   private StompFrame stompFrame;
   private int retType;
   private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+  private static final String HEART_BEAT = "Heart_Beat";
 
   public ApiCallbackDecoder(ApiComposeCallback callback) {
     this.callback = callback;
@@ -38,21 +37,11 @@ public class ApiCallbackDecoder {
 
   public synchronized void handle(StompFrame stompFrame) {
     String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    if (!StringUtils.isEmpty(content) && "Heart_Beat".equals(content)) {
+    if (!StringUtils.isEmpty(content) && HEART_BEAT.equals(content)) {
       processHeartBeat(content);
       return;
     }
     init(stompFrame);
-
-    if (stompFrame.command() == StompCommand.ERROR || stompFrame.command() == StompCommand.UNKNOWN) {
-      processErrorEnd();
-      return;
-    }
-
-    if (stompFrame.command() == StompCommand.DISCONNECT) {
-      processConnectionEnd();
-      return;
-    }
 
     switch (retType) {
       case SUBSCRIBE_POSITION:
@@ -78,9 +67,6 @@ public class ApiCallbackDecoder {
         break;
       case ERROR_END:
         processErrorEnd();
-        break;
-      case END_CONN:
-        processConnectionEnd();
         break;
       default:
         processDefault();
@@ -162,10 +148,6 @@ public class ApiCallbackDecoder {
     } else {
       callback.error("unknown error");
     }
-  }
-
-  private void processConnectionEnd() {
-    callback.connectionClosed();
   }
 
   private void processDefault() {
