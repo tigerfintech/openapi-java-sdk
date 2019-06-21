@@ -6,10 +6,12 @@ import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
+import io.netty.handler.codec.stomp.StompCommand;
 import io.netty.handler.codec.stomp.StompFrame;
 import java.nio.charset.Charset;
 
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.END_CONN;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.ERROR_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_CANCEL_SUBSCRIBE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_QUOTE_CHANGE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUBSCRIBE_END;
@@ -42,6 +44,16 @@ public class ApiCallbackDecoder {
     }
     init(stompFrame);
 
+    if (stompFrame.command() == StompCommand.ERROR || stompFrame.command() == StompCommand.UNKNOWN) {
+      processErrorEnd();
+      return;
+    }
+
+    if (stompFrame.command() == StompCommand.DISCONNECT) {
+      processConnectionEnd();
+      return;
+    }
+
     switch (retType) {
       case SUBSCRIBE_POSITION:
         processPosition();
@@ -64,7 +76,11 @@ public class ApiCallbackDecoder {
       case GET_CANCEL_SUBSCRIBE_END:
         processCancelSubscribeEnd();
         break;
+      case ERROR_END:
+        processErrorEnd();
+        break;
       case END_CONN:
+        processConnectionEnd();
         break;
       default:
         processDefault();
@@ -135,6 +151,21 @@ public class ApiCallbackDecoder {
   private void processCancelSubscribeEnd() {
     String content = stompFrame.content().toString(DEFAULT_CHARSET);
     callback.cancelSubscribeEnd(JSONObject.parseObject(content));
+  }
+
+  private void processErrorEnd() {
+    if (stompFrame != null && stompFrame.content() != null) {
+      String content = stompFrame.content().toString(DEFAULT_CHARSET);
+      callback.error(content);
+    } else if (stompFrame != null) {
+      callback.error(JSONObject.toJSONString(stompFrame));
+    } else {
+      callback.error("unknown error");
+    }
+  }
+
+  private void processConnectionEnd() {
+    callback.connectionClosed();
   }
 
   private void processDefault() {

@@ -61,7 +61,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   public final static String STOMP_ENCODER = "stompEncoder";
   public final static String STOMP_DECODER = "stompDecoder";
-  private static final String[] PROTOCOLS = new String[] {"TLSv1", "TLSv1.1", "TLSv1.2"};
+  private static final String[] PROTOCOLS = new String[] {"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"};
 
   private String url;
   private ApiAuthentication authentication;
@@ -89,8 +89,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   private int clientSendInterval = 0;
   private int clientReceiveInterval = 0;
-  private static final int CLIENT_SEND_INTERVAL_MIN = 3000;
-  private static final int CLIENT_RECEIVE_INTERVAL_MIN = 5000;
+  private static final int CLIENT_SEND_INTERVAL_MIN = 10000;
+  private static final int CLIENT_RECEIVE_INTERVAL_MIN = 10000;
 
   public WebSocketClient(String url, ApiAuthentication authentication, ApiComposeCallback apiComposeCallback) {
     this.url = url;
