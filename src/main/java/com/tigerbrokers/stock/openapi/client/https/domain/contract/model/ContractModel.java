@@ -1,7 +1,5 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.contract.model;
 
-import com.alibaba.fastjson.annotation.JSONField;
-import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import lombok.Data;
 
 /**
@@ -9,17 +7,9 @@ import lombok.Data;
  * 时间：2019/05/29
  */
 @Data
-public class ContractModel extends ApiModel {
+public class ContractModel extends BaseContractModel {
 
-  private String account;
   private String symbol;
-  @JSONField(name = "sec_type")
-  private String secType;
-  private String currency;
-  private String expiry;
-  private Double strike;
-  private String right;
-  private String exchange;
 
   public ContractModel() {
 
@@ -27,18 +17,26 @@ public class ContractModel extends ApiModel {
 
   public ContractModel(String account, String symbol) {
     this.symbol = symbol;
-    this.account = account;
+    setAccount(account);
   }
 
   public ContractModel(String account, String symbol, String secType) {
     this(account, symbol);
-    this.secType = secType;
+    setSecType(secType);
   }
 
   public ContractModel(String account, String symbol, String secType, String expiry, Double strike, String right) {
     this(account, symbol, secType);
-    this.strike = strike;
-    this.expiry = expiry;
-    this.right = right;
+    setStrike(strike);
+    setExpiry(expiry);
+    setRight(right);
+  }
+
+  public String getSymbol() {
+    return symbol;
+  }
+
+  public void setSymbol(String symbol) {
+    this.symbol = symbol;
   }
 }
