@@ -29,6 +29,25 @@ public interface SubscribeAsyncApi {
   String subscribe(Subject subject, List<String> focusKeys);
 
   /**
+   * 订阅主题字段
+   *
+   * @param account 账户
+   * @param subject 主题
+   * @return string id
+   */
+  String subscribe(String account, Subject subject);
+
+  /**
+   * 订阅主题字段
+   *
+   * @param account 账户
+   * @param subject 主题
+   * @param focusKeys 关注key列表
+   * @return string id
+   */
+  String subscribe(String account, Subject subject, List<String> focusKeys);
+
+  /**
    * 取消订阅主题
    *
    * @param subject 主题

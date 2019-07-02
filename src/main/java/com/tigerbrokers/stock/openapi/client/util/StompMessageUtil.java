@@ -93,6 +93,21 @@ public class StompMessageUtil {
     return stompFrame;
   }
 
+  public static StompFrame buildSubscribeMessage(String account, Subject subject, Set<String> focusKeys) {
+    StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
+    int id = increment.addAndGet(1);
+    StompHeaders headers = StompHeaderBuilder.instance()
+        .id(id)
+        .version()
+        .account(account)
+        .host()
+        .subject(subject)
+        .focusKeys(focusKeys)
+        .build();
+    stompFrame.headers().set(headers);
+    return stompFrame;
+  }
+
   public static StompFrame buildSubscribeMessage(Set<String> symbols, QuoteSubject subject) {
     return buildSubscribeMessage(symbols, null, subject);
   }

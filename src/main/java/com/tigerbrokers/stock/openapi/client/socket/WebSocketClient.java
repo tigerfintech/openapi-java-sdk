@@ -362,6 +362,32 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   @Override
+  public String subscribe(String account, Subject subject) {
+    if (!isConnected()) {
+      notConnect();
+      return null;
+    }
+    StompFrame frame = StompMessageUtil.buildSubscribeMessage(account, subject, null);
+    channel.writeAndFlush(frame);
+    subscribeList.add(subject);
+
+    return frame.headers().getAsString(StompHeaders.ID);
+  }
+
+  @Override
+  public String subscribe(String account, Subject subject, List<String> focusKeys) {
+    if (!isConnected()) {
+      notConnect();
+      return null;
+    }
+    StompFrame frame = StompMessageUtil.buildSubscribeMessage(account, subject, new HashSet<>(focusKeys));
+    channel.writeAndFlush(frame);
+    subscribeList.add(subject);
+
+    return frame.headers().getAsString(StompHeaders.ID);
+  }
+
+  @Override
   public String cancelSubscribe(Subject subject) {
     if (!isConnected()) {
       notConnect();

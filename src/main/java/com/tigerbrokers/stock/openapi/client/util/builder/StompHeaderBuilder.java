@@ -79,7 +79,9 @@ public class StompHeaderBuilder {
   }
 
   public StompHeaderBuilder focusKeys(Set<String> focusKeys) {
-    this.stompHeaders.set(FOCUS_KEYS, join(focusKeys));
+    if (focusKeys != null) {
+      this.stompHeaders.set(FOCUS_KEYS, join(focusKeys));
+    }
     return this;
   }
 
