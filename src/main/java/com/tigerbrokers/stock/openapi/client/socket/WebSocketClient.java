@@ -36,6 +36,7 @@ import io.netty.handler.codec.stomp.StompSubframeDecoder;
 import io.netty.handler.codec.stomp.StompSubframeEncoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.util.internal.ConcurrentSet;
 import java.net.InetSocketAddress;
@@ -133,8 +134,11 @@ public class WebSocketClient implements SubscribeAsyncApi {
           protected void initChannel(SocketChannel ch) throws SSLException {
             ChannelPipeline p = ch.pipeline();
             SslContext sslCtx =
-                SslContextBuilder.forClient().protocols(PROTOCOLS)
-                    .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+                SslContextBuilder.forClient()
+                    .protocols(PROTOCOLS)
+                    .trustManager(InsecureTrustManagerFactory.INSTANCE)
+                    .sslProvider(SslProvider.OPENSSL)
+                    .build();
             p.addLast(sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
             if (port == 8887 || port == 8889) {
               p.addLast("websocketCodec", new HttpClientCodec());
