@@ -23,8 +23,10 @@ public class ContractItem extends ApiModel {
   private int status;
   private Double minTick;
   private Double shortMargin;
-  private Double feeRate;
+  private Double shortFeeRate;
   private boolean shortable;
+  private Double longInitialMargin;
+  private Double longMaintenanceMargin;
   private String lastTradingDate;
   private String firstNoticeDate;
   private Long lastBiddingCloseTime;
@@ -175,6 +177,46 @@ public class ContractItem extends ApiModel {
     this.minTick = minTick;
   }
 
+  public Double getShortMargin() {
+    return shortMargin;
+  }
+
+  public void setShortMargin(Double shortMargin) {
+    this.shortMargin = shortMargin;
+  }
+
+  public Double getShortFeeRate() {
+    return shortFeeRate;
+  }
+
+  public void setShortFeeRate(Double shortFeeRate) {
+    this.shortFeeRate = shortFeeRate;
+  }
+
+  public boolean isShortable() {
+    return shortable;
+  }
+
+  public void setShortable(boolean shortable) {
+    this.shortable = shortable;
+  }
+
+  public Double getLongInitialMargin() {
+    return longInitialMargin;
+  }
+
+  public void setLongInitialMargin(Double longInitialMargin) {
+    this.longInitialMargin = longInitialMargin;
+  }
+
+  public Double getLongMaintenanceMargin() {
+    return longMaintenanceMargin;
+  }
+
+  public void setLongMaintenanceMargin(Double longMaintenanceMargin) {
+    this.longMaintenanceMargin = longMaintenanceMargin;
+  }
+
   public String getLastTradingDate() {
     return lastTradingDate;
   }
@@ -236,6 +278,11 @@ public class ContractItem extends ApiModel {
         ", name='" + name + '\'' +
         ", status=" + status +
         ", minTick=" + minTick +
+        ", shortMargin=" + shortMargin +
+        ", shortFeeRate=" + shortFeeRate +
+        ", shortable=" + shortable +
+        ", longInitialMargin=" + longInitialMargin +
+        ", longMaintenanceMargin=" + longMaintenanceMargin +
         ", lastTradingDate='" + lastTradingDate + '\'' +
         ", firstNoticeDate='" + firstNoticeDate + '\'' +
         ", lastBiddingCloseTime=" + lastBiddingCloseTime +
