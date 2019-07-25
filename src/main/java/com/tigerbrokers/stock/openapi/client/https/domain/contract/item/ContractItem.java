@@ -22,7 +22,9 @@ public class ContractItem extends ApiModel {
   private String name;
   private int status;
   private Double minTick;
-
+  private Double shortMargin;
+  private Double feeRate;
+  private boolean shortable;
   private String lastTradingDate;
   private String firstNoticeDate;
   private Long lastBiddingCloseTime;
