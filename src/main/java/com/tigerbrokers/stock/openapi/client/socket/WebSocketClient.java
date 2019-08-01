@@ -157,7 +157,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
           }
         });
 
-    apiComposeCallback.client(this);
     inited = true;
   }
 

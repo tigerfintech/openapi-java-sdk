@@ -6,8 +6,6 @@ package com.tigerbrokers.stock.openapi.client.socket;
  */
 public interface ApiComposeCallback extends SubscribeApiCallback {
 
-  void client(WebSocketClient client);
-
   void error(String errorMsg);
 
   void error(int id, int errorCode, String errorMsg);
