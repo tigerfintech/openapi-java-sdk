@@ -24,7 +24,7 @@ public class ContractItem extends ApiModel {
   private Double minTick;
   private Double shortMargin;
   private Double shortFeeRate;
-  private boolean shortable;
+  private int shortable;
   private Double longInitialMargin;
   private Double longMaintenanceMargin;
   private String lastTradingDate;
@@ -193,11 +193,11 @@ public class ContractItem extends ApiModel {
     this.shortFeeRate = shortFeeRate;
   }
 
-  public boolean isShortable() {
+  public int getShortable() {
     return shortable;
   }
 
-  public void setShortable(boolean shortable) {
+  public void setShortable(int shortable) {
     this.shortable = shortable;
   }
 

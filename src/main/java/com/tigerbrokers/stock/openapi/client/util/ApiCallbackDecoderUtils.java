@@ -55,15 +55,15 @@ public class ApiCallbackDecoderUtils {
                         .addAfter(IDLE_STATE_HANDLER, IDLE_TRIGGER_HANDLER, new IdleTriggerHandler(decoder));
                   }
                 }
-                decoder.getCallback().connectAck(serverSendInterval, serverReceiveInterval);
+                decoder.getCallback().connectionAck(serverSendInterval, serverReceiveInterval);
               } else {
-                decoder.getCallback().connectAck();
+                decoder.getCallback().connectionAck();
               }
             } else {
-              decoder.getCallback().connectAck();
+              decoder.getCallback().connectionAck();
             }
           } else {
-            decoder.getCallback().connectAck();
+            decoder.getCallback().connectionAck();
           }
         }
         connectCountDown.countDown();
