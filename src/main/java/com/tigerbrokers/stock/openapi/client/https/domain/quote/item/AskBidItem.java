@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.quote.item;
 
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import java.util.List;
 
 /**
  * 作者：ltc
@@ -14,9 +15,14 @@ public class AskBidItem extends ApiModel {
   private String symbol;
 
   /**
-   * 十档买卖盘数据
+   * 卖盘
    */
-  private AskBidOrderPair askBidDepth;
+  private List<DepthEntry> asks;
+
+  /**
+   * 买盘
+   */
+  private List<DepthEntry> bids;
 
   public String getSymbol() {
     return symbol;
@@ -26,19 +32,27 @@ public class AskBidItem extends ApiModel {
     this.symbol = symbol;
   }
 
-  public AskBidOrderPair getAskBidDepth() {
-    return askBidDepth;
+  public List<DepthEntry> getAsks() {
+    return asks;
   }
 
-  public void setAskBidDepth(AskBidOrderPair askBidDepth) {
-    this.askBidDepth = askBidDepth;
+  public void setAsks(List<DepthEntry> asks) {
+    this.asks = asks;
   }
 
-  @Override
-  public String toString() {
+  public List<DepthEntry> getBids() {
+    return bids;
+  }
+
+  public void setBids(List<DepthEntry> bids) {
+    this.bids = bids;
+  }
+
+  @Override public String toString() {
     return "AskBidItem{" +
         "symbol='" + symbol + '\'' +
-        ", askBidDepth=" + askBidDepth +
+        ", asks=" + asks +
+        ", bids=" + bids +
         '}';
   }
 }

@@ -6,7 +6,7 @@ import java.io.Serializable;
  * 作者：ltc
  * 时间：2019/08/13
  */
-public class OrderPoint implements Serializable {
+public class DepthEntry implements Serializable {
 
   /**
    * 价格
@@ -49,7 +49,7 @@ public class OrderPoint implements Serializable {
 
   @Override
   public String toString() {
-    return "OrderPoint{" +
+    return "DepthEntry{" +
         "price=" + price +
         ", count=" + count +
         ", volume=" + volume +
