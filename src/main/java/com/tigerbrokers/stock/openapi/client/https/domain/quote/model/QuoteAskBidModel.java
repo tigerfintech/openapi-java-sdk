@@ -11,11 +11,8 @@ public class QuoteAskBidModel extends ApiModel {
 
   private List<String> symbols;
 
-  private Integer hkQuoteAuthority;
-
-  public QuoteAskBidModel(List<String> symbols, Integer hkQuoteAuthority) {
+  public QuoteAskBidModel(List<String> symbols) {
     this.symbols = symbols;
-    this.hkQuoteAuthority = hkQuoteAuthority;
   }
 
   public List<String> getSymbols() {
@@ -24,13 +21,5 @@ public class QuoteAskBidModel extends ApiModel {
 
   public void setSymbols(List<String> symbols) {
     this.symbols = symbols;
-  }
-
-  public Integer getHkQuoteAuthority() {
-    return hkQuoteAuthority;
-  }
-
-  public void setHkQuoteAuthority(Integer hkQuoteAuthority) {
-    this.hkQuoteAuthority = hkQuoteAuthority;
   }
 }

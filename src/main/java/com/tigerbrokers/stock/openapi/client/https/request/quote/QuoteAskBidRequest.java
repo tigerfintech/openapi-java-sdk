@@ -18,9 +18,9 @@ public class QuoteAskBidRequest extends TigerCommonRequest implements TigerReque
     setApiMethodName(ApiServiceType.ASK_BID);
   }
 
-  public static QuoteAskBidRequest newRequest(List<String> symbols, Integer hkQuoteAuthority) {
+  public static QuoteAskBidRequest newRequest(List<String> symbols) {
     QuoteAskBidRequest request = new QuoteAskBidRequest();
-    QuoteAskBidModel quoteAskBidModel = new QuoteAskBidModel(symbols, hkQuoteAuthority);
+    QuoteAskBidModel quoteAskBidModel = new QuoteAskBidModel(symbols);
     request.setApiModel(quoteAskBidModel);
     return request;
   }
