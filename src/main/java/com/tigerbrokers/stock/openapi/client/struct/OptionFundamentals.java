@@ -13,19 +13,19 @@ public class OptionFundamentals {
   /**
    * delta
    */
-  String Delta;
+  String delta;
   /**
    * gamma
    */
-  String Gamma;
+  String gamma;
   /**
    * theta
    */
-  String Theta;
+  String theta;
   /**
    * vega
    */
-  String Vega;
+  String vega;
   /**
    * 时间价值
    */
