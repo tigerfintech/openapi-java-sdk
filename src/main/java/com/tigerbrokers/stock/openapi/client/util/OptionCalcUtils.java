@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -42,6 +44,8 @@ public class OptionCalcUtils {
   private static double n(double x) {
     return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-x * x / 2);
   }
+
+  private static ExecutorService executorService = Executors.newFixedThreadPool(4);
 
   private static double N(double z) {
     if (z > 6.0) {
@@ -427,7 +431,7 @@ public class OptionCalcUtils {
       }
       return null;
     });
-    new Thread(corporateDividendTask).start();
+    executorService.execute(corporateDividendTask);
 
     FutureTask<MarketItem> marketItemTask = new FutureTask<>(() -> {
       // 验证是否美股是盘中状态
@@ -440,7 +444,7 @@ public class OptionCalcUtils {
       }
       return null;
     });
-    new Thread(marketItemTask).start();
+    executorService.execute(marketItemTask);
 
     FutureTask<RealTimeQuoteItem> realTimeQuoteItemTask = new FutureTask<>(() -> {
       QuoteRealTimeQuoteResponse quoteRealTimeQuoteResponse =
@@ -453,7 +457,7 @@ public class OptionCalcUtils {
       }
       throw new RuntimeException("无法获取股票最新价格！");
     });
-    new Thread(realTimeQuoteItemTask).start();
+    executorService.execute(realTimeQuoteItemTask);
 
     FutureTask<OptionBriefItem> optionBriefItemTask = new FutureTask<>(() -> {
       // 获取期权摘要
@@ -473,8 +477,7 @@ public class OptionCalcUtils {
       }
       throw new RuntimeException("无法期权摘要信息！");
     });
-
-    new Thread(optionBriefItemTask).start();
+    executorService.execute(optionBriefItemTask);
 
     double dividendAmount = 0;
     Long executeDateLong = 0L;
@@ -522,7 +525,8 @@ public class OptionCalcUtils {
   }
 }
 
-@Data class OptionResult {
+@Data
+class OptionResult {
 
   OptionIndex index;
   double timeValue;
