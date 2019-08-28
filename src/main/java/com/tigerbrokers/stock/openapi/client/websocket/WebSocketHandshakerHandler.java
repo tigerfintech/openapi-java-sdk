@@ -76,7 +76,7 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
 
   @Override
   protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-    ApiLogger.info("WebSocketHandshakerHandler channelRead0  {}", this.handshaker.isHandshakeComplete());
+    ApiLogger.debug("WebSocketHandshakerHandler channelRead0  {}", this.handshaker.isHandshakeComplete());
 
     Channel ch = ctx.channel();
     FullHttpResponse response;

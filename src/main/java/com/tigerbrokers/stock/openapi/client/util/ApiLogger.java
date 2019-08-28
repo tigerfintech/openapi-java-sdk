@@ -1,11 +1,20 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.core.FileAppender;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.TimeZone;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -14,16 +23,65 @@ import org.slf4j.LoggerFactory;
  */
 public class ApiLogger {
 
-  private static final Logger logger = LoggerFactory.getLogger("com.tigerbrokers.openapi.client");
+  private static Logger logger = null;
 
-  private static boolean enabled = true;
+  private static boolean enabled = false;
   private static boolean debugEnabled = false;
   private static boolean infoEnabled = true;
   private static boolean errorEnabled = true;
   private static final String SPLITTER = "###";
 
   public static void setEnabled(boolean isEnabled) {
+    setEnabled(isEnabled, null);
+  }
+
+  public static void setEnabled(boolean isEnabled, String logPath) {
+    Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+    root.setLevel(Level.INFO);
+    if (isEnabled) {
+      initConfig(logPath);
+    }
     ApiLogger.enabled = isEnabled;
+  }
+
+  private static void initConfig(String logPath) {
+    String filename = "tiger_openapi_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".log";
+    File logFilePath;
+    if (logPath == null) {
+      logFilePath = new File("log/");
+    } else {
+      logFilePath = new File(logPath);
+    }
+    if (!logFilePath.exists()) {
+      logFilePath.mkdir();
+    }
+    String filePath = (logPath == null ? "log/" : logPath) + filename;
+    File logFile = new File(filePath);
+    if (!logFilePath.exists()) {
+      try {
+        logFile.createNewFile();
+      } catch (IOException e) {
+        throw new RuntimeException("create log error:" + e.getMessage());
+      }
+    }
+    LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+    PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+    encoder.setContext(loggerContext);
+    encoder.setCharset(Charset.forName("UTF-8"));
+    encoder.setPattern("%d %level - %msg%n");
+    encoder.start();
+
+    FileAppender fileAppender = new FileAppender();
+    fileAppender.setName("TigerOpenApi");
+    fileAppender.setContext(loggerContext);
+    fileAppender.setFile(filePath);
+    fileAppender.setEncoder(encoder);
+    fileAppender.start();
+
+    logger = loggerContext.getLogger("com.tigerbrokers.openapi.client");
+    logger.addAppender(fileAppender);
+    logger.setLevel(Level.INFO);
   }
 
   public static void setDebugEnabled(boolean debugEnabled) {
