@@ -2,8 +2,10 @@ package com.tigerbrokers.stock.openapi.client.https.request;
 
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.DATE_TIME_FORMAT;
 
@@ -24,7 +26,8 @@ public class TigerCommonRequest {
   public static final String V2_0 = "2.0";
 
   public TigerCommonRequest() {
-    timestamp = new SimpleDateFormat(DATE_TIME_FORMAT).format(new Date());
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
+    timestamp = dtf.format(LocalDateTime.now(ZoneId.of(TimeZoneId.Shanghai.getZoneId())));
   }
 
   public String getApiVersion() {

@@ -18,7 +18,10 @@ import com.tigerbrokers.stock.openapi.client.struct.OptionFundamentals;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -412,16 +415,15 @@ public class OptionCalcUtils {
       String strike,
       String expiry) throws Exception {
 
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     FutureTask<CorporateDividendItem> corporateDividendTask = new FutureTask<>(() -> {
 
       // 获取分红数据
       List<String> symbols = new ArrayList<>();
       symbols.add(symbol);
-      CorporateDividendRequest request = CorporateDividendRequest.newRequest(symbols, Market.US,
-          DateUtils.getZoneDate(sdf.format(new Date()), TimeZoneId.Shanghai),
-          DateUtils.getZoneDate(sdf.format(new Date()), TimeZoneId.Shanghai));
+      Date date = Date.from(LocalDate.now().atStartOfDay(ZoneId.of(TimeZoneId.Shanghai.getZoneId())).toInstant());
+      CorporateDividendRequest request = CorporateDividendRequest.newRequest(symbols, Market.US, date, date);
       CorporateDividendResponse corporateDividendResponse = client.execute(request);
       if (corporateDividendResponse.isSuccess()) {
         List<CorporateDividendItem> corporateDividendItems = corporateDividendResponse.getItems().get(symbol);
@@ -484,7 +486,9 @@ public class OptionCalcUtils {
     CorporateDividendItem corporateDividendItem = corporateDividendTask.get();
     if (corporateDividendItem != null) {
       dividendAmount = corporateDividendItem.getAmount();
-      executeDateLong = sdf.parse(corporateDividendItem.getExecuteDate().toString()).getTime();
+      executeDateLong = corporateDividendItem.getExecuteDate()
+          .atStartOfDay(ZoneId.of(TimeZoneId.Shanghai.getZoneId()))
+          .toInstant().toEpochMilli();
     }
 
     boolean isTrading = false;
@@ -497,15 +501,17 @@ public class OptionCalcUtils {
     double latestPrice = realTimeQuoteItem.getLatestPrice();
 
     OptionBriefItem op = optionBriefItemTask.get();
-
-    long expiryLong = sdf.parse(expiry).getTime();
+    long expiryLong = LocalDate.parse(expiry, dtf)
+        .atStartOfDay(ZoneId.of(TimeZoneId.Shanghai.getZoneId()))
+        .toInstant().toEpochMilli();
     double target = (op.getAskPrice() + op.getBidPrice()) / 2;
     double strikeD = Double.parseDouble(op.getStrike());
 
     OptionResult result =
         OptionCalcUtils.calcOptionIndex(op.getRatesBonds(), expiryLong,
-            executeDateLong, latestPrice, target, dividendAmount,
-            strikeD, op.getRight(), System.currentTimeMillis(), isTrading);
+            executeDateLong, latestPrice, target, dividendAmount, strikeD, op.getRight(),
+            LocalDateTime.now().atZone(ZoneId.of(TimeZoneId.Shanghai.getZoneId())).toInstant().toEpochMilli(),
+            isTrading);
 
     OptionFundamentals optionFundamentals = new OptionFundamentals();
     optionFundamentals.setPremiumRate(result.getPremiumRateString());

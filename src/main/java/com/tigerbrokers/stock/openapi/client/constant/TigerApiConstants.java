@@ -34,8 +34,6 @@ public class TigerApiConstants {
 
   public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-  public static final String DATE_TIMEZONE = "GMT+8";
-
   public static final String CHARSET_UTF8 = "UTF-8";
 
   public static final String CONTENT_TYPE_JSON = "application/json";

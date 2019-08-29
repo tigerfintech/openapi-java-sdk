@@ -5,17 +5,16 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.core.FileAppender;
-import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.TimeZone;
 import org.slf4j.LoggerFactory;
+
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.DATE_TIME_FORMAT;
 
 /**
  * Description:
@@ -105,11 +104,11 @@ public class ApiLogger {
     if (!enabled || !errorEnabled) {
       return;
     }
-    DateFormat df = new SimpleDateFormat(TigerApiConstants.DATE_TIME_FORMAT);
-    df.setTimeZone(TimeZone.getTimeZone(TigerApiConstants.DATE_TIMEZONE));
+
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
 
     StringBuilder builder = new StringBuilder();
-    builder.append(df.format(new Date()));
+    builder.append(dtf.format(LocalDateTime.now(ZoneId.of(TimeZoneId.Shanghai.getZoneId()))));
     builder.append(SPLITTER);
     builder.append(method);
     builder.append(SPLITTER);
