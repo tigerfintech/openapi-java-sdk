@@ -14,8 +14,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import org.slf4j.LoggerFactory;
 
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.DATE_TIME_FORMAT;
-
 /**
  * Description:
  * Created by lijiawen on 2018/12/27.
@@ -44,7 +42,7 @@ public class ApiLogger {
   }
 
   private static void initConfig(String logPath) {
-    String filename = "tiger_openapi_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".log";
+    String filename = "tiger_openapi_" + LocalDateTime.now().format(DateUtils.DATE_FORMAT) + ".log";
     File logFilePath;
     if (logPath == null) {
       logFilePath = new File("log/");
@@ -105,7 +103,7 @@ public class ApiLogger {
       return;
     }
 
-    DateTimeFormatter dtf = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
+    DateTimeFormatter dtf = DateUtils.DATE_FORMAT;
 
     StringBuilder builder = new StringBuilder();
     builder.append(dtf.format(LocalDateTime.now(ZoneId.of(TimeZoneId.Shanghai.getZoneId()))));

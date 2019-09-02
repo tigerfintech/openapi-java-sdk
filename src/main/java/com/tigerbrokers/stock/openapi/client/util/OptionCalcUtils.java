@@ -415,7 +415,13 @@ public class OptionCalcUtils {
       String strike,
       String expiry) throws Exception {
 
-    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    DateTimeFormatter dtf = DateUtils.DATE_FORMAT;
+
+    LocalDate expiryDate = LocalDate.parse(expiry, dtf);
+    LocalDate now = LocalDate.now(ZoneId.of(TimeZoneId.Shanghai.getZoneId()));
+    if(now.compareTo(expiryDate) > 0) {
+      throw new RuntimeException("期权过期日无效");
+    }
 
     FutureTask<CorporateDividendItem> corporateDividendTask = new FutureTask<>(() -> {
 
@@ -498,12 +504,18 @@ public class OptionCalcUtils {
     }
 
     RealTimeQuoteItem realTimeQuoteItem = realTimeQuoteItemTask.get();
-    double latestPrice = realTimeQuoteItem.getLatestPrice();
+    Double latestPrice = realTimeQuoteItem.getLatestPrice();
+    if (latestPrice == null) {
+      throw new RuntimeException("无法获取股票最新价格！");
+    }
 
     OptionBriefItem op = optionBriefItemTask.get();
     long expiryLong = LocalDate.parse(expiry, dtf)
         .atStartOfDay(ZoneId.of(TimeZoneId.Shanghai.getZoneId()))
         .toInstant().toEpochMilli();
+    if(op.getAskPrice() == null || op.getBidPrice() == null || op.getStrike() == null) {
+      throw new RuntimeException("无法期权摘要信息！");
+    }
     double target = (op.getAskPrice() + op.getBidPrice()) / 2;
     double strikeD = Double.parseDouble(op.getStrike());
 

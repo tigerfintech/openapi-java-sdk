@@ -4,11 +4,10 @@ import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerHttpResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
+import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.DATE_TIME_FORMAT;
 
 public class TigerHttpRequest implements TigerRequest<TigerHttpResponse> {
 
@@ -23,7 +22,7 @@ public class TigerHttpRequest implements TigerRequest<TigerHttpResponse> {
 
   public TigerHttpRequest(String apiMethodName) {
     this.apiMethodName = apiMethodName;
-    DateTimeFormatter dtf = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
+    DateTimeFormatter dtf = DateUtils.DATETIME_FORMAT;
     timestamp = dtf.format(LocalDateTime.now(ZoneId.of(TimeZoneId.Shanghai.getZoneId())));
   }
 

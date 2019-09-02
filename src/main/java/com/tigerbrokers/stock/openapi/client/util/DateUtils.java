@@ -13,8 +13,12 @@ import java.util.Date;
  */
 public class DateUtils {
 
-  public static final String FORMAT_FULL = "yyyy-MM-dd HH:mm:ss";
+  private static final String FORMAT_FULL = "yyyy-MM-dd HH:mm:ss";
   private static final String SUFFIX = " 00:00:00";
+  private static final String FORMAT_DATE = "yyyy-MM-dd";
+  public static final DateTimeFormatter DATE_FORMAT =
+      DateTimeFormatter.ofPattern(FORMAT_DATE).withZone(ZoneId.of(TimeZoneId.Shanghai.getZoneId()));
+  public static final DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern(FORMAT_FULL);
 
   public static Date getZoneDate(String time, TimeZoneId zoneId) {
     if (time == null || (time.length() != 10 && time.length() != 19) || zoneId == null) {
@@ -26,8 +30,7 @@ public class DateUtils {
     }
 
     try {
-      DateTimeFormatter dtf = DateTimeFormatter.ofPattern(FORMAT_FULL);
-      ZonedDateTime zdt = LocalDateTime.parse(time, dtf).atZone(ZoneId.of(zoneId.getZoneId()));
+      ZonedDateTime zdt = LocalDateTime.parse(time, DATETIME_FORMAT).atZone(ZoneId.of(zoneId.getZoneId()));
       return Date.from(zdt.toInstant());
     } catch (Exception ex) {
       return null;

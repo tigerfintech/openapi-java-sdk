@@ -3,11 +3,10 @@ package com.tigerbrokers.stock.openapi.client.https.request;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
+import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.DATE_TIME_FORMAT;
 
 /**
  * Description:
@@ -26,7 +25,7 @@ public class TigerCommonRequest {
   public static final String V2_0 = "2.0";
 
   public TigerCommonRequest() {
-    DateTimeFormatter dtf = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
+    DateTimeFormatter dtf = DateUtils.DATETIME_FORMAT;
     timestamp = dtf.format(LocalDateTime.now(ZoneId.of(TimeZoneId.Shanghai.getZoneId())));
   }
 
