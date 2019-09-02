@@ -29,13 +29,15 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
  * 期权指标计算器
  */
-
 public class OptionCalcUtils {
 
   private static final int TIME_MILLIS_IN_ONE_HOUR = 60 * 60 * 1000;
@@ -48,7 +50,12 @@ public class OptionCalcUtils {
     return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-x * x / 2);
   }
 
-  private static ExecutorService executorService = Executors.newFixedThreadPool(4);
+  private static ExecutorService executorService = new ThreadPoolExecutor(4, 4,
+      0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(1024), (r) -> {
+    Thread t = Executors.defaultThreadFactory().newThread(r);
+    t.setDaemon(true);
+    return t;
+  }, new ThreadPoolExecutor.AbortPolicy());
 
   private static double N(double z) {
     if (z > 6.0) {
@@ -531,8 +538,7 @@ public class OptionCalcUtils {
   }
 }
 
-@Data
-class OptionResult {
+@Data class OptionResult {
 
   OptionIndex index;
   double timeValue;
