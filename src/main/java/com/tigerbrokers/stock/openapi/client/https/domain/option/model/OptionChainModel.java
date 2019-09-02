@@ -14,6 +14,15 @@ public class OptionChainModel extends ApiModel {
   private String symbol;
   private Long expiry;
 
+  public OptionChainModel() {
+
+  }
+
+  public OptionChainModel(String symbol, Long expiry) {
+    this.symbol = symbol;
+    this.expiry = expiry;
+  }
+
   public String getSymbol() {
     return symbol;
   }

@@ -16,6 +16,16 @@ public class OptionCommonModel extends ApiModel {
   protected String strike;
   protected Long expiry;
 
+  public OptionCommonModel() {
+  }
+
+  public OptionCommonModel(String symbol, String right, String strike, Long expiry) {
+    this.symbol = symbol;
+    this.right = right;
+    this.strike = strike;
+    this.expiry = expiry;
+  }
+
   public String getSymbol() {
     return symbol;
   }
