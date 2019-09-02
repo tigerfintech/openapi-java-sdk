@@ -550,7 +550,8 @@ public class OptionCalcUtils {
   }
 }
 
-@Data class OptionResult {
+@Data
+class OptionResult {
 
   OptionIndex index;
   double timeValue;
