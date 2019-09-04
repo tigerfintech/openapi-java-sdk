@@ -32,7 +32,7 @@ public class HttpUtils {
       return null;
     }
     try {
-      RequestBody body = RequestBody.create(json, JSON);
+      RequestBody body = RequestBody.create(JSON, json);
       okhttp3.Request request = new okhttp3.Request.Builder()
           .url(url)
           .post(body)

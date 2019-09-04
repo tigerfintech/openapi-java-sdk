@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -35,5 +36,31 @@ public class DateUtils {
     } catch (Exception ex) {
       return null;
     }
+  }
+
+  public static boolean isDateBeforeToday(String date) {
+    if (date == null || date.isEmpty()) {
+      return false;
+    }
+    LocalDate expiryDate = LocalDate.parse(date, DATE_FORMAT);
+    LocalDate now = LocalDate.now(ZoneId.of(TimeZoneId.Shanghai.getZoneId()));
+    if (now.compareTo(expiryDate) > 0) {
+      return false;
+    }
+    return true;
+  }
+
+  public static long parseEpochMill(String date) {
+    if (date == null) {
+      return 0;
+    }
+    return parseEpochMill(LocalDate.parse(date, DATE_FORMAT));
+  }
+
+  public static long parseEpochMill(LocalDate localDate) {
+    if (localDate == null) {
+      return 0;
+    }
+    return localDate.atStartOfDay(ZoneId.of(TimeZoneId.Shanghai.getZoneId())).toInstant().toEpochMilli();
   }
 }

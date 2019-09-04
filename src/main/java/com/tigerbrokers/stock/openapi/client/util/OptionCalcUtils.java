@@ -19,9 +19,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import java.text.NumberFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -416,23 +414,36 @@ public class OptionCalcUtils {
    * @return 期权基本面信息
    * @throws Exception
    */
-  public static OptionFundamentals getOptionFundamentals(TigerHttpClient client,
-      String symbol,
-      String right,
-      String strike,
-      String expiry) throws Exception {
-
-    DateTimeFormatter dtf = DateUtils.DATE_FORMAT;
-
-    LocalDate expiryDate = LocalDate.parse(expiry, dtf);
-    LocalDate now = LocalDate.now(ZoneId.of(TimeZoneId.Shanghai.getZoneId()));
-    if(now.compareTo(expiryDate) > 0) {
+  public static OptionFundamentals getOptionFundamentals(TigerHttpClient client, String symbol, String right,
+      String strike, String expiry) throws Exception {
+    if (!DateUtils.isDateBeforeToday(expiry)) {
       throw new RuntimeException("期权过期日无效");
     }
 
-    FutureTask<CorporateDividendItem> corporateDividendTask = new FutureTask<>(() -> {
+    FutureTask<CorporateDividendItem> dividendTask = getCorporateDividendTask(client, symbol);
+    FutureTask<Boolean> marketStateTask = getMarketStateTask(client);
+    FutureTask<Double> latestPriceTask = getLatestPriceTask(client, symbol);
+    FutureTask<OptionBriefItem> optionBriefTask =
+        getOptionBriefTask(client, symbol, right, strike, DateUtils.parseEpochMill(expiry));
 
-      // 获取分红数据
+    OptionBriefItem optionBriefItem = optionBriefTask.get();
+    if (optionBriefItem.getAskPrice() == null
+        || optionBriefItem.getBidPrice() == null
+        || optionBriefItem.getStrike() == null) {
+      throw new RuntimeException("无法获取期权摘要信息！");
+    }
+    double target = (optionBriefItem.getAskPrice() + optionBriefItem.getBidPrice()) / 2;
+
+    OptionResult result = calcOptionIndex(optionBriefItem.getRatesBonds(), DateUtils.parseEpochMill(expiry),
+        DateUtils.parseEpochMill(dividendTask.get().getExecuteDate()), latestPriceTask.get(), target,
+        dividendTask.get().getAmount(), Double.parseDouble(optionBriefItem.getStrike()), optionBriefItem.getRight(),
+        System.currentTimeMillis(), marketStateTask.get());
+
+    return result.toOptionFundamentals(optionBriefItem.getOpenInterest(), optionBriefItem.getVolatility());
+  }
+
+  private static FutureTask<CorporateDividendItem> getCorporateDividendTask(TigerHttpClient client, String symbol) {
+    FutureTask<CorporateDividendItem> corporateDividendTask = new FutureTask<>(() -> {
       List<String> symbols = new ArrayList<>();
       symbols.add(symbol);
       Date date = Date.from(LocalDate.now().atStartOfDay(ZoneId.of(TimeZoneId.Shanghai.getZoneId())).toInstant());
@@ -444,114 +455,69 @@ public class OptionCalcUtils {
           return corporateDividendItems.get(0);
         }
       }
-      return null;
+      CorporateDividendItem item = new CorporateDividendItem();
+      item.setAmount(0D);
+      return item;
     });
     executorService.execute(corporateDividendTask);
+    return corporateDividendTask;
+  }
 
-    FutureTask<MarketItem> marketItemTask = new FutureTask<>(() -> {
-      // 验证是否美股是盘中状态
+  private static FutureTask<Boolean> getMarketStateTask(TigerHttpClient client) {
+    FutureTask<Boolean> marketItemTask = new FutureTask<>(() -> {
       QuoteMarketResponse quoteMarketResponse = client.execute(QuoteMarketRequest.newRequest(Market.US));
       if (quoteMarketResponse.isSuccess()) {
         List<MarketItem> marketItems = quoteMarketResponse.getMarketItems();
         if (!isEmpty(marketItems)) {
-          return marketItems.get(0);
+          return "交易中".equals(marketItems.get(0).getMarketStatus());
         }
       }
-      return null;
+      return false;
     });
     executorService.execute(marketItemTask);
+    return marketItemTask;
+  }
 
-    FutureTask<RealTimeQuoteItem> realTimeQuoteItemTask = new FutureTask<>(() -> {
+  private static FutureTask<Double> getLatestPriceTask(TigerHttpClient client, String symbol) {
+    FutureTask<Double> realTimeQuoteItemTask = new FutureTask<>(() -> {
       QuoteRealTimeQuoteResponse quoteRealTimeQuoteResponse =
           client.execute(QuoteRealTimeQuoteRequest.newRequest(Arrays.asList(symbol)));
       if (quoteRealTimeQuoteResponse.isSuccess()) {
         List<RealTimeQuoteItem> realTimeQuoteItems = quoteRealTimeQuoteResponse.getRealTimeQuoteItems();
         if (!isEmpty(realTimeQuoteItems)) {
-          return realTimeQuoteItems.get(0);
+          Double latestPrice = realTimeQuoteItems.get(0).getLatestPrice();
+          if (latestPrice == null) {
+            throw new RuntimeException("无法获取股票最新价格！");
+          }
+          return latestPrice;
         }
       }
       throw new RuntimeException("无法获取股票最新价格！");
     });
     executorService.execute(realTimeQuoteItemTask);
+    return realTimeQuoteItemTask;
+  }
 
+  private static FutureTask<OptionBriefItem> getOptionBriefTask(TigerHttpClient client, String symbol, String right,
+      String strike, long expiryDate) {
     FutureTask<OptionBriefItem> optionBriefItemTask = new FutureTask<>(() -> {
-      // 获取期权摘要
-      OptionCommonModel model = new OptionCommonModel();
-      model.setSymbol(symbol);
-      model.setRight(right);
-      model.setStrike(strike);
-      model.setExpiry(expiry);
+      OptionCommonModel model = new OptionCommonModel(symbol, right, strike, expiryDate);
       OptionBriefResponse optionBriefResponse = client.execute(OptionBriefQueryRequest.of(model));
-
-      List<OptionBriefItem> res;
+      List<OptionBriefItem> briefItems;
       if (optionBriefResponse.isSuccess()) {
-        res = optionBriefResponse.getOptionBriefItems();
-        if (!isEmpty(res)) {
-          return res.get(0);
+        briefItems = optionBriefResponse.getOptionBriefItems();
+        if (!isEmpty(briefItems)) {
+          return briefItems.get(0);
         }
       }
-      throw new RuntimeException("无法期权摘要信息！");
+      throw new RuntimeException("无法获取期权摘要信息！");
     });
     executorService.execute(optionBriefItemTask);
-
-    double dividendAmount = 0;
-    Long executeDateLong = 0L;
-    CorporateDividendItem corporateDividendItem = corporateDividendTask.get();
-    if (corporateDividendItem != null) {
-      dividendAmount = corporateDividendItem.getAmount();
-      executeDateLong = corporateDividendItem.getExecuteDate()
-          .atStartOfDay(ZoneId.of(TimeZoneId.Shanghai.getZoneId()))
-          .toInstant().toEpochMilli();
-    }
-
-    boolean isTrading = false;
-    MarketItem marketItem = marketItemTask.get();
-    if (marketItem != null) {
-      isTrading = "交易中".equals(marketItem.getMarketStatus());
-    }
-
-    RealTimeQuoteItem realTimeQuoteItem = realTimeQuoteItemTask.get();
-    Double latestPrice = realTimeQuoteItem.getLatestPrice();
-    if (latestPrice == null) {
-      throw new RuntimeException("无法获取股票最新价格！");
-    }
-
-    OptionBriefItem op = optionBriefItemTask.get();
-    long expiryLong = LocalDate.parse(expiry, dtf)
-        .atStartOfDay(ZoneId.of(TimeZoneId.Shanghai.getZoneId()))
-        .toInstant().toEpochMilli();
-    if(op.getAskPrice() == null || op.getBidPrice() == null || op.getStrike() == null) {
-      throw new RuntimeException("无法期权摘要信息！");
-    }
-    double target = (op.getAskPrice() + op.getBidPrice()) / 2;
-    double strikeD = Double.parseDouble(op.getStrike());
-
-    OptionResult result =
-        OptionCalcUtils.calcOptionIndex(op.getRatesBonds(), expiryLong,
-            executeDateLong, latestPrice, target, dividendAmount, strikeD, op.getRight(),
-            LocalDateTime.now().atZone(ZoneId.of(TimeZoneId.Shanghai.getZoneId())).toInstant().toEpochMilli(),
-            isTrading);
-
-    OptionFundamentals optionFundamentals = new OptionFundamentals();
-    optionFundamentals.setPremiumRate(result.getPremiumRateString());
-    optionFundamentals.setOpenInterest(op.getOpenInterest() + "");
-    optionFundamentals.setVolatility(result.getVolatilityString());
-    optionFundamentals.setHistoryVolatility(op.getVolatility());
-    optionFundamentals.setDelta(result.getIndex().getDeltaString());
-    optionFundamentals.setTheta(result.getIndex().getThetaString());
-    optionFundamentals.setGamma(result.getIndex().getGammaString());
-    optionFundamentals.setVega(result.getIndex().getVegaString());
-    optionFundamentals.setTimeValue(result.getTimeValueString());
-    optionFundamentals.setInsideValue(result.getInsideValueString());
-    optionFundamentals.setLeverage(result.getLeverageString());
-    optionFundamentals.setProfitRate(result.getProfitRateString());
-
-    return optionFundamentals;
+    return optionBriefItemTask;
   }
 }
 
-@Data
-class OptionResult {
+@Data class OptionResult {
 
   OptionIndex index;
   double timeValue;
@@ -630,5 +596,22 @@ class OptionResult {
     nf.setMaximumFractionDigits(fractionDigits);
     String res = nf.format(src);
     return res;
+  }
+
+  public OptionFundamentals toOptionFundamentals(int openInterest, String volatility) {
+    OptionFundamentals optionFundamentals = new OptionFundamentals();
+    optionFundamentals.setPremiumRate(getPremiumRateString());
+    optionFundamentals.setOpenInterest(openInterest + "");
+    optionFundamentals.setVolatility(getVolatilityString());
+    optionFundamentals.setHistoryVolatility(volatility);
+    optionFundamentals.setDelta(getIndex().getDeltaString());
+    optionFundamentals.setTheta(getIndex().getThetaString());
+    optionFundamentals.setGamma(getIndex().getGammaString());
+    optionFundamentals.setVega(getIndex().getVegaString());
+    optionFundamentals.setTimeValue(getTimeValueString());
+    optionFundamentals.setInsideValue(getInsideValueString());
+    optionFundamentals.setLeverage(getLeverageString());
+    optionFundamentals.setProfitRate(getProfitRateString());
+    return optionFundamentals;
   }
 }
