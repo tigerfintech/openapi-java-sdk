@@ -50,17 +50,21 @@ public class DateUtils {
     return true;
   }
 
-  public static long parseEpochMill(String date) {
+  public static long parseEpochMill(String date, TimeZoneId zoneId) {
     if (date == null) {
       return 0;
     }
-    return parseEpochMill(LocalDate.parse(date, DATE_FORMAT));
+    return parseEpochMill(LocalDate.parse(date, DATE_FORMAT), zoneId);
   }
 
   public static long parseEpochMill(LocalDate localDate) {
+    return parseEpochMill(localDate, TimeZoneId.Shanghai);
+  }
+
+  public static long parseEpochMill(LocalDate localDate, TimeZoneId zoneId) {
     if (localDate == null) {
       return 0;
     }
-    return localDate.atStartOfDay(ZoneId.of(TimeZoneId.Shanghai.getZoneId())).toInstant().toEpochMilli();
+    return localDate.atStartOfDay(ZoneId.of(zoneId.getZoneId())).toInstant().toEpochMilli();
   }
 }

@@ -424,7 +424,7 @@ public class OptionCalcUtils {
     FutureTask<Boolean> marketStateTask = getMarketStateTask(client);
     FutureTask<Double> latestPriceTask = getLatestPriceTask(client, symbol);
     FutureTask<OptionBriefItem> optionBriefTask =
-        getOptionBriefTask(client, symbol, right, strike, DateUtils.parseEpochMill(expiry));
+        getOptionBriefTask(client, symbol, right, strike, DateUtils.parseEpochMill(expiry, TimeZoneId.NewYork));
 
     OptionBriefItem optionBriefItem = optionBriefTask.get();
     if (optionBriefItem.getAskPrice() == null
@@ -434,10 +434,11 @@ public class OptionCalcUtils {
     }
     double target = (optionBriefItem.getAskPrice() + optionBriefItem.getBidPrice()) / 2;
 
-    OptionResult result = calcOptionIndex(optionBriefItem.getRatesBonds(), DateUtils.parseEpochMill(expiry),
-        DateUtils.parseEpochMill(dividendTask.get().getExecuteDate()), latestPriceTask.get(), target,
-        dividendTask.get().getAmount(), Double.parseDouble(optionBriefItem.getStrike()), optionBriefItem.getRight(),
-        System.currentTimeMillis(), marketStateTask.get());
+    OptionResult result =
+        calcOptionIndex(optionBriefItem.getRatesBonds(), DateUtils.parseEpochMill(expiry, TimeZoneId.NewYork),
+            DateUtils.parseEpochMill(dividendTask.get().getExecuteDate()), latestPriceTask.get(), target,
+            dividendTask.get().getAmount(), Double.parseDouble(optionBriefItem.getStrike()), optionBriefItem.getRight(),
+            System.currentTimeMillis(), marketStateTask.get());
 
     return result.toOptionFundamentals(optionBriefItem.getOpenInterest(), optionBriefItem.getVolatility());
   }
