@@ -16,6 +16,7 @@ public class FutureContractItem extends ApiModel {
   private String contractMonth;
   private String exchangeCode;
   private BigDecimal multiplier;
+  private BigDecimal minTick;
   private String lastTradingDate;
   private String firstNoticeDate;
   private long lastBiddingCloseTime;
@@ -79,6 +80,14 @@ public class FutureContractItem extends ApiModel {
     this.multiplier = multiplier;
   }
 
+  public BigDecimal getMinTick() {
+    return minTick;
+  }
+
+  public void setMinTick(BigDecimal minTick) {
+    this.minTick = minTick;
+  }
+
   public String getLastTradingDate() {
     return lastTradingDate;
   }
@@ -137,6 +146,7 @@ public class FutureContractItem extends ApiModel {
         ", contractMonth='" + contractMonth + '\'' +
         ", exchangeCode='" + exchangeCode + '\'' +
         ", multiplier=" + multiplier +
+        ", minTick=" + minTick +
         ", lastTradingDate='" + lastTradingDate + '\'' +
         ", firstNoticeDate='" + firstNoticeDate + '\'' +
         ", lastBiddingCloseTime=" + lastBiddingCloseTime +
