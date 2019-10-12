@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.struct.TagValue;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.AttachType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
@@ -237,6 +238,57 @@ public class TradeParamBuilder {
       this.orderParameter.setMultiplier(contract.getMultiplier().floatValue());
     }
 
+    return this;
+  }
+
+  public TradeParamBuilder attachType(AttachType attachType) {
+    if (attachType != null) {
+      this.orderParameter.setAttachType(attachType);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder profitTakerOrderId(int profitTakerOrderId) {
+    this.orderParameter.setProfitTakerOrderId(profitTakerOrderId);
+    return this;
+  }
+
+  public TradeParamBuilder profitTakerPrice(double profitTakerPrice) {
+    this.orderParameter.setProfitTakerPrice(profitTakerPrice);
+    return this;
+  }
+
+  public TradeParamBuilder profitTakerTif(TimeInForce profitTakerTif) {
+    if (profitTakerTif != null) {
+      this.orderParameter.setProfitTakerTif(profitTakerTif);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder profitTakerRth(boolean profitTakerRth) {
+    this.orderParameter.setProfitTakerRth(profitTakerRth);
+    return this;
+  }
+
+  public TradeParamBuilder stopLossOrderId(int stopLossOrderId) {
+    this.orderParameter.setStopLossOrderId(stopLossOrderId);
+    return this;
+  }
+
+  public TradeParamBuilder stopLossPrice(double stopLossPrice) {
+    this.orderParameter.setStopLossPrice(stopLossPrice);
+    return this;
+  }
+
+  public TradeParamBuilder stopLossTif(TimeInForce stopLossTif) {
+    if (stopLossTif != null) {
+      this.orderParameter.setStopLossTif(stopLossTif);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder stopLossRth(boolean stopLossRth) {
+    this.orderParameter.setStopLossRth(stopLossRth);
     return this;
   }
 

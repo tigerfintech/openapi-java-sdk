@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.struct.param;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.struct.TagValue;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.AttachType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
@@ -136,6 +137,35 @@ public class OrderParameter implements Serializable {
   private List<TagValue> algoParams;
 
   private String source;
+
+  /**
+   * 附加订单类型：
+   * PROFIT
+   * LOSS
+   */
+  private AttachType attachType;
+
+  /**
+   * 止盈订单
+   */
+  private int profitTakerOrderId;
+
+  private double profitTakerPrice;
+
+  private TimeInForce profitTakerTif;
+
+  private boolean profitTakerRth;
+
+  /**
+   * 止损订单
+   */
+  private int stopLossOrderId;
+
+  private double stopLossPrice;
+
+  private TimeInForce stopLossTif;
+
+  private boolean stopLossRth;
 
   public Long getId() {
     return id;
@@ -345,10 +375,82 @@ public class OrderParameter implements Serializable {
     this.source = source;
   }
 
-  @Override
-  public String toString() {
+  public void setAttachType(AttachType attachType) {
+    this.attachType = attachType;
+  }
+
+  public void setProfitTakerOrderId(int profitTakerOrderId) {
+    this.profitTakerOrderId = profitTakerOrderId;
+  }
+
+  public void setProfitTakerPrice(double profitTakerPrice) {
+    this.profitTakerPrice = profitTakerPrice;
+  }
+
+  public void setProfitTakerTif(TimeInForce profitTakerTif) {
+    this.profitTakerTif = profitTakerTif;
+  }
+
+  public void setProfitTakerRth(boolean profitTakerRth) {
+    this.profitTakerRth = profitTakerRth;
+  }
+
+  public void setStopLossOrderId(int stopLossOrderId) {
+    this.stopLossOrderId = stopLossOrderId;
+  }
+
+  public void setStopLossPrice(double stopLossPrice) {
+    this.stopLossPrice = stopLossPrice;
+  }
+
+  public void setStopLossTif(TimeInForce stopLossTif) {
+    this.stopLossTif = stopLossTif;
+  }
+
+  public void setStopLossRth(boolean stopLossRth) {
+    this.stopLossRth = stopLossRth;
+  }
+
+  public AttachType getAttachType() {
+    return attachType;
+  }
+
+  public int getProfitTakerOrderId() {
+    return profitTakerOrderId;
+  }
+
+  public double getProfitTakerPrice() {
+    return profitTakerPrice;
+  }
+
+  public TimeInForce getProfitTakerTif() {
+    return profitTakerTif;
+  }
+
+  public boolean isProfitTakerRth() {
+    return profitTakerRth;
+  }
+
+  public int getStopLossOrderId() {
+    return stopLossOrderId;
+  }
+
+  public double getStopLossPrice() {
+    return stopLossPrice;
+  }
+
+  public TimeInForce getStopLossTif() {
+    return stopLossTif;
+  }
+
+  public boolean isStopLossRth() {
+    return stopLossRth;
+  }
+
+  @Override public String toString() {
     return "OrderParameter{" +
-        "orderId=" + orderId +
+        "id=" + id +
+        ", orderId=" + orderId +
         ", account='" + account + '\'' +
         ", symbol='" + symbol + '\'' +
         ", secType=" + secType +
@@ -367,11 +469,21 @@ public class OrderParameter implements Serializable {
         ", strike='" + strike + '\'' +
         ", right='" + right + '\'' +
         ", multiplier=" + multiplier +
+        ", localSymbol='" + localSymbol + '\'' +
         ", allocAccounts=" + allocAccounts +
         ", allocShares=" + allocShares +
         ", algoStrategy='" + algoStrategy + '\'' +
         ", algoParams=" + algoParams +
         ", source='" + source + '\'' +
+        ", attachType='" + attachType + '\'' +
+        ", profitTakerOrderId=" + profitTakerOrderId +
+        ", profitTakerPrice=" + profitTakerPrice +
+        ", profitTakerTif='" + profitTakerTif + '\'' +
+        ", profitTakerRth=" + profitTakerRth +
+        ", stopLossOrderId=" + stopLossOrderId +
+        ", stopLossPrice=" + stopLossPrice +
+        ", stopLossTif='" + stopLossTif + '\'' +
+        ", stopLossRth=" + stopLossRth +
         '}';
   }
 }

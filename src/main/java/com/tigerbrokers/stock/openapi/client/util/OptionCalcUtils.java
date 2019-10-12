@@ -450,7 +450,7 @@ public class OptionCalcUtils {
       Date date = Date.from(LocalDate.now().atStartOfDay(ZoneId.of(TimeZoneId.Shanghai.getZoneId())).toInstant());
       CorporateDividendRequest request = CorporateDividendRequest.newRequest(symbols, Market.US, date, date);
       CorporateDividendResponse corporateDividendResponse = client.execute(request);
-      if (corporateDividendResponse.isSuccess()) {
+      if (corporateDividendResponse != null && corporateDividendResponse.isSuccess()) {
         List<CorporateDividendItem> corporateDividendItems = corporateDividendResponse.getItems().get(symbol);
         if (!isEmpty(corporateDividendItems)) {
           return corporateDividendItems.get(0);
@@ -467,7 +467,7 @@ public class OptionCalcUtils {
   private static FutureTask<Boolean> getMarketStateTask(TigerHttpClient client) {
     FutureTask<Boolean> marketItemTask = new FutureTask<>(() -> {
       QuoteMarketResponse quoteMarketResponse = client.execute(QuoteMarketRequest.newRequest(Market.US));
-      if (quoteMarketResponse.isSuccess()) {
+      if (quoteMarketResponse != null && quoteMarketResponse.isSuccess()) {
         List<MarketItem> marketItems = quoteMarketResponse.getMarketItems();
         if (!isEmpty(marketItems)) {
           return "交易中".equals(marketItems.get(0).getMarketStatus());
@@ -483,7 +483,7 @@ public class OptionCalcUtils {
     FutureTask<Double> realTimeQuoteItemTask = new FutureTask<>(() -> {
       QuoteRealTimeQuoteResponse quoteRealTimeQuoteResponse =
           client.execute(QuoteRealTimeQuoteRequest.newRequest(Arrays.asList(symbol)));
-      if (quoteRealTimeQuoteResponse.isSuccess()) {
+      if (quoteRealTimeQuoteResponse != null && quoteRealTimeQuoteResponse.isSuccess()) {
         List<RealTimeQuoteItem> realTimeQuoteItems = quoteRealTimeQuoteResponse.getRealTimeQuoteItems();
         if (!isEmpty(realTimeQuoteItems)) {
           Double latestPrice = realTimeQuoteItems.get(0).getLatestPrice();
@@ -505,7 +505,7 @@ public class OptionCalcUtils {
       OptionCommonModel model = new OptionCommonModel(symbol, right, strike, expiryDate);
       OptionBriefResponse optionBriefResponse = client.execute(OptionBriefQueryRequest.of(model));
       List<OptionBriefItem> briefItems;
-      if (optionBriefResponse.isSuccess()) {
+      if (optionBriefResponse != null && optionBriefResponse.isSuccess()) {
         briefItems = optionBriefResponse.getOptionBriefItems();
         if (!isEmpty(briefItems)) {
           return briefItems.get(0);
