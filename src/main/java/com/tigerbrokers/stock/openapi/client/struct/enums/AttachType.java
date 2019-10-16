@@ -6,5 +6,6 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
  */
 public enum AttachType {
   PROFIT,
-  LOSS
+  LOSS,
+  BRACKETS
 }
