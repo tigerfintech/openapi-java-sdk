@@ -204,6 +204,13 @@ public class AccountParamBuilder {
     return this;
   }
 
+  public AccountParamBuilder parentId(Integer parentId) {
+    if (parentId != null) {
+      paramMap.put("parent_id", parentId);
+    }
+    return this;
+  }
+
   public String buildJson() {
     JSONObject jsonObject = new JSONObject();
     jsonObject.putAll(paramMap);
