@@ -248,13 +248,17 @@ public class TradeParamBuilder {
     return this;
   }
 
-  public TradeParamBuilder profitTakerOrderId(int profitTakerOrderId) {
-    this.orderParameter.setProfitTakerOrderId(profitTakerOrderId);
+  public TradeParamBuilder profitTakerOrderId(Integer profitTakerOrderId) {
+    if (profitTakerOrderId != null) {
+      this.orderParameter.setProfitTakerOrderId(profitTakerOrderId);
+    }
     return this;
   }
 
-  public TradeParamBuilder profitTakerPrice(double profitTakerPrice) {
-    this.orderParameter.setProfitTakerPrice(profitTakerPrice);
+  public TradeParamBuilder profitTakerPrice(Double profitTakerPrice) {
+    if (profitTakerPrice != null) {
+      this.orderParameter.setProfitTakerPrice(profitTakerPrice);
+    }
     return this;
   }
 
@@ -265,18 +269,24 @@ public class TradeParamBuilder {
     return this;
   }
 
-  public TradeParamBuilder profitTakerRth(boolean profitTakerRth) {
-    this.orderParameter.setProfitTakerRth(profitTakerRth);
+  public TradeParamBuilder profitTakerRth(Boolean profitTakerRth) {
+    if (profitTakerRth) {
+      this.orderParameter.setProfitTakerRth(profitTakerRth);
+    }
     return this;
   }
 
-  public TradeParamBuilder stopLossOrderId(int stopLossOrderId) {
-    this.orderParameter.setStopLossOrderId(stopLossOrderId);
+  public TradeParamBuilder stopLossOrderId(Integer stopLossOrderId) {
+    if (stopLossOrderId != null) {
+      this.orderParameter.setStopLossOrderId(stopLossOrderId);
+    }
     return this;
   }
 
-  public TradeParamBuilder stopLossPrice(double stopLossPrice) {
-    this.orderParameter.setStopLossPrice(stopLossPrice);
+  public TradeParamBuilder stopLossPrice(Double stopLossPrice) {
+    if (stopLossPrice != null) {
+      this.orderParameter.setStopLossPrice(stopLossPrice);
+    }
     return this;
   }
 
@@ -287,8 +297,10 @@ public class TradeParamBuilder {
     return this;
   }
 
-  public TradeParamBuilder stopLossRth(boolean stopLossRth) {
-    this.orderParameter.setStopLossRth(stopLossRth);
+  public TradeParamBuilder stopLossRth(Boolean stopLossRth) {
+    if (stopLossRth != null) {
+      this.orderParameter.setStopLossRth(stopLossRth);
+    }
     return this;
   }
 

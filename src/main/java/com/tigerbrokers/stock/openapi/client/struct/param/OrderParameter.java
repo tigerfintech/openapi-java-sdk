@@ -148,24 +148,24 @@ public class OrderParameter implements Serializable {
   /**
    * 止盈订单
    */
-  private int profitTakerOrderId;
+  private Integer profitTakerOrderId;
 
-  private double profitTakerPrice;
+  private Double profitTakerPrice;
 
   private TimeInForce profitTakerTif;
 
-  private boolean profitTakerRth;
+  private Boolean profitTakerRth;
 
   /**
    * 止损订单
    */
-  private int stopLossOrderId;
+  private Integer stopLossOrderId;
 
-  private double stopLossPrice;
+  private Double stopLossPrice;
 
   private TimeInForce stopLossTif;
 
-  private boolean stopLossRth;
+  private Boolean stopLossRth;
 
   public Long getId() {
     return id;
@@ -379,11 +379,11 @@ public class OrderParameter implements Serializable {
     this.attachType = attachType;
   }
 
-  public void setProfitTakerOrderId(int profitTakerOrderId) {
+  public void setProfitTakerOrderId(Integer profitTakerOrderId) {
     this.profitTakerOrderId = profitTakerOrderId;
   }
 
-  public void setProfitTakerPrice(double profitTakerPrice) {
+  public void setProfitTakerPrice(Double profitTakerPrice) {
     this.profitTakerPrice = profitTakerPrice;
   }
 
@@ -391,15 +391,15 @@ public class OrderParameter implements Serializable {
     this.profitTakerTif = profitTakerTif;
   }
 
-  public void setProfitTakerRth(boolean profitTakerRth) {
+  public void setProfitTakerRth(Boolean profitTakerRth) {
     this.profitTakerRth = profitTakerRth;
   }
 
-  public void setStopLossOrderId(int stopLossOrderId) {
+  public void setStopLossOrderId(Integer stopLossOrderId) {
     this.stopLossOrderId = stopLossOrderId;
   }
 
-  public void setStopLossPrice(double stopLossPrice) {
+  public void setStopLossPrice(Double stopLossPrice) {
     this.stopLossPrice = stopLossPrice;
   }
 
@@ -407,7 +407,7 @@ public class OrderParameter implements Serializable {
     this.stopLossTif = stopLossTif;
   }
 
-  public void setStopLossRth(boolean stopLossRth) {
+  public void setStopLossRth(Boolean stopLossRth) {
     this.stopLossRth = stopLossRth;
   }
 
@@ -415,11 +415,11 @@ public class OrderParameter implements Serializable {
     return attachType;
   }
 
-  public int getProfitTakerOrderId() {
+  public Integer getProfitTakerOrderId() {
     return profitTakerOrderId;
   }
 
-  public double getProfitTakerPrice() {
+  public Double getProfitTakerPrice() {
     return profitTakerPrice;
   }
 
@@ -427,15 +427,15 @@ public class OrderParameter implements Serializable {
     return profitTakerTif;
   }
 
-  public boolean isProfitTakerRth() {
+  public Boolean isProfitTakerRth() {
     return profitTakerRth;
   }
 
-  public int getStopLossOrderId() {
+  public Integer getStopLossOrderId() {
     return stopLossOrderId;
   }
 
-  public double getStopLossPrice() {
+  public Double getStopLossPrice() {
     return stopLossPrice;
   }
 
@@ -443,7 +443,7 @@ public class OrderParameter implements Serializable {
     return stopLossTif;
   }
 
-  public boolean isStopLossRth() {
+  public Boolean isStopLossRth() {
     return stopLossRth;
   }
 
