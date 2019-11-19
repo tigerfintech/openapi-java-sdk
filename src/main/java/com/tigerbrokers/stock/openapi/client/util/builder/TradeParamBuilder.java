@@ -297,13 +297,6 @@ public class TradeParamBuilder {
     return this;
   }
 
-  public TradeParamBuilder stopLossRth(Boolean stopLossRth) {
-    if (stopLossRth != null) {
-      this.orderParameter.setStopLossRth(stopLossRth);
-    }
-    return this;
-  }
-
   public OrderParameter build() {
     return this.orderParameter;
   }
