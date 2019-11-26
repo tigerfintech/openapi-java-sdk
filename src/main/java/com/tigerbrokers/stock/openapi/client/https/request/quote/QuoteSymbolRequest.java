@@ -31,9 +31,9 @@ public class QuoteSymbolRequest extends TigerCommonRequest implements TigerReque
     return request;
   }
 
-  public static QuoteSymbolRequest newRequest(Market market, PackageName packageName) {
+  public static QuoteSymbolRequest newRequest(PackageName packageName) {
     QuoteSymbolRequest request = new QuoteSymbolRequest();
-    QuoteMarketModel model = new QuoteMarketModel(market, packageName);
+    QuoteMarketModel model = new QuoteMarketModel(packageName);
     request.setApiModel(model);
     return request;
   }

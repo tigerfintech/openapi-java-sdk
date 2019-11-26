@@ -30,8 +30,7 @@ public class QuoteMarketModel extends ApiModel {
     this.language = language;
   }
 
-  public QuoteMarketModel(Market market, PackageName packageName) {
-    this.market = market;
+  public QuoteMarketModel(PackageName packageName) {
     this.packageName = packageName;
   }
 
