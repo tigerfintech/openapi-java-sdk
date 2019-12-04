@@ -12,124 +12,125 @@ import java.util.Set;
 public interface SubscribeAsyncApi {
 
   /**
-   * 订阅主题
+   * subscribe trade data , include order / position / asset
    *
-   * @param subject 主题
+   * @param subject trade subject
    * @return string id
    */
   String subscribe(Subject subject);
 
   /**
-   * 订阅主题字段
+   * subscribe trade data , include order / position / asset
    *
-   * @param subject 主题
-   * @param focusKeys 关注key列表
+   * @param subject trade subject
+   * @param focusKeys focus keys
    * @return string id
    */
   String subscribe(Subject subject, List<String> focusKeys);
 
   /**
-   * 订阅主题字段
+   * subscribe trade data , include order / position / asset
    *
-   * @param account 账户
-   * @param subject 主题
+   * @param account subscribe account
+   * @param subject trade subject
    * @return string id
    */
   String subscribe(String account, Subject subject);
 
   /**
-   * 订阅主题字段
+   * subscribe trade data , include order / position / asset
    *
-   * @param account 账户
-   * @param subject 主题
-   * @param focusKeys 关注key列表
+   * @param account account
+   * @param subject subject
+   * @param focusKeys focus keys
    * @return string id
    */
   String subscribe(String account, Subject subject, List<String> focusKeys);
 
   /**
-   * 取消订阅主题
+   * cancel subscribe trade data , include order / position / asset
    *
-   * @param subject 主题
+   * @param subject trade subject
    * @return string id
    */
   String cancelSubscribe(Subject subject);
 
   /**
-   * 订阅行情
+   * subscrie quote
    *
-   * @param symbols 标的列表
+   * @param symbols symbol list
    * @return string id
    */
   String subscribeQuote(Set<String> symbols);
 
   /**
-   * 订阅行情字段
+   * subscribe quote data
    *
-   * @param symbols 标的列表
-   * @param focusKeys 关注key
+   * @param symbols symbol list
+   * @param focusKeys focus keys
    * @return string id
    */
   String subscribeQuote(Set<String> symbols, List<String> focusKeys);
 
   /**
-   * 取消订阅行情
+   * cancel subscribe quote data,include stock / option / futures
    *
-   * @param symbols 标的列表
+   * @param symbols symbol list
    * @return string id
    */
   String cancelSubscribeQuote(Set<String> symbols);
 
   /**
-   * 订阅期权数据
+   * subscribe option data
    *
-   * @param symbols 标的列表
+   * @param symbols symbol list
    * @return string id
    */
   String subscribeOption(Set<String> symbols);
 
   /**
-   * 取消订阅期权数据
+   * cancel subscribe option data
    *
-   * @param symbols 标的列表
+   * @param symbols symbol list
    * @return string id
    */
   String cancelSubscribeOption(Set<String> symbols);
 
   /**
-   * 订阅期货数据
+   * subscribe futures data
    *
-   * @param symbols 标的列表
+   * @param symbols symbol list
    * @return string id
    */
   String subscribeFuture(Set<String> symbols);
 
   /**
-   * 取消订单期货数据
+   * cancel subscribe futures data
    *
-   * @param symbols 标的列表
+   * @param symbols symbol list
    * @return string id
    */
   String cancelSubscribeFuture(Set<String> symbols);
 
   /**
-   * 订阅买卖盘数据
+   * subscribe depth data
    *
-   * @param symbols 标的列表
+   * @param symbols symbol list
+   * @param exchange exchange name
    * @return string id
    */
   String subscribeAskBid(Set<String> symbols, Exchange exchange);
 
   /**
-   * 取消订阅买卖盘数据
+   * cancel subscribe depth data
    *
-   * @param symbols 标的列表
+   * @param symbols symbol list
    * @return string id
    */
   String cancelSubscribeAskBid(Set<String> symbols);
 
   /**
-   * 查询已订阅symbol列表
+   * query subscribed symbol list
    *
    * @return string id
    */

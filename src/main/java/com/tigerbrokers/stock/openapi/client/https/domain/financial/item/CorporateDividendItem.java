@@ -9,15 +9,10 @@ import java.time.LocalDate;
 public class CorporateDividendItem extends CorporateActionItem {
 
   private LocalDate recordDate;
-
   private LocalDate announcedDate;
-
   private LocalDate payDate;
-
   private Double amount;
-
   private String currency;
-
   private String type;
 
   public LocalDate getRecordDate() {

@@ -34,6 +34,7 @@ public class StompMessageUtil {
    * @param version version
    * @param sendInterval client能保证发送心跳的最小间隔，0代表client不发送心跳
    * @param receiveInterval client希望收到server心跳的间隔，0代表client不希望收到server的心跳
+   * @return StompFrame
    */
   public static StompFrame buildConnectMessage(String login, String passcode, String version, int sendInterval,
       int receiveInterval) {
