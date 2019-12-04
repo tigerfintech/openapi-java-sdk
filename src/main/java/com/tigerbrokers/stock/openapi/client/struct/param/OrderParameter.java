@@ -165,8 +165,6 @@ public class OrderParameter implements Serializable {
 
   private TimeInForce stopLossTif;
 
-  private Boolean stopLossRth;
-
   public Long getId() {
     return id;
   }
@@ -407,10 +405,6 @@ public class OrderParameter implements Serializable {
     this.stopLossTif = stopLossTif;
   }
 
-  public void setStopLossRth(Boolean stopLossRth) {
-    this.stopLossRth = stopLossRth;
-  }
-
   public AttachType getAttachType() {
     return attachType;
   }
@@ -443,10 +437,6 @@ public class OrderParameter implements Serializable {
     return stopLossTif;
   }
 
-  public Boolean isStopLossRth() {
-    return stopLossRth;
-  }
-
   @Override public String toString() {
     return "OrderParameter{" +
         "id=" + id +
@@ -475,15 +465,14 @@ public class OrderParameter implements Serializable {
         ", algoStrategy='" + algoStrategy + '\'' +
         ", algoParams=" + algoParams +
         ", source='" + source + '\'' +
-        ", attachType='" + attachType + '\'' +
+        ", attachType=" + attachType +
         ", profitTakerOrderId=" + profitTakerOrderId +
         ", profitTakerPrice=" + profitTakerPrice +
-        ", profitTakerTif='" + profitTakerTif + '\'' +
+        ", profitTakerTif=" + profitTakerTif +
         ", profitTakerRth=" + profitTakerRth +
         ", stopLossOrderId=" + stopLossOrderId +
         ", stopLossPrice=" + stopLossPrice +
-        ", stopLossTif='" + stopLossTif + '\'' +
-        ", stopLossRth=" + stopLossRth +
+        ", stopLossTif=" + stopLossTif +
         '}';
   }
 }

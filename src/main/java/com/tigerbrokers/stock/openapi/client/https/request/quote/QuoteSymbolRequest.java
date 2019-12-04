@@ -7,6 +7,7 @@ import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteSymbolResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
+import com.tigerbrokers.stock.openapi.client.struct.enums.PackageName;
 
 /**
  * Description:
@@ -26,6 +27,13 @@ public class QuoteSymbolRequest extends TigerCommonRequest implements TigerReque
   public static QuoteSymbolRequest newRequest(Market market, Language lang) {
     QuoteSymbolRequest request = new QuoteSymbolRequest();
     QuoteMarketModel model = new QuoteMarketModel(market, lang);
+    request.setApiModel(model);
+    return request;
+  }
+
+  public static QuoteSymbolRequest newRequest(Market market, PackageName packageName) {
+    QuoteSymbolRequest request = new QuoteSymbolRequest();
+    QuoteMarketModel model = new QuoteMarketModel(market, packageName);
     request.setApiModel(model);
     return request;
   }
