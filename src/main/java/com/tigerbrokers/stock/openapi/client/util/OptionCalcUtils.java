@@ -412,7 +412,7 @@ public class OptionCalcUtils {
    * @param strike 行权价
    * @param expiry 过期日（yyyy-MM-dd）
    * @return 期权基本面信息
-   * @throws Exception
+   * @throws Exception runtime exception
    */
   public static OptionFundamentals getOptionFundamentals(TigerHttpClient client, String symbol, String right,
       String strike, String expiry) throws Exception {

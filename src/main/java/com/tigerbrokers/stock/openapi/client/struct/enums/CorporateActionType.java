@@ -6,7 +6,8 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
  */
 public enum CorporateActionType {
   SPLIT("split"),
-  DIVIDEND("dividend");
+  DIVIDEND("dividend"),
+  EARNING("earning");
 
   private String value;
 
