@@ -40,8 +40,6 @@ public class OptionCalcUtils {
 
   private static final int TIME_MILLIS_IN_ONE_HOUR = 60 * 60 * 1000;
 
-  private static final int HALF_DAY_MILLS = 12 * TIME_MILLIS_IN_ONE_HOUR;
-
   private static double ACCURACY = 1.0e-6;
 
   private static double n(double x) {
@@ -354,13 +352,13 @@ public class OptionCalcUtils {
    *
    * @param r 国债利率
    * @param expiryLong 过期日（long类型）
-   * @param executeDateLong 除权除息日（long类型）
+   * @param executeDateLong 除权除息日（long类型），与expiryLong保持时区一致
    * @param latestPrice 最新正股价格
    * @param targetPrice 期权目标价格
    * @param dividendAmount 分红
    * @param strike 行权价
    * @param type CALL or PUT
-   * @param currentTime 当前时间（long类型）
+   * @param currentTime 当前时间（long类型），与expiryLong保持时区一致
    * @param isTrading 是否在正股交易时间
    */
   private static OptionResult calcOptionIndex(double r, long expiryLong, long executeDateLong,
@@ -368,10 +366,10 @@ public class OptionCalcUtils {
       boolean isTrading) {
 
     OptionResult result = new OptionResult();
-    double diff = ((expiryLong - currentTime + HALF_DAY_MILLS) /
+    double diff = ((expiryLong - currentTime) /
         (24.0f * TIME_MILLIS_IN_ONE_HOUR) + 1 + (isTrading ? 0 : 1)) / 365.0f;
     final boolean needDividend =
-        executeDateLong != 0 && expiryLong > executeDateLong && currentTime < executeDateLong + HALF_DAY_MILLS;
+        executeDateLong != 0 && expiryLong > executeDateLong && currentTime < executeDateLong;
     latestPrice = latestPrice - (needDividend ? dividendAmount : 0);
 
     if (targetPrice == 0 || strike == 0) {
@@ -439,7 +437,7 @@ public class OptionCalcUtils {
     double target = (optionBriefItem.getAskPrice() + optionBriefItem.getBidPrice()) / 2;
 
     OptionResult result =
-        calcOptionIndex(optionBriefItem.getRatesBonds(), DateUtils.parseEpochMill(expiry, TimeZoneId.NewYork),
+        calcOptionIndex(optionBriefItem.getRatesBonds(), optionBriefItem.getExpiry(),
             DateUtils.parseEpochMill(dividendTask.get().getExecuteDate()), latestPriceTask.get(), target,
             dividendTask.get().getAmount(), Double.parseDouble(optionBriefItem.getStrike()), optionBriefItem.getRight(),
             System.currentTimeMillis(), marketStateTask.get());
