@@ -427,9 +427,13 @@ public class OptionCalcUtils {
         getOptionBriefTask(client, symbol, right, strike, DateUtils.parseEpochMill(expiry, TimeZoneId.NewYork));
 
     OptionBriefItem optionBriefItem = optionBriefTask.get();
-    if (optionBriefItem.getAskPrice() == null
-        || optionBriefItem.getBidPrice() == null
-        || optionBriefItem.getStrike() == null) {
+    if (optionBriefItem.getAskPrice() == null) {
+      optionBriefItem.setAskPrice(0D);
+    }
+    if (optionBriefItem.getBidPrice() == null) {
+      optionBriefItem.setBidPrice(0D);
+    }
+    if (optionBriefItem.getStrike() == null) {
       throw new RuntimeException("无法获取期权摘要信息！");
     }
     double target = (optionBriefItem.getAskPrice() + optionBriefItem.getBidPrice()) / 2;
