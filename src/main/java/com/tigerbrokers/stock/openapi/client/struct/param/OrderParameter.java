@@ -143,26 +143,29 @@ public class OrderParameter implements Serializable {
    * PROFIT
    * LOSS
    */
+  @JSONField(name = "attach_type")
   private AttachType attachType;
 
   /**
    * 止盈订单
    */
+  @JSONField(name = "profit_taker_orderId")
   private Integer profitTakerOrderId;
-
+  @JSONField(name = "profit_taker_price")
   private Double profitTakerPrice;
-
+  @JSONField(name = "profit_taker_tif")
   private TimeInForce profitTakerTif;
-
+  @JSONField(name = "profit_taker_rth")
   private Boolean profitTakerRth;
 
   /**
    * 止损订单
    */
+  @JSONField(name = "stop_loss_orderId")
   private Integer stopLossOrderId;
-
+  @JSONField(name = "stop_loss_price")
   private Double stopLossPrice;
-
+  @JSONField(name = "stop_loss_tif")
   private TimeInForce stopLossTif;
 
   public Long getId() {
