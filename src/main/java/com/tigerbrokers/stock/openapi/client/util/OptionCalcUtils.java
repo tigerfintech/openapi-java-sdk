@@ -495,7 +495,10 @@ public class OptionCalcUtils {
           return latestPrice;
         }
       }
-      throw new RuntimeException("实时行情返回值：" + quoteRealTimeQuoteResponse);
+      if (quoteRealTimeQuoteResponse == null) {
+        throw new RuntimeException("无法获取股票最新价格！");
+      }
+      throw new RuntimeException("实时行情返回：" + quoteRealTimeQuoteResponse.getMessage());
     });
     executorService.execute(realTimeQuoteItemTask);
     return realTimeQuoteItemTask;
@@ -513,7 +516,10 @@ public class OptionCalcUtils {
           return briefItems.get(0);
         }
       }
-      throw new RuntimeException("期权摘要返回值：" + optionBriefResponse);
+      if (optionBriefResponse == null) {
+        throw new RuntimeException("无法获取期权摘要信息！");
+      }
+      throw new RuntimeException("期权摘要返回：" + optionBriefResponse.getMessage());
     });
     executorService.execute(optionBriefItemTask);
     return optionBriefItemTask;
