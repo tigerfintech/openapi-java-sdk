@@ -29,7 +29,7 @@ public class ApiCallbackDecoder {
   private StompFrame stompFrame;
   private int retType;
   private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
-  private static final String HEART_BEAT = "Heart_Beat";
+  private static final String HEART_BEAT = "heart-beat";
 
   public ApiCallbackDecoder(ApiComposeCallback callback) {
     this.callback = callback;
