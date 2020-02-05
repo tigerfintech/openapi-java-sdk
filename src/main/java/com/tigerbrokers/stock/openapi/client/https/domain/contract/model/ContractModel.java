@@ -20,13 +20,15 @@ public class ContractModel extends BaseContractModel {
     setAccount(account);
   }
 
-  public ContractModel(String account, String symbol, String secType) {
+  public ContractModel(String account, String symbol, String secType, String currency) {
     this(account, symbol);
     setSecType(secType);
+    setCurrency(currency);
   }
 
-  public ContractModel(String account, String symbol, String secType, String expiry, Double strike, String right) {
-    this(account, symbol, secType);
+  public ContractModel(String account, String symbol, String secType, String currency, String expiry, Double strike,
+      String right) {
+    this(account, symbol, secType, currency);
     setStrike(strike);
     setExpiry(expiry);
     setRight(right);
