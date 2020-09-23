@@ -80,6 +80,9 @@ public interface ApiServiceType {
   String FINANCIAL_DAILY = "financial_daily";
   String FINANCIAL_REPORT = "financial_report";
   String CORPORATE_ACTION = "corporate_action";
+  String INDUSTRY_LIST = "industry_list";
+  String INDUSTRY_STOCKS = "industry_stocks";
+  String STOCK_INDUSTRY = "stock_industry";
 
   /**
    * 用户

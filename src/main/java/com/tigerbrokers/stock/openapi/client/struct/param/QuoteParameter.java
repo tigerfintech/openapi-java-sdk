@@ -31,6 +31,10 @@ public class QuoteParameter implements Serializable {
   private int endIndex;
   @JSONField(name = "lang")
   private Language language;
+  @JSONField(name = "industry_id")
+  private Integer industryId;
+  @JSONField(name = "industry_level")
+  private String industryLevel;
 
   public QuoteParameter() {
   }
@@ -131,6 +135,22 @@ public class QuoteParameter implements Serializable {
     this.language = language;
   }
 
+  public Integer getIndustryId() {
+    return industryId;
+  }
+
+  public void setIndustryId(Integer industryId) {
+    this.industryId = industryId;
+  }
+
+  public String getIndustryLevel() {
+    return industryLevel;
+  }
+
+  public void setIndustryLevel(String industryLevel) {
+    this.industryLevel = industryLevel;
+  }
+
   @Override
   public String toString() {
     return "QuoteParameter{" +
@@ -146,6 +166,8 @@ public class QuoteParameter implements Serializable {
         ", beginIndex=" + beginIndex +
         ", endIndex=" + endIndex +
         ", language=" + language +
+        ", industryId=" + industryId +
+        ", industryLevel='" + industryLevel + '\'' +
         '}';
   }
 }
