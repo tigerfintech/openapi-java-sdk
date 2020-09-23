@@ -180,6 +180,20 @@ public class QuoteParamBuilder {
     return this;
   }
 
+  public QuoteParamBuilder industryId(Integer industryId) {
+    if (industryId != null) {
+      paramMap.put("industry_id", industryId);
+    }
+    return this;
+  }
+
+  public QuoteParamBuilder industryLevel(String industryLevel) {
+    if (industryLevel != null) {
+      paramMap.put("industry_level", industryLevel);
+    }
+    return this;
+  }
+
   public QuoteParameter build() {
     return JSONObject.parseObject(JSON.toJSONString(paramMap), QuoteParameter.class);
   }
