@@ -13,6 +13,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
+import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import com.tigerbrokers.stock.openapi.client.util.TigerSignature;
 import java.security.Security;
@@ -23,6 +24,7 @@ import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.A
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCOUNT_TYPE;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.BIZ_CONTENT;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.CHARSET;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.DEVICE_ID;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.METHOD;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN_TYPE;
@@ -43,6 +45,7 @@ public class TigerHttpClient implements TigerClient {
   private String accessToken;
   private String tradeToken;
   private String accountType;
+  private String deviceId;
 
   private static final String ONLINE_PUBLIC_KEY =
       "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDNF3G8SoEcCZh2rshUbayDgLLrj6rKgzNMxDL2HSnKcB0+GPOsndqSv+a4IBu9+I3fyBp5hkyMMG2+AXugd9pMpy6VxJxlNjhX1MYbNTZJUT4nudki4uh+LMOkIBHOceGNXjgB+cXqmlUnjlqha/HgboeHSnSgpM3dKSJQlIOsDwIDAQAB";
@@ -75,6 +78,7 @@ public class TigerHttpClient implements TigerClient {
     } else {
       this.tigerPublicKey = SANDBOX_PUBLIC_KEY;
     }
+    this.deviceId = NetworkUtil.getLocalMac();
   }
 
   public TigerHttpClient(String serverUrl) {
@@ -203,6 +207,9 @@ public class TigerHttpClient implements TigerClient {
     }
     if (this.accountType != null) {
       params.put(ACCOUNT_TYPE, this.accountType);
+    }
+    if (this.deviceId != null) {
+      params.put(DEVICE_ID, this.deviceId);
     }
     if (this.tigerId != null) {
       String signContent = TigerSignature.getSignContent(params);
