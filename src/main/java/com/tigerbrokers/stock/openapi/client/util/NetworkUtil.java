@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 
 /**
  * @author ltc
@@ -12,18 +13,21 @@ import java.net.UnknownHostException;
  */
 public class NetworkUtil {
 
+  private NetworkUtil() {
+  }
+
   /**
    * 获取主机mac地址
    */
   public static String getLocalMac() {
     try {
-      InetAddress ia = InetAddress.getLocalHost();
+      InetAddress ia = getLocalHostLANAddress();
       byte[] mac = NetworkInterface.getByInetAddress(ia).getHardwareAddress();
       if (mac == null) {
         ApiLogger.error("Please check if the network connection is disconnected");
         return null;
       }
-      StringBuffer sb = new StringBuffer();
+      StringBuilder sb = new StringBuilder();
       for (int i = 0; i < mac.length; i++) {
         if (i != 0) {
           sb.append("-");
@@ -40,5 +44,37 @@ public class NetworkUtil {
       ApiLogger.error(e.getMessage());
     }
     return null;
+  }
+
+  private static InetAddress getLocalHostLANAddress() throws UnknownHostException {
+    try {
+      InetAddress candidateAddress = null;
+      for (Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces(); networkInterfaces.hasMoreElements(); ) {
+        NetworkInterface networkInterface = networkInterfaces.nextElement();
+        for (Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses(); inetAddresses.hasMoreElements(); ) {
+          InetAddress inetAddress = inetAddresses.nextElement();
+          if (!inetAddress.isLoopbackAddress()) {
+            if (inetAddress.isSiteLocalAddress()) {
+              return inetAddress;
+            } else if (candidateAddress == null) {
+              candidateAddress = inetAddress;
+            }
+          }
+        }
+      }
+      if (candidateAddress != null) {
+        return candidateAddress;
+      }
+      InetAddress jdkSuppliedAddress = InetAddress.getLocalHost();
+      if (jdkSuppliedAddress == null) {
+        throw new UnknownHostException("The JDK InetAddress.getLocalHost() method unexpectedly returned null.");
+      }
+      return jdkSuppliedAddress;
+    } catch (Exception e) {
+      UnknownHostException unknownHostException = new UnknownHostException(
+          "Failed to determine LAN address: " + e);
+      unknownHostException.initCause(e);
+      throw unknownHostException;
+    }
   }
 }
