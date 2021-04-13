@@ -91,4 +91,9 @@ public interface ApiServiceType {
   String USER_TRADE_TOKEN = "user_trade_token";
   String USER_TRADE_PASSWORD_VERIFY = "user_trade_password_verify";
   String USER_TRADE_PASSWORD_RESET = "user_trade_password_reset";
+
+  /**
+   * 行情抢占
+   */
+  String GRAB_QUOTE_PERMISSION = "grab_quote_permission";
 }
