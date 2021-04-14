@@ -30,7 +30,7 @@ public class NetworkUtil {
       StringBuilder sb = new StringBuilder();
       for (int i = 0; i < mac.length; i++) {
         if (i != 0) {
-          sb.append("-");
+          sb.append(":");
         }
         int temp = mac[i] & 0xff;
         String str = Integer.toHexString(temp);
