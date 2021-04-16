@@ -78,7 +78,7 @@ public class TigerHttpClient implements TigerClient {
     } else {
       this.tigerPublicKey = SANDBOX_PUBLIC_KEY;
     }
-    this.deviceId = NetworkUtil.getLocalMac();
+    this.deviceId = NetworkUtil.getDeviceId();
   }
 
   public TigerHttpClient(String serverUrl) {

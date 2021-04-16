@@ -13,19 +13,18 @@ import java.util.Enumeration;
  */
 public class NetworkUtil {
 
+  private static final String NETWORK_DISCONNECTED = "Please check if the network connection is disconnected";
+
   private NetworkUtil() {
   }
 
-  /**
-   * 获取主机mac地址
-   */
-  public static String getLocalMac() {
+  public static String getDeviceId() {
     try {
       InetAddress ia = getLocalHostLANAddress();
       byte[] mac = NetworkInterface.getByInetAddress(ia).getHardwareAddress();
       if (mac == null) {
-        ApiLogger.error("Please check if the network connection is disconnected");
-        return null;
+        ApiLogger.error(NETWORK_DISCONNECTED);
+        throw new RuntimeException(NETWORK_DISCONNECTED);
       }
       StringBuilder sb = new StringBuilder();
       for (int i = 0; i < mac.length; i++) {
@@ -42,8 +41,8 @@ public class NetworkUtil {
       return sb.toString();
     } catch (SocketException | UnknownHostException e) {
       ApiLogger.error(e.getMessage());
+      throw new RuntimeException(e);
     }
-    return null;
   }
 
   private static InetAddress getLocalHostLANAddress() throws UnknownHostException {
