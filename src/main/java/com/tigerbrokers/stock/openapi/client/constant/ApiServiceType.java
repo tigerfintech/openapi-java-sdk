@@ -96,4 +96,5 @@ public interface ApiServiceType {
    * 行情抢占
    */
   String GRAB_QUOTE_PERMISSION = "grab_quote_permission";
+  String GET_QUOTE_PERMISSION = "get_quote_permission";
 }
