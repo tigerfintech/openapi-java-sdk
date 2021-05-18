@@ -10,9 +10,11 @@ import java.util.List;
 public class QuoteAskBidModel extends ApiModel {
 
   private List<String> symbols;
+  private String market;
 
-  public QuoteAskBidModel(List<String> symbols) {
+  public QuoteAskBidModel(List<String> symbols, String market) {
     this.symbols = symbols;
+    this.market = market;
   }
 
   public List<String> getSymbols() {
