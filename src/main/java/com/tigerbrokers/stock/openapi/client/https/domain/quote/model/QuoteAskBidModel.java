@@ -17,6 +17,14 @@ public class QuoteAskBidModel extends ApiModel {
     this.market = market;
   }
 
+  public String getMarket() {
+    return market;
+  }
+
+  public void setMarket(String market) {
+    this.market = market;
+  }
+
   public List<String> getSymbols() {
     return symbols;
   }
