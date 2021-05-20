@@ -33,7 +33,7 @@ public interface ApiServiceType {
   String QUOTE_REAL_TIME = "quote_real_time";
   String QUOTE_SHORTABLE_STOCKS = "quote_shortable_stocks";
   String QUOTE_STOCK_TRADE = "quote_stock_trade";
-  String ASK_BID = "ask_bid";
+  String QUOTE_DEPTH = "quote_depth";
 
   /**
    * 期权行情
