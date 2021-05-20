@@ -76,7 +76,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private Channel channel = null;
   private ChannelFuture future = null;
 
-  private boolean inited = false;
+  private boolean isInitial = false;
   private volatile ScheduledFuture<?> reconnectExecutorFuture = null;
   private static final ScheduledThreadPoolExecutor reconnectExecutorService = new ScheduledThreadPoolExecutor(2);
 
@@ -157,7 +157,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
           }
         });
 
-    inited = true;
+    isInitial = true;
   }
 
   public void connect() {
@@ -182,7 +182,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private void doConnect() {
     try {
       long start = System.currentTimeMillis();
-      if (!inited) {
+      if (!isInitial) {
         init();
       }
       InetSocketAddress address = getServerAddress();
@@ -214,7 +214,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
               WebSocketClientHandshaker handshaker =
                   WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, true, httpHeaders);
               webSocketHandshakerHandler.setHandshaker(handshaker);
-              channel.pipeline().addLast("handshakerHandler", webSocketHandshakerHandler);
+              channel.pipeline().addLast("handshakeHandler", webSocketHandshakerHandler);
               webSocketHandshakerHandler.setHandshaker(handshaker);
               ChannelPromise channelFuture = (ChannelPromise) handshaker.handshake(this.channel);
               channelFuture.sync();
@@ -269,7 +269,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     } catch (Throwable t) {
       ApiLogger.error(t.getMessage());
     } finally {
-      inited = false;
+      isInitial = false;
     }
   }
 

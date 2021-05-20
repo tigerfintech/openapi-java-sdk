@@ -33,9 +33,6 @@ import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.T
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TRADE_TOKEN;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.VERSION;
 
-/**
- * HTTP客户端
- */
 public class TigerHttpClient implements TigerClient {
 
   private String serverUrl;
@@ -73,7 +70,7 @@ public class TigerHttpClient implements TigerClient {
     this.serverUrl = serverUrl;
     this.tigerId = tigerId;
     this.privateKey = privateKey;
-    if (serverUrl.contains("openapi.itiger")) {
+    if (serverUrl.contains(TigerApiConstants.API_ONLINE_DOMAIN_URL)) {
       this.tigerPublicKey = ONLINE_PUBLIC_KEY;
     } else {
       this.tigerPublicKey = SANDBOX_PUBLIC_KEY;
@@ -116,6 +113,7 @@ public class TigerHttpClient implements TigerClient {
     return accountType;
   }
 
+  @Override
   public <T extends TigerResponse> T execute(TigerRequest<T> request) {
     T response;
     String param = null;
@@ -127,12 +125,12 @@ public class TigerHttpClient implements TigerClient {
       data = HttpUtils.post(serverUrl, param);
 
       if (StringUtils.isEmpty(data)) {
-        return null;
+        throw new TigerApiException(TigerApiCode.EMPTY_DATA_ERROR);
       }
       response = JSON.parseObject(data, request.getResponseClass());
 
       if (StringUtils.isEmpty(this.tigerPublicKey) || response.getSign() == null) {
-        return response;
+        throw new TigerApiException(TigerApiCode.SIGN_CHECK_FAILED);
       }
       boolean signSuccess =
           TigerSignature.rsaCheckContent(request.getTimestamp(), response.getSign(), this.tigerPublicKey, this.charset);
@@ -182,7 +180,7 @@ public class TigerHttpClient implements TigerClient {
   }
 
   private Map<String, Object> buildParams(TigerRequest request) {
-    Map params = new HashMap<>();
+    Map<String,Object> params = new HashMap<>();
     params.put(METHOD, request.getApiMethodName());
     params.put(VERSION, request.getApiVersion());
     if (request instanceof TigerHttpRequest) {
@@ -212,9 +210,7 @@ public class TigerHttpClient implements TigerClient {
       params.put(DEVICE_ID, this.deviceId);
     }
     if (this.tigerId != null) {
-      String signContent = TigerSignature.getSignContent(params);
-      String sign = TigerSignature.rsaSign(signContent, privateKey, charset);
-      params.put(SIGN, sign);
+      params.put(SIGN, TigerSignature.rsaSign(params, privateKey, charset));
     }
 
     return params;
