@@ -13,6 +13,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
+import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import com.tigerbrokers.stock.openapi.client.util.TigerSignature;
 import java.security.Security;
@@ -23,6 +24,7 @@ import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.A
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCOUNT_TYPE;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.BIZ_CONTENT;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.CHARSET;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.DEVICE_ID;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.METHOD;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN_TYPE;
@@ -31,9 +33,6 @@ import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.T
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TRADE_TOKEN;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.VERSION;
 
-/**
- * HTTP客户端
- */
 public class TigerHttpClient implements TigerClient {
 
   private String serverUrl;
@@ -43,6 +42,7 @@ public class TigerHttpClient implements TigerClient {
   private String accessToken;
   private String tradeToken;
   private String accountType;
+  private String deviceId;
 
   private static final String ONLINE_PUBLIC_KEY =
       "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDNF3G8SoEcCZh2rshUbayDgLLrj6rKgzNMxDL2HSnKcB0+GPOsndqSv+a4IBu9+I3fyBp5hkyMMG2+AXugd9pMpy6VxJxlNjhX1MYbNTZJUT4nudki4uh+LMOkIBHOceGNXjgB+cXqmlUnjlqha/HgboeHSnSgpM3dKSJQlIOsDwIDAQAB";
@@ -70,11 +70,12 @@ public class TigerHttpClient implements TigerClient {
     this.serverUrl = serverUrl;
     this.tigerId = tigerId;
     this.privateKey = privateKey;
-    if (serverUrl.contains("openapi.itiger")) {
+    if (serverUrl.contains(TigerApiConstants.API_ONLINE_DOMAIN_URL)) {
       this.tigerPublicKey = ONLINE_PUBLIC_KEY;
     } else {
       this.tigerPublicKey = SANDBOX_PUBLIC_KEY;
     }
+    this.deviceId = NetworkUtil.getDeviceId();
   }
 
   public TigerHttpClient(String serverUrl) {
@@ -112,6 +113,7 @@ public class TigerHttpClient implements TigerClient {
     return accountType;
   }
 
+  @Override
   public <T extends TigerResponse> T execute(TigerRequest<T> request) {
     T response;
     String param = null;
@@ -123,12 +125,12 @@ public class TigerHttpClient implements TigerClient {
       data = HttpUtils.post(serverUrl, param);
 
       if (StringUtils.isEmpty(data)) {
-        return null;
+        throw new TigerApiException(TigerApiCode.EMPTY_DATA_ERROR);
       }
       response = JSON.parseObject(data, request.getResponseClass());
 
       if (StringUtils.isEmpty(this.tigerPublicKey) || response.getSign() == null) {
-        return response;
+        throw new TigerApiException(TigerApiCode.SIGN_CHECK_FAILED);
       }
       boolean signSuccess =
           TigerSignature.rsaCheckContent(request.getTimestamp(), response.getSign(), this.tigerPublicKey, this.charset);
@@ -178,7 +180,7 @@ public class TigerHttpClient implements TigerClient {
   }
 
   private Map<String, Object> buildParams(TigerRequest request) {
-    Map params = new HashMap<>();
+    Map<String,Object> params = new HashMap<>();
     params.put(METHOD, request.getApiMethodName());
     params.put(VERSION, request.getApiVersion());
     if (request instanceof TigerHttpRequest) {
@@ -204,10 +206,11 @@ public class TigerHttpClient implements TigerClient {
     if (this.accountType != null) {
       params.put(ACCOUNT_TYPE, this.accountType);
     }
+    if (this.deviceId != null) {
+      params.put(DEVICE_ID, this.deviceId);
+    }
     if (this.tigerId != null) {
-      String signContent = TigerSignature.getSignContent(params);
-      String sign = TigerSignature.rsaSign(signContent, privateKey, charset);
-      params.put(SIGN, sign);
+      params.put(SIGN, TigerSignature.rsaSign(params, privateKey, charset));
     }
 
     return params;

@@ -43,4 +43,8 @@ public class TigerApiConstants {
   public static final String DATA = "data";
 
   public static final String ACCOUNT = "account";
+
+  public static final String DEVICE_ID = "device_id";
+
+  public static final String API_ONLINE_DOMAIN_URL = "openapi.itiger.com";
 }

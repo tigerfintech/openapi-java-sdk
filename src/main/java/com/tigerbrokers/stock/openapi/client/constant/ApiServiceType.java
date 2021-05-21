@@ -33,7 +33,7 @@ public interface ApiServiceType {
   String QUOTE_REAL_TIME = "quote_real_time";
   String QUOTE_SHORTABLE_STOCKS = "quote_shortable_stocks";
   String QUOTE_STOCK_TRADE = "quote_stock_trade";
-  String ASK_BID = "ask_bid";
+  String QUOTE_DEPTH = "quote_depth";
 
   /**
    * 期权行情
@@ -91,4 +91,10 @@ public interface ApiServiceType {
   String USER_TRADE_TOKEN = "user_trade_token";
   String USER_TRADE_PASSWORD_VERIFY = "user_trade_password_verify";
   String USER_TRADE_PASSWORD_RESET = "user_trade_password_reset";
+
+  /**
+   * 行情抢占
+   */
+  String GRAB_QUOTE_PERMISSION = "grab_quote_permission";
+  String GET_QUOTE_PERMISSION = "get_quote_permission";
 }
