@@ -1,7 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.util.builder;
 
 import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
-import com.tigerbrokers.stock.openapi.client.struct.enums.Exchange;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MarketDataProvider;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import io.netty.handler.codec.stomp.DefaultStompHeaders;
 import io.netty.handler.codec.stomp.StompHeaders;
@@ -22,7 +22,7 @@ public class StompHeaderBuilder {
   public static final String HOST = "localhost";
   public static final String ACCOUNT = "account";
   public static final String SYMBOLS = "symbols";
-  public static final String EXCHANGE = "exchange";
+  public static final String MARKET_DATA_PROVIDER = "marketDataProvider";
 
   private StompHeaders stompHeaders;
 
@@ -96,9 +96,9 @@ public class StompHeaderBuilder {
     return this;
   }
 
-  public StompHeaderBuilder exchange(Exchange exchange) {
-    if (exchange != null) {
-      this.stompHeaders.set(EXCHANGE, exchange.name());
+  public StompHeaderBuilder marketDataProvider(MarketDataProvider marketDataProvider) {
+    if (marketDataProvider != null) {
+      this.stompHeaders.set(MARKET_DATA_PROVIDER, marketDataProvider.name());
     }
     return this;
   }
