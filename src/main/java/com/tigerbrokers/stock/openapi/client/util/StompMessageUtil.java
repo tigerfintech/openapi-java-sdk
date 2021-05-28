@@ -1,6 +1,5 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
-import com.tigerbrokers.stock.openapi.client.struct.enums.MarketDataProvider;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import com.tigerbrokers.stock.openapi.client.util.builder.StompHeaderBuilder;
@@ -110,10 +109,6 @@ public class StompMessageUtil {
   }
 
   public static StompFrame buildSubscribeMessage(Set<String> symbols, QuoteSubject subject) {
-    return buildSubscribeMessage(symbols, null, subject);
-  }
-
-  public static StompFrame buildSubscribeMessage(Set<String> symbols, MarketDataProvider marketDataProvider, QuoteSubject subject) {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
     int id = increment.addAndGet(1);
     StompHeaders headers =
@@ -123,7 +118,6 @@ public class StompMessageUtil {
             .host()
             .subject(subject.name())
             .symbols(symbols)
-            .marketDataProvider(marketDataProvider)
             .build();
     stompFrame.headers().set(headers);
     return stompFrame;

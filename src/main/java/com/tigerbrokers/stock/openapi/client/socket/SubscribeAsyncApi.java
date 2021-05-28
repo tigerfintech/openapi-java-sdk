@@ -116,10 +116,9 @@ public interface SubscribeAsyncApi {
    * subscribe depth data
    *
    * @param symbols symbol list
-   * @param marketDataProvider marketDataProvider name
    * @return string id
    */
-  String subscribeAskBid(Set<String> symbols, MarketDataProvider marketDataProvider);
+  String subscribeAskBid(Set<String> symbols);
 
   /**
    * cancel subscribe depth data

@@ -2,7 +2,6 @@ package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
-import com.tigerbrokers.stock.openapi.client.struct.enums.MarketDataProvider;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
@@ -62,7 +61,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   public final static String STOMP_ENCODER = "stompEncoder";
   public final static String STOMP_DECODER = "stompDecoder";
-  private static final String[] PROTOCOLS = new String[] {"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"};
+  private static final String[] PROTOCOLS = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"};
 
   private String url;
   private ApiAuthentication authentication;
@@ -102,7 +101,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   public WebSocketClient(String url, ApiAuthentication authentication, ApiComposeCallback apiComposeCallback,
-      final ClientHeartBeatData clientHeartBeatData) {
+                         final ClientHeartBeatData clientHeartBeatData) {
     this.url = url;
     this.authentication = authentication;
     this.apiComposeCallback = apiComposeCallback;
@@ -439,17 +438,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   @Override
-  public String subscribeAskBid(Set<String> symbols, MarketDataProvider marketDataProvider) {
-    if (!isConnected()) {
-      notConnect();
-      return null;
-    }
-    StompFrame frame = StompMessageUtil.buildSubscribeMessage(symbols, marketDataProvider, QuoteSubject.AskBid);
-    channel.writeAndFlush(frame);
-    subscribeSymbols.addAll(symbols);
-    ApiLogger.info("send subscribe [{}] message, symbols:{}", QuoteSubject.AskBid, symbols);
-
-    return frame.headers().getAsString(StompHeaders.ID);
+  public String subscribeAskBid(Set<String> symbols) {
+    return subscribeQuote(symbols, QuoteSubject.AskBid);
   }
 
   @Override
