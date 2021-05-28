@@ -7,6 +7,7 @@ public enum TigerApiCode implements CodeEnumType {
   CLIENT_API_ERROR(3,"client error"),
   ACCESS_FORBIDDEN(4, "access forbidden"),
   RATE_LIMIT_ERROR(5, "rate limit error"),
+  EMPTY_DATA_ERROR(6,"the data returned from the server is empty"),
 
   COMMON_PARAM_ERROR(1000, "common param error"),
   BIZ_PARAM_ERROR(1010, "biz param error"),

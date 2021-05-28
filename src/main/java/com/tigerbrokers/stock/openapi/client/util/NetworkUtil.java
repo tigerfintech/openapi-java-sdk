@@ -13,32 +13,31 @@ import java.util.Enumeration;
  */
 public class NetworkUtil {
 
-  private static final String NETWORK_DISCONNECTED = "Please check if the network connection is disconnected";
+  private static final String GET_DEVICE_ERROR = "Please check if the network connection is disconnected";
 
   private NetworkUtil() {
   }
 
   public static String getDeviceId() {
     try {
-      InetAddress ia = getLocalHostLANAddress();
-      byte[] mac = NetworkInterface.getByInetAddress(ia).getHardwareAddress();
+      InetAddress inetAddress = getLocalHostLANAddress();
+      byte[] mac = NetworkInterface.getByInetAddress(inetAddress).getHardwareAddress();
       if (mac == null) {
-        ApiLogger.error(NETWORK_DISCONNECTED);
-        throw new RuntimeException(NETWORK_DISCONNECTED);
+        ApiLogger.error(GET_DEVICE_ERROR);
+        throw new RuntimeException(GET_DEVICE_ERROR);
       }
-      StringBuilder sb = new StringBuilder();
+      StringBuilder deviceId = new StringBuilder();
       for (int i = 0; i < mac.length; i++) {
         if (i != 0) {
-          sb.append(":");
+          deviceId.append(":");
         }
-        int temp = mac[i] & 0xff;
-        String str = Integer.toHexString(temp);
+        String str = Integer.toHexString(mac[i] & 0xff);
         if (str.length() == 1) {
-          sb.append(0);
+          deviceId.append(0);
         }
-        sb.append(str);
+        deviceId.append(str);
       }
-      return sb.toString();
+      return deviceId.toString();
     } catch (SocketException | UnknownHostException e) {
       ApiLogger.error(e.getMessage());
       throw new RuntimeException(e);
