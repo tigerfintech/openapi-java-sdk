@@ -438,13 +438,13 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   @Override
-  public String subscribeAskBid(Set<String> symbols) {
-    return subscribeQuote(symbols, QuoteSubject.AskBid);
+  public String subscribeQuoteDepth(Set<String> symbols) {
+    return subscribeQuote(symbols, QuoteSubject.QuoteDepth);
   }
 
   @Override
-  public String cancelSubscribeAskBid(Set<String> symbols) {
-    return cancelSubscribeQuote(symbols, QuoteSubject.AskBid);
+  public String cancelSubscribeQuoteDepth(Set<String> symbols) {
+    return cancelSubscribeQuote(symbols, QuoteSubject.QuoteDepth);
   }
 
   private String subscribeQuote(Set<String> symbols, QuoteSubject subject) {

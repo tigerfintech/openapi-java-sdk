@@ -118,7 +118,7 @@ public interface SubscribeAsyncApi {
    * @param symbols symbol list
    * @return string id
    */
-  String subscribeAskBid(Set<String> symbols);
+  String subscribeQuoteDepth(Set<String> symbols);
 
   /**
    * cancel subscribe depth data
@@ -126,7 +126,7 @@ public interface SubscribeAsyncApi {
    * @param symbols symbol list
    * @return string id
    */
-  String cancelSubscribeAskBid(Set<String> symbols);
+  String cancelSubscribeQuoteDepth(Set<String> symbols);
 
   /**
    * query subscribed symbol list
