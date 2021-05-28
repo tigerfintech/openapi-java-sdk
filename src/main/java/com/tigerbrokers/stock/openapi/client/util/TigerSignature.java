@@ -58,13 +58,12 @@ public class TigerSignature {
   /**
    * 使用私钥签名
    *
-   * @param params 待签参数
+   * @param content 待签参数
    * @param privateKey 私钥
    * @param charset 字符集，如UTF-8, GBK, GB2312
    * @return 签名后的内容
    */
-  public static String rsaSign(Map<String, Object> params, String privateKey, String charset) {
-    String content = getSignContent(params);
+  public static String rsaSign(String content, String privateKey, String charset) {
     if (privateKey.startsWith("-")) {
       if (privateKey.contains(PRIVATE_KEY_BEGIN)) {
         privateKey = privateKey.replace(PRIVATE_KEY_BEGIN, "");

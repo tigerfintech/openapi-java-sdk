@@ -210,7 +210,8 @@ public class TigerHttpClient implements TigerClient {
       params.put(DEVICE_ID, this.deviceId);
     }
     if (this.tigerId != null) {
-      params.put(SIGN, TigerSignature.rsaSign(params, privateKey, charset));
+      String content = TigerSignature.getSignContent(params);
+      params.put(SIGN, TigerSignature.rsaSign(content, privateKey, charset));
     }
 
     return params;

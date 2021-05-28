@@ -1,7 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.util.builder;
 
 import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
-import com.tigerbrokers.stock.openapi.client.struct.enums.Exchange;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import io.netty.handler.codec.stomp.DefaultStompHeaders;
 import io.netty.handler.codec.stomp.StompHeaders;
@@ -22,7 +21,6 @@ public class StompHeaderBuilder {
   public static final String HOST = "localhost";
   public static final String ACCOUNT = "account";
   public static final String SYMBOLS = "symbols";
-  public static final String EXCHANGE = "exchange";
 
   private StompHeaders stompHeaders;
 
@@ -93,13 +91,6 @@ public class StompHeaderBuilder {
   public StompHeaderBuilder heartBeat(int cx, int cy) {
     String value = String.format("%d,%d", cx, cy);
     this.stompHeaders.set(HEART_BEAT, value);
-    return this;
-  }
-
-  public StompHeaderBuilder exchange(Exchange exchange) {
-    if (exchange != null) {
-      this.stompHeaders.set(EXCHANGE, exchange.name());
-    }
     return this;
   }
 

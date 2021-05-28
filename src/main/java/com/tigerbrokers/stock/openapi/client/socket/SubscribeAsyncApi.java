@@ -1,6 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
-import com.tigerbrokers.stock.openapi.client.struct.enums.Exchange;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MarketDataProvider;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import java.util.List;
 import java.util.Set;
@@ -116,10 +116,9 @@ public interface SubscribeAsyncApi {
    * subscribe depth data
    *
    * @param symbols symbol list
-   * @param exchange exchange name
    * @return string id
    */
-  String subscribeAskBid(Set<String> symbols, Exchange exchange);
+  String subscribeAskBid(Set<String> symbols);
 
   /**
    * cancel subscribe depth data
