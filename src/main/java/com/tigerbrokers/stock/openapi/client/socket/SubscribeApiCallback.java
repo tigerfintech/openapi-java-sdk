@@ -21,7 +21,7 @@ public interface SubscribeApiCallback {
 
   void futureChange(JSONObject jsonObject);
 
-  void quoteDepthChange(JSONObject jsonObject);
+  void depthQuoteChange(JSONObject jsonObject);
 
   void subscribeEnd(JSONObject jsonObject);
 

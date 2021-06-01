@@ -118,7 +118,7 @@ public class ApiCallbackDecoder {
     } else if (type.equals(QuoteSubject.Future.name())) {
       callback.futureChange(jsonObject);
     } else if (type.equals(QuoteSubject.QuoteDepth.name())) {
-      callback.quoteDepthChange(jsonObject);
+      callback.depthQuoteChange(jsonObject);
     } else {
       callback.quoteChange(jsonObject);
     }
