@@ -130,7 +130,7 @@ public class TigerHttpClient implements TigerClient {
       response = JSON.parseObject(data, request.getResponseClass());
 
       if (StringUtils.isEmpty(this.tigerPublicKey) || response.getSign() == null) {
-        throw new TigerApiException(TigerApiCode.SIGN_CHECK_FAILED);
+        return response;
       }
       boolean signSuccess =
           TigerSignature.rsaCheckContent(request.getTimestamp(), response.getSign(), this.tigerPublicKey, this.charset);
