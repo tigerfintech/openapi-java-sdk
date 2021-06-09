@@ -35,6 +35,9 @@ public class OrderParameter implements Serializable {
    * 交易账户
    */
   private String account;
+
+  @JSONField(name = "user_id")
+  private Long userId;
   /**
    * 底层股票代码
    */
@@ -440,11 +443,21 @@ public class OrderParameter implements Serializable {
     return stopLossTif;
   }
 
-  @Override public String toString() {
+  public Long getUserId() {
+    return userId;
+  }
+
+  public void setUserId(Long userId) {
+    this.userId = userId;
+  }
+
+  @Override
+  public String toString() {
     return "OrderParameter{" +
         "id=" + id +
         ", orderId=" + orderId +
         ", account='" + account + '\'' +
+        ", userId=" + userId +
         ", symbol='" + symbol + '\'' +
         ", secType=" + secType +
         ", action=" + action +

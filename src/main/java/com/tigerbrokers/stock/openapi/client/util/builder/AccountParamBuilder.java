@@ -211,6 +211,13 @@ public class AccountParamBuilder {
     return this;
   }
 
+  public AccountParamBuilder userId(Integer userId) {
+    if (userId != null) {
+      paramMap.put("user_id", userId);
+    }
+    return this;
+  }
+
   public String buildJson() {
     JSONObject jsonObject = new JSONObject();
     jsonObject.putAll(paramMap);

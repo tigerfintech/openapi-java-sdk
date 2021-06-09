@@ -128,6 +128,14 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder userId(Long userId) {
+    if (userId != null) {
+      this.orderParameter.setUserId(userId);
+    }
+    return this;
+  }
+
+
   public TradeParamBuilder market(Market market) {
     if (market != null) {
       this.orderParameter.setMarket(market.name());
