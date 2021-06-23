@@ -128,9 +128,9 @@ public class TradeParamBuilder {
     return this;
   }
 
-  public TradeParamBuilder userId(Long userId) {
-    if (userId != null) {
-      this.orderParameter.setUserId(userId);
+  public TradeParamBuilder secretKey(String secretKey) {
+    if (secretKey != null) {
+      this.orderParameter.setSecretKey(secretKey);
     }
     return this;
   }

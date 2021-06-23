@@ -36,8 +36,8 @@ public class OrderParameter implements Serializable {
    */
   private String account;
 
-  @JSONField(name = "user_id")
-  private Long userId;
+  @JSONField(name = "secret_key")
+  private String secretKey;
   /**
    * 底层股票代码
    */
@@ -443,12 +443,12 @@ public class OrderParameter implements Serializable {
     return stopLossTif;
   }
 
-  public Long getUserId() {
-    return userId;
+  public String getSecretKey() {
+    return secretKey;
   }
 
-  public void setUserId(Long userId) {
-    this.userId = userId;
+  public void setSecretKey(String secretKey) {
+    this.secretKey = secretKey;
   }
 
   @Override
@@ -457,7 +457,7 @@ public class OrderParameter implements Serializable {
         "id=" + id +
         ", orderId=" + orderId +
         ", account='" + account + '\'' +
-        ", userId=" + userId +
+        ", secretKey=" + secretKey +
         ", symbol='" + symbol + '\'' +
         ", secType=" + secType +
         ", action=" + action +

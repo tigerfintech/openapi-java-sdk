@@ -211,9 +211,9 @@ public class AccountParamBuilder {
     return this;
   }
 
-  public AccountParamBuilder userId(Integer userId) {
-    if (userId != null) {
-      paramMap.put("user_id", userId);
+  public AccountParamBuilder secretKey(String secretKey) {
+    if (secretKey != null) {
+      paramMap.put("secret_key", secretKey);
     }
     return this;
   }
