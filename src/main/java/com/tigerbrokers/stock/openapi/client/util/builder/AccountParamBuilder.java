@@ -211,6 +211,13 @@ public class AccountParamBuilder {
     return this;
   }
 
+  public AccountParamBuilder secretKey(String secretKey) {
+    if (secretKey != null) {
+      paramMap.put("secret_key", secretKey);
+    }
+    return this;
+  }
+
   public String buildJson() {
     JSONObject jsonObject = new JSONObject();
     jsonObject.putAll(paramMap);

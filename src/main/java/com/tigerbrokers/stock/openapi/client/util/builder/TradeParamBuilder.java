@@ -128,6 +128,14 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder secretKey(String secretKey) {
+    if (secretKey != null) {
+      this.orderParameter.setSecretKey(secretKey);
+    }
+    return this;
+  }
+
+
   public TradeParamBuilder market(Market market) {
     if (market != null) {
       this.orderParameter.setMarket(market.name());

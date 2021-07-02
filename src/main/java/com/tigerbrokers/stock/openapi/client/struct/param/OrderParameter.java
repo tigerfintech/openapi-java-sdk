@@ -35,6 +35,9 @@ public class OrderParameter implements Serializable {
    * 交易账户
    */
   private String account;
+
+  @JSONField(name = "secret_key")
+  private String secretKey;
   /**
    * 底层股票代码
    */
@@ -440,11 +443,21 @@ public class OrderParameter implements Serializable {
     return stopLossTif;
   }
 
-  @Override public String toString() {
+  public String getSecretKey() {
+    return secretKey;
+  }
+
+  public void setSecretKey(String secretKey) {
+    this.secretKey = secretKey;
+  }
+
+  @Override
+  public String toString() {
     return "OrderParameter{" +
         "id=" + id +
         ", orderId=" + orderId +
         ", account='" + account + '\'' +
+        ", secretKey=" + secretKey +
         ", symbol='" + symbol + '\'' +
         ", secType=" + secType +
         ", action=" + action +
