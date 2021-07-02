@@ -7,11 +7,8 @@ package com.tigerbrokers.stock.openapi.client.https.domain.financial.item;
 public class CorporateSplitItem extends CorporateActionItem {
 
   private Double fromFactor;
-
   private Double toFactor;
-
   private Double ratio;
-
   private String type;
 
   public Double getFromFactor() {

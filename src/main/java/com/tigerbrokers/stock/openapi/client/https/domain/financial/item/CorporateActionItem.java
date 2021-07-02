@@ -11,15 +11,10 @@ import java.time.LocalDate;
 public class CorporateActionItem extends ApiModel {
 
   private Long id;
-
   private String symbol;
-
   private String market;
-
   private String exchange;
-
   private LocalDate executeDate;
-
   private CorporateActionType actionType;
 
   public Long getId() {

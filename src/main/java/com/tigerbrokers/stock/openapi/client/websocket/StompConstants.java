@@ -1,7 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.websocket;
 
 /**
- * @author  zhaolei
+ * @author zhaolei
  * create at 2018/12/20
  */
 public class StompConstants {

@@ -25,7 +25,7 @@ import static io.netty.buffer.ByteBufUtil.indexOf;
 import static io.netty.buffer.ByteBufUtil.readBytes;
 
 /**
- * @author  zhaolei
+ * @author zhaolei
  * create at 2018/12/20
  */
 public class WebSocketStompFrameDecoder extends MessageToMessageDecoder<WebSocketFrame> {
@@ -317,6 +317,8 @@ public class WebSocketStompFrameDecoder extends MessageToMessageDecoder<WebSocke
   }
 
   /**
+   * @param state state
+   * @param buf buffer
    * Stores the internal cumulative buffer's reader position and updates
    * the current decoder state.
    */

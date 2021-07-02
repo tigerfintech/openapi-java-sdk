@@ -58,7 +58,7 @@ public class TigerSignature {
   /**
    * 使用私钥签名
    *
-   * @param content 待签内容
+   * @param content 待签参数
    * @param privateKey 私钥
    * @param charset 字符集，如UTF-8, GBK, GB2312
    * @return 签名后的内容

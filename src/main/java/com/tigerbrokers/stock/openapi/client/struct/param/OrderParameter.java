@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.struct.param;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.struct.TagValue;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.AttachType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
@@ -34,6 +35,9 @@ public class OrderParameter implements Serializable {
    * 交易账户
    */
   private String account;
+
+  @JSONField(name = "secret_key")
+  private String secretKey;
   /**
    * 底层股票代码
    */
@@ -136,6 +140,36 @@ public class OrderParameter implements Serializable {
   private List<TagValue> algoParams;
 
   private String source;
+
+  /**
+   * 附加订单类型：
+   * PROFIT
+   * LOSS
+   */
+  @JSONField(name = "attach_type")
+  private AttachType attachType;
+
+  /**
+   * 止盈订单
+   */
+  @JSONField(name = "profit_taker_orderId")
+  private Integer profitTakerOrderId;
+  @JSONField(name = "profit_taker_price")
+  private Double profitTakerPrice;
+  @JSONField(name = "profit_taker_tif")
+  private TimeInForce profitTakerTif;
+  @JSONField(name = "profit_taker_rth")
+  private Boolean profitTakerRth;
+
+  /**
+   * 止损订单
+   */
+  @JSONField(name = "stop_loss_orderId")
+  private Integer stopLossOrderId;
+  @JSONField(name = "stop_loss_price")
+  private Double stopLossPrice;
+  @JSONField(name = "stop_loss_tif")
+  private TimeInForce stopLossTif;
 
   public Long getId() {
     return id;
@@ -345,11 +379,85 @@ public class OrderParameter implements Serializable {
     this.source = source;
   }
 
+  public void setAttachType(AttachType attachType) {
+    this.attachType = attachType;
+  }
+
+  public void setProfitTakerOrderId(Integer profitTakerOrderId) {
+    this.profitTakerOrderId = profitTakerOrderId;
+  }
+
+  public void setProfitTakerPrice(Double profitTakerPrice) {
+    this.profitTakerPrice = profitTakerPrice;
+  }
+
+  public void setProfitTakerTif(TimeInForce profitTakerTif) {
+    this.profitTakerTif = profitTakerTif;
+  }
+
+  public void setProfitTakerRth(Boolean profitTakerRth) {
+    this.profitTakerRth = profitTakerRth;
+  }
+
+  public void setStopLossOrderId(Integer stopLossOrderId) {
+    this.stopLossOrderId = stopLossOrderId;
+  }
+
+  public void setStopLossPrice(Double stopLossPrice) {
+    this.stopLossPrice = stopLossPrice;
+  }
+
+  public void setStopLossTif(TimeInForce stopLossTif) {
+    this.stopLossTif = stopLossTif;
+  }
+
+  public AttachType getAttachType() {
+    return attachType;
+  }
+
+  public Integer getProfitTakerOrderId() {
+    return profitTakerOrderId;
+  }
+
+  public Double getProfitTakerPrice() {
+    return profitTakerPrice;
+  }
+
+  public TimeInForce getProfitTakerTif() {
+    return profitTakerTif;
+  }
+
+  public Boolean isProfitTakerRth() {
+    return profitTakerRth;
+  }
+
+  public Integer getStopLossOrderId() {
+    return stopLossOrderId;
+  }
+
+  public Double getStopLossPrice() {
+    return stopLossPrice;
+  }
+
+  public TimeInForce getStopLossTif() {
+    return stopLossTif;
+  }
+
+  public String getSecretKey() {
+    return secretKey;
+  }
+
+  public void setSecretKey(String secretKey) {
+    this.secretKey = secretKey;
+  }
+
   @Override
   public String toString() {
     return "OrderParameter{" +
-        "orderId=" + orderId +
+        "id=" + id +
+        ", orderId=" + orderId +
         ", account='" + account + '\'' +
+        ", secretKey=" + secretKey +
         ", symbol='" + symbol + '\'' +
         ", secType=" + secType +
         ", action=" + action +
@@ -367,11 +475,20 @@ public class OrderParameter implements Serializable {
         ", strike='" + strike + '\'' +
         ", right='" + right + '\'' +
         ", multiplier=" + multiplier +
+        ", localSymbol='" + localSymbol + '\'' +
         ", allocAccounts=" + allocAccounts +
         ", allocShares=" + allocShares +
         ", algoStrategy='" + algoStrategy + '\'' +
         ", algoParams=" + algoParams +
         ", source='" + source + '\'' +
+        ", attachType=" + attachType +
+        ", profitTakerOrderId=" + profitTakerOrderId +
+        ", profitTakerPrice=" + profitTakerPrice +
+        ", profitTakerTif=" + profitTakerTif +
+        ", profitTakerRth=" + profitTakerRth +
+        ", stopLossOrderId=" + stopLossOrderId +
+        ", stopLossPrice=" + stopLossPrice +
+        ", stopLossTif=" + stopLossTif +
         '}';
   }
 }

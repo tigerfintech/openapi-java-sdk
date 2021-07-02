@@ -7,6 +7,8 @@ import io.netty.handler.codec.stomp.StompHeaders;
 import java.util.Collection;
 import java.util.Set;
 
+import static io.netty.handler.codec.stomp.StompHeaders.HEART_BEAT;
+
 /**
  * Description:
  * Created by lijiawen on 2018/05/23.
@@ -75,12 +77,20 @@ public class StompHeaderBuilder {
   }
 
   public StompHeaderBuilder focusKeys(Set<String> focusKeys) {
-    this.stompHeaders.set(FOCUS_KEYS, join(focusKeys));
+    if (focusKeys != null) {
+      this.stompHeaders.set(FOCUS_KEYS, join(focusKeys));
+    }
     return this;
   }
 
   public StompHeaderBuilder account(String account) {
     this.stompHeaders.set(ACCOUNT, account);
+    return this;
+  }
+
+  public StompHeaderBuilder heartBeat(int cx, int cy) {
+    String value = String.format("%d,%d", cx, cy);
+    this.stompHeaders.set(HEART_BEAT, value);
     return this;
   }
 

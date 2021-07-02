@@ -12,6 +12,12 @@ public class TigerApiConstants {
 
   public static final String TIGER_ID = "tiger_id";
 
+  public static final String ACCESS_TOKEN = "access_token";
+
+  public static final String TRADE_TOKEN = "trade_token";
+
+  public static final String ACCOUNT_TYPE = "account_type";
+
   public static final String METHOD = "method";
 
   public static final String TIMESTAMP = "timestamp";
@@ -26,10 +32,6 @@ public class TigerApiConstants {
 
   public static final String BIZ_CONTENT = "biz_content";
 
-  public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-
-  public static final String DATE_TIMEZONE = "GMT+8";
-
   public static final String CHARSET_UTF8 = "UTF-8";
 
   public static final String CONTENT_TYPE_JSON = "application/json";
@@ -41,4 +43,8 @@ public class TigerApiConstants {
   public static final String DATA = "data";
 
   public static final String ACCOUNT = "account";
+
+  public static final String DEVICE_ID = "device_id";
+
+  public static final String API_ONLINE_DOMAIN_URL = "openapi.itiger.com";
 }

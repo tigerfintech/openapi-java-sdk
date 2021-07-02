@@ -3,13 +3,14 @@ package com.tigerbrokers.stock.openapi.client.socket;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
+import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
+import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import io.netty.handler.codec.stomp.StompFrame;
 import java.nio.charset.Charset;
 
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.END_CONN;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.ERROR_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_CANCEL_SUBSCRIBE_END;
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_OPTION_CHANGE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_QUOTE_CHANGE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUBSCRIBE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUB_SYMBOLS_END;
@@ -28,12 +29,18 @@ public class ApiCallbackDecoder {
   private StompFrame stompFrame;
   private int retType;
   private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+  private static final String HEART_BEAT = "heart-beat";
 
   public ApiCallbackDecoder(ApiComposeCallback callback) {
     this.callback = callback;
   }
 
   public synchronized void handle(StompFrame stompFrame) {
+    String content = stompFrame.content().toString(DEFAULT_CHARSET);
+    if (!StringUtils.isEmpty(content) && HEART_BEAT.equals(content)) {
+      processHeartBeat(content);
+      return;
+    }
     init(stompFrame);
 
     switch (retType) {
@@ -49,9 +56,6 @@ public class ApiCallbackDecoder {
       case GET_QUOTE_CHANGE_END:
         processSubscribeQuoteChange();
         break;
-      case GET_OPTION_CHANGE_END:
-        processSubscribeOptionEnd();
-        break;
       case GET_SUB_SYMBOLS_END:
         processGetSubscribedSymbols();
         break;
@@ -61,7 +65,8 @@ public class ApiCallbackDecoder {
       case GET_CANCEL_SUBSCRIBE_END:
         processCancelSubscribeEnd();
         break;
-      case END_CONN:
+      case ERROR_END:
+        processErrorEnd();
         break;
       default:
         processDefault();
@@ -95,7 +100,28 @@ public class ApiCallbackDecoder {
 
   private void processSubscribeQuoteChange() {
     String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    callback.quoteChange(JSONObject.parseObject(content));
+    if (content == null) {
+      return;
+    }
+    JSONObject jsonObject = JSONObject.parseObject(content);
+    if (jsonObject == null) {
+      return;
+    }
+    String type = jsonObject.getString("type");
+    if (type == null) {
+      return;
+    }
+    if (type.equals(QuoteSubject.Quote.name())) {
+      callback.quoteChange(jsonObject);
+    } else if (type.equals(QuoteSubject.Option.name())) {
+      callback.optionChange(jsonObject);
+    } else if (type.equals(QuoteSubject.Future.name())) {
+      callback.futureChange(jsonObject);
+    } else if (type.equals(QuoteSubject.QuoteDepth.name())) {
+      callback.depthQuoteChange(jsonObject);
+    } else {
+      callback.quoteChange(jsonObject);
+    }
   }
 
   private void processGetSubscribedSymbols() {
@@ -113,12 +139,26 @@ public class ApiCallbackDecoder {
     callback.cancelSubscribeEnd(JSONObject.parseObject(content));
   }
 
-  private void processSubscribeOptionEnd() {
-    String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    callback.optionChange(JSONObject.parseObject(content));
+  private void processErrorEnd() {
+    if (stompFrame != null && stompFrame.content() != null) {
+      String content = stompFrame.content().toString(DEFAULT_CHARSET);
+      callback.error(content);
+    } else if (stompFrame != null) {
+      callback.error(JSONObject.toJSONString(stompFrame));
+    } else {
+      callback.error("unknown error");
+    }
   }
 
   private void processDefault() {
     ApiLogger.info("ret-type:{} cannot be processed.", retType);
+  }
+
+  private void processHeartBeat(final String content) {
+    callback.hearBeat(content);
+  }
+
+  public void serverHeartBeatTimeOut(String channelId) {
+    callback.serverHeartBeatTimeOut(channelId);
   }
 }

@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.https.domain.quote.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TimeLineType;
 import java.util.List;
 
 /**
@@ -13,27 +14,33 @@ public class QuoteTimelineModel extends QuoteSymbolModel {
   @JSONField(name = "begin_time")
   private Long beginTime;
 
-  public QuoteTimelineModel() {
-
-  }
-
-  public QuoteTimelineModel(List<String> symbols) {
-    super(symbols);
-  }
+  private String period;
 
   public QuoteTimelineModel(List<String> symbols, Long beginTime) {
     super(symbols);
     this.beginTime = beginTime;
+    this.period = TimeLineType.day.name();
   }
 
   public QuoteTimelineModel(List<String> symbols, Long beginTime, boolean includeHourTrading) {
     super(symbols, includeHourTrading);
     this.beginTime = beginTime;
+    this.period = TimeLineType.day.name();
   }
 
   public QuoteTimelineModel(List<String> symbols, Long beginTime, boolean includeHourTrading, Language language) {
     super(symbols, includeHourTrading, language);
     this.beginTime = beginTime;
+    this.period = TimeLineType.day.name();
+  }
+
+  public QuoteTimelineModel(List<String> symbols, Long beginTime, boolean includeHourTrading, TimeLineType timeLineType,
+      Language language) {
+    super(symbols, includeHourTrading, language);
+    this.beginTime = beginTime;
+    if (timeLineType != null) {
+      this.period = timeLineType.name();
+    }
   }
 
   public Long getBeginTime() {
@@ -42,5 +49,13 @@ public class QuoteTimelineModel extends QuoteSymbolModel {
 
   public void setBeginTime(Long beginTime) {
     this.beginTime = beginTime;
+  }
+
+  public String getPeriod() {
+    return period;
+  }
+
+  public void setPeriod(String period) {
+    this.period = period;
   }
 }

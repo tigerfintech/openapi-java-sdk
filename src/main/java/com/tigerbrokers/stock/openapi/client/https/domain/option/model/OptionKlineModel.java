@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.option.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 import java.util.Date;
@@ -15,6 +16,14 @@ public class OptionKlineModel extends OptionCommonModel {
   private Long beginTime;
   @JSONField(name = "end_time")
   private Long endTime;
+
+  public OptionKlineModel() {
+
+  }
+
+  public OptionKlineModel(String identifier) throws TigerApiException {
+    super(identifier);
+  }
 
   public Long getBeginTime() {
     return beginTime;

@@ -30,6 +30,7 @@ public class QuoteTradeTickRequest extends TigerCommonRequest implements TigerRe
     return request;
   }
 
+  @Deprecated
   public static QuoteTradeTickRequest newRequest(List<String> symbols, Long beginIndex, Long endIndex) {
     QuoteTradeTickRequest request = new QuoteTradeTickRequest();
     QuoteTradeTickModel model = new QuoteTradeTickModel(symbols, beginIndex, endIndex, Language.en_US);
@@ -37,6 +38,7 @@ public class QuoteTradeTickRequest extends TigerCommonRequest implements TigerRe
     return request;
   }
 
+  @Deprecated
   public static QuoteTradeTickRequest newRequest(List<String> symbols, Long beginIndex, Long endIndex, Language lang) {
     QuoteTradeTickRequest request = new QuoteTradeTickRequest();
     QuoteTradeTickModel model = new QuoteTradeTickModel(symbols, beginIndex, endIndex, lang);

@@ -13,20 +13,33 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
 
   private ApiAuthentication authentication;
   private ApiCallbackDecoder decoder;
+  private int clientSendInterval = 0;
+  private int clientReceiveInterval = 0;
+  public final static int HEART_BEAT_SPAN = 1000;
 
   public WebSocketHandler(ApiAuthentication authentication, ApiComposeCallback callback) {
     this.authentication = authentication;
     this.decoder = new ApiCallbackDecoder(callback);
   }
 
-  @Override
-  public void handlerAdded(ChannelHandlerContext ctx) {
+  public WebSocketHandler(ApiAuthentication authentication, ApiComposeCallback callback, int sendInterval,
+      int receiveInterval) {
+    this.authentication = authentication;
+    this.decoder = new ApiCallbackDecoder(callback);
+    this.clientSendInterval = sendInterval;
+    this.clientReceiveInterval = receiveInterval;
   }
 
   @Override
   public void channelActive(ChannelHandlerContext ctx) throws Exception {
-    ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
-        authentication.getVersion()));
+    if (0 == this.clientSendInterval && 0 == this.clientReceiveInterval) {
+      ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
+          authentication.getVersion()));
+    } else {
+      ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
+          authentication.getVersion(), this.clientSendInterval == 0 ? 0 : this.clientSendInterval + HEART_BEAT_SPAN,
+          this.clientReceiveInterval == 0 ? 0 : this.clientReceiveInterval - HEART_BEAT_SPAN));
+    }
     super.channelActive(ctx);
   }
 

@@ -1,8 +1,11 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.option.model;
 
+import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.struct.OptionSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
+import com.tigerbrokers.stock.openapi.client.util.SymbolUtil;
 import java.util.Date;
 
 /**
@@ -15,6 +18,24 @@ public class OptionCommonModel extends ApiModel {
   protected String right;
   protected String strike;
   protected Long expiry;
+
+  public OptionCommonModel() {
+  }
+
+  public OptionCommonModel(String identifier) throws TigerApiException {
+    OptionSymbol optionSymbol = SymbolUtil.convertToOptionSymbolObject(identifier);
+    setSymbol(optionSymbol.getSymbol());
+    setRight(optionSymbol.getRight());
+    setStrike(optionSymbol.getStrike());
+    setExpiry(optionSymbol.getExpiry());
+  }
+
+  public OptionCommonModel(String symbol, String right, String strike, Long expiry) {
+    this.symbol = symbol;
+    this.right = right;
+    this.strike = strike;
+    this.expiry = expiry;
+  }
 
   public String getSymbol() {
     return symbol;

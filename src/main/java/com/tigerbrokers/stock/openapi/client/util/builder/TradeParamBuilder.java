@@ -1,8 +1,10 @@
 package com.tigerbrokers.stock.openapi.client.util.builder;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.struct.TagValue;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.AttachType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
@@ -126,6 +128,14 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder secretKey(String secretKey) {
+    if (secretKey != null) {
+      this.orderParameter.setSecretKey(secretKey);
+    }
+    return this;
+  }
+
+
   public TradeParamBuilder market(Market market) {
     if (market != null) {
       this.orderParameter.setMarket(market.name());
@@ -206,6 +216,91 @@ public class TradeParamBuilder {
   public TradeParamBuilder source(String source) {
     if (source != null) {
       this.orderParameter.setSource(source);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder contract(ContractItem contract) {
+    symbol(contract.getSymbol())
+        .right(contract.getRight())
+        .expiry(contract.getExpiry())
+        .localSymbol(contract.getLocalSymbol())
+        .exchange(contract.getExchange());
+    if (contract.getStrike() != null) {
+      this.orderParameter.setStrike(contract.getStrike().toString());
+    }
+
+    if (contract.getSecType() != null) {
+      this.orderParameter.setSecType(SecType.valueOf(contract.getSecType()));
+    }
+
+    if (contract.getMarket() != null) {
+      this.orderParameter.setMarket(contract.getMarket());
+    }
+
+    if (contract.getCurrency() != null) {
+      this.orderParameter.setCurrency(Currency.valueOf(contract.getCurrency()));
+    }
+
+    if (contract.getMultiplier() != null) {
+      this.orderParameter.setMultiplier(contract.getMultiplier().floatValue());
+    }
+
+    return this;
+  }
+
+  public TradeParamBuilder attachType(AttachType attachType) {
+    if (attachType != null) {
+      this.orderParameter.setAttachType(attachType);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder profitTakerOrderId(Integer profitTakerOrderId) {
+    if (profitTakerOrderId != null) {
+      this.orderParameter.setProfitTakerOrderId(profitTakerOrderId);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder profitTakerPrice(Double profitTakerPrice) {
+    if (profitTakerPrice != null) {
+      this.orderParameter.setProfitTakerPrice(profitTakerPrice);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder profitTakerTif(TimeInForce profitTakerTif) {
+    if (profitTakerTif != null) {
+      this.orderParameter.setProfitTakerTif(profitTakerTif);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder profitTakerRth(Boolean profitTakerRth) {
+    if (profitTakerRth) {
+      this.orderParameter.setProfitTakerRth(profitTakerRth);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder stopLossOrderId(Integer stopLossOrderId) {
+    if (stopLossOrderId != null) {
+      this.orderParameter.setStopLossOrderId(stopLossOrderId);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder stopLossPrice(Double stopLossPrice) {
+    if (stopLossPrice != null) {
+      this.orderParameter.setStopLossPrice(stopLossPrice);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder stopLossTif(TimeInForce stopLossTif) {
+    if (stopLossTif != null) {
+      this.orderParameter.setStopLossTif(stopLossTif);
     }
     return this;
   }

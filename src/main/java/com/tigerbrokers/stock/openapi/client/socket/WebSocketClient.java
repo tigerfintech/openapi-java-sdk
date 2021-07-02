@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
+import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
@@ -34,6 +35,7 @@ import io.netty.handler.codec.stomp.StompSubframeDecoder;
 import io.netty.handler.codec.stomp.StompSubframeEncoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.util.internal.ConcurrentSet;
 import java.net.InetSocketAddress;
@@ -57,6 +59,10 @@ import javax.net.ssl.SSLException;
  */
 public class WebSocketClient implements SubscribeAsyncApi {
 
+  public final static String STOMP_ENCODER = "stompEncoder";
+  public final static String STOMP_DECODER = "stompDecoder";
+  private static final String[] PROTOCOLS = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"};
+
   private String url;
   private ApiAuthentication authentication;
   private ApiComposeCallback apiComposeCallback;
@@ -69,7 +75,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private Channel channel = null;
   private ChannelFuture future = null;
 
-  private boolean inited = false;
+  private boolean isInitial = false;
   private volatile ScheduledFuture<?> reconnectExecutorFuture = null;
   private static final ScheduledThreadPoolExecutor reconnectExecutorService = new ScheduledThreadPoolExecutor(2);
 
@@ -81,10 +87,33 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private static final long SHUTDOWN_TIMEOUT = 1000 * 60 * 15;
   private static final int RECONNECT_WARNING_PERIOD = 1800;
 
+  private int clientSendInterval = 0;
+  private int clientReceiveInterval = 0;
+  private static final int CLIENT_SEND_INTERVAL_MIN = 10000;
+  private static final int CLIENT_RECEIVE_INTERVAL_MIN = 10000;
+
   public WebSocketClient(String url, ApiAuthentication authentication, ApiComposeCallback apiComposeCallback) {
     this.url = url;
     this.authentication = authentication;
     this.apiComposeCallback = apiComposeCallback;
+    this.clientSendInterval = 10000;
+    init();
+  }
+
+  public WebSocketClient(String url, ApiAuthentication authentication, ApiComposeCallback apiComposeCallback,
+                         final ClientHeartBeatData clientHeartBeatData) {
+    this.url = url;
+    this.authentication = authentication;
+    this.apiComposeCallback = apiComposeCallback;
+    if (clientHeartBeatData.getSendInterval() >= 0) {
+      this.clientSendInterval =
+          clientHeartBeatData.getSendInterval() >= CLIENT_SEND_INTERVAL_MIN ? clientHeartBeatData.getSendInterval()
+              : CLIENT_SEND_INTERVAL_MIN;
+    }
+    if (clientHeartBeatData.getReceiveInterval() >= 0) {
+      this.clientReceiveInterval = clientHeartBeatData.getReceiveInterval() >= CLIENT_RECEIVE_INTERVAL_MIN
+          ? clientHeartBeatData.getReceiveInterval() : CLIENT_RECEIVE_INTERVAL_MIN;
+    }
     init();
   }
 
@@ -104,26 +133,30 @@ public class WebSocketClient implements SubscribeAsyncApi {
           protected void initChannel(SocketChannel ch) throws SSLException {
             ChannelPipeline p = ch.pipeline();
             SslContext sslCtx =
-                SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+                SslContextBuilder.forClient()
+                    .protocols(PROTOCOLS)
+                    .trustManager(InsecureTrustManagerFactory.INSTANCE)
+                    .sslProvider(SslProvider.OPENSSL)
+                    .build();
             p.addLast(sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
             if (port == 8887 || port == 8889) {
               p.addLast("websocketCodec", new HttpClientCodec());
               p.addLast("websocketAggregator", new HttpObjectAggregator(65535));
-              p.addLast("websocketStompDecoder", new WebSocketStompFrameDecoder());
-              p.addLast("websocketStompEncoder", new WebSocketStompFrameEncoder());
+              p.addLast(STOMP_ENCODER, new WebSocketStompFrameDecoder());
+              p.addLast(STOMP_DECODER, new WebSocketStompFrameEncoder());
               p.addLast("stompAggregator", new StompSubframeAggregator(65535));
             } else {
-              final WebSocketHandler handler = new WebSocketHandler(authentication, apiComposeCallback);
-              p.addLast("stompEncoder", new StompSubframeEncoder());
-              p.addLast("stompDecoder", new StompSubframeDecoder());
+              final WebSocketHandler handler =
+                  new WebSocketHandler(authentication, apiComposeCallback, clientSendInterval, clientReceiveInterval);
+              p.addLast(STOMP_ENCODER, new StompSubframeEncoder());
+              p.addLast(STOMP_DECODER, new StompSubframeDecoder());
               p.addLast("aggregator", new StompSubframeAggregator(65535));
               p.addLast("webSocketHandler", handler);
             }
           }
         });
 
-    apiComposeCallback.client(this);
-    inited = true;
+    isInitial = true;
   }
 
   public void connect() {
@@ -148,7 +181,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private void doConnect() {
     try {
       long start = System.currentTimeMillis();
-      if (!inited) {
+      if (!isInitial) {
         init();
       }
       InetSocketAddress address = getServerAddress();
@@ -174,12 +207,13 @@ public class WebSocketClient implements SubscribeAsyncApi {
           if (address.getPort() == 8887 || address.getPort() == 8889) {
             synchronized (this.channel) {
               WebSocketHandshakerHandler webSocketHandshakerHandler =
-                  new WebSocketHandshakerHandler(authentication, apiComposeCallback);
+                  new WebSocketHandshakerHandler(authentication, apiComposeCallback, clientSendInterval,
+                      clientReceiveInterval);
               HttpHeaders httpHeaders = new DefaultHttpHeaders();
               WebSocketClientHandshaker handshaker =
                   WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, true, httpHeaders);
               webSocketHandshakerHandler.setHandshaker(handshaker);
-              channel.pipeline().addLast("handshakerHandler", webSocketHandshakerHandler);
+              channel.pipeline().addLast("handshakeHandler", webSocketHandshakerHandler);
               webSocketHandshakerHandler.setHandshaker(handshaker);
               ChannelPromise channelFuture = (ChannelPromise) handshaker.handshake(this.channel);
               channelFuture.sync();
@@ -234,7 +268,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     } catch (Throwable t) {
       ApiLogger.error(t.getMessage());
     } finally {
-      inited = false;
+      isInitial = false;
     }
   }
 
@@ -330,6 +364,32 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   @Override
+  public String subscribe(String account, Subject subject) {
+    if (!isConnected()) {
+      notConnect();
+      return null;
+    }
+    StompFrame frame = StompMessageUtil.buildSubscribeMessage(account, subject, null);
+    channel.writeAndFlush(frame);
+    subscribeList.add(subject);
+
+    return frame.headers().getAsString(StompHeaders.ID);
+  }
+
+  @Override
+  public String subscribe(String account, Subject subject, List<String> focusKeys) {
+    if (!isConnected()) {
+      notConnect();
+      return null;
+    }
+    StompFrame frame = StompMessageUtil.buildSubscribeMessage(account, subject, new HashSet<>(focusKeys));
+    channel.writeAndFlush(frame);
+    subscribeList.add(subject);
+
+    return frame.headers().getAsString(StompHeaders.ID);
+  }
+
+  @Override
   public String cancelSubscribe(Subject subject) {
     if (!isConnected()) {
       notConnect();
@@ -375,6 +435,16 @@ public class WebSocketClient implements SubscribeAsyncApi {
   @Override
   public String cancelSubscribeFuture(Set<String> symbols) {
     return cancelSubscribeQuote(symbols, QuoteSubject.Future);
+  }
+
+  @Override
+  public String subscribeDepthQuote(Set<String> symbols) {
+    return subscribeQuote(symbols, QuoteSubject.QuoteDepth);
+  }
+
+  @Override
+  public String cancelSubscribeDepthQuote(Set<String> symbols) {
+    return cancelSubscribeQuote(symbols, QuoteSubject.QuoteDepth);
   }
 
   private String subscribeQuote(Set<String> symbols, QuoteSubject subject) {

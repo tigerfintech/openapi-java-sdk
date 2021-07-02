@@ -27,6 +27,31 @@ public class StompMessageUtil {
     return stompFrame;
   }
 
+  /**
+   * @param login login
+   * @param passcode passcode
+   * @param version version
+   * @param sendInterval client能保证发送心跳的最小间隔，0代表client不发送心跳
+   * @param receiveInterval client希望收到server心跳的间隔，0代表client不希望收到server的心跳
+   * @return StompFrame
+   */
+  public static StompFrame buildConnectMessage(String login, String passcode, String version, int sendInterval,
+      int receiveInterval) {
+    if (sendInterval < 0 || receiveInterval < 0) {
+      throw new RuntimeException("sendInterval < 0 or receiveInterval < 0");
+    }
+    StompFrame stompFrame = new DefaultStompFrame(StompCommand.CONNECT);
+    stompFrame.headers()
+        .set(StompHeaderBuilder.instance()
+            .version(version)
+            .host()
+            .login(login)
+            .passcode(passcode)
+            .heartBeat(sendInterval, receiveInterval)
+            .build());
+    return stompFrame;
+  }
+
   public static StompFrame buildSendMessage(int reqType, String message) {
     if (reqType <= 0) {
       throw new RuntimeException("reqType不能为空");
@@ -45,6 +70,21 @@ public class StompMessageUtil {
     return stompFrame;
   }
 
+  public static StompFrame buildCommonSendMessage(String message) {
+    StompFrame stompFrame;
+    int id = increment.addAndGet(1);
+    if (message != null) {
+      stompFrame =
+          new DefaultStompFrame(StompCommand.SEND, Unpooled.wrappedBuffer(message.getBytes(Charset.defaultCharset())));
+    } else {
+      stompFrame = new DefaultStompFrame(StompCommand.SEND);
+    }
+    StompHeaders headers = StompHeaderBuilder.instance().id(id).version().host().build();
+    stompFrame.headers().set(headers);
+
+    return stompFrame;
+  }
+
   public static StompFrame buildSubscribeMessage(Subject subject) {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
     int id = increment.addAndGet(1);
@@ -53,11 +93,32 @@ public class StompMessageUtil {
     return stompFrame;
   }
 
+  public static StompFrame buildSubscribeMessage(String account, Subject subject, Set<String> focusKeys) {
+    StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
+    int id = increment.addAndGet(1);
+    StompHeaders headers = StompHeaderBuilder.instance()
+        .id(id)
+        .version()
+        .account(account)
+        .host()
+        .subject(subject)
+        .focusKeys(focusKeys)
+        .build();
+    stompFrame.headers().set(headers);
+    return stompFrame;
+  }
+
   public static StompFrame buildSubscribeMessage(Set<String> symbols, QuoteSubject subject) {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
     int id = increment.addAndGet(1);
     StompHeaders headers =
-        StompHeaderBuilder.instance().id(id).version().host().subject(subject.name()).symbols(symbols).build();
+        StompHeaderBuilder.instance()
+            .id(id)
+            .version()
+            .host()
+            .subject(subject.name())
+            .symbols(symbols)
+            .build();
     stompFrame.headers().set(headers);
     return stompFrame;
   }

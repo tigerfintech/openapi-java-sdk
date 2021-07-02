@@ -54,6 +54,20 @@ public class AccountParamBuilder {
     return this;
   }
 
+  public AccountParamBuilder symbols(List<String> symbols) {
+    if (symbols != null) {
+      paramMap.put("symbols", symbols);
+    }
+    return this;
+  }
+
+  public AccountParamBuilder continuous(Boolean continuous) {
+    if (continuous != null) {
+      paramMap.put("continuous", continuous);
+    }
+    return this;
+  }
+
   public AccountParamBuilder currency(Currency currency) {
     if (currency != null) {
       paramMap.put("currency", currency.name());
@@ -186,6 +200,20 @@ public class AccountParamBuilder {
   public AccountParamBuilder isBrief(Boolean isBrief) {
     if (isBrief != null) {
       paramMap.put("is_brief", isBrief);
+    }
+    return this;
+  }
+
+  public AccountParamBuilder parentId(Integer parentId) {
+    if (parentId != null) {
+      paramMap.put("parent_id", parentId);
+    }
+    return this;
+  }
+
+  public AccountParamBuilder secretKey(String secretKey) {
+    if (secretKey != null) {
+      paramMap.put("secret_key", secretKey);
     }
     return this;
   }
