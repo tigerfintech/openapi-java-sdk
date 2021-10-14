@@ -31,6 +31,8 @@ public enum TigerApiCode implements CodeEnumType {
   UNSUBSCRIBE_ERROR(3006, "unsubscribe error"),
   UNKNOWN_STOMP_COMMAND(3007, "unknown stomp command"),
 
+  CONNECTION_KICK_OFF_ERROR(4001, "kick off by a new connection"),
+
   SIGN_CHECK_FAILED(40013, "check sign and data fail");
 
   int code;

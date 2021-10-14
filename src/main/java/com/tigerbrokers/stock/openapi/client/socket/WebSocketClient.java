@@ -72,10 +72,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   private EventLoopGroup group = null;
   private Bootstrap bootstrap = null;
-  private Channel channel = null;
+  private volatile Channel channel = null;
   private ChannelFuture future = null;
 
-  private boolean isInitial = false;
+  private volatile boolean isInitial = false;
   private volatile ScheduledFuture<?> reconnectExecutorFuture = null;
   private static final ScheduledThreadPoolExecutor reconnectExecutorService = new ScheduledThreadPoolExecutor(2);
 
@@ -117,7 +117,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
     init();
   }
 
-  private void init() {
+  private synchronized void init() {
+    if (isInitial) {
+      return;
+    }
     InetSocketAddress address = getServerAddress();
     if (address == null) {
       throw new RuntimeException("get connect address error.");
@@ -159,7 +162,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
     isInitial = true;
   }
 
-  public void connect() {
+  /**
+   * create the connection (The same tigerId has only one active connection)
+   */
+  public synchronized void connect() {
     try {
       if (isConnected()) {
         return;
@@ -181,9 +187,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private void doConnect() {
     try {
       long start = System.currentTimeMillis();
-      if (!isInitial) {
-        init();
-      }
+      init();
       InetSocketAddress address = getServerAddress();
       if (address == null) {
         throw new RuntimeException("get connect address error.");
@@ -253,8 +257,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   public void disconnect() {
-    sendDisconnectFrame();
     destroyConnectCommand();
+    sendDisconnectFrame();
     try {
       if (channel != null) {
         channel.close();
@@ -287,15 +291,17 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
   }
 
-  private synchronized void destroyConnectCommand() {
-    try {
-      if (reconnectExecutorFuture != null && !reconnectExecutorFuture.isDone()) {
-        reconnectExecutorFuture.cancel(true);
-        reconnectExecutorService.purge();
-        reconnectExecutorService.shutdownNow();
+  private void destroyConnectCommand() {
+    synchronized (reconnectExecutorService) {
+      try {
+        if (reconnectExecutorFuture != null && !reconnectExecutorFuture.isDone()) {
+          reconnectExecutorFuture.cancel(true);
+          reconnectExecutorService.purge();
+          reconnectExecutorService.shutdownNow();
+        }
+      } catch (Throwable e) {
+        ApiLogger.error(e.getMessage(), e);
       }
-    } catch (Throwable e) {
-      ApiLogger.error(e.getMessage(), e);
     }
   }
 
@@ -306,34 +312,37 @@ public class WebSocketClient implements SubscribeAsyncApi {
     return channel.isActive();
   }
 
-  private synchronized void initReconnectCommand() {
-    if (reconnectExecutorFuture == null || reconnectExecutorFuture.isCancelled()) {
-      Runnable reconnectCommand = () -> {
-        try {
-          if (!isConnected()) {
-            connect();
-          } else {
-            lastConnectedTime = System.currentTimeMillis();
-          }
-        } catch (Throwable t) {
-          if (System.currentTimeMillis() - lastConnectedTime > SHUTDOWN_TIMEOUT) {
-            if (!reconnectErrorLogFlag.get()) {
-              reconnectErrorLogFlag.set(true);
+  private void initReconnectCommand() {
+    synchronized (reconnectExecutorService) {
+      if (reconnectExecutorFuture == null || reconnectExecutorFuture.isCancelled()) {
+        Runnable reconnectCommand = () -> {
+          try {
+            if (!isConnected()) {
+              connect();
+            } else {
+              lastConnectedTime = System.currentTimeMillis();
+            }
+          } catch (Throwable t) {
+            if (System.currentTimeMillis() - lastConnectedTime > SHUTDOWN_TIMEOUT) {
+              if (!reconnectErrorLogFlag.get()) {
+                reconnectErrorLogFlag.set(true);
+                ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}",
+                    lastConnectedTime,
+                    System.currentTimeMillis(), t);
+                return;
+              }
+            }
+            if (reconnectCount.getAndIncrement() % RECONNECT_WARNING_PERIOD == 0) {
               ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}",
                   lastConnectedTime,
                   System.currentTimeMillis(), t);
-              return;
             }
           }
-          if (reconnectCount.getAndIncrement() % RECONNECT_WARNING_PERIOD == 0) {
-            ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}", lastConnectedTime,
-                System.currentTimeMillis(), t);
-          }
-        }
-      };
-      reconnectExecutorFuture =
-          reconnectExecutorService.scheduleWithFixedDelay(reconnectCommand, 3 * 1000, 10 * 1000,
-              TimeUnit.MILLISECONDS);
+        };
+        reconnectExecutorFuture =
+            reconnectExecutorService.scheduleWithFixedDelay(reconnectCommand, 3 * 1000, 10 * 1000,
+                TimeUnit.MILLISECONDS);
+      }
     }
   }
 

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import io.netty.handler.codec.stomp.StompFrame;
@@ -142,6 +143,18 @@ public class ApiCallbackDecoder {
   private void processErrorEnd() {
     if (stompFrame != null && stompFrame.content() != null) {
       String content = stompFrame.content().toString(DEFAULT_CHARSET);
+      try {
+        JSONObject jsonObject = JSONObject.parseObject(content);
+        if (jsonObject.getIntValue("code") == TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode()) {
+          String errMessage = jsonObject.getString("message");
+          // callback. close the connection and stop reconnect
+          callback.connectionKickoff(TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode(),
+              errMessage == null ? TigerApiCode.CONNECTION_KICK_OFF_ERROR.getMessage() : errMessage);
+          return;
+        }
+      } catch (Exception e) {
+        // ignore...
+      }
       callback.error(content);
     } else if (stompFrame != null) {
       callback.error(JSONObject.toJSONString(stompFrame));
