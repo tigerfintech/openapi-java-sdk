@@ -5,6 +5,7 @@ import com.tigerbrokers.stock.openapi.client.socket.ApiCallbackDecoder;
 import com.tigerbrokers.stock.openapi.client.socket.IdleTriggerHandler;
 import com.tigerbrokers.stock.openapi.client.socket.WebSocketClient;
 import com.tigerbrokers.stock.openapi.client.socket.WebSocketHandler;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.stomp.StompFrame;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -77,6 +78,18 @@ public class ApiCallbackDecoderUtils {
         if (decoder.getCallback() != null) {
           if (frame != null && frame.content() != null) {
             String content = frame.content().toString(Charset.defaultCharset());
+            try {
+              JSONObject jsonObject = JSONObject.parseObject(content);
+              if (jsonObject.getIntValue("code") == TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode()) {
+                String errMessage = jsonObject.getString("message");
+                // callback. close the connection and stop reconnect
+                decoder.getCallback().connectionKickoff(TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode(),
+                    errMessage == null ? TigerApiCode.CONNECTION_KICK_OFF_ERROR.getMessage() : errMessage);
+                return;
+              }
+            } catch (Exception e) {
+              // ignore...
+            }
             decoder.getCallback().error(content);
           } else if (frame != null) {
             decoder.getCallback().error(JSONObject.toJSONString(frame));
