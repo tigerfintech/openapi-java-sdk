@@ -66,9 +66,9 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private String url;
   private ApiAuthentication authentication;
   private ApiComposeCallback apiComposeCallback;
-  private Set<Subject> subscribeList = new CopyOnWriteArraySet<>();
-  private Set<String> subscribeSymbols = new ConcurrentSet<>();
-  public static CountDownLatch connectCountDown = new CountDownLatch(1);
+  private final Set<Subject> subscribeList = new CopyOnWriteArraySet<>();
+  private final Set<String> subscribeSymbols = new ConcurrentSet<>();
+  private CountDownLatch connectCountDown = new CountDownLatch(1);
 
   private EventLoopGroup group = null;
   private Bootstrap bootstrap = null;
@@ -77,7 +77,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   private volatile boolean isInitial = false;
   private volatile ScheduledFuture<?> reconnectExecutorFuture = null;
-  private static final ScheduledThreadPoolExecutor reconnectExecutorService = new ScheduledThreadPoolExecutor(2);
+  private ScheduledThreadPoolExecutor reconnectExecutorService = new ScheduledThreadPoolExecutor(1);
 
   private long lastConnectedTime = System.currentTimeMillis();
   private AtomicInteger reconnectCount = new AtomicInteger(0);
@@ -92,29 +92,64 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private static final int CLIENT_SEND_INTERVAL_MIN = 10000;
   private static final int CLIENT_RECEIVE_INTERVAL_MIN = 10000;
 
-  public WebSocketClient(String url, ApiAuthentication authentication, ApiComposeCallback apiComposeCallback) {
-    this.url = url;
-    this.authentication = authentication;
-    this.apiComposeCallback = apiComposeCallback;
-    this.clientSendInterval = 10000;
-    init();
+  private WebSocketClient() {
   }
 
-  public WebSocketClient(String url, ApiAuthentication authentication, ApiComposeCallback apiComposeCallback,
-                         final ClientHeartBeatData clientHeartBeatData) {
+  private static class SingletonInner {
+    private static WebSocketClient singleton = new WebSocketClient();
+  }
+
+  /**
+   * get WebSocketClient instance
+   * @return
+   */
+  public static WebSocketClient getInstance() {
+    return SingletonInner.singleton;
+  }
+
+  public WebSocketClient url(String url) {
     this.url = url;
+    return this;
+  }
+
+  public WebSocketClient authentication(final ApiAuthentication authentication) {
     this.authentication = authentication;
+    return this;
+  }
+
+  public WebSocketClient apiComposeCallback(final ApiComposeCallback apiComposeCallback) {
     this.apiComposeCallback = apiComposeCallback;
-    if (clientHeartBeatData.getSendInterval() >= 0) {
-      this.clientSendInterval =
-          clientHeartBeatData.getSendInterval() >= CLIENT_SEND_INTERVAL_MIN ? clientHeartBeatData.getSendInterval()
-              : CLIENT_SEND_INTERVAL_MIN;
+    return this;
+  }
+
+  public WebSocketClient clientHeartBeatData(final ClientHeartBeatData clientHeartBeatData) {
+    if (clientHeartBeatData != null) {
+      if (clientHeartBeatData.getSendInterval() >= 0) {
+        this.clientSendInterval =
+            clientHeartBeatData.getSendInterval() >= CLIENT_SEND_INTERVAL_MIN ? clientHeartBeatData.getSendInterval()
+                : CLIENT_SEND_INTERVAL_MIN;
+      }
+      if (clientHeartBeatData.getReceiveInterval() >= 0) {
+        this.clientReceiveInterval = clientHeartBeatData.getReceiveInterval() >= CLIENT_RECEIVE_INTERVAL_MIN
+            ? clientHeartBeatData.getReceiveInterval() : CLIENT_RECEIVE_INTERVAL_MIN;
+      }
     }
-    if (clientHeartBeatData.getReceiveInterval() >= 0) {
-      this.clientReceiveInterval = clientHeartBeatData.getReceiveInterval() >= CLIENT_RECEIVE_INTERVAL_MIN
-          ? clientHeartBeatData.getReceiveInterval() : CLIENT_RECEIVE_INTERVAL_MIN;
+    return this;
+  }
+
+  private void checkArgument() {
+    if (this.url == null || this.url.isEmpty()) {
+      throw new IllegalArgumentException("url is empty.");
     }
-    init();
+    if (this.authentication == null) {
+      throw new IllegalArgumentException("authentication info is missing.");
+    }
+    if (this.apiComposeCallback == null) {
+      throw new IllegalArgumentException("apiComposeCallback is missing.");
+    }
+    if (connectCountDown.getCount() == 0) {
+      connectCountDown = new CountDownLatch(1);
+    }
   }
 
   private synchronized void init() {
@@ -162,6 +197,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
     isInitial = true;
   }
 
+  public void connectCountDown() {
+    connectCountDown.countDown();
+  }
+
   /**
    * create the connection (The same tigerId has only one active connection)
    */
@@ -170,6 +209,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
       if (isConnected()) {
         return;
       }
+      checkArgument();
       initReconnectCommand();
       doConnect();
       if (!isConnected()) {
@@ -202,7 +242,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
         try {
           uri = new URI(url);
           Channel oldChannel = this.channel;
-          if (oldChannel != null) {
+          if (oldChannel != null && oldChannel.isActive()) {
             ApiLogger.info("close old netty channel:{} , create new netty channel:{} ", oldChannel, newChannel);
             oldChannel.close();
           }
@@ -256,6 +296,9 @@ public class WebSocketClient implements SubscribeAsyncApi {
     return new InetSocketAddress(uri.getHost(), uri.getPort());
   }
 
+  /**
+   * destroy the reconnect thread and close the connection
+   */
   public void disconnect() {
     destroyConnectCommand();
     sendDisconnectFrame();
@@ -263,6 +306,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
       if (channel != null) {
         channel.close();
       }
+      channel = null;
     } catch (Throwable e) {
       ApiLogger.error(e.getMessage(), e);
     }
@@ -292,7 +336,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   private void destroyConnectCommand() {
-    synchronized (reconnectExecutorService) {
+    synchronized (SingletonInner.singleton) {
       try {
         if (reconnectExecutorFuture != null && !reconnectExecutorFuture.isDone()) {
           reconnectExecutorFuture.cancel(true);
@@ -302,6 +346,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
       } catch (Throwable e) {
         ApiLogger.error(e.getMessage(), e);
       }
+      reconnectCount.set(0);
+      reconnectErrorLogFlag.set(false);
     }
   }
 
@@ -313,7 +359,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   private void initReconnectCommand() {
-    synchronized (reconnectExecutorService) {
+    synchronized (SingletonInner.singleton) {
       if (reconnectExecutorFuture == null || reconnectExecutorFuture.isCancelled()) {
         Runnable reconnectCommand = () -> {
           try {
@@ -339,6 +385,9 @@ public class WebSocketClient implements SubscribeAsyncApi {
             }
           }
         };
+        if (reconnectExecutorService.isShutdown()) {
+          reconnectExecutorService = new ScheduledThreadPoolExecutor(1);
+        }
         reconnectExecutorFuture =
             reconnectExecutorService.scheduleWithFixedDelay(reconnectCommand, 3 * 1000, 10 * 1000,
                 TimeUnit.MILLISECONDS);

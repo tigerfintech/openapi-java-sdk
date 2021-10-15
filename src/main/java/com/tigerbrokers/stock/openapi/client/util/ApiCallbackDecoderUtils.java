@@ -12,7 +12,6 @@ import io.netty.handler.timeout.IdleStateHandler;
 import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 
-import static com.tigerbrokers.stock.openapi.client.socket.WebSocketClient.connectCountDown;
 import static io.netty.handler.codec.stomp.StompHeaders.HEART_BEAT;
 
 /**
@@ -67,7 +66,7 @@ public class ApiCallbackDecoderUtils {
             decoder.getCallback().connectionAck();
           }
         }
-        connectCountDown.countDown();
+        WebSocketClient.getInstance().connectCountDown();
         break;
       case MESSAGE:
         decoder.handle(frame);
@@ -81,8 +80,11 @@ public class ApiCallbackDecoderUtils {
             try {
               JSONObject jsonObject = JSONObject.parseObject(content);
               if (jsonObject.getIntValue("code") == TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode()) {
+                ApiLogger.info(content);
+                // stop reconnect and close the connection
+                WebSocketClient.getInstance().disconnect();
                 String errMessage = jsonObject.getString("message");
-                // callback. close the connection and stop reconnect
+                // callback
                 decoder.getCallback().connectionKickoff(TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode(),
                     errMessage == null ? TigerApiCode.CONNECTION_KICK_OFF_ERROR.getMessage() : errMessage);
                 return;
