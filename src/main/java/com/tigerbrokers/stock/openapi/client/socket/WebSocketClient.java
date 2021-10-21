@@ -86,6 +86,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private static final int CONNECT_TIMEOUT = 3000;
   private static final long SHUTDOWN_TIMEOUT = 1000 * 60 * 15;
   private static final int RECONNECT_WARNING_PERIOD = 1800;
+  private static final long RECONNECT_DELAY_TIME = 3 * 1000;
+  private static final long RECONNECT_INTERVAL_TIME = 10 * 1000;
 
   private int clientSendInterval = 0;
   private int clientReceiveInterval = 0;
@@ -389,8 +391,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
           reconnectExecutorService = new ScheduledThreadPoolExecutor(1);
         }
         reconnectExecutorFuture =
-            reconnectExecutorService.scheduleWithFixedDelay(reconnectCommand, 3 * 1000, 10 * 1000,
-                TimeUnit.MILLISECONDS);
+            reconnectExecutorService.scheduleWithFixedDelay(reconnectCommand, RECONNECT_DELAY_TIME,
+                RECONNECT_INTERVAL_TIME, TimeUnit.MILLISECONDS);
       }
     }
   }

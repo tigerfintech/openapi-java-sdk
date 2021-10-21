@@ -22,8 +22,8 @@ public class StompHeaderBuilder {
   public static final String HOST = "localhost";
   public static final String ACCOUNT = "account";
   public static final String SYMBOLS = "symbols";
-  public static final String API_VERSION = "1.0.13";
-  private static AsciiString API_VERSION_HEADER = AsciiString.cached("api-version");
+  public static final String SDK_VERSION = "java-1.0.13";
+  private static AsciiString SDK_VERSION_HEADER = AsciiString.cached("sdk-version");
 
   private StompHeaders stompHeaders;
 
@@ -44,8 +44,8 @@ public class StompHeaderBuilder {
     return this;
   }
 
-  public StompHeaderBuilder apiVersion() {
-    this.stompHeaders.set(API_VERSION_HEADER, API_VERSION);
+  public StompHeaderBuilder sdkVersion() {
+    this.stompHeaders.set(SDK_VERSION_HEADER, SDK_VERSION);
     return this;
   }
 
