@@ -7,6 +7,8 @@ package com.tigerbrokers.stock.openapi.client.constant;
 public interface RspProtocolType {
 
   String RET_HEADER = "ret-type";
+  String SUBSCRIPTION_HEADER = "subscription";
+  String ID_HEADER = "id";
 
   int CONNECTION_END = -1;
 

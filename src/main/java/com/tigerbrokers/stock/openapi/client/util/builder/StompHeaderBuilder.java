@@ -4,6 +4,7 @@ import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import io.netty.handler.codec.stomp.DefaultStompHeaders;
 import io.netty.handler.codec.stomp.StompHeaders;
+import io.netty.util.AsciiString;
 import java.util.Collection;
 import java.util.Set;
 
@@ -21,6 +22,8 @@ public class StompHeaderBuilder {
   public static final String HOST = "localhost";
   public static final String ACCOUNT = "account";
   public static final String SYMBOLS = "symbols";
+  public static final String SDK_VERSION = "java-1.0.13";
+  private static AsciiString SDK_VERSION_HEADER = AsciiString.cached("sdk-version");
 
   private StompHeaders stompHeaders;
 
@@ -38,6 +41,11 @@ public class StompHeaderBuilder {
 
   public StompHeaderBuilder version(String version) {
     this.stompHeaders.set(StompHeaders.ACCEPT_VERSION, version);
+    return this;
+  }
+
+  public StompHeaderBuilder sdkVersion() {
+    this.stompHeaders.set(SDK_VERSION_HEADER, SDK_VERSION);
     return this;
   }
 

@@ -14,10 +14,12 @@ import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_QUOTE_CHANGE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUBSCRIBE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUB_SYMBOLS_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.ID_HEADER;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.RET_HEADER;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ASSET;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ORDER_STATUS;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_POSITION;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIPTION_HEADER;
 
 /**
  * Description:
@@ -28,6 +30,7 @@ public class ApiCallbackDecoder {
   private ApiComposeCallback callback;
   private StompFrame stompFrame;
   private int retType;
+  private String id;
   private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
   private static final String HEART_BEAT = "heart-beat";
 
@@ -77,6 +80,7 @@ public class ApiCallbackDecoder {
   private void init(StompFrame stompFrame) {
     this.stompFrame = stompFrame;
     this.retType = stompFrame.headers().getInt(RET_HEADER);
+    this.id = stompFrame.headers().getAsString(ID_HEADER);
   }
 
   public ApiComposeCallback getCallback() {
@@ -130,13 +134,15 @@ public class ApiCallbackDecoder {
   }
 
   private void processSubscribeEnd() {
+    String subject = stompFrame.headers().getAsString(SUBSCRIPTION_HEADER);
     String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    callback.subscribeEnd(JSONObject.parseObject(content));
+    callback.subscribeEnd(id, subject, JSONObject.parseObject(content));
   }
 
   private void processCancelSubscribeEnd() {
+    String subject = stompFrame.headers().getAsString(SUBSCRIPTION_HEADER);
     String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    callback.cancelSubscribeEnd(JSONObject.parseObject(content));
+    callback.cancelSubscribeEnd(id, subject, JSONObject.parseObject(content));
   }
 
   private void processErrorEnd() {

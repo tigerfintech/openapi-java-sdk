@@ -66,18 +66,18 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private String url;
   private ApiAuthentication authentication;
   private ApiComposeCallback apiComposeCallback;
-  private Set<Subject> subscribeList = new CopyOnWriteArraySet<>();
-  private Set<String> subscribeSymbols = new ConcurrentSet<>();
-  public static CountDownLatch connectCountDown = new CountDownLatch(1);
+  private final Set<Subject> subscribeList = new CopyOnWriteArraySet<>();
+  private final Set<String> subscribeSymbols = new ConcurrentSet<>();
+  private CountDownLatch connectCountDown = new CountDownLatch(1);
 
   private EventLoopGroup group = null;
   private Bootstrap bootstrap = null;
-  private Channel channel = null;
+  private volatile Channel channel = null;
   private ChannelFuture future = null;
 
-  private boolean isInitial = false;
+  private volatile boolean isInitial = false;
   private volatile ScheduledFuture<?> reconnectExecutorFuture = null;
-  private static final ScheduledThreadPoolExecutor reconnectExecutorService = new ScheduledThreadPoolExecutor(2);
+  private ScheduledThreadPoolExecutor reconnectExecutorService = new ScheduledThreadPoolExecutor(1);
 
   private long lastConnectedTime = System.currentTimeMillis();
   private AtomicInteger reconnectCount = new AtomicInteger(0);
@@ -86,38 +86,78 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private static final int CONNECT_TIMEOUT = 3000;
   private static final long SHUTDOWN_TIMEOUT = 1000 * 60 * 15;
   private static final int RECONNECT_WARNING_PERIOD = 1800;
+  private static final long RECONNECT_DELAY_TIME = 3 * 1000;
+  private static final long RECONNECT_INTERVAL_TIME = 10 * 1000;
 
   private int clientSendInterval = 0;
   private int clientReceiveInterval = 0;
   private static final int CLIENT_SEND_INTERVAL_MIN = 10000;
   private static final int CLIENT_RECEIVE_INTERVAL_MIN = 10000;
 
-  public WebSocketClient(String url, ApiAuthentication authentication, ApiComposeCallback apiComposeCallback) {
-    this.url = url;
-    this.authentication = authentication;
-    this.apiComposeCallback = apiComposeCallback;
-    this.clientSendInterval = 10000;
-    init();
+  private WebSocketClient() {
   }
 
-  public WebSocketClient(String url, ApiAuthentication authentication, ApiComposeCallback apiComposeCallback,
-                         final ClientHeartBeatData clientHeartBeatData) {
-    this.url = url;
-    this.authentication = authentication;
-    this.apiComposeCallback = apiComposeCallback;
-    if (clientHeartBeatData.getSendInterval() >= 0) {
-      this.clientSendInterval =
-          clientHeartBeatData.getSendInterval() >= CLIENT_SEND_INTERVAL_MIN ? clientHeartBeatData.getSendInterval()
-              : CLIENT_SEND_INTERVAL_MIN;
-    }
-    if (clientHeartBeatData.getReceiveInterval() >= 0) {
-      this.clientReceiveInterval = clientHeartBeatData.getReceiveInterval() >= CLIENT_RECEIVE_INTERVAL_MIN
-          ? clientHeartBeatData.getReceiveInterval() : CLIENT_RECEIVE_INTERVAL_MIN;
-    }
-    init();
+  private static class SingletonInner {
+    private static WebSocketClient singleton = new WebSocketClient();
   }
 
-  private void init() {
+  /**
+   * get WebSocketClient instance
+   * @return
+   */
+  public static WebSocketClient getInstance() {
+    return SingletonInner.singleton;
+  }
+
+  public WebSocketClient url(String url) {
+    this.url = url;
+    return this;
+  }
+
+  public WebSocketClient authentication(final ApiAuthentication authentication) {
+    this.authentication = authentication;
+    return this;
+  }
+
+  public WebSocketClient apiComposeCallback(final ApiComposeCallback apiComposeCallback) {
+    this.apiComposeCallback = apiComposeCallback;
+    return this;
+  }
+
+  public WebSocketClient clientHeartBeatData(final ClientHeartBeatData clientHeartBeatData) {
+    if (clientHeartBeatData != null) {
+      if (clientHeartBeatData.getSendInterval() >= 0) {
+        this.clientSendInterval =
+            clientHeartBeatData.getSendInterval() >= CLIENT_SEND_INTERVAL_MIN ? clientHeartBeatData.getSendInterval()
+                : CLIENT_SEND_INTERVAL_MIN;
+      }
+      if (clientHeartBeatData.getReceiveInterval() >= 0) {
+        this.clientReceiveInterval = clientHeartBeatData.getReceiveInterval() >= CLIENT_RECEIVE_INTERVAL_MIN
+            ? clientHeartBeatData.getReceiveInterval() : CLIENT_RECEIVE_INTERVAL_MIN;
+      }
+    }
+    return this;
+  }
+
+  private void checkArgument() {
+    if (this.url == null || this.url.isEmpty()) {
+      throw new IllegalArgumentException("url is empty.");
+    }
+    if (this.authentication == null) {
+      throw new IllegalArgumentException("authentication info is missing.");
+    }
+    if (this.apiComposeCallback == null) {
+      throw new IllegalArgumentException("apiComposeCallback is missing.");
+    }
+    if (connectCountDown.getCount() == 0) {
+      connectCountDown = new CountDownLatch(1);
+    }
+  }
+
+  private synchronized void init() {
+    if (isInitial) {
+      return;
+    }
     InetSocketAddress address = getServerAddress();
     if (address == null) {
       throw new RuntimeException("get connect address error.");
@@ -159,11 +199,19 @@ public class WebSocketClient implements SubscribeAsyncApi {
     isInitial = true;
   }
 
-  public void connect() {
+  public void connectCountDown() {
+    connectCountDown.countDown();
+  }
+
+  /**
+   * create the connection (The same tigerId has only one active connection)
+   */
+  public synchronized void connect() {
     try {
       if (isConnected()) {
         return;
       }
+      checkArgument();
       initReconnectCommand();
       doConnect();
       if (!isConnected()) {
@@ -181,9 +229,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private void doConnect() {
     try {
       long start = System.currentTimeMillis();
-      if (!isInitial) {
-        init();
-      }
+      init();
       InetSocketAddress address = getServerAddress();
       if (address == null) {
         throw new RuntimeException("get connect address error.");
@@ -198,7 +244,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
         try {
           uri = new URI(url);
           Channel oldChannel = this.channel;
-          if (oldChannel != null) {
+          if (oldChannel != null && oldChannel.isActive()) {
             ApiLogger.info("close old netty channel:{} , create new netty channel:{} ", oldChannel, newChannel);
             oldChannel.close();
           }
@@ -252,13 +298,17 @@ public class WebSocketClient implements SubscribeAsyncApi {
     return new InetSocketAddress(uri.getHost(), uri.getPort());
   }
 
+  /**
+   * destroy the reconnect thread and close the connection
+   */
   public void disconnect() {
-    sendDisconnectFrame();
     destroyConnectCommand();
+    sendDisconnectFrame();
     try {
       if (channel != null) {
         channel.close();
       }
+      channel = null;
     } catch (Throwable e) {
       ApiLogger.error(e.getMessage(), e);
     }
@@ -287,15 +337,19 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
   }
 
-  private synchronized void destroyConnectCommand() {
-    try {
-      if (reconnectExecutorFuture != null && !reconnectExecutorFuture.isDone()) {
-        reconnectExecutorFuture.cancel(true);
-        reconnectExecutorService.purge();
-        reconnectExecutorService.shutdownNow();
+  private void destroyConnectCommand() {
+    synchronized (SingletonInner.singleton) {
+      try {
+        if (reconnectExecutorFuture != null && !reconnectExecutorFuture.isDone()) {
+          reconnectExecutorFuture.cancel(true);
+          reconnectExecutorService.purge();
+          reconnectExecutorService.shutdownNow();
+        }
+      } catch (Throwable e) {
+        ApiLogger.error(e.getMessage(), e);
       }
-    } catch (Throwable e) {
-      ApiLogger.error(e.getMessage(), e);
+      reconnectCount.set(0);
+      reconnectErrorLogFlag.set(false);
     }
   }
 
@@ -306,34 +360,40 @@ public class WebSocketClient implements SubscribeAsyncApi {
     return channel.isActive();
   }
 
-  private synchronized void initReconnectCommand() {
-    if (reconnectExecutorFuture == null || reconnectExecutorFuture.isCancelled()) {
-      Runnable reconnectCommand = () -> {
-        try {
-          if (!isConnected()) {
-            connect();
-          } else {
-            lastConnectedTime = System.currentTimeMillis();
-          }
-        } catch (Throwable t) {
-          if (System.currentTimeMillis() - lastConnectedTime > SHUTDOWN_TIMEOUT) {
-            if (!reconnectErrorLogFlag.get()) {
-              reconnectErrorLogFlag.set(true);
+  private void initReconnectCommand() {
+    synchronized (SingletonInner.singleton) {
+      if (reconnectExecutorFuture == null || reconnectExecutorFuture.isCancelled()) {
+        Runnable reconnectCommand = () -> {
+          try {
+            if (!isConnected()) {
+              connect();
+            } else {
+              lastConnectedTime = System.currentTimeMillis();
+            }
+          } catch (Throwable t) {
+            if (System.currentTimeMillis() - lastConnectedTime > SHUTDOWN_TIMEOUT) {
+              if (!reconnectErrorLogFlag.get()) {
+                reconnectErrorLogFlag.set(true);
+                ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}",
+                    lastConnectedTime,
+                    System.currentTimeMillis(), t);
+                return;
+              }
+            }
+            if (reconnectCount.getAndIncrement() % RECONNECT_WARNING_PERIOD == 0) {
               ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}",
                   lastConnectedTime,
                   System.currentTimeMillis(), t);
-              return;
             }
           }
-          if (reconnectCount.getAndIncrement() % RECONNECT_WARNING_PERIOD == 0) {
-            ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}", lastConnectedTime,
-                System.currentTimeMillis(), t);
-          }
+        };
+        if (reconnectExecutorService.isShutdown()) {
+          reconnectExecutorService = new ScheduledThreadPoolExecutor(1);
         }
-      };
-      reconnectExecutorFuture =
-          reconnectExecutorService.scheduleWithFixedDelay(reconnectCommand, 3 * 1000, 10 * 1000,
-              TimeUnit.MILLISECONDS);
+        reconnectExecutorFuture =
+            reconnectExecutorService.scheduleWithFixedDelay(reconnectCommand, RECONNECT_DELAY_TIME,
+                RECONNECT_INTERVAL_TIME, TimeUnit.MILLISECONDS);
+      }
     }
   }
 

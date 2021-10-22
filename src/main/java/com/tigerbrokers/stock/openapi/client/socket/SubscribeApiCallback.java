@@ -23,9 +23,9 @@ public interface SubscribeApiCallback {
 
   void depthQuoteChange(JSONObject jsonObject);
 
-  void subscribeEnd(JSONObject jsonObject);
+  void subscribeEnd(String id, String subject, JSONObject jsonObject);
 
-  void cancelSubscribeEnd(JSONObject jsonObject);
+  void cancelSubscribeEnd(String id, String subject, JSONObject jsonObject);
 
   void getSubscribedSymbolEnd(SubscribedSymbol subscribedSymbol);
 }
