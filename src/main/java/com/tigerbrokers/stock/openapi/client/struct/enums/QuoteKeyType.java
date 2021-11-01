@@ -18,7 +18,7 @@ public enum QuoteKeyType {
   /** 分时数据,包含的字段: p: 最新价； a:当日截至当前的平均价; t:所属分钟的时间戳; v: 成交量 */
   TIMELINE("TIMELINE", QuoteChangeKey.minute),
   ALL("ALL", QuoteChangeKey.open, QuoteChangeKey.high, QuoteChangeKey.low, QuoteChangeKey.close,
-      QuoteChangeKey.preClose, QuoteChangeKey.volume, QuoteChangeKey.latestPrice,
+      QuoteChangeKey.preClose, QuoteChangeKey.volume, QuoteChangeKey.latestPrice, QuoteChangeKey.latestTime,
       QuoteChangeKey.askPrice, QuoteChangeKey.askSize, QuoteChangeKey.bidPrice, QuoteChangeKey.bidSize,
       QuoteChangeKey.minute),
   ;
