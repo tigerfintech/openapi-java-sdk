@@ -10,9 +10,9 @@ import java.util.List;
  */
 public enum QuoteKeyType {
 
-  /** 成交数据,包含的字段: open,high,low,close,preClose,volume,latestPrice  */
+  /** 成交数据,包含的字段: open,high,low,close,preClose,volume,latestPrice,latestTime  */
   TRADE("TRADE", QuoteChangeKey.open, QuoteChangeKey.high, QuoteChangeKey.low, QuoteChangeKey.close,
-      QuoteChangeKey.preClose, QuoteChangeKey.volume, QuoteChangeKey.latestPrice),
+      QuoteChangeKey.preClose, QuoteChangeKey.volume, QuoteChangeKey.latestPrice, QuoteChangeKey.latestTime),
   /** 盘口数据,包含的字段: askPrice,askSize,bidPrice,bidSize */
   QUOTE("QUOTE", QuoteChangeKey.askPrice, QuoteChangeKey.askSize, QuoteChangeKey.bidPrice, QuoteChangeKey.bidSize),
   /** 分时数据,包含的字段: p: 最新价； a:当日截至当前的平均价; t:所属分钟的时间戳; v: 成交量 */
