@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
+import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteKeyType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
@@ -465,6 +466,12 @@ public class WebSocketClient implements SubscribeAsyncApi {
   @Override
   public String subscribeQuote(Set<String> symbols) {
     return subscribeQuote(symbols, QuoteSubject.Quote);
+  }
+
+  @Override
+  public String subscribeQuote(Set<String> symbols, QuoteKeyType quoteKeyType) {
+    List<String> focusKeys = (quoteKeyType == null ? null : quoteKeyType.getFocusKeys());
+    return subscribeQuote(symbols, QuoteSubject.Quote, focusKeys);
   }
 
   @Override
