@@ -84,7 +84,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private AtomicInteger reconnectCount = new AtomicInteger(0);
   private AtomicBoolean reconnectErrorLogFlag = new AtomicBoolean(false);
 
-  private static final int CONNECT_TIMEOUT = 3000;
+  private static final int CONNECT_TIMEOUT = 5000;
   private static final long SHUTDOWN_TIMEOUT = 1000 * 60 * 15;
   private static final int RECONNECT_WARNING_PERIOD = 1800;
   private static final long RECONNECT_DELAY_TIME = 3 * 1000;
