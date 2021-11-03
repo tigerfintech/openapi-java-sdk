@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.tigerbrokers.stock.openapi.client.struct.enums.MarketDataProvider;
+import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteKeyType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import java.util.List;
 import java.util.Set;
@@ -62,6 +63,15 @@ public interface SubscribeAsyncApi {
    * @return string id
    */
   String subscribeQuote(Set<String> symbols);
+
+  /**
+   * subscribe quote data
+   *
+   * @param symbols symbol list
+   * @param quoteKeyType quote key type
+   * @return string id
+   */
+  String subscribeQuote(Set<String> symbols, QuoteKeyType quoteKeyType);
 
   /**
    * subscribe quote data
