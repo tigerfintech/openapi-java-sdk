@@ -6,12 +6,14 @@ import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
+import com.tigerbrokers.stock.openapi.client.util.FastJsonPropertyFilter;
 import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
 import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
@@ -189,6 +191,8 @@ public class TigerHttpClient implements TigerClient {
       ApiModel apiModel = request.getApiModel();
       if (apiModel instanceof BatchApiModel) {
         params.put(BIZ_CONTENT, JSONObject.toJSONString(((BatchApiModel) apiModel).getItems()));
+      } else if (apiModel instanceof TradeOrderModel) {
+        params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel, FastJsonPropertyFilter.getPropertyFilter()));
       } else {
         params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel));
       }

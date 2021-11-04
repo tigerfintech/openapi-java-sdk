@@ -145,7 +145,7 @@ public class FutureContractItem extends ApiModel {
         ", contractCode='" + contractCode + '\'' +
         ", contractMonth='" + contractMonth + '\'' +
         ", exchangeCode='" + exchangeCode + '\'' +
-        ", multiplier=" + multiplier +
+        ", multiplier=" + (multiplier == null ? multiplier : multiplier.stripTrailingZeros().toPlainString()) +
         ", minTick=" + minTick +
         ", lastTradingDate='" + lastTradingDate + '\'' +
         ", firstNoticeDate='" + firstNoticeDate + '\'' +

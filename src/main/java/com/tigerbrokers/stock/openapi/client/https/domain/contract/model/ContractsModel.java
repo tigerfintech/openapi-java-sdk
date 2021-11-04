@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.contract.model;
 
+import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import java.util.List;
 
 /**
@@ -17,6 +18,7 @@ public class ContractsModel extends BaseContractModel {
   public ContractsModel(String account, List<String> symbols) {
     this.symbols = symbols;
     setAccount(account);
+    setSecType(SecType.STK.name());
   }
 
   public ContractsModel(String account, List<String> symbols, String secType) {

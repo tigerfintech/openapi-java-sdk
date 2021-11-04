@@ -4,13 +4,13 @@ import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.model.ContractsModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
-import com.tigerbrokers.stock.openapi.client.https.response.contract.ContractResponse;
+import com.tigerbrokers.stock.openapi.client.https.response.contract.ContractsResponse;
 
 /**
  * Description:
  * Created by lijiawen on 2019/06/26.
  */
-public class ContractsRequest extends TigerCommonRequest implements TigerRequest<ContractResponse> {
+public class ContractsRequest extends TigerCommonRequest implements TigerRequest<ContractsResponse> {
 
   public ContractsRequest() {
     setApiMethodName(ApiServiceType.CONTRACTS);
@@ -23,7 +23,7 @@ public class ContractsRequest extends TigerCommonRequest implements TigerRequest
   }
 
   @Override
-  public Class<ContractResponse> getResponseClass() {
-    return ContractResponse.class;
+  public Class<ContractsResponse> getResponseClass() {
+    return ContractsResponse.class;
   }
 }
