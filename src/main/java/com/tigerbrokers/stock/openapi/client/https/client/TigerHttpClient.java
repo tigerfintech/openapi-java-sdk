@@ -6,10 +6,15 @@ import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.contract.model.ContractModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.contract.model.ContractsModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
+import com.tigerbrokers.stock.openapi.client.https.validator.ContractRequestValidator;
+import com.tigerbrokers.stock.openapi.client.https.validator.PlaceOrderRequestValidator;
+import com.tigerbrokers.stock.openapi.client.https.validator.RequestValidator;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
@@ -28,6 +33,8 @@ import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.B
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.CHARSET;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.DEVICE_ID;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.METHOD;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SDK_VERSION;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SDK_VERSION_VALUE;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN_TYPE;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TIGER_ID;
@@ -45,6 +52,7 @@ public class TigerHttpClient implements TigerClient {
   private String tradeToken;
   private String accountType;
   private String deviceId;
+  private Map<Class<? extends ApiModel>, RequestValidator> validatorMap = new HashMap<>();
 
   private static final String ONLINE_PUBLIC_KEY =
       "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDNF3G8SoEcCZh2rshUbayDgLLrj6rKgzNMxDL2HSnKcB0+GPOsndqSv+a4IBu9+I3fyBp5hkyMMG2+AXugd9pMpy6VxJxlNjhX1MYbNTZJUT4nudki4uh+LMOkIBHOceGNXjgB+cXqmlUnjlqha/HgboeHSnSgpM3dKSJQlIOsDwIDAQAB";
@@ -78,6 +86,13 @@ public class TigerHttpClient implements TigerClient {
       this.tigerPublicKey = SANDBOX_PUBLIC_KEY;
     }
     this.deviceId = NetworkUtil.getDeviceId();
+    initValidator();
+  }
+  private void initValidator() {
+    ContractRequestValidator contractRequestValidator = new ContractRequestValidator();
+    validatorMap.put(ContractModel.class, contractRequestValidator);
+    validatorMap.put(ContractsModel.class, contractRequestValidator);
+    validatorMap.put(TradeOrderModel.class, new PlaceOrderRequestValidator());
   }
 
   public TigerHttpClient(String serverUrl) {
@@ -121,6 +136,7 @@ public class TigerHttpClient implements TigerClient {
     String param = null;
     String data = null;
     try {
+      validate(request);
       param = JSONObject.toJSONString(buildParams(request));
       ApiLogger.debug("request param:{}", param);
 
@@ -185,6 +201,7 @@ public class TigerHttpClient implements TigerClient {
     Map<String,Object> params = new HashMap<>();
     params.put(METHOD, request.getApiMethodName());
     params.put(VERSION, request.getApiVersion());
+    params.put(SDK_VERSION, SDK_VERSION_VALUE);
     if (request instanceof TigerHttpRequest) {
       params.put(BIZ_CONTENT, ((TigerHttpRequest) request).getBizContent());
     } else {
@@ -219,5 +236,23 @@ public class TigerHttpClient implements TigerClient {
     }
 
     return params;
+  }
+
+  /**
+   * validate parameters
+   * @param request
+   * @throws TigerApiException
+   */
+  private void validate(TigerRequest request) throws TigerApiException {
+    if (request instanceof TigerHttpRequest) {
+      return;
+    }
+    // TigerCommonRequest
+    ApiModel apiModel = request.getApiModel();
+    RequestValidator validator = validatorMap.get(apiModel.getClass());
+    if (validator == null) {
+      return;
+    }
+    validator.validate(apiModel);
   }
 }
