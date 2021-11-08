@@ -3,7 +3,6 @@ package com.tigerbrokers.stock.openapi.client.constant;
 public class TigerApiConstants {
 
   public static final String DEFAULT_VERSION = "1.0";
-  public static final String SDK_VERSION_VALUE = "java-1.0.13";
 
   public static final String SIGN_TYPE = "sign_type";
 

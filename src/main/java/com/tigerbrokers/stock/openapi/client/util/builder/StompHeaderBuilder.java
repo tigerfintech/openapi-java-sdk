@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.util.builder;
 import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
+import com.tigerbrokers.stock.openapi.client.util.SdkVersionUtils;
 import io.netty.handler.codec.stomp.DefaultStompHeaders;
 import io.netty.handler.codec.stomp.StompHeaders;
 import io.netty.util.AsciiString;
@@ -45,7 +46,7 @@ public class StompHeaderBuilder {
   }
 
   public StompHeaderBuilder sdkVersion() {
-    this.stompHeaders.set(SDK_VERSION_HEADER, TigerApiConstants.SDK_VERSION_VALUE);
+    this.stompHeaders.set(SDK_VERSION_HEADER, SdkVersionUtils.getSdkVersion());
     return this;
   }
 

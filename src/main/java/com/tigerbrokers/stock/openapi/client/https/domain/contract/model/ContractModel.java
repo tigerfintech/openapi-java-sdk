@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.contract.model;
 
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import lombok.Data;
 
@@ -16,27 +17,40 @@ public class ContractModel extends BaseContractModel {
 
   }
 
-  public ContractModel(String account, String symbol) {
+  /**
+   * use ClientConfig.DEFAULT_CONFIG.defaultAccount
+   * @param symbol
+   */
+  public ContractModel(String symbol) {
     this.symbol = symbol;
-    setAccount(account);
+    setAccount(ClientConfig.DEFAULT_CONFIG.defaultAccount);
     setSecType(SecType.STK.name());
   }
 
-  public ContractModel(String account, String symbol, String secType) {
-    this.symbol = symbol;
-    setAccount(account);
+  /**
+   * use ClientConfig.DEFAULT_CONFIG.defaultAccount
+   * @param symbol
+   * @param secType
+   */
+  public ContractModel(String symbol, String secType) {
+    this(symbol);
     setSecType(secType);
   }
 
-  public ContractModel(String account, String symbol, String secType, String currency) {
-    this(account, symbol);
-    setSecType(secType);
+  /**
+   * use ClientConfig.DEFAULT_CONFIG.defaultAccount
+   */
+  public ContractModel(String symbol, String secType, String currency) {
+    this(symbol, secType);
     setCurrency(currency);
   }
 
-  public ContractModel(String account, String symbol, String secType, String currency, String expiry, Double strike,
+  /**
+   * use ClientConfig.DEFAULT_CONFIG.defaultAccount
+   */
+  public ContractModel(String symbol, String secType, String currency, String expiry, Double strike,
       String right) {
-    this(account, symbol, secType, currency);
+    this(symbol, secType, currency);
     setStrike(strike);
     setExpiry(expiry);
     setRight(right);

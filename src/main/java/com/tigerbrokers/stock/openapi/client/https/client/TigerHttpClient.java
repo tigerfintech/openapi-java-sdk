@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.https.client;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
@@ -21,6 +22,7 @@ import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.FastJsonPropertyFilter;
 import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
 import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
+import com.tigerbrokers.stock.openapi.client.util.SdkVersionUtils;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import com.tigerbrokers.stock.openapi.client.util.TigerSignature;
 import java.security.Security;
@@ -34,7 +36,6 @@ import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.C
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.DEVICE_ID;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.METHOD;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SDK_VERSION;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SDK_VERSION_VALUE;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN_TYPE;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TIGER_ID;
@@ -65,6 +66,10 @@ public class TigerHttpClient implements TigerClient {
 
   static {
     Security.setProperty("jdk.certpath.disabledAlgorithms", "");
+  }
+
+  public TigerHttpClient(ClientConfig clientConfig) {
+    this(clientConfig.serverUrl, clientConfig.tigerId, clientConfig.privateKey);
   }
 
   public TigerHttpClient(String serverUrl, String tigerId, String privateKey) {
@@ -201,7 +206,7 @@ public class TigerHttpClient implements TigerClient {
     Map<String,Object> params = new HashMap<>();
     params.put(METHOD, request.getApiMethodName());
     params.put(VERSION, request.getApiVersion());
-    params.put(SDK_VERSION, SDK_VERSION_VALUE);
+    params.put(SDK_VERSION, SdkVersionUtils.getSdkVersion());
     if (request instanceof TigerHttpRequest) {
       params.put(BIZ_CONTENT, ((TigerHttpRequest) request).getBizContent());
     } else {

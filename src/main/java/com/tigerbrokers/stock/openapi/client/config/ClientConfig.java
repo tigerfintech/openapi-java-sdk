@@ -1,7 +1,5 @@
 package com.tigerbrokers.stock.openapi.client.config;
 
-import com.tigerbrokers.stock.openapi.client.constant.ClientConfigProd;
-import com.tigerbrokers.stock.openapi.client.constant.ClientConfigSandbox;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,19 +18,19 @@ public class ClientConfig {
   public static final ClientConfig DEFAULT_CONFIG = new ClientConfig();
 
   /**
-   * config environment ：prod，sandbox
+   * config label ：prod，sandbox
    */
-  public String env = ClientConfigProd.env;
+  public String label = "prod";
 
   /**
    * http interface server url
    */
-  public String serverUrl = ClientConfigProd.serverUrl;
+  public String serverUrl;
 
   /**
    * socket server url
    */
-  public String socketServerUrl = ClientConfigProd.socketServerUrl;
+  public String socketServerUrl;
 
   /**
    * tigerId : 2015xxxx,  address：https://www.itiger.com/openapi/info
@@ -55,18 +53,8 @@ public class ClientConfig {
   public String secretKey = null;
 
   public ClientConfig() {
-  }
-
-  public void init(boolean isProd) {
-    if (isProd) {
-      env = ClientConfigProd.env;
-      serverUrl = ClientConfigProd.serverUrl;
-      socketServerUrl = ClientConfigProd.socketServerUrl;
-    } else {
-      env = ClientConfigSandbox.env;
-      serverUrl = ClientConfigSandbox.serverUrl;
-      socketServerUrl = ClientConfigSandbox.socketServerUrl;
-    }
+    this.serverUrl = "https://openapi.itiger.com/gateway";
+    this.socketServerUrl = "wss://openapi.itiger.com:8887/stomp";
   }
 
   /**
@@ -82,12 +70,22 @@ public class ClientConfig {
       byte[] buffer = new byte[size];
       in.read(buffer);
       content = new String(buffer, "UTF-8");
+      int start = 0;
       if (content.startsWith(PPRVATE_KEY_BEGIN)) {
-        content = content.substring(PPRVATE_KEY_BEGIN.length());
+        start = PPRVATE_KEY_BEGIN.length();
+        while (content.charAt(start) == 10 || content.charAt(start) == 13) {
+          start++;
+        }
       }
-      if (content.endsWith(PRIVATE_KEY_END)) {
-        content = content.substring(0, content.length() - PRIVATE_KEY_END.length());
+      int end = content.length();
+      int endIndex = content.indexOf(PRIVATE_KEY_END);
+      if (endIndex > 0) {
+        end = endIndex;
       }
+      while (content.charAt(end - 1) == 10 || content.charAt(end - 1) == 13) {
+        end--;
+      }
+      content = content.substring(start, end);
     } catch (IOException e) {
       ApiLogger.error("read file fail:" + privateKeyFile, e);
     }

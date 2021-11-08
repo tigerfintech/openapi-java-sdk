@@ -44,42 +44,18 @@ public class PlaceOrderRequestValidator implements RequestValidator<TradeOrderMo
     if (model.getOrderType() == OrderType.LMT || model.getOrderType() == OrderType.STP_LMT) {
       if (model.getLimitPrice() == null) {
         throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "limit_price");
-      } else if (model.getLimitPrice() <= 0.0D) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "limit_price");
       }
     }
 
     if (model.getOrderType() == OrderType.STP || model.getOrderType() == OrderType.STP_LMT) {
       if (model.getAuxPrice() == null) {
         throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "aux_price");
-      } else if (model.getAuxPrice() <= 0.0D) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "aux_price");
       }
     }
 
     if (model.getSecType() == SecType.CASH) {
       if (!model.getSymbol().contains(".") && model.getCurrency() == null) {
         throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "currency");
-      }
-    } else if (model.getSecType() == SecType.FUT) {
-      if (StringUtils.isEmpty(model.getExpiry())) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "expiry");
-      }
-      if (model.getMultiplier() == null || model.getMultiplier() <= 0.0) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "multiplier");
-      }
-      if (StringUtils.isEmpty(model.getExchange())) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "exchange");
-      }
-    } else if (model.getSecType() == SecType.OPT) {
-      if (StringUtils.isEmpty(model.getStrike())) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "strike");
-      }
-      if (StringUtils.isEmpty(model.getExpiry())) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "expiry");
-      }
-      if (StringUtils.isEmpty(model.getRight()) || Right.valueOf(model.getRight()) == null) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "right");
       }
     } else if (model.getCurrency() == Currency.HKD
         && (model.getSecType() == SecType.WAR || model.getSecType() == SecType.IOPT)) {
