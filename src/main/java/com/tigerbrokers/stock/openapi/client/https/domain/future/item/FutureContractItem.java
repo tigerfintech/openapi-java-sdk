@@ -21,8 +21,8 @@ public class FutureContractItem extends ApiModel {
   private String firstNoticeDate;
   private long lastBiddingCloseTime;
   private String currency;
-  private boolean isContinuous;
-  private boolean isTrade;
+  private boolean continuous;
+  private boolean trade;
 
   public String getType() {
     return type;
@@ -121,19 +121,19 @@ public class FutureContractItem extends ApiModel {
   }
 
   public boolean isContinuous() {
-    return isContinuous;
+    return continuous;
   }
 
   public void setContinuous(boolean continuous) {
-    isContinuous = continuous;
+    this.continuous = continuous;
   }
 
   public boolean isTrade() {
-    return isTrade;
+    return trade;
   }
 
   public void setTrade(boolean trade) {
-    isTrade = trade;
+    this.trade = trade;
   }
 
   @Override
@@ -145,14 +145,14 @@ public class FutureContractItem extends ApiModel {
         ", contractCode='" + contractCode + '\'' +
         ", contractMonth='" + contractMonth + '\'' +
         ", exchangeCode='" + exchangeCode + '\'' +
-        ", multiplier=" + multiplier +
+        ", multiplier=" + (multiplier == null ? multiplier : multiplier.stripTrailingZeros().toPlainString()) +
         ", minTick=" + minTick +
         ", lastTradingDate='" + lastTradingDate + '\'' +
         ", firstNoticeDate='" + firstNoticeDate + '\'' +
         ", lastBiddingCloseTime=" + lastBiddingCloseTime +
         ", currency='" + currency + '\'' +
-        ", isContinuous=" + isContinuous +
-        ", isTrade=" + isTrade +
+        ", continuous=" + continuous +
+        ", trade=" + trade +
         '}';
   }
 }

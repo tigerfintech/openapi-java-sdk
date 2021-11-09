@@ -1,7 +1,9 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.contract.item;
 
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import lombok.ToString;
 
+@ToString
 public class ContractItem extends ApiModel {
 
   private Integer contractId;

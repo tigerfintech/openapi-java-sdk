@@ -24,6 +24,8 @@ public class TigerApiConstants {
 
   public static final String VERSION = "version";
 
+  public static final String SDK_VERSION = "sdk-version";
+
   public static final String SIGN = "sign";
 
   public static final String CHARSET = "charset";
