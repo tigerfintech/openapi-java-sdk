@@ -1,6 +1,8 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.contract.item;
 
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.future.item.FutureContractItem;
+import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import lombok.ToString;
 
 @ToString
@@ -34,6 +36,9 @@ public class ContractItem extends ApiModel {
   private Long lastBiddingCloseTime;
   private boolean trade;
   private boolean continuous;
+  /** future contract fields */
+  private String type;
+  private String ibCode;
 
   public Integer getContractId() {
     return contractId;
@@ -259,6 +264,22 @@ public class ContractItem extends ApiModel {
     this.continuous = continuous;
   }
 
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
+  }
+
+  public String getIbCode() {
+    return ibCode;
+  }
+
+  public void setIbCode(String ibCode) {
+    this.ibCode = ibCode;
+  }
+
   @Override
   public String toString() {
     return "ContractItem{" +
@@ -288,8 +309,31 @@ public class ContractItem extends ApiModel {
         ", lastTradingDate='" + lastTradingDate + '\'' +
         ", firstNoticeDate='" + firstNoticeDate + '\'' +
         ", lastBiddingCloseTime=" + lastBiddingCloseTime +
+        ", ibCode=" + ibCode +
+        ", type=" + type +
         ", trade=" + trade +
         ", continuous=" + continuous +
         '}';
+  }
+
+  public static ContractItem convert(FutureContractItem futureContractItem) {
+    ContractItem contractItem = new ContractItem();
+    contractItem.setSecType(SecType.FUT.name());
+    contractItem.setSymbol(futureContractItem.getContractCode());
+    contractItem.setType(futureContractItem.getType());
+    contractItem.setIbCode(futureContractItem.getIbCode());
+    contractItem.setName(futureContractItem.getName());
+    contractItem.setContractMonth(futureContractItem.getContractMonth());
+    contractItem.setExchange(futureContractItem.getExchangeCode());
+    contractItem.setMultiplier(futureContractItem.getMultiplier() == null ? null : futureContractItem.getMultiplier().doubleValue());
+    contractItem.setMinTick(futureContractItem.getMinTick() == null ? null : futureContractItem.getMinTick().doubleValue());
+
+    contractItem.setExpiry(futureContractItem.getLastTradingDate());
+    contractItem.setFirstNoticeDate(futureContractItem.getFirstNoticeDate());
+    contractItem.setLastBiddingCloseTime(futureContractItem.getLastBiddingCloseTime());
+    contractItem.setCurrency(futureContractItem.getCurrency());
+    contractItem.setTrade(futureContractItem.isTrade());
+    contractItem.setContinuous(futureContractItem.isContinuous());
+    return contractItem;
   }
 }

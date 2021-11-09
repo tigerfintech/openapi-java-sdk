@@ -9,6 +9,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrder
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.TradeOrderResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AttachType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
@@ -16,6 +17,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
+import com.tigerbrokers.stock.openapi.client.util.AccountUtil;
 
 public class TradeOrderRequest extends TigerCommonRequest implements TigerRequest<TradeOrderResponse> {
 
@@ -115,7 +117,8 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     if (contract == null) {
       throw new IllegalArgumentException("parameter 'contract' is null");
     }
-    return TradeOrderModel.builder().account(account)
+    AccountType accountType = AccountUtil.getAccountType(account);
+    TradeOrderModel model = TradeOrderModel.builder().account(account)
         .action(action).totalQuantity(quantity)
         .symbol(contract.getSymbol())
         .currency(contract.getCurrency() == null ? null : Currency.valueOf(contract.getCurrency()))
@@ -128,6 +131,14 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
         .right(contract.getRight())
         .multiplier(contract.getMultiplier() == null ? null : contract.getMultiplier().floatValue())
         .build();
+    if (model.getSecType() == SecType.FUT) {
+      if (accountType == AccountType.GLOBAL) {
+        model.setSymbol(contract.getType());
+      } else {
+        model.setExpiry(null);
+      }
+    }
+    return model;
   }
 
   public static TradeOrderRequest newRequest(TradeOrderModel model) {
