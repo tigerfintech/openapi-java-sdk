@@ -1,8 +1,11 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.contract.item;
 
+import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.item.FutureContractItem;
+import com.tigerbrokers.stock.openapi.client.struct.OptionSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
+import com.tigerbrokers.stock.openapi.client.util.SymbolUtil;
 import lombok.ToString;
 
 @ToString
@@ -334,6 +337,77 @@ public class ContractItem extends ApiModel {
     contractItem.setCurrency(futureContractItem.getCurrency());
     contractItem.setTrade(futureContractItem.isTrade());
     contractItem.setContinuous(futureContractItem.isContinuous());
+    return contractItem;
+  }
+
+  public static ContractItem buildStockContract(String symbol, String currency) {
+    ContractItem contractItem = new ContractItem();
+    contractItem.setSecType(SecType.STK.name());
+    contractItem.setSymbol(symbol);
+    contractItem.setCurrency(currency);
+    return contractItem;
+  }
+
+  public static ContractItem buildOptionContract(String identifier) throws TigerApiException {
+    ContractItem contractItem = new ContractItem();
+    contractItem.setSecType(SecType.OPT.name());
+    // identifier='AAPL  190118P00160000'
+    OptionSymbol optionSymbol = SymbolUtil.convertToOptionSymbolObject(identifier);
+    contractItem.setSymbol(optionSymbol.getSymbol());
+    contractItem.setExpiry(optionSymbol.getExpiry());
+    contractItem.setStrike(Double.parseDouble(optionSymbol.getStrike()));
+    contractItem.setRight(optionSymbol.getRight());
+    return contractItem;
+  }
+
+  public static ContractItem buildOptionContract(String symbol, String expiry, Double strike, String right) {
+    ContractItem contractItem = new ContractItem();
+    contractItem.setSecType(SecType.OPT.name());
+    contractItem.setSymbol(symbol);
+    contractItem.setExpiry(expiry);
+    contractItem.setStrike(strike);
+    contractItem.setRight(right);
+    return contractItem;
+  }
+
+  public static ContractItem buildWarrantContract(String symbol, String expiry, Double strike, String right) {
+    ContractItem contractItem = new ContractItem();
+    contractItem.setSecType(SecType.WAR.name());
+    contractItem.setSymbol(symbol);
+    contractItem.setExpiry(expiry);
+    contractItem.setStrike(strike);
+    contractItem.setRight(right);
+    return contractItem;
+
+  }
+
+  public static ContractItem buildCbbcContract(String symbol, String expiry, Double strike, String right) {
+    ContractItem contractItem = new ContractItem();
+    contractItem.setSecType(SecType.IOPT.name());
+    contractItem.setSymbol(symbol);
+    contractItem.setExpiry(expiry);
+    contractItem.setStrike(strike);
+    contractItem.setRight(right);
+    return contractItem;
+  }
+
+  public static ContractItem buildFutureContract(String symbol, String currency, String exchange,
+      String expiry, Double multiplier) {
+    ContractItem contractItem = new ContractItem();
+    contractItem.setSecType(SecType.FUT.name());
+    contractItem.setSymbol(symbol);
+    contractItem.setCurrency(currency);
+    contractItem.setExchange(exchange);
+    contractItem.setExpiry(expiry);
+    contractItem.setMultiplier(multiplier);
+    return contractItem;
+  }
+
+  public static ContractItem buildFutureContract(String symbol, String currency) {
+    ContractItem contractItem = new ContractItem();
+    contractItem.setSecType(SecType.FUT.name());
+    contractItem.setSymbol(symbol);
+    contractItem.setCurrency(currency);
     return contractItem;
   }
 }
