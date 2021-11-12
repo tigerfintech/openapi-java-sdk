@@ -16,9 +16,6 @@ public class ContractsModel extends BaseContractModel {
 
   }
 
-  /**
-   * use ClientConfig.DEFAULT_CONFIG.defaultAccount
-   */
   public ContractsModel(List<String> symbols) {
     this.symbols = symbols;
     setAccount(ClientConfig.DEFAULT_CONFIG.defaultAccount);

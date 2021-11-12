@@ -25,9 +25,6 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     setApiMethodName(ApiServiceType.PLACE_ORDER);
   }
 
-  /**
-   * use ClientConfig.DEFAULT_CONFIG.defaultAccount
-   */
   public static TradeOrderRequest buildMarketOrder(ContractItem contract,
       ActionType action, Integer quantity) {
     return buildMarketOrder(ClientConfig.DEFAULT_CONFIG.defaultAccount,
@@ -41,9 +38,6 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     return newRequest(tradeOrderModel);
   }
 
-  /**
-   * use ClientConfig.DEFAULT_CONFIG.defaultAccount
-   */
   public static TradeOrderRequest buildLimitOrder(ContractItem contract,
       ActionType action, Integer quantity, Double limitPrice) {
     return buildLimitOrder(ClientConfig.DEFAULT_CONFIG.defaultAccount,
@@ -58,9 +52,6 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     return newRequest(tradeOrderModel);
   }
 
-  /**
-   * use ClientConfig.DEFAULT_CONFIG.defaultAccount
-   */
   public static TradeOrderRequest buildStopOrder(ContractItem contract,
       ActionType action, Integer quantity, Double auxPrice) {
     return buildStopOrder(ClientConfig.DEFAULT_CONFIG.defaultAccount,
@@ -75,9 +66,6 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     return newRequest(tradeOrderModel);
   }
 
-  /**
-   * use ClientConfig.DEFAULT_CONFIG.defaultAccount
-   */
   public static TradeOrderRequest buildStopLimitOrder(ContractItem contract,
       ActionType action, Integer quantity, Double limitPrice, Double auxPrice) {
     return buildStopLimitOrder(ClientConfig.DEFAULT_CONFIG.defaultAccount,
@@ -93,9 +81,6 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     return newRequest(tradeOrderModel);
   }
 
-  /**
-   * use ClientConfig.DEFAULT_CONFIG.defaultAccount
-   */
   public static TradeOrderRequest buildTrailOrder(ContractItem contract,
       ActionType action, Integer quantity, Double trailingPercent, Double auxPrice) {
     return buildTrailOrder(ClientConfig.DEFAULT_CONFIG.defaultAccount,

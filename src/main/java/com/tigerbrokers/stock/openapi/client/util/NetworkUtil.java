@@ -7,9 +7,7 @@ import java.net.UnknownHostException;
 import java.util.Enumeration;
 
 /**
- * @author ltc
- * @description
- * @date 2021-04-08
+ * description: Created by ltc on 2021-04-08
  */
 public class NetworkUtil {
 
