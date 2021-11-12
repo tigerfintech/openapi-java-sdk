@@ -402,4 +402,12 @@ public class ContractItem extends ApiModel {
     contractItem.setMultiplier(multiplier);
     return contractItem;
   }
+
+  public static ContractItem buildFutureContract(String symbol, String currency) {
+    ContractItem contractItem = new ContractItem();
+    contractItem.setSecType(SecType.FUT.name());
+    contractItem.setSymbol(symbol);
+    contractItem.setCurrency(currency);
+    return contractItem;
+  }
 }
