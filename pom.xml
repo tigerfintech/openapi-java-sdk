@@ -4,7 +4,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <groupId>io.github.tigerbrokers</groupId>
-  <version>1.0.13</version>
+  <version>1.2.0</version>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>openapi-java-sdk</artifactId>
   <packaging>jar</packaging>
@@ -99,6 +99,9 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>2.9.1</version>
+        <configuration>
+          <additionalparam>${javadoc.opts}</additionalparam>
+        </configuration>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -124,6 +127,19 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <!-- 禁用注释检查 -->
+    <profile>
+      <id>disable-javadoc-doclint</id>
+      <activation>
+        <jdk>[1.8,)</jdk>
+      </activation>
+      <properties>
+        <javadoc.opts>-Xdoclint:none</javadoc.opts>
+      </properties>
+    </profile>
+  </profiles>
 
   <distributionManagement>
     <snapshotRepository>

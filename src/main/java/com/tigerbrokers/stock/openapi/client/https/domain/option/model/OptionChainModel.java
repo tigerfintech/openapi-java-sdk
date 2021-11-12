@@ -23,6 +23,14 @@ public class OptionChainModel extends ApiModel {
     this.expiry = expiry;
   }
 
+  public OptionChainModel(String symbol, String expiry) {
+    this.symbol = symbol;
+    Date date = DateUtils.getZoneDate(expiry, TimeZoneId.NewYork);
+    if (date != null) {
+      this.expiry = date.getTime();
+    }
+  }
+
   public String getSymbol() {
     return symbol;
   }
