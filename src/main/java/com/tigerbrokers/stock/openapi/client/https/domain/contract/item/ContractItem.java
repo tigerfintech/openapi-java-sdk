@@ -391,44 +391,14 @@ public class ContractItem extends ApiModel {
     return contractItem;
   }
 
-  public static ContractItem buildFutureContract(String symbol, String currency) {
-    ContractItem contractItem = new ContractItem();
-    contractItem.setSecType(SecType.FUT.name());
-    contractItem.setSymbol(symbol);
-    contractItem.setCurrency(currency);
-    return contractItem;
-  }
-
-  public static ContractItem buildSimpleFutureContract(String symbol, String currency, String exchange,
-      String lastTradingDate, String contractMonth) {
+  public static ContractItem buildFutureContract(String symbol, String currency, String exchange,
+      String expiry, Double multiplier) {
     ContractItem contractItem = new ContractItem();
     contractItem.setSecType(SecType.FUT.name());
     contractItem.setSymbol(symbol);
     contractItem.setCurrency(currency);
     contractItem.setExchange(exchange);
-    contractItem.setLastTradingDate(lastTradingDate);
-    contractItem.setContractMonth(contractMonth);
-    return contractItem;
-  }
-
-  public static ContractItem buildFutureContractWithLocalSymbol(String localSymbol, String currency, String exchange) {
-    ContractItem contractItem = new ContractItem();
-    contractItem.setSecType(SecType.FUT.name());
-    contractItem.setLocalSymbol(localSymbol);
-    contractItem.setCurrency(currency);
-    contractItem.setExchange(exchange);
-    return contractItem;
-  }
-
-  public static ContractItem buildFutureContractWithMultiplier(String symbol, String currency, String exchange,
-      String lastTradingDate, String contractMonth, Double multiplier) {
-    ContractItem contractItem = new ContractItem();
-    contractItem.setSecType(SecType.FUT.name());
-    contractItem.setSymbol(symbol);
-    contractItem.setCurrency(currency);
-    contractItem.setExchange(exchange);
-    contractItem.setLastTradingDate(lastTradingDate);
-    contractItem.setContractMonth(contractMonth);
+    contractItem.setExpiry(expiry);
     contractItem.setMultiplier(multiplier);
     return contractItem;
   }
