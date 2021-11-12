@@ -63,4 +63,24 @@ public class ContractModel extends BaseContractModel {
   public void setSymbol(String symbol) {
     this.symbol = symbol;
   }
+
+  public static ContractModel getStockModel(String symbol) {
+    return new ContractModel(symbol, SecType.STK.name());
+  }
+
+  public static ContractModel getOptionModel(String symbol, String expiry, Double strike, String right) {
+    return new ContractModel(symbol, SecType.OPT.name(), null, expiry, strike, right);
+  }
+
+  public static ContractModel getWarrantModel(String symbol, String expiry, Double strike, String right) {
+    return new ContractModel(symbol, SecType.WAR.name(), null, expiry, strike, right);
+  }
+
+  public static ContractModel getCbbcModel(String symbol, String expiry, Double strike, String right) {
+    return new ContractModel(symbol, SecType.IOPT.name(), null, expiry, strike, right);
+  }
+
+  public static ContractModel getFutureModel(String symbol) {
+    return new ContractModel(symbol, SecType.FUT.name());
+  }
 }

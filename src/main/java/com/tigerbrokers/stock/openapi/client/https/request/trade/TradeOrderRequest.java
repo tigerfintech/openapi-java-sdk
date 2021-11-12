@@ -1,6 +1,5 @@
 package com.tigerbrokers.stock.openapi.client.https.request.trade;
 
-import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
@@ -15,9 +14,9 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.AttachType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
-import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
 import com.tigerbrokers.stock.openapi.client.util.AccountUtil;
+import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 
 public class TradeOrderRequest extends TigerCommonRequest implements TigerRequest<TradeOrderResponse> {
 
@@ -133,7 +132,12 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
         .build();
     if (model.getSecType() == SecType.FUT) {
       if (accountType == AccountType.GLOBAL) {
-        model.setSymbol(contract.getType());
+        if (!StringUtils.isEmpty(contract.getType())) {
+          model.setSymbol(contract.getType());
+        }
+        if (StringUtils.isEmpty(model.getExpiry()) && !StringUtils.isEmpty(contract.getLastTradingDate())) {
+          model.setExpiry(contract.getLastTradingDate());
+        }
       } else {
         model.setExpiry(null);
       }
