@@ -8,7 +8,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import java.util.List;
 
-public class OptionChainV2Model extends ApiModel {
+public class OptionChainV3Model extends ApiModel {
 
   @JSONField(name = "option_basic")
   private List<OptionChainModel> optionBasic;
