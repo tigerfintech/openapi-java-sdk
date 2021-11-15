@@ -19,7 +19,7 @@ public class ContractModel extends BaseContractModel {
 
   /**
    * use ClientConfig.DEFAULT_CONFIG.defaultAccount
-   * @param symbol
+   * @param symbol symbol
    */
   public ContractModel(String symbol) {
     this.symbol = symbol;
@@ -29,25 +29,19 @@ public class ContractModel extends BaseContractModel {
 
   /**
    * use ClientConfig.DEFAULT_CONFIG.defaultAccount
-   * @param symbol
-   * @param secType
+   * @param symbol symbol
+   * @param secType secType
    */
   public ContractModel(String symbol, String secType) {
     this(symbol);
     setSecType(secType);
   }
 
-  /**
-   * use ClientConfig.DEFAULT_CONFIG.defaultAccount
-   */
   public ContractModel(String symbol, String secType, String currency) {
     this(symbol, secType);
     setCurrency(currency);
   }
 
-  /**
-   * use ClientConfig.DEFAULT_CONFIG.defaultAccount
-   */
   public ContractModel(String symbol, String secType, String currency, String expiry, Double strike,
       String right) {
     this(symbol, secType, currency);

@@ -9,10 +9,7 @@ import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import java.util.List;
 
 /**
- * @author liutongping
- * @version 1.0
- * @description:
- * @date 2021/11/5 下午5:54
+ * Description: created by liutongping on 2021/11/5
  */
 public class ContractRequestValidator implements RequestValidator<BaseContractModel> {
 
