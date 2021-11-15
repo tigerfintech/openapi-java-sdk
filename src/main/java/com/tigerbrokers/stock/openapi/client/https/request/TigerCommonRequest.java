@@ -23,6 +23,7 @@ public class TigerCommonRequest {
   protected String sign;
 
   public static final String V2_0 = "2.0";
+  public static final String V3_0 = "3.0";
 
   public TigerCommonRequest() {
     DateTimeFormatter dtf = DateUtils.DATETIME_FORMAT;

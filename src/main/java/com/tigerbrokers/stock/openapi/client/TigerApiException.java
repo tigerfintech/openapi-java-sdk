@@ -40,6 +40,11 @@ public class TigerApiException extends Exception {
     this.tigerApiCode = error;
   }
 
+  public TigerApiException(TigerApiCode error, String... args) {
+    this(error.getCode(), String.format(error.getMessage(), args));
+    this.tigerApiCode = error;
+  }
+
   public int getErrCode() {
     return this.errCode;
   }

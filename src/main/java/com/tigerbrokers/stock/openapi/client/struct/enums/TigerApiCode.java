@@ -31,7 +31,16 @@ public enum TigerApiCode implements CodeEnumType {
   UNSUBSCRIBE_ERROR(3006, "unsubscribe error"),
   UNKNOWN_STOMP_COMMAND(3007, "unknown stomp command"),
 
-  SIGN_CHECK_FAILED(40013, "check sign and data fail");
+  CONNECTION_KICK_OFF_ERROR(4001, "kick off by a new connection"),
+
+  SIGN_CHECK_FAILED(40013, "check sign and data fail"),
+
+  HTTP_COMMON_PARAM_ERROR(10000, "client common param error(%s)"),
+  HTTP_COMMON_PARAM_EMPTY_ERROR(10001, "client common param error(%s is requried)"),
+  HTTP_BIZ_PARAM_ERROR(10100, "client biz param error(%s)"),
+  HTTP_BIZ_PARAM_EMPTY_ERROR(10101, "client biz param error(%s is requried)"),
+  HTTP_BIZ_PARAM_VALUE_ERROR(10102, "client biz param error(%s is incorrect)"),
+  ;
 
   int code;
   String message;
