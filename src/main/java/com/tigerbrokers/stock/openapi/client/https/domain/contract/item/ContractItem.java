@@ -29,9 +29,18 @@ public class ContractItem extends ApiModel {
   private String name;
   private int status;
   private Double minTick;
+  private boolean marginable;
+  private boolean canShort;
+  /** please see 'shortInitialMargin' and 'shortMaintenanceMargin' */
+  @Deprecated
   private Double shortMargin;
+  private Double shortInitialMargin;
+  private Double shortMaintenanceMargin;
   private Double shortFeeRate;
-  private int shortable;
+  /** please see 'shortableCount' */
+  @Deprecated
+  private long shortable;
+  private long shortableCount;
   private Double longInitialMargin;
   private Double longMaintenanceMargin;
   private String lastTradingDate;
@@ -187,12 +196,46 @@ public class ContractItem extends ApiModel {
     this.minTick = minTick;
   }
 
+  public boolean isMarginable() {
+    return marginable;
+  }
+
+  public void setMarginable(boolean marginable) {
+    this.marginable = marginable;
+  }
+
+  public boolean isCanShort() {
+    return canShort;
+  }
+
+  public void setCanShort(boolean canShort) {
+    this.canShort = canShort;
+  }
+
+  @Deprecated
   public Double getShortMargin() {
     return shortMargin;
   }
 
+  @Deprecated
   public void setShortMargin(Double shortMargin) {
     this.shortMargin = shortMargin;
+  }
+
+  public Double getShortInitialMargin() {
+    return shortInitialMargin;
+  }
+
+  public void setShortInitialMargin(Double shortInitialMargin) {
+    this.shortInitialMargin = shortInitialMargin;
+  }
+
+  public Double getShortMaintenanceMargin() {
+    return shortMaintenanceMargin;
+  }
+
+  public void setShortMaintenanceMargin(Double shortMaintenanceMargin) {
+    this.shortMaintenanceMargin = shortMaintenanceMargin;
   }
 
   public Double getShortFeeRate() {
@@ -203,12 +246,22 @@ public class ContractItem extends ApiModel {
     this.shortFeeRate = shortFeeRate;
   }
 
-  public int getShortable() {
-    return shortable;
+  @Deprecated
+  public long getShortable() {
+    return shortable == 0 ? shortableCount : shortable;
   }
 
-  public void setShortable(int shortable) {
+  @Deprecated
+  public void setShortable(long shortable) {
     this.shortable = shortable;
+  }
+
+  public long getShortableCount() {
+    return shortableCount;
+  }
+
+  public void setShortableCount(long shortableCount) {
+    this.shortableCount = shortableCount;
   }
 
   public Double getLongInitialMargin() {
@@ -304,9 +357,12 @@ public class ContractItem extends ApiModel {
         ", name='" + name + '\'' +
         ", status=" + status +
         ", minTick=" + minTick +
-        ", shortMargin=" + shortMargin +
+        ", marginable=" + marginable +
+        ", canShort=" + canShort +
+        ", shortInitialMargin=" + shortInitialMargin +
+        ", shortMaintenanceMargin=" + shortMaintenanceMargin +
         ", shortFeeRate=" + shortFeeRate +
-        ", shortable=" + shortable +
+        ", shortableCount=" + shortableCount +
         ", longInitialMargin=" + longInitialMargin +
         ", longMaintenanceMargin=" + longMaintenanceMargin +
         ", lastTradingDate='" + lastTradingDate + '\'' +
