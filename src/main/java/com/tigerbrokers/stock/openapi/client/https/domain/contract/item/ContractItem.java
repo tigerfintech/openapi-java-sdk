@@ -34,10 +34,10 @@ public class ContractItem extends ApiModel {
   private String name;
   /** please use 'tradeable' */
   @Deprecated
-  private int status;
-  private boolean tradeable;
+  private Integer status;
+  private Boolean tradeable;
   private Double minTick;
-  private boolean marginable;
+  private Boolean marginable;
   /** please use 'shortInitialMargin' and 'shortMaintenanceMargin' */
   @Deprecated
   private Double shortMargin;
@@ -45,8 +45,8 @@ public class ContractItem extends ApiModel {
   private Double shortMaintenanceMargin;
   private Double shortFeeRate;
   @JSONField(deserializeUsing = FastJsonBooleanDeserializer.class)
-  private boolean shortable;
-  private long shortableCount;
+  private Boolean shortable;
+  private Long shortableCount;
   private Double longInitialMargin;
   private Double longMaintenanceMargin;
   private String lastTradingDate;
@@ -54,8 +54,8 @@ public class ContractItem extends ApiModel {
   private Long lastBiddingCloseTime;
   /** please use 'tradeable' */
   @Deprecated
-  private boolean trade;
-  private boolean continuous;
+  private Boolean trade;
+  private Boolean continuous;
   /** future contract fields */
   private String type;
   private String ibCode;
@@ -189,20 +189,20 @@ public class ContractItem extends ApiModel {
   }
 
   @Deprecated
-  public int getStatus() {
+  public Integer getStatus() {
     return status;
   }
 
   @Deprecated
-  public void setStatus(int status) {
+  public void setStatus(Integer status) {
     this.status = status;
   }
 
-  public boolean isTradeable() {
+  public Boolean isTradeable() {
     return tradeable;
   }
 
-  public void setTradeable(boolean tradeable) {
+  public void setTradeable(Boolean tradeable) {
     this.tradeable = tradeable;
   }
 
@@ -214,11 +214,11 @@ public class ContractItem extends ApiModel {
     this.minTick = minTick;
   }
 
-  public boolean isMarginable() {
+  public Boolean isMarginable() {
     return marginable;
   }
 
-  public void setMarginable(boolean marginable) {
+  public void setMarginable(Boolean marginable) {
     this.marginable = marginable;
   }
 
@@ -254,19 +254,19 @@ public class ContractItem extends ApiModel {
     this.shortFeeRate = shortFeeRate;
   }
 
-  public boolean isShortable() {
+  public Boolean isShortable() {
     return shortable;
   }
 
-  public void setShortable(boolean shortable) {
+  public void setShortable(Boolean shortable) {
     this.shortable = shortable;
   }
 
-  public long getShortableCount() {
+  public Long getShortableCount() {
     return shortableCount;
   }
 
-  public void setShortableCount(long shortableCount) {
+  public void setShortableCount(Long shortableCount) {
     this.shortableCount = shortableCount;
   }
 
@@ -311,19 +311,19 @@ public class ContractItem extends ApiModel {
   }
 
   @Deprecated
-  public boolean isTrade() {
+  public Boolean isTrade() {
     return trade;
   }
 
-  public void setTrade(boolean trade) {
+  public void setTrade(Boolean trade) {
     this.trade = trade;
   }
 
-  public boolean isContinuous() {
+  public Boolean isContinuous() {
     return continuous;
   }
 
-  public void setContinuous(boolean continuous) {
+  public void setContinuous(Boolean continuous) {
     this.continuous = continuous;
   }
 
