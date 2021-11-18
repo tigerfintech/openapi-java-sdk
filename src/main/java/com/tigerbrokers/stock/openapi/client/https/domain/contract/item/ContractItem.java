@@ -2,11 +2,13 @@ package com.tigerbrokers.stock.openapi.client.https.domain.contract.item;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.item.FutureContractItem;
 import com.tigerbrokers.stock.openapi.client.struct.OptionSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
+import com.tigerbrokers.stock.openapi.client.util.FastJsonBooleanDeserializer;
 import com.tigerbrokers.stock.openapi.client.util.SymbolUtil;
 import java.util.List;
 import lombok.ToString;
@@ -42,6 +44,7 @@ public class ContractItem extends ApiModel {
   private Double shortInitialMargin;
   private Double shortMaintenanceMargin;
   private Double shortFeeRate;
+  @JSONField(deserializeUsing = FastJsonBooleanDeserializer.class)
   private boolean shortable;
   private long shortableCount;
   private Double longInitialMargin;
@@ -49,6 +52,8 @@ public class ContractItem extends ApiModel {
   private String lastTradingDate;
   private String firstNoticeDate;
   private Long lastBiddingCloseTime;
+  /** please use 'tradeable' */
+  @Deprecated
   private boolean trade;
   private boolean continuous;
   /** future contract fields */
@@ -305,6 +310,7 @@ public class ContractItem extends ApiModel {
     this.lastBiddingCloseTime = lastBiddingCloseTime;
   }
 
+  @Deprecated
   public boolean isTrade() {
     return trade;
   }
