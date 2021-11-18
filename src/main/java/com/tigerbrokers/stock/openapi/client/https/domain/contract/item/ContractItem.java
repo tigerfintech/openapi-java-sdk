@@ -1,11 +1,14 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.contract.item;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.item.FutureContractItem;
 import com.tigerbrokers.stock.openapi.client.struct.OptionSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.util.SymbolUtil;
+import java.util.List;
 import lombok.ToString;
 
 @ToString
@@ -27,19 +30,19 @@ public class ContractItem extends ApiModel {
   private String localSymbol;
   private String tradingClass;
   private String name;
+  /** please use 'tradeable' */
+  @Deprecated
   private int status;
+  private boolean tradeable;
   private Double minTick;
   private boolean marginable;
-  private boolean canShort;
-  /** please see 'shortInitialMargin' and 'shortMaintenanceMargin' */
+  /** please use 'shortInitialMargin' and 'shortMaintenanceMargin' */
   @Deprecated
   private Double shortMargin;
   private Double shortInitialMargin;
   private Double shortMaintenanceMargin;
   private Double shortFeeRate;
-  /** please see 'shortableCount' */
-  @Deprecated
-  private long shortable;
+  private boolean shortable;
   private long shortableCount;
   private Double longInitialMargin;
   private Double longMaintenanceMargin;
@@ -180,12 +183,22 @@ public class ContractItem extends ApiModel {
     this.name = name;
   }
 
+  @Deprecated
   public int getStatus() {
     return status;
   }
 
+  @Deprecated
   public void setStatus(int status) {
     this.status = status;
+  }
+
+  public boolean isTradeable() {
+    return tradeable;
+  }
+
+  public void setTradeable(boolean tradeable) {
+    this.tradeable = tradeable;
   }
 
   public Double getMinTick() {
@@ -204,20 +217,10 @@ public class ContractItem extends ApiModel {
     this.marginable = marginable;
   }
 
-  public boolean isCanShort() {
-    return canShort;
-  }
-
-  public void setCanShort(boolean canShort) {
-    this.canShort = canShort;
-  }
-
-  @Deprecated
   public Double getShortMargin() {
     return shortMargin;
   }
 
-  @Deprecated
   public void setShortMargin(Double shortMargin) {
     this.shortMargin = shortMargin;
   }
@@ -246,13 +249,11 @@ public class ContractItem extends ApiModel {
     this.shortFeeRate = shortFeeRate;
   }
 
-  @Deprecated
-  public long getShortable() {
-    return shortable == 0 ? shortableCount : shortable;
+  public boolean isShortable() {
+    return shortable;
   }
 
-  @Deprecated
-  public void setShortable(long shortable) {
+  public void setShortable(boolean shortable) {
     this.shortable = shortable;
   }
 
@@ -355,14 +356,13 @@ public class ContractItem extends ApiModel {
         ", localSymbol='" + localSymbol + '\'' +
         ", tradingClass='" + tradingClass + '\'' +
         ", name='" + name + '\'' +
-        ", status=" + status +
+        ", tradeable=" + tradeable +
         ", minTick=" + minTick +
         ", marginable=" + marginable +
-        ", canShort=" + canShort +
+        ", shortableCount=" + shortableCount +
         ", shortInitialMargin=" + shortInitialMargin +
         ", shortMaintenanceMargin=" + shortMaintenanceMargin +
         ", shortFeeRate=" + shortFeeRate +
-        ", shortableCount=" + shortableCount +
         ", longInitialMargin=" + longInitialMargin +
         ", longMaintenanceMargin=" + longMaintenanceMargin +
         ", lastTradingDate='" + lastTradingDate + '\'' +
@@ -465,5 +465,29 @@ public class ContractItem extends ApiModel {
     contractItem.setSymbol(symbol);
     contractItem.setCurrency(currency);
     return contractItem;
+  }
+
+  public static ContractItem convertFromJson(String data) {
+    if (data.startsWith("{\"items\":")) {
+      data = data.substring("{\"items\":".length(), data.length() - 1);
+      List<ContractItem> items = JSON.parseObject(data, new TypeReference<List<ContractItem>>() {
+      });
+      if (items == null || items.size() == 0) {
+        return new ContractItem();
+      }
+      return items.get(0);
+    } else {
+      return JSON.parseObject(data, ContractItem.class);
+    }
+  }
+
+  public static List<ContractItem> convertFromJsonV2(String data) {
+    if (data.startsWith("{\"items\":")) {
+      data = data.substring("{\"items\":" .length(), data.length() - 1);
+      List<ContractItem> items = JSON.parseObject(data, new TypeReference<List<ContractItem>>() {
+      });
+      return items;
+    }
+    return null;
   }
 }
