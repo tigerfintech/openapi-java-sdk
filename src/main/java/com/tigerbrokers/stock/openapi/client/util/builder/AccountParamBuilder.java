@@ -197,6 +197,13 @@ public class AccountParamBuilder {
     return this;
   }
 
+  public AccountParamBuilder orderId(Long orderId) {
+    if (orderId != null) {
+      paramMap.put("order_id", orderId);
+    }
+    return this;
+  }
+
   public AccountParamBuilder isBrief(Boolean isBrief) {
     if (isBrief != null) {
       paramMap.put("is_brief", isBrief);
