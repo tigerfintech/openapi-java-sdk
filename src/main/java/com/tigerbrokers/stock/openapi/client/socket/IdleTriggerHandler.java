@@ -5,15 +5,17 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author  zhaolei
  * @since  2019/3/13
  * 描述
  */
-@Slf4j
 public class IdleTriggerHandler extends ChannelInboundHandlerAdapter {
+
+  private static final Logger log = LoggerFactory.getLogger(IdleTriggerHandler.class);
 
   private ApiCallbackDecoder apiCallbackDecoder = null;
 
