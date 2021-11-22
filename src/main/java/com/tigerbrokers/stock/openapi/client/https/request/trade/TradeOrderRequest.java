@@ -113,7 +113,7 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     model.setMarket(contract.getMarket());
     model.setLocalSymbol(contract.getLocalSymbol());
     model.setExpiry(contract.getExpiry());
-    model.setStrike(contract.getExpiry());
+    model.setStrike(contract.getStrike() == null ? null : contract.getStrike().toString());
     model.setRight(contract.getRight());
     model.setMultiplier(contract.getMultiplier() == null ? null : contract.getMultiplier().floatValue());
     if (model.getSecType() == SecType.FUT) {
