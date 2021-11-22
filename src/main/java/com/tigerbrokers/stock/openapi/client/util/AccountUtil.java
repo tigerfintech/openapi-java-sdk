@@ -1,14 +1,16 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
 import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Description:
  * Created by lijiawen on 2018/12/03.
  */
-@Slf4j
 public class AccountUtil {
+
+  private static final Logger log = LoggerFactory.getLogger(AccountUtil.class);
 
   public static boolean isOmnibusAccount(String account) {
     if (StringUtils.isEmpty(account)) {
@@ -41,5 +43,4 @@ public class AccountUtil {
       return AccountType.PAPER;
     }
   }
-
 }

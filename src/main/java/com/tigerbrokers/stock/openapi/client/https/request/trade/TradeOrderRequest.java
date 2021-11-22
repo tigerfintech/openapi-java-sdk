@@ -102,19 +102,20 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
       throw new IllegalArgumentException("parameter 'contract' is null");
     }
     AccountType accountType = AccountUtil.getAccountType(account);
-    TradeOrderModel model = TradeOrderModel.builder().account(account)
-        .action(action).totalQuantity(quantity)
-        .symbol(contract.getSymbol())
-        .currency(contract.getCurrency() == null ? null : Currency.valueOf(contract.getCurrency()))
-        .secType(contract.getSecType() == null ? null : SecType.valueOf(contract.getSecType()))
-        .exchange(contract.getExchange())
-        .market(contract.getMarket())
-        .localSymbol(contract.getLocalSymbol())
-        .expiry(contract.getExpiry())
-        .strike(contract.getStrike() == null ? null : contract.getStrike().toString())
-        .right(contract.getRight())
-        .multiplier(contract.getMultiplier() == null ? null : contract.getMultiplier().floatValue())
-        .build();
+    TradeOrderModel model = new TradeOrderModel();
+    model.setAccount(account);
+    model.setAction(action);
+    model.setTotalQuantity(quantity);
+    model.setSymbol(contract.getSymbol());
+    model.setCurrency(contract.getCurrency() == null ? null : Currency.valueOf(contract.getCurrency()));
+    model.setSecType(contract.getSecType() == null ? null : SecType.valueOf(contract.getSecType()));
+    model.setExchange(contract.getExchange());
+    model.setMarket(contract.getMarket());
+    model.setLocalSymbol(contract.getLocalSymbol());
+    model.setExpiry(contract.getExpiry());
+    model.setStrike(contract.getExpiry());
+    model.setRight(contract.getRight());
+    model.setMultiplier(contract.getMultiplier() == null ? null : contract.getMultiplier().floatValue());
     if (model.getSecType() == SecType.FUT) {
       if (accountType == AccountType.GLOBAL) {
         if (!StringUtils.isEmpty(contract.getType())) {

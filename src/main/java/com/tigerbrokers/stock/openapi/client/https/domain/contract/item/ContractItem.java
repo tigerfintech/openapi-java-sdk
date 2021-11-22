@@ -11,9 +11,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.util.FastJsonBooleanDeserializer;
 import com.tigerbrokers.stock.openapi.client.util.SymbolUtil;
 import java.util.List;
-import lombok.ToString;
 
-@ToString
 public class ContractItem extends ApiModel {
 
   private Integer contractId;

@@ -4,9 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.TradeOrderItem;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
-import lombok.ToString;
 
-@ToString
 public class TradeOrderResponse extends TigerResponse {
 
   @JSONField(name = "data")
@@ -31,5 +29,13 @@ public class TradeOrderResponse extends TigerResponse {
 
   public void setItem(TradeOrderItem item) {
     this.item = item;
+  }
+
+  @Override
+  public String toString() {
+    return "TradeOrderResponse{" +
+        "data='" + data + '\'' +
+        ", item=" + item +
+        '}';
   }
 }
