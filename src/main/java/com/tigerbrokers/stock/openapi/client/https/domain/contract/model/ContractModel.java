@@ -2,13 +2,11 @@ package com.tigerbrokers.stock.openapi.client.https.domain.contract.model;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
-import lombok.Data;
 
 /**
  * 作者：ltc
  * 时间：2019/05/29
  */
-@Data
 public class ContractModel extends BaseContractModel {
 
   private String symbol;

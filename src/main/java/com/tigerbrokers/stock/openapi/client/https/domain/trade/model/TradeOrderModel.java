@@ -10,13 +10,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
 import java.util.List;
-import lombok.Builder;
-import lombok.Data;
-import lombok.ToString;
 
-@Data
-@Builder
-@ToString
 public class TradeOrderModel extends ApiModel {
 
   /**
@@ -169,4 +163,328 @@ public class TradeOrderModel extends ApiModel {
   private Double stopLossPrice;
   @JSONField(name = "stop_loss_tif")
   private TimeInForce stopLossTif;
+
+  public TradeOrderModel() {
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public Integer getOrderId() {
+    return orderId;
+  }
+
+  public void setOrderId(Integer orderId) {
+    this.orderId = orderId;
+  }
+
+  public String getAccount() {
+    return account;
+  }
+
+  public void setAccount(String account) {
+    this.account = account;
+  }
+
+  public String getSecretKey() {
+    return secretKey;
+  }
+
+  public void setSecretKey(String secretKey) {
+    this.secretKey = secretKey;
+  }
+
+  public String getSymbol() {
+    return symbol;
+  }
+
+  public void setSymbol(String symbol) {
+    this.symbol = symbol;
+  }
+
+  public SecType getSecType() {
+    return secType;
+  }
+
+  public void setSecType(SecType secType) {
+    this.secType = secType;
+  }
+
+  public ActionType getAction() {
+    return action;
+  }
+
+  public void setAction(ActionType action) {
+    this.action = action;
+  }
+
+  public Currency getCurrency() {
+    return currency;
+  }
+
+  public void setCurrency(Currency currency) {
+    this.currency = currency;
+  }
+
+  public Integer getTotalQuantity() {
+    return totalQuantity;
+  }
+
+  public void setTotalQuantity(Integer totalQuantity) {
+    this.totalQuantity = totalQuantity;
+  }
+
+  public TimeInForce getTimeInForce() {
+    return timeInForce;
+  }
+
+  public void setTimeInForce(TimeInForce timeInForce) {
+    this.timeInForce = timeInForce;
+  }
+
+  public OrderType getOrderType() {
+    return orderType;
+  }
+
+  public void setOrderType(OrderType orderType) {
+    this.orderType = orderType;
+  }
+
+  public Double getLimitPrice() {
+    return limitPrice;
+  }
+
+  public void setLimitPrice(Double limitPrice) {
+    this.limitPrice = limitPrice;
+  }
+
+  public Double getAuxPrice() {
+    return auxPrice;
+  }
+
+  public void setAuxPrice(Double auxPrice) {
+    this.auxPrice = auxPrice;
+  }
+
+  public Double getTrailingPercent() {
+    return trailingPercent;
+  }
+
+  public void setTrailingPercent(Double trailingPercent) {
+    this.trailingPercent = trailingPercent;
+  }
+
+  public Boolean getOutsideRth() {
+    return outsideRth;
+  }
+
+  public void setOutsideRth(Boolean outsideRth) {
+    this.outsideRth = outsideRth;
+  }
+
+  public String getMarket() {
+    return market;
+  }
+
+  public void setMarket(String market) {
+    this.market = market;
+  }
+
+  public String getExchange() {
+    return exchange;
+  }
+
+  public void setExchange(String exchange) {
+    this.exchange = exchange;
+  }
+
+  public String getExpiry() {
+    return expiry;
+  }
+
+  public void setExpiry(String expiry) {
+    this.expiry = expiry;
+  }
+
+  public String getStrike() {
+    return strike;
+  }
+
+  public void setStrike(String strike) {
+    this.strike = strike;
+  }
+
+  public String getRight() {
+    return right;
+  }
+
+  public void setRight(String right) {
+    this.right = right;
+  }
+
+  public Float getMultiplier() {
+    return multiplier;
+  }
+
+  public void setMultiplier(Float multiplier) {
+    this.multiplier = multiplier;
+  }
+
+  public String getLocalSymbol() {
+    return localSymbol;
+  }
+
+  public void setLocalSymbol(String localSymbol) {
+    this.localSymbol = localSymbol;
+  }
+
+  public List<String> getAllocAccounts() {
+    return allocAccounts;
+  }
+
+  public void setAllocAccounts(List<String> allocAccounts) {
+    this.allocAccounts = allocAccounts;
+  }
+
+  public List<Double> getAllocShares() {
+    return allocShares;
+  }
+
+  public void setAllocShares(List<Double> allocShares) {
+    this.allocShares = allocShares;
+  }
+
+  public String getAlgoStrategy() {
+    return algoStrategy;
+  }
+
+  public void setAlgoStrategy(String algoStrategy) {
+    this.algoStrategy = algoStrategy;
+  }
+
+  public List<TagValue> getAlgoParams() {
+    return algoParams;
+  }
+
+  public void setAlgoParams(List<TagValue> algoParams) {
+    this.algoParams = algoParams;
+  }
+
+  public String getSource() {
+    return source;
+  }
+
+  public void setSource(String source) {
+    this.source = source;
+  }
+
+  public AttachType getAttachType() {
+    return attachType;
+  }
+
+  public void setAttachType(AttachType attachType) {
+    this.attachType = attachType;
+  }
+
+  public Integer getProfitTakerOrderId() {
+    return profitTakerOrderId;
+  }
+
+  public void setProfitTakerOrderId(Integer profitTakerOrderId) {
+    this.profitTakerOrderId = profitTakerOrderId;
+  }
+
+  public Double getProfitTakerPrice() {
+    return profitTakerPrice;
+  }
+
+  public void setProfitTakerPrice(Double profitTakerPrice) {
+    this.profitTakerPrice = profitTakerPrice;
+  }
+
+  public TimeInForce getProfitTakerTif() {
+    return profitTakerTif;
+  }
+
+  public void setProfitTakerTif(TimeInForce profitTakerTif) {
+    this.profitTakerTif = profitTakerTif;
+  }
+
+  public Boolean getProfitTakerRth() {
+    return profitTakerRth;
+  }
+
+  public void setProfitTakerRth(Boolean profitTakerRth) {
+    this.profitTakerRth = profitTakerRth;
+  }
+
+  public Integer getStopLossOrderId() {
+    return stopLossOrderId;
+  }
+
+  public void setStopLossOrderId(Integer stopLossOrderId) {
+    this.stopLossOrderId = stopLossOrderId;
+  }
+
+  public Double getStopLossPrice() {
+    return stopLossPrice;
+  }
+
+  public void setStopLossPrice(Double stopLossPrice) {
+    this.stopLossPrice = stopLossPrice;
+  }
+
+  public TimeInForce getStopLossTif() {
+    return stopLossTif;
+  }
+
+  public void setStopLossTif(TimeInForce stopLossTif) {
+    this.stopLossTif = stopLossTif;
+  }
+
+  @Override
+  public String toString() {
+    return "TradeOrderModel{" +
+        "id=" + id +
+        ", orderId=" + orderId +
+        ", account='" + account + '\'' +
+        ", secretKey='" + secretKey + '\'' +
+        ", symbol='" + symbol + '\'' +
+        ", secType=" + secType +
+        ", action=" + action +
+        ", currency=" + currency +
+        ", totalQuantity=" + totalQuantity +
+        ", timeInForce=" + timeInForce +
+        ", orderType=" + orderType +
+        ", limitPrice=" + limitPrice +
+        ", auxPrice=" + auxPrice +
+        ", trailingPercent=" + trailingPercent +
+        ", outsideRth=" + outsideRth +
+        ", market='" + market + '\'' +
+        ", exchange='" + exchange + '\'' +
+        ", expiry='" + expiry + '\'' +
+        ", strike='" + strike + '\'' +
+        ", right='" + right + '\'' +
+        ", multiplier=" + multiplier +
+        ", localSymbol='" + localSymbol + '\'' +
+        ", allocAccounts=" + allocAccounts +
+        ", allocShares=" + allocShares +
+        ", algoStrategy='" + algoStrategy + '\'' +
+        ", algoParams=" + algoParams +
+        ", source='" + source + '\'' +
+        ", attachType=" + attachType +
+        ", profitTakerOrderId=" + profitTakerOrderId +
+        ", profitTakerPrice=" + profitTakerPrice +
+        ", profitTakerTif=" + profitTakerTif +
+        ", profitTakerRth=" + profitTakerRth +
+        ", stopLossOrderId=" + stopLossOrderId +
+        ", stopLossPrice=" + stopLossPrice +
+        ", stopLossTif=" + stopLossTif +
+        '}';
+  }
 }

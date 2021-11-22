@@ -30,8 +30,6 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
 /**
  * 期权指标计算器
@@ -526,7 +524,7 @@ public class OptionCalcUtils {
   }
 }
 
-@Data class OptionResult {
+ class OptionResult {
 
   OptionIndex index;
   double timeValue;
@@ -535,6 +533,62 @@ public class OptionCalcUtils {
   double volatility;
   double leverage;
   double insideValue;
+
+  public OptionIndex getIndex() {
+    return index;
+  }
+
+  public void setIndex(OptionIndex index) {
+    this.index = index;
+  }
+
+  public double getTimeValue() {
+    return timeValue;
+  }
+
+  public void setTimeValue(double timeValue) {
+    this.timeValue = timeValue;
+  }
+
+  public double getPremiumRate() {
+    return premiumRate;
+  }
+
+  public void setPremiumRate(double premiumRate) {
+    this.premiumRate = premiumRate;
+  }
+
+  public double getProfitRate() {
+    return profitRate;
+  }
+
+  public void setProfitRate(double profitRate) {
+    this.profitRate = profitRate;
+  }
+
+  public double getVolatility() {
+    return volatility;
+  }
+
+  public void setVolatility(double volatility) {
+    this.volatility = volatility;
+  }
+
+  public double getLeverage() {
+    return leverage;
+  }
+
+  public void setLeverage(double leverage) {
+    this.leverage = leverage;
+  }
+
+  public double getInsideValue() {
+    return insideValue;
+  }
+
+  public void setInsideValue(double insideValue) {
+    this.insideValue = insideValue;
+  }
 
   public String getTimeValueString() {
     return formatDoubleString(timeValue, 2);
@@ -560,8 +614,6 @@ public class OptionCalcUtils {
     return formatDoubleString(insideValue, 2);
   }
 
-  @Data
-  @AllArgsConstructor
   static class OptionIndex {
 
     double Delta;
@@ -569,6 +621,14 @@ public class OptionCalcUtils {
     double Theta;
     double Vega;
     double Rho;
+
+    public OptionIndex(double delta, double gamma, double theta, double vega, double rho) {
+      Delta = delta;
+      Gamma = gamma;
+      Theta = theta;
+      Vega = vega;
+      Rho = rho;
+    }
 
     public String getDeltaString() {
       return formatDoubleString(Delta, 3);
@@ -588,6 +648,46 @@ public class OptionCalcUtils {
 
     public String getRhoString() {
       return formatDoubleString(Rho, 3);
+    }
+
+    public double getDelta() {
+      return Delta;
+    }
+
+    public void setDelta(double delta) {
+      Delta = delta;
+    }
+
+    public double getGamma() {
+      return Gamma;
+    }
+
+    public void setGamma(double gamma) {
+      Gamma = gamma;
+    }
+
+    public double getTheta() {
+      return Theta;
+    }
+
+    public void setTheta(double theta) {
+      Theta = theta;
+    }
+
+    public double getVega() {
+      return Vega;
+    }
+
+    public void setVega(double vega) {
+      Vega = vega;
+    }
+
+    public double getRho() {
+      return Rho;
+    }
+
+    public void setRho(double rho) {
+      Rho = rho;
     }
   }
 

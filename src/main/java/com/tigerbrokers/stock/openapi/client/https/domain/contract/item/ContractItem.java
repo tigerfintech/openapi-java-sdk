@@ -6,9 +6,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.future.item.FutureCont
 import com.tigerbrokers.stock.openapi.client.struct.OptionSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.util.SymbolUtil;
-import lombok.ToString;
 
-@ToString
 public class ContractItem extends ApiModel {
 
   private Integer contractId;
