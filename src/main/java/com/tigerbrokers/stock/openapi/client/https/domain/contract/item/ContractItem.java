@@ -7,6 +7,8 @@ import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.item.FutureContractItem;
 import com.tigerbrokers.stock.openapi.client.struct.OptionSymbol;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.util.FastJsonBooleanDeserializer;
 import com.tigerbrokers.stock.openapi.client.util.SymbolUtil;
@@ -437,6 +439,9 @@ public class ContractItem extends ApiModel {
     contractItem.setExpiry(expiry);
     contractItem.setStrike(strike);
     contractItem.setRight(right);
+    contractItem.setLocalSymbol(symbol);
+    contractItem.setCurrency(Currency.HKD.name());
+    contractItem.setMarket(Market.HK.name());
     return contractItem;
 
   }
@@ -448,6 +453,9 @@ public class ContractItem extends ApiModel {
     contractItem.setExpiry(expiry);
     contractItem.setStrike(strike);
     contractItem.setRight(right);
+    contractItem.setLocalSymbol(symbol);
+    contractItem.setCurrency(Currency.HKD.name());
+    contractItem.setMarket(Market.HK.name());
     return contractItem;
   }
 
