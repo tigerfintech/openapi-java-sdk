@@ -34,6 +34,7 @@ public interface ApiServiceType {
   String QUOTE_SHORTABLE_STOCKS = "quote_shortable_stocks";
   String QUOTE_STOCK_TRADE = "quote_stock_trade";
   String QUOTE_DEPTH = "quote_depth";
+  String QUOTE_DELAY = "quote_delay";
 
   /**
    * 期权行情
