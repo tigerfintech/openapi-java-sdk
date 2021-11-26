@@ -1,13 +1,11 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.quote.item;
 
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
-import lombok.Data;
 
 /**
  * Description:
  * Created by sk on 2021/11/18.
  */
-@Data
 public class QuoteDelayItem extends ApiModel {
 
   /**
@@ -55,4 +53,75 @@ public class QuoteDelayItem extends ApiModel {
    */
   private Long volume;
 
+  public String getSymbol() {
+    return symbol;
+  }
+
+  public void setSymbol(String symbol) {
+    this.symbol = symbol;
+  }
+
+  public Double getOpen() {
+    return open;
+  }
+
+  public void setOpen(Double open) {
+    this.open = open;
+  }
+
+  public Double getHigh() {
+    return high;
+  }
+
+  public void setHigh(Double high) {
+    this.high = high;
+  }
+
+  public Double getLow() {
+    return low;
+  }
+
+  public void setLow(Double low) {
+    this.low = low;
+  }
+
+  public Double getClose() {
+    return close;
+  }
+
+  public void setClose(Double close) {
+    this.close = close;
+  }
+
+  public Double getPreClose() {
+    return preClose;
+  }
+
+  public void setPreClose(Double preClose) {
+    this.preClose = preClose;
+  }
+
+  public Double getHalted() {
+    return halted;
+  }
+
+  public void setHalted(Double halted) {
+    this.halted = halted;
+  }
+
+  public Long getTime() {
+    return time;
+  }
+
+  public void setTime(Long time) {
+    this.time = time;
+  }
+
+  public Long getVolume() {
+    return volume;
+  }
+
+  public void setVolume(Long volume) {
+    this.volume = volume;
+  }
 }
