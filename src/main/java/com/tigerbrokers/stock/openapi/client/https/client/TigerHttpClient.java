@@ -7,12 +7,14 @@ import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.model.ContractModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.model.ContractsModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
+import com.tigerbrokers.stock.openapi.client.https.response.contract.ContractResponse;
 import com.tigerbrokers.stock.openapi.client.https.validator.ContractRequestValidator;
 import com.tigerbrokers.stock.openapi.client.https.validator.PlaceOrderRequestValidator;
 import com.tigerbrokers.stock.openapi.client.https.validator.RequestValidator;
@@ -27,8 +29,10 @@ import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import com.tigerbrokers.stock.openapi.client.util.TigerSignature;
 import java.security.Security;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import static com.tigerbrokers.stock.openapi.client.constant.ApiServiceType.CONTRACT;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCESS_TOKEN;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCOUNT_TYPE;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.BIZ_CONTENT;
@@ -42,6 +46,7 @@ import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.T
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TIMESTAMP;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TRADE_TOKEN;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.VERSION;
+import static com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest.V2_0;
 
 public class TigerHttpClient implements TigerClient {
 
@@ -151,7 +156,9 @@ public class TigerHttpClient implements TigerClient {
         throw new TigerApiException(TigerApiCode.EMPTY_DATA_ERROR);
       }
       response = JSON.parseObject(data, request.getResponseClass());
-
+      if (CONTRACT.equals(request.getApiMethodName())) {
+        convertContractItem(response, request.getApiVersion());
+      }
       if (StringUtils.isEmpty(this.tigerPublicKey) || response.getSign() == null) {
         return response;
       }
@@ -171,6 +178,24 @@ public class TigerHttpClient implements TigerClient {
     } catch (Exception e) {
       ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), param, data, e);
       return errorResponse(tigerId, request, e);
+    }
+  }
+
+  private void convertContractItem(TigerResponse response, String apiVersion) {
+    if (response instanceof ContractResponse) {
+      ContractResponse contractResponse = (ContractResponse) response;
+      if (StringUtils.isEmpty(contractResponse.getData())) {
+        return;
+      }
+      if (V2_0.equals(apiVersion)) {
+        List<ContractItem> items = ContractItem.convertFromJsonV2(contractResponse.getData());
+        contractResponse.setItems(items);
+        if (items != null && items.size() > 0) {
+          contractResponse.setItem(items.get(0));
+        }
+      } else {
+        contractResponse.setItem(ContractItem.convertFromJson(contractResponse.getData()));
+      }
     }
   }
 

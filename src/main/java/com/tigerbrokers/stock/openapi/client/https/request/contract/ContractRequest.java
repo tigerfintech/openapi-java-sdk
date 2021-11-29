@@ -16,12 +16,9 @@ public class ContractRequest extends TigerCommonRequest implements TigerRequest<
 
   public ContractRequest() {
     setApiMethodName(ApiServiceType.CONTRACT);
-    setApiVersion(V3_0);
+    setApiVersion(V2_0);
   }
 
-  /**
-   * if account is null, use ClientConfig.DEFAULT_CONFIG.defaultAccount
-   */
   public static ContractRequest newRequest(ContractModel contractModel) {
     ContractRequest request = new ContractRequest();
     if (StringUtils.isEmpty(contractModel.getAccount())) {

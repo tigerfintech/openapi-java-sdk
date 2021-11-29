@@ -6,10 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
- * @author liutongping
- * @version 1.0
- * @description:
- * @date 2021/11/5 下午4:11
+ * description: Created by liutongping on 2021/11/5
  */
 public class ClientConfig {
   private static final String PPRVATE_KEY_BEGIN = "-----BEGIN PRIVATE KEY-----";
@@ -61,6 +58,7 @@ public class ClientConfig {
    * read private key from file
    *
    * @param privateKeyFile absolute path
+   * @return privateKey String
    */
   public String readPrivateKey(String privateKeyFile) {
     String content = "";

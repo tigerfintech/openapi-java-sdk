@@ -5,10 +5,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 /**
- * @author liutongping
- * @version 1.0
- * @description:
- * @date 2021/11/8 下午7:16
+ * description: Created by liutongping on 2021/11/8
  */
 public class SdkVersionUtils {
   private static String sdkVersion = null;
@@ -16,7 +13,7 @@ public class SdkVersionUtils {
 
   /**
    * 获取sdk版本信息
-   * @return
+   * @return sdk version
    */
   public static String getSdkVersion() {
     if (null == sdkVersion) {

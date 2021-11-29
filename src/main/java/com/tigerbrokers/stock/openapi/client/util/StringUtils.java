@@ -48,4 +48,16 @@ public abstract class StringUtils {
       return true;
     }
   }
+
+  public static int toInt(String str, int defaultValue) {
+    if (str == null) {
+      return defaultValue;
+    } else {
+      try {
+        return Integer.parseInt(str);
+      } catch (NumberFormatException var3) {
+        return defaultValue;
+      }
+    }
+  }
 }

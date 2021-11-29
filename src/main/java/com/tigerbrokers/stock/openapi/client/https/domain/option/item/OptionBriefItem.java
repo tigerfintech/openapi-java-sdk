@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.option.item;
 
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 
 /**
  * Description:
@@ -28,6 +29,8 @@ public class OptionBriefItem extends ApiModel {
   private String volatility;
   private Long expiry;
   protected Double ratesBonds;
+  private Long timestamp;
+  private String latestTime;
 
   public String getIdentifier() {
     return identifier;
@@ -189,6 +192,25 @@ public class OptionBriefItem extends ApiModel {
     this.ratesBonds = ratesBonds;
   }
 
+  public Long getTimestamp() {
+    return timestamp;
+  }
+
+  public void setTimestamp(Long timestamp) {
+    this.timestamp = timestamp;
+  }
+
+  public void setLatestTime(String latestTime) {
+    this.latestTime = latestTime;
+  }
+
+  public String getLatestTime() {
+    if (this.latestTime == null && timestamp != null) {
+      this.latestTime = DateUtils.printTimeZoneET(timestamp);
+    }
+    return this.latestTime;
+  }
+
   @Override
   public String toString() {
     return "OptionBriefItem{" +
@@ -212,6 +234,8 @@ public class OptionBriefItem extends ApiModel {
         ", volatility='" + volatility + '\'' +
         ", expiry=" + expiry +
         ", ratesBonds=" + ratesBonds +
+        ", timestamp=" + timestamp +
+        ", latestTime=" + getLatestTime() +
         '}';
   }
 }
