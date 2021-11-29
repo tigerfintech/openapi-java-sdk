@@ -16,7 +16,7 @@ import java.util.Date;
 public class DateUtils {
 
   private static final String FORMAT_FULL = "yyyy-MM-dd HH:mm:ss";
-  private static final String FORMAT_FULL_WITH_ZONE = "yyyy-MM-dd HH:mm:ss z";
+  private static final String FORMAT_FULL_WITH_ZONE = "yyyy-MM-dd HH:mm:ss.SSS";
   private static final String SUFFIX = " 00:00:00";
   private static final String FORMAT_DATE = "yyyy-MM-dd";
   public static final DateTimeFormatter DATE_FORMAT =
