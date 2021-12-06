@@ -12,6 +12,8 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
 import com.tigerbrokers.stock.openapi.client.struct.param.OrderParameter;
 import com.tigerbrokers.stock.openapi.client.util.FastJsonPropertyFilter;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -302,6 +304,14 @@ public class TradeParamBuilder {
     if (stopLossTif != null) {
       this.orderParameter.setStopLossTif(stopLossTif);
     }
+    return this;
+  }
+
+  public TradeParamBuilder appendOcaOrders(OrderParameter orderParameter) {
+    if (this.orderParameter.getOcaOrders() == null) {
+      this.orderParameter.setOcaOrders(new ArrayList<>());
+    }
+    this.orderParameter.getOcaOrders().add(orderParameter);
     return this;
   }
 

@@ -171,6 +171,9 @@ public class OrderParameter implements Serializable {
   @JSONField(name = "stop_loss_tif")
   private TimeInForce stopLossTif;
 
+  @JSONField(name = "oca_orders")
+  private List<OrderParameter> ocaOrders;
+
   public Long getId() {
     return id;
   }
@@ -449,6 +452,14 @@ public class OrderParameter implements Serializable {
 
   public void setSecretKey(String secretKey) {
     this.secretKey = secretKey;
+  }
+
+  public List<OrderParameter> getOcaOrders() {
+    return ocaOrders;
+  }
+
+  public void setOcaOrders(List<OrderParameter> ocaOrders) {
+    this.ocaOrders = ocaOrders;
   }
 
   @Override
