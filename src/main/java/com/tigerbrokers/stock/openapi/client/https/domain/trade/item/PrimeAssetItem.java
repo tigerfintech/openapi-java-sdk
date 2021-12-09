@@ -14,22 +14,31 @@ import java.util.List;
 public class PrimeAssetItem extends ApiModel {
 
     private String accountId;
+    private Long updateTimestamp;
     private List<Segment> segments;
-
-    public void setAccountId(String accountId) {
-        this.accountId = accountId;
-    }
-
-    public void setSegments(List<Segment> segments) {
-        this.segments = segments;
-    }
 
     public String getAccountId() {
         return accountId;
     }
 
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
+    }
+
+    public Long getUpdateTimestamp() {
+        return updateTimestamp;
+    }
+
+    public void setUpdateTimestamp(Long updateTimestamp) {
+        this.updateTimestamp = updateTimestamp;
+    }
+
     public List<Segment> getSegments() {
         return segments;
+    }
+
+    public void setSegments(List<Segment> segments) {
+        this.segments = segments;
     }
 
     public static class Segment {
