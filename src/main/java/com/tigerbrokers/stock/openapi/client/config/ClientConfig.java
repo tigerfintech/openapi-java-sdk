@@ -80,10 +80,14 @@ public class ClientConfig {
       if (endIndex > 0) {
         end = endIndex;
       }
-      while (content.charAt(end - 1) == 10 || content.charAt(end - 1) == 13) {
-        end--;
+      StringBuilder builder = new StringBuilder();
+      for (int i = start; i < end; i++) {
+        if (content.charAt(i) == 10 || content.charAt(i) == 13) {
+          continue;
+        }
+        builder.append(content.charAt(i));
       }
-      content = content.substring(start, end);
+      content = builder.toString();
     } catch (IOException e) {
       ApiLogger.error("read file fail:" + privateKeyFile, e);
     }
