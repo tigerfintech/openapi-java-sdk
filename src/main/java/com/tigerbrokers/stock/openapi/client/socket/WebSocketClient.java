@@ -104,7 +104,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   /**
    * get WebSocketClient instance
-   * @return
+   * @return WebSocketClient
    */
   public static WebSocketClient getInstance() {
     return SingletonInner.singleton;

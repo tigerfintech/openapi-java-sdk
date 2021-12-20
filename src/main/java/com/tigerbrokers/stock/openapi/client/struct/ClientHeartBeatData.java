@@ -1,17 +1,10 @@
 package com.tigerbrokers.stock.openapi.client.struct;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-
 /**
  * @author  zhaolei
  * @since  2019/3/12
  * 描述
  */
-@Data
-@AllArgsConstructor
-@RequiredArgsConstructor
 public class ClientHeartBeatData {
 
   /**
@@ -22,4 +15,28 @@ public class ClientHeartBeatData {
    * client希望收到server心跳的间隔，0代表client不希望收到server的心跳
    */
   private int receiveInterval = 0;
+
+  public int getSendInterval() {
+    return sendInterval;
+  }
+
+  public void setSendInterval(int sendInterval) {
+    this.sendInterval = sendInterval;
+  }
+
+  public int getReceiveInterval() {
+    return receiveInterval;
+  }
+
+  public void setReceiveInterval(int receiveInterval) {
+    this.receiveInterval = receiveInterval;
+  }
+
+  public ClientHeartBeatData(int sendInterval, int receiveInterval) {
+    this.sendInterval = sendInterval;
+    this.receiveInterval = receiveInterval;
+  }
+
+  public ClientHeartBeatData() {
+  }
 }

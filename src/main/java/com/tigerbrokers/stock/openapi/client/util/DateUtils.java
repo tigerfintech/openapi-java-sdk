@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -15,10 +16,13 @@ import java.util.Date;
 public class DateUtils {
 
   private static final String FORMAT_FULL = "yyyy-MM-dd HH:mm:ss";
+  private static final String FORMAT_FULL_WITH_ZONE = "yyyy-MM-dd HH:mm:ss.SSS";
   private static final String SUFFIX = " 00:00:00";
   private static final String FORMAT_DATE = "yyyy-MM-dd";
   public static final DateTimeFormatter DATE_FORMAT =
       DateTimeFormatter.ofPattern(FORMAT_DATE).withZone(ZoneId.of(TimeZoneId.Shanghai.getZoneId()));
+  public static final DateTimeFormatter DATE_FORMAT_EST =
+      DateTimeFormatter.ofPattern(FORMAT_FULL_WITH_ZONE).withZone(ZoneId.of(TimeZoneId.NewYork.getZoneId()));
   public static final DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern(FORMAT_FULL);
 
   public static Date getZoneDate(String time, TimeZoneId zoneId) {
@@ -66,5 +70,9 @@ public class DateUtils {
       return 0;
     }
     return localDate.atStartOfDay(ZoneId.of(zoneId.getZoneId())).toInstant().toEpochMilli();
+  }
+
+  public static String printTimeZoneET(long timestamp) {
+    return DATE_FORMAT_EST.format(Instant.ofEpochMilli(timestamp));
   }
 }

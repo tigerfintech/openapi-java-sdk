@@ -15,6 +15,8 @@ public interface ApiComposeCallback extends SubscribeApiCallback {
   /**
    * kicked out by a new connection. recommend to terminate the connection.
    * The same tigerId has only one active connection
+   * @param errorCode errorCode
+   * @param errorMsg errorMsg
    */
   void connectionKickoff(int errorCode, String errorMsg);
 
