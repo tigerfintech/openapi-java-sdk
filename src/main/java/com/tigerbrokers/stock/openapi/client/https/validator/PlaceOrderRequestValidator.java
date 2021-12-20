@@ -69,9 +69,6 @@ public class PlaceOrderRequestValidator implements RequestValidator<TradeOrderMo
       if (model.getProfitTakerTif() == null) {
         throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "profit_taker_tif");
       }
-      if (model.getProfitTakerRth() == null) {
-        model.setProfitTakerRth(model.getOutsideRth() == null ? Boolean.TRUE : model.getOutsideRth());
-      }
     }
 
     if (model.getAttachType() == AttachType.BRACKETS || model.getAttachType() == AttachType.LOSS) {

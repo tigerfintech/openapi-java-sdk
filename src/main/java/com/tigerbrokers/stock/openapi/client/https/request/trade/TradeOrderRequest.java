@@ -116,7 +116,6 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     model.setStrike(contract.getStrike() == null ? null : contract.getStrike().toString());
     model.setRight(contract.getRight());
     model.setMultiplier(contract.getMultiplier() == null ? null : contract.getMultiplier().floatValue());
-    model.setOutsideRth(Boolean.TRUE);
     if (model.getSecType() == SecType.FUT) {
       if (accountType == AccountType.GLOBAL) {
         if (!StringUtils.isEmpty(contract.getType())) {
