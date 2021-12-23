@@ -161,6 +161,8 @@ public class TradeOrderModel extends ApiModel {
   private Integer stopLossOrderId;
   @JSONField(name = "stop_loss_price")
   private Double stopLossPrice;
+  @JSONField(name = "stop_loss_limit_price")
+  private Double stopLossLimitPrice;
   @JSONField(name = "stop_loss_tif")
   private TimeInForce stopLossTif;
 
@@ -437,6 +439,14 @@ public class TradeOrderModel extends ApiModel {
 
   public void setStopLossPrice(Double stopLossPrice) {
     this.stopLossPrice = stopLossPrice;
+  }
+
+  public Double getStopLossLimitPrice() {
+    return stopLossLimitPrice;
+  }
+
+  public void setStopLossLimitPrice(Double stopLossLimitPrice) {
+    this.stopLossLimitPrice = stopLossLimitPrice;
   }
 
   public TimeInForce getStopLossTif() {
