@@ -26,7 +26,7 @@
 <dependency>
     <groupId>io.github.tigerbrokers</groupId>
     <artifactId>openapi-java-sdk</artifactId>
-    <version>1.3.3</version>
+    <version>1.3.6</version>
 </dependency>
 ```
 
