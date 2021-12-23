@@ -154,6 +154,15 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     model.setStopLossTif(stopLossTif);
   }
 
+  public static void addStopLossLimitOrder(TradeOrderRequest tradeOrderRequest,
+      double stopLossPrice, double stopLossLimitPrice, TimeInForce stopLossTif) {
+    TradeOrderModel model = (TradeOrderModel) tradeOrderRequest.getApiModel();
+    model.setAttachType(AttachType.LOSS);
+    model.setStopLossPrice(stopLossPrice);
+    model.setStopLossLimitPrice(stopLossLimitPrice);
+    model.setStopLossTif(stopLossTif);
+  }
+
   public static void addBracketsOrder(TradeOrderRequest tradeOrderRequest,
       double profitTakerPrice, TimeInForce profitTakerTif, Boolean profitTakerRth,
       double stopLossPrice, TimeInForce stopLossTif) {

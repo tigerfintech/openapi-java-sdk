@@ -1,10 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.trade.item;
 
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import java.util.List;
 
 public class TradeOrderItem extends ApiModel {
   private long id;
   private long orderId;
+  private List<Long> subIds;
 
   public long getId() {
     return id;
@@ -20,5 +22,13 @@ public class TradeOrderItem extends ApiModel {
 
   public void setOrderId(long orderId) {
     this.orderId = orderId;
+  }
+
+  public List<Long> getSubIds() {
+    return subIds;
+  }
+
+  public void setSubIds(List<Long> subIds) {
+    this.subIds = subIds;
   }
 }
