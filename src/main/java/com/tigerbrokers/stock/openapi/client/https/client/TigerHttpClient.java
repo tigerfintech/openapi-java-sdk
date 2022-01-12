@@ -90,7 +90,8 @@ public class TigerHttpClient implements TigerClient {
     this.serverUrl = serverUrl;
     this.tigerId = tigerId;
     this.privateKey = privateKey;
-    if (serverUrl.contains(TigerApiConstants.API_ONLINE_DOMAIN_URL)) {
+    if (serverUrl.contains(TigerApiConstants.API_ONLINE_DOMAIN_URL)
+        || serverUrl.contains(TigerApiConstants.API_ONLINE_DOMAIN_URL_OLD)) {
       this.tigerPublicKey = ONLINE_PUBLIC_KEY;
     } else {
       this.tigerPublicKey = SANDBOX_PUBLIC_KEY;

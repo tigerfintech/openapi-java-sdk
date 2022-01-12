@@ -50,8 +50,8 @@ public class ClientConfig {
   public String secretKey = null;
 
   public ClientConfig() {
-    this.serverUrl = "https://openapi.itiger.com/gateway";
-    this.socketServerUrl = "wss://openapi.itiger.com:8887/stomp";
+    this.serverUrl = "https://openapi.skytigris.cn/gateway";
+    this.socketServerUrl = "wss://openapi.skytigris.cn:8887/stomp";
   }
 
   /**

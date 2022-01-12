@@ -48,5 +48,7 @@ public class TigerApiConstants {
 
   public static final String DEVICE_ID = "device_id";
 
-  public static final String API_ONLINE_DOMAIN_URL = "openapi.itiger.com";
+  @Deprecated
+  public static final String API_ONLINE_DOMAIN_URL_OLD = "openapi.itiger.com";
+  public static final String API_ONLINE_DOMAIN_URL = "openapi.skytigris.cn";
 }
