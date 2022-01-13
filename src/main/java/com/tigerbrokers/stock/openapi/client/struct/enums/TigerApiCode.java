@@ -3,8 +3,8 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
 public enum TigerApiCode implements CodeEnumType {
   SUCCESS(0, "success"),
   SERVER_ERROR(1, "server error"),
-  READ_TIME_OUT(2, "network read time out"),
-  CLIENT_API_ERROR(3,"client error"),
+  READ_TIME_OUT(2, "network read timeout"),
+  CLIENT_API_ERROR(3,"sdk send request exception"),
   ACCESS_FORBIDDEN(4, "access forbidden"),
   RATE_LIMIT_ERROR(5, "rate limit error"),
   EMPTY_DATA_ERROR(6,"the data returned from the server is empty"),
