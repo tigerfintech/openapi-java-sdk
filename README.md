@@ -26,9 +26,10 @@
 <dependency>
     <groupId>io.github.tigerbrokers</groupId>
     <artifactId>openapi-java-sdk</artifactId>
-    <version>1.3.7</version>
+    <version>{latestVersion}</version>
 </dependency>
 ```
+使用maven地址时，可以查看maven仓库中依赖的上传时间，尽量使用最新版本来替换掉上面依赖中的 {latestVersion} 变量。
 
 
 #### 文档地址
