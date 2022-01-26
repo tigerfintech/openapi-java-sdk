@@ -36,6 +36,7 @@ public class ContractItem extends ApiModel {
   @Deprecated
   private Integer status;
   private Boolean tradeable;
+  private Boolean closeOnly;
   private Double minTick;
   private Boolean marginable;
   /** please use 'shortInitialMargin' and 'shortMaintenanceMargin' */
@@ -204,6 +205,14 @@ public class ContractItem extends ApiModel {
 
   public void setTradeable(Boolean tradeable) {
     this.tradeable = tradeable;
+  }
+
+  public Boolean isCloseOnly() {
+    return closeOnly;
+  }
+
+  public void setCloseOnly(Boolean closeOnly) {
+    this.closeOnly = closeOnly;
   }
 
   public Double getMinTick() {
