@@ -1,12 +1,18 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
+import io.netty.handler.ssl.OpenSsl;
+import io.netty.handler.ssl.SslProvider;
+import java.lang.reflect.Field;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.LinkedHashSet;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * description: Created by ltc on 2021-04-08
@@ -132,5 +138,44 @@ public class NetworkUtil {
       unknownHostException.initCause(e);
       throw unknownHostException;
     }
+  }
+
+  public static String[] getOpenSslSupportedProtocolsSet(String[] serverSupportedProtocols,
+      SslProvider sslProvider) {
+    if (serverSupportedProtocols == null || serverSupportedProtocols.length == 0) {
+      ApiLogger.error("Server Supported protocols (OpenSSL) is empty. serverSupportedProtocols:{}", serverSupportedProtocols);
+      return serverSupportedProtocols;
+    }
+    if (sslProvider != SslProvider.OPENSSL || !OpenSsl.isAvailable()) {
+      String[] supportedProtocols = new String[serverSupportedProtocols.length];
+      System.arraycopy(serverSupportedProtocols,0,
+          supportedProtocols,0, serverSupportedProtocols.length);
+      return supportedProtocols;
+    }
+
+    Set<String> localSupportedProtocols = Collections.emptySet();
+    try {
+      Field supportedProtocolsSetField = OpenSsl.class.getDeclaredField("SUPPORTED_PROTOCOLS_SET");
+      if (supportedProtocolsSetField != null) {
+        supportedProtocolsSetField.setAccessible(true);
+        localSupportedProtocols = (Set<String>) supportedProtocolsSetField.get(OpenSsl.class);
+      }
+    } catch (Throwable th) {
+      ApiLogger.error("getOpenSslSupportedProtocolsSet exception:{}", th.getMessage(), th);
+    }
+    if (localSupportedProtocols.isEmpty()) {
+      ApiLogger.error("Local Supported protocols (OpenSSL): {}, is empty", localSupportedProtocols);
+      return null;
+    }
+
+    ApiLogger.info("Local Supported protocols (OpenSSL): {}", localSupportedProtocols);
+    Set<String> supportedProtocols = new LinkedHashSet<>();
+    for (String protocol : serverSupportedProtocols) {
+      if (localSupportedProtocols.contains(protocol)) {
+        supportedProtocols.add(protocol);
+      }
+    }
+
+    return supportedProtocols.toArray(new String[supportedProtocols.size()]);
   }
 }
