@@ -165,6 +165,7 @@ public class NetworkUtil {
     }
     if (localSupportedProtocols.isEmpty()) {
       ApiLogger.error("Local Supported protocols (OpenSSL): {}, is empty", localSupportedProtocols);
+      return null;
     }
 
     ApiLogger.info("Local Supported protocols (OpenSSL): {}", localSupportedProtocols);
