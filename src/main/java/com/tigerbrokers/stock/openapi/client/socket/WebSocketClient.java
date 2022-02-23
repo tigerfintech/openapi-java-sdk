@@ -6,6 +6,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteKeyType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
+import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import com.tigerbrokers.stock.openapi.client.websocket.WebSocketHandshakerHandler;
@@ -165,6 +166,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
     group = new NioEventLoopGroup(1);
     bootstrap = new Bootstrap();
+    final String[] protocols = NetworkUtil.getOpenSslSupportedProtocolsSet(PROTOCOLS, SslProvider.OPENSSL);
+    if (protocols == null || protocols.length == 0) {
+      throw new RuntimeException("supported protocols is empty.");
+    }
 
     final int port = address.getPort();
     bootstrap.group(group).option(ChannelOption.TCP_NODELAY, true)
@@ -175,7 +180,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
             ChannelPipeline p = ch.pipeline();
             SslContext sslCtx =
                 SslContextBuilder.forClient()
-                    .protocols(PROTOCOLS)
+                    .protocols(protocols)
                     .trustManager(InsecureTrustManagerFactory.INSTANCE)
                     .sslProvider(SslProvider.OPENSSL)
                     .build();
