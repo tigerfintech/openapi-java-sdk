@@ -65,6 +65,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   public final static String STOMP_DECODER = "stompDecoder";
   private static final String[] PROTOCOLS = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"};
 
+  private SslProvider sslProvider = null;
   private String url;
   private ApiAuthentication authentication;
   private ApiComposeCallback apiComposeCallback;
@@ -109,6 +110,16 @@ public class WebSocketClient implements SubscribeAsyncApi {
    */
   public static WebSocketClient getInstance() {
     return SingletonInner.singleton;
+  }
+
+  /**
+   * set SslProvider
+   * @param sslProvider Only OPENSSL and JDK are supported
+   * @return WebSocketClient
+   */
+  public WebSocketClient sslProvider(SslProvider sslProvider) {
+    this.sslProvider = sslProvider;
+    return this;
   }
 
   public WebSocketClient url(String url) {
@@ -166,6 +177,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
     group = new NioEventLoopGroup(1);
     bootstrap = new Bootstrap();
+    SslProvider provider = this.sslProvider == null ? SslProvider.OPENSSL : this.sslProvider;
     final String[] protocols = NetworkUtil.getOpenSslSupportedProtocolsSet(PROTOCOLS, SslProvider.OPENSSL);
     if (protocols == null || protocols.length == 0) {
       throw new RuntimeException("supported protocols is empty.");
@@ -182,7 +194,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
                 SslContextBuilder.forClient()
                     .protocols(protocols)
                     .trustManager(InsecureTrustManagerFactory.INSTANCE)
-                    .sslProvider(SslProvider.OPENSSL)
+                    .sslProvider(provider)
                     .build();
             p.addLast(sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
             if (port == 8887 || port == 8889) {
