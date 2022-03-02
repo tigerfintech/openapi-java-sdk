@@ -162,6 +162,7 @@ public class NetworkUtil {
             supportedProtocolsSet.add(protocol);
           }
         }
+        ApiLogger.info("Local Supported protocols (JDK): {}", ProtocolVersion.values());
       } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
         // ignore
       }

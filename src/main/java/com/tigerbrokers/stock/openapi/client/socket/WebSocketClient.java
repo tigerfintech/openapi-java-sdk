@@ -114,7 +114,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   /**
    * set SslProvider
-   * @param sslProvider Only OPENSSL and JDK are supported
+   * @param sslProvider
    * @return WebSocketClient
    */
   public WebSocketClient sslProvider(SslProvider sslProvider) {
@@ -178,7 +178,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     group = new NioEventLoopGroup(1);
     bootstrap = new Bootstrap();
     SslProvider provider = this.sslProvider == null ? SslProvider.OPENSSL : this.sslProvider;
-    final String[] protocols = NetworkUtil.getOpenSslSupportedProtocolsSet(PROTOCOLS, SslProvider.OPENSSL);
+    final String[] protocols = NetworkUtil.getOpenSslSupportedProtocolsSet(PROTOCOLS, provider);
     if (protocols == null || protocols.length == 0) {
       throw new RuntimeException("supported protocols is empty.");
     }
