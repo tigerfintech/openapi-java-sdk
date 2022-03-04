@@ -21,7 +21,7 @@ public class FastJsonPropertyFilter {
             return false;
           }
         } else if (value instanceof Double) {
-          if ((Double) value <= 0.0D) {
+          if ((Double) value <= 0.0D && !"adjust_limit".equals(key)) {
             return false;
           }
         } else if (value instanceof Float) {

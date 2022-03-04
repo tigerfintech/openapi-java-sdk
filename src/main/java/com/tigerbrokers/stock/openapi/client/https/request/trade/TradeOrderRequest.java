@@ -46,9 +46,15 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
 
   public static TradeOrderRequest buildLimitOrder(String account, ContractItem contract,
       ActionType action, Integer quantity, Double limitPrice) {
+    return buildLimitOrder(account, contract, action, quantity, limitPrice, 0D);
+  }
+
+  public static TradeOrderRequest buildLimitOrder(String account, ContractItem contract,
+      ActionType action, Integer quantity, Double limitPrice, Double adjustLimit) {
     TradeOrderModel tradeOrderModel = buildTradeOrderModel(account, contract, action, quantity);
     tradeOrderModel.setOrderType(OrderType.LMT);
     tradeOrderModel.setLimitPrice(limitPrice);
+    tradeOrderModel.setAdjustLimit(adjustLimit);
     return newRequest(tradeOrderModel);
   }
 
@@ -60,9 +66,15 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
 
   public static TradeOrderRequest buildStopOrder(String account, ContractItem contract,
       ActionType action, Integer quantity, Double auxPrice) {
+    return buildStopOrder(account, contract, action, quantity, auxPrice, 0D);
+  }
+
+  public static TradeOrderRequest buildStopOrder(String account, ContractItem contract,
+      ActionType action, Integer quantity, Double auxPrice, Double adjustLimit) {
     TradeOrderModel tradeOrderModel = buildTradeOrderModel(account, contract, action, quantity);
     tradeOrderModel.setOrderType(OrderType.STP);
     tradeOrderModel.setAuxPrice(auxPrice);
+    tradeOrderModel.setAdjustLimit(adjustLimit);
     return newRequest(tradeOrderModel);
   }
 
@@ -74,10 +86,16 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
 
   public static TradeOrderRequest buildStopLimitOrder(String account, ContractItem contract,
       ActionType action, Integer quantity, Double limitPrice, Double auxPrice) {
+    return buildStopLimitOrder(account, contract, action, quantity, limitPrice, auxPrice, 0D);
+  }
+
+  public static TradeOrderRequest buildStopLimitOrder(String account, ContractItem contract,
+      ActionType action, Integer quantity, Double limitPrice, Double auxPrice, Double adjustLimit) {
     TradeOrderModel tradeOrderModel = buildTradeOrderModel(account, contract, action, quantity);
     tradeOrderModel.setOrderType(OrderType.STP_LMT);
     tradeOrderModel.setLimitPrice(limitPrice);
     tradeOrderModel.setAuxPrice(auxPrice);
+    tradeOrderModel.setAdjustLimit(adjustLimit);
     return newRequest(tradeOrderModel);
   }
 
