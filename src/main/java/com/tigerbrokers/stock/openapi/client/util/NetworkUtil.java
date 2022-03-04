@@ -199,14 +199,4 @@ public class NetworkUtil {
     }
     return supportedProtocolsSet.toArray(new String[supportedProtocolsSet.size()]);
   }
-
-  public static void main(String[] args) {
-    String[] protocols = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3", "TLSv1.4"};
-    String[] protocolsJdk = getOpenSslSupportedProtocolsSet(protocols, SslProvider.JDK);
-    ApiLogger.info("jdk: {}", protocolsJdk);
-    String[] protocols2 = getOpenSslSupportedProtocolsSet(protocols, SslProvider.OPENSSL);
-    ApiLogger.info("OPENSSL: {}", protocols2);
-    String[] protocols3 = getOpenSslSupportedProtocolsSet(protocols, SslProvider.OPENSSL_REFCNT);
-    ApiLogger.info("OPENSSL_REFCNT: {}", protocols3);
-  }
 }
