@@ -3,6 +3,8 @@ package com.tigerbrokers.stock.openapi.client.util;
 import io.netty.handler.ssl.OpenSsl;
 import io.netty.handler.ssl.SslProvider;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -13,6 +15,7 @@ import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.Random;
 import java.util.Set;
+import sun.security.ssl.ProtocolVersion;
 
 /**
  * description: Created by ltc on 2021-04-08
@@ -146,36 +149,54 @@ public class NetworkUtil {
       ApiLogger.error("Server Supported protocols (OpenSSL) is empty. serverSupportedProtocols:{}", serverSupportedProtocols);
       return serverSupportedProtocols;
     }
-    if (sslProvider != SslProvider.OPENSSL || !OpenSsl.isAvailable()) {
+
+    Set<String> supportedProtocolsSet = Collections.emptySet();
+    if (sslProvider == SslProvider.JDK) {
+      supportedProtocolsSet = new LinkedHashSet<>();
+      try {
+        Method method = ProtocolVersion.class.getDeclaredMethod("nameOf", String.class);
+        method.setAccessible(true);
+        for (String protocol : serverSupportedProtocols) {
+          ProtocolVersion version = (ProtocolVersion)method.invoke(null, protocol);
+          if (version != null) {
+            supportedProtocolsSet.add(protocol);
+          }
+        }
+        ApiLogger.info("Local Supported protocols (JDK): {}", ProtocolVersion.values());
+      } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+        // ignore
+      }
+    } else if (sslProvider == SslProvider.OPENSSL) {
+      Set<String> localSupportedProtocols = Collections.emptySet();
+      try {
+        Field supportedProtocolsSetField = OpenSsl.class.getDeclaredField("SUPPORTED_PROTOCOLS_SET");
+        if (supportedProtocolsSetField != null) {
+          supportedProtocolsSetField.setAccessible(true);
+          localSupportedProtocols = (Set<String>) supportedProtocolsSetField.get(OpenSsl.class);
+        }
+      } catch (Throwable th) {
+        ApiLogger.error("getOpenSslSupportedProtocolsSet exception:{}", th.getMessage(), th);
+      }
+      if (localSupportedProtocols.isEmpty()) {
+        ApiLogger.error("Local Supported protocols (OpenSSL): {}, is empty", localSupportedProtocols);
+        return null;
+      }
+
+      ApiLogger.info("Local Supported protocols (OpenSSL): {}", localSupportedProtocols);
+      supportedProtocolsSet = new LinkedHashSet<>();
+      for (String protocol : serverSupportedProtocols) {
+        if (localSupportedProtocols.contains(protocol)) {
+          supportedProtocolsSet.add(protocol);
+        }
+      }
+    }
+
+    if (supportedProtocolsSet.isEmpty()) {
       String[] supportedProtocols = new String[serverSupportedProtocols.length];
       System.arraycopy(serverSupportedProtocols,0,
           supportedProtocols,0, serverSupportedProtocols.length);
       return supportedProtocols;
     }
-
-    Set<String> localSupportedProtocols = Collections.emptySet();
-    try {
-      Field supportedProtocolsSetField = OpenSsl.class.getDeclaredField("SUPPORTED_PROTOCOLS_SET");
-      if (supportedProtocolsSetField != null) {
-        supportedProtocolsSetField.setAccessible(true);
-        localSupportedProtocols = (Set<String>) supportedProtocolsSetField.get(OpenSsl.class);
-      }
-    } catch (Throwable th) {
-      ApiLogger.error("getOpenSslSupportedProtocolsSet exception:{}", th.getMessage(), th);
-    }
-    if (localSupportedProtocols.isEmpty()) {
-      ApiLogger.error("Local Supported protocols (OpenSSL): {}, is empty", localSupportedProtocols);
-      return null;
-    }
-
-    ApiLogger.info("Local Supported protocols (OpenSSL): {}", localSupportedProtocols);
-    Set<String> supportedProtocols = new LinkedHashSet<>();
-    for (String protocol : serverSupportedProtocols) {
-      if (localSupportedProtocols.contains(protocol)) {
-        supportedProtocols.add(protocol);
-      }
-    }
-
-    return supportedProtocols.toArray(new String[supportedProtocols.size()]);
+    return supportedProtocolsSet.toArray(new String[supportedProtocolsSet.size()]);
   }
 }

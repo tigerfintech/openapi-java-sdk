@@ -85,6 +85,12 @@ public class OrderParameter implements Serializable {
   @JSONField(name = "limit_price")
   private Double limitPrice;
   /**
+   * 价格微调幅度（默认为0表示不调整，正数为向上调整，负数向下调整），对传入价格自动调整到合法价位上
+   * 例如：0.001 代表向上调整且幅度不超过 0.1%；-0.001 代表向下调整且幅度不超过 0.1%。默认 0 表示不调整
+   */
+  @JSONField(name = "adjust_limit")
+  private Double adjustLimit;
+  /**
    * 股票止损价。当 order_type 为STP,STP_LMT时该参数必需，当 order_type 为 TRAIL时,aux_price为跟踪额
    */
   @JSONField(name = "aux_price")
@@ -252,6 +258,14 @@ public class OrderParameter implements Serializable {
 
   public void setLimitPrice(Double limitPrice) {
     this.limitPrice = limitPrice;
+  }
+
+  public Double getAdjustLimit() {
+    return adjustLimit;
+  }
+
+  public void setAdjustLimit(Double adjustLimit) {
+    this.adjustLimit = adjustLimit;
   }
 
   public Double getAuxPrice() {
@@ -478,6 +492,7 @@ public class OrderParameter implements Serializable {
         ", orderType=" + orderType +
         ", limitPrice=" + limitPrice +
         ", auxPrice=" + auxPrice +
+        ", adjustLimit=" + adjustLimit +
         ", trailingPercent=" + trailingPercent +
         ", outsideRth=" + outsideRth +
         ", market='" + market + '\'' +
