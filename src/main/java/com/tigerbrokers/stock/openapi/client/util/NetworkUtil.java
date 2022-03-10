@@ -1,5 +1,11 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
+import com.alibaba.fastjson.JSON;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
+import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
+import com.tigerbrokers.stock.openapi.client.struct.enums.License;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
 import io.netty.handler.ssl.OpenSsl;
 import io.netty.handler.ssl.SslProvider;
 import java.lang.reflect.Field;
@@ -12,7 +18,10 @@ import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import sun.security.ssl.ProtocolVersion;
@@ -25,6 +34,12 @@ public class NetworkUtil {
   private static final String GET_DEVICE_ERROR = "Please check if the network connection is disconnected";
   private static final int MAC_ARRAY_LENGTH = 6;
   private static final int MAC_LENGTH = MAC_ARRAY_LENGTH * 3 - 1;
+  private static final Set<String> ONLINE_DOMAIN_SET = new HashSet<String>(){
+    {
+      add(TigerApiConstants.API_ONLINE_DOMAIN_URL);
+      add(TigerApiConstants.API_ONLINE_DOMAIN_URL_OLD);
+    }
+  };
 
   private NetworkUtil() {
   }
@@ -198,5 +213,89 @@ public class NetworkUtil {
       return supportedProtocols;
     }
     return supportedProtocolsSet.toArray(new String[supportedProtocolsSet.size()]);
+  }
+
+  public static boolean isOnlineEnv(String serverUrl) {
+    for (String domainName : ONLINE_DOMAIN_SET) {
+      if (serverUrl.contains(domainName)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * get http server address
+   */
+  public static String getHttpServerAddress() {
+    return refreshAndGetServerAddress(Protocol.HTTP);
+  }
+
+  public static String getServerAddress() {
+    return refreshAndGetServerAddress(ClientConfig.DEFAULT_CONFIG.getSubscribeProtocol());
+  }
+
+  private static String refreshAndGetServerAddress(Protocol protocol) {
+    Env env = ClientConfig.DEFAULT_CONFIG.getEnv();
+    String domainUrl = (env == Env.PROD ? TigerApiConstants.DEFAULT_PROD_DOMAIN_URL
+        : TigerApiConstants.DEFAULT_SANDBOX_DOMAIN_URL);
+    String port = "";
+    if (protocol != Protocol.HTTP) {
+      if (env == Env.PROD) {
+        port = protocol == Protocol.STOMP ? "8887" : "8883";
+      } else {
+        port = protocol == Protocol.STOMP ? "8889" : "8885";
+      }
+    }
+
+    String data = null;
+    try {
+      data = HttpUtils.get(TigerApiConstants.CG_PLAY_ADDRESS);
+    } catch (Throwable th) {
+      // ignore
+    }
+    if (StringUtils.isEmpty(data)) {
+      return String.format(protocol.getUrlFormat(), domainUrl, port);
+    }
+    Map<String, Object> returnMap = null;
+    try {
+      returnMap = JSON.parseObject(data, Map.class);
+    } catch (Exception e) {
+      ApiLogger.debug("HttpUtils response data is wrong, data:{}", data);
+    }
+    if (returnMap == null || returnMap.get("items") == null) {
+      return String.format(protocol.getUrlFormat(), domainUrl, port);
+    }
+    License license = ClientConfig.DEFAULT_CONFIG.getLicense();
+    List<Map<String, Object>> list = (List<Map<String, Object>>)returnMap.get("items");
+    boolean match = false;
+    for (Map<String, Object> configMap : list) {
+      Map<String, Object> dataMap = (Map<String, Object>) configMap.get(env.getConfigFieldName());
+      for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
+        if (Protocol.STOMP.getPortFieldName().equals(entry.getKey())
+            || Protocol.SOCKET.getPortFieldName().equals(entry.getKey())) {
+          if (protocol.getPortFieldName().equals(entry.getKey())) {
+            port = entry.getValue().toString();
+          }
+        } else {
+          String value = entry.getValue().toString();
+          if (value.startsWith("https://")) {
+            value = value.substring("https://".length());
+          }
+          if (env == Env.PROD) {
+            ONLINE_DOMAIN_SET.add(value);
+          }
+          if (license.name().equals(entry.getKey())) {
+            domainUrl = value;
+            match = true;
+          }
+          if ("COMMON".equals(entry.getKey()) && !match) {
+            domainUrl = value;
+          }
+        }
+      }
+    }
+    String serverAddress = String.format(protocol.getUrlFormat(), domainUrl, port);
+    return serverAddress;
   }
 }

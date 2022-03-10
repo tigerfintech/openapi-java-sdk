@@ -51,4 +51,8 @@ public class TigerApiConstants {
   @Deprecated
   public static final String API_ONLINE_DOMAIN_URL_OLD = "openapi.itiger.com";
   public static final String API_ONLINE_DOMAIN_URL = "openapi.skytigris.cn";
+
+  public static final String DEFAULT_PROD_DOMAIN_URL = API_ONLINE_DOMAIN_URL;
+  public static final String DEFAULT_SANDBOX_DOMAIN_URL = "openapi-sandbox.skytigris.cn";
+  public static final String CG_PLAY_ADDRESS = "https://cg.play-analytics.com/";
 }

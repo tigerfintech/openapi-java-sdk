@@ -78,6 +78,9 @@ public class TigerHttpClient implements TigerClient {
   }
 
   public TigerHttpClient(String serverUrl, String tigerId, String privateKey) {
+    if (StringUtils.isEmpty(serverUrl)) {
+      serverUrl = NetworkUtil.getHttpServerAddress();
+    }
     if (serverUrl == null) {
       throw new RuntimeException("serverUrl is empty.");
     }
@@ -90,8 +93,7 @@ public class TigerHttpClient implements TigerClient {
     this.serverUrl = serverUrl;
     this.tigerId = tigerId;
     this.privateKey = privateKey;
-    if (serverUrl.contains(TigerApiConstants.API_ONLINE_DOMAIN_URL)
-        || serverUrl.contains(TigerApiConstants.API_ONLINE_DOMAIN_URL_OLD)) {
+    if (NetworkUtil.isOnlineEnv(serverUrl)) {
       this.tigerPublicKey = ONLINE_PUBLIC_KEY;
     } else {
       this.tigerPublicKey = SANDBOX_PUBLIC_KEY;

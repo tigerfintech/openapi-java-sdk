@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteKeyType;
@@ -122,6 +123,22 @@ public class WebSocketClient implements SubscribeAsyncApi {
     return this;
   }
 
+  public WebSocketClient clientConfig(ClientConfig clientConfig) {
+    if (StringUtils.isEmpty(clientConfig.socketServerUrl)) {
+      this.url = NetworkUtil.getServerAddress();
+    } else {
+      this.url = clientConfig.socketServerUrl;
+    }
+    if (this.sslProvider == null && clientConfig.getSslProvider() != null) {
+      this.sslProvider = clientConfig.getSslProvider();
+    }
+    if (this.authentication == null) {
+      ApiAuthentication authentication = ApiAuthentication.build(clientConfig.tigerId, clientConfig.privateKey);
+      this.authentication = authentication;
+    }
+    return this;
+  }
+
   public WebSocketClient url(String url) {
     this.url = url;
     return this;
@@ -183,7 +200,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
       throw new RuntimeException("supported protocols is empty.");
     }
 
-    final int port = address.getPort();
     bootstrap.group(group).option(ChannelOption.TCP_NODELAY, true)
         .channel(NioSocketChannel.class)
         .handler(new ChannelInitializer<SocketChannel>() {
@@ -197,7 +213,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
                     .sslProvider(provider)
                     .build();
             p.addLast(sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
-            if (port == 8887 || port == 8889) {
+            if (isStompProtocol()) {
               p.addLast("websocketCodec", new HttpClientCodec());
               p.addLast("websocketAggregator", new HttpObjectAggregator(65535));
               p.addLast(STOMP_ENCODER, new WebSocketStompFrameDecoder());
@@ -215,6 +231,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
         });
 
     isInitial = true;
+  }
+
+  private boolean isStompProtocol() {
+    return this.url.contains("/stomp");
   }
 
   public void connectCountDown() {
@@ -268,7 +288,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
           }
         } finally {
           this.channel = newChannel;
-          if (address.getPort() == 8887 || address.getPort() == 8889) {
+          if (isStompProtocol()) {
             synchronized (this.channel) {
               WebSocketHandshakerHandler webSocketHandshakerHandler =
                   new WebSocketHandshakerHandler(authentication, apiComposeCallback, clientSendInterval,
