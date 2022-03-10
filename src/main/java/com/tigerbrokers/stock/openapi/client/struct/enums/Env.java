@@ -5,7 +5,7 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
  * Created by liutongping on 2022/03/08.
  */
 public enum Env {
-  PROD("openapi"),
+  PROD("openapi-online"),
   SANDBOX("openapi-sandbox");
 
   private String configFieldName;

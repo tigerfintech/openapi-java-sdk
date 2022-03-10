@@ -271,6 +271,9 @@ public class NetworkUtil {
     boolean match = false;
     for (Map<String, Object> configMap : list) {
       Map<String, Object> dataMap = (Map<String, Object>) configMap.get(env.getConfigFieldName());
+      if (dataMap == null) {
+        continue;
+      }
       for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
         if (Protocol.STOMP.getPortFieldName().equals(entry.getKey())
             || Protocol.SOCKET.getPortFieldName().equals(entry.getKey())) {
