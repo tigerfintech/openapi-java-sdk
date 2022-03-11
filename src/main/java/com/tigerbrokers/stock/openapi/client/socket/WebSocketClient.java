@@ -332,11 +332,12 @@ public class WebSocketClient implements SubscribeAsyncApi {
       if (!this.url.equals(newUrl)) {
         InetSocketAddress address = getServerAddress(newUrl);
         if (address != null) {
+          ApiLogger.info("socket url changed. {}-->{}", this.url, newUrl);
           if (channel != null && channel.pipeline().get(TigerApiConstants.SSL_HANDLER_NAME) != null) {
             ChannelHandler oldHandler = channel.pipeline().get(TigerApiConstants.SSL_HANDLER_NAME);
             channel.pipeline().replace(oldHandler, TigerApiConstants.SSL_HANDLER_NAME,
                 sslCtx.newHandler(channel.alloc(), address.getHostName(), address.getPort()));
-            ApiLogger.info("url changed. {}-->{}. replace sslHandler", this.url, newUrl);
+            ApiLogger.info("socket url changed. {}-->{}. replace sslHandler", this.url, newUrl);
           }
           this.url = newUrl;
           return address;
