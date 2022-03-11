@@ -66,6 +66,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   public final static String STOMP_DECODER = "stompDecoder";
   private static final String[] PROTOCOLS = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"};
 
+  private ClientConfig clientConfig;
   private SslProvider sslProvider = null;
   private String url;
   private ApiAuthentication authentication;
@@ -124,8 +125,9 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   public WebSocketClient clientConfig(ClientConfig clientConfig) {
+    this.clientConfig = clientConfig;
     if (StringUtils.isEmpty(clientConfig.socketServerUrl)) {
-      this.url = NetworkUtil.getServerAddress();
+      this.url = NetworkUtil.getServerAddress(clientConfig);
     } else {
       this.url = clientConfig.socketServerUrl;
     }
@@ -188,10 +190,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
     if (isInitial) {
       return;
     }
-    InetSocketAddress address = getServerAddress();
-    if (address == null) {
-      throw new RuntimeException("get connect address error.");
-    }
     group = new NioEventLoopGroup(1);
     bootstrap = new Bootstrap();
     SslProvider provider = this.sslProvider == null ? SslProvider.OPENSSL : this.sslProvider;
@@ -212,6 +210,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
                     .trustManager(InsecureTrustManagerFactory.INSTANCE)
                     .sslProvider(provider)
                     .build();
+            InetSocketAddress address = getNewServerAddress();
+            if (address == null) {
+              throw new RuntimeException("get connect address error.");
+            }
             p.addLast(sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
             if (isStompProtocol()) {
               p.addLast("websocketCodec", new HttpClientCodec());
@@ -268,7 +270,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     try {
       long start = System.currentTimeMillis();
       init();
-      InetSocketAddress address = getServerAddress();
+      InetSocketAddress address = getNewServerAddress();
       if (address == null) {
         throw new RuntimeException("get connect address error.");
       }
@@ -321,16 +323,35 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
   }
 
+  private InetSocketAddress getNewServerAddress() {
+    if (clientConfig != null && StringUtils.isEmpty(clientConfig.socketServerUrl)) {
+      String newUrl = NetworkUtil.getServerAddress(this.clientConfig);
+      if (!this.url.equals(newUrl)) {
+        InetSocketAddress address = getServerAddress(newUrl);
+        if (address != null) {
+          this.url = newUrl;
+          return address;
+        }
+      }
+    }
+    return getServerAddress();
+  }
+
   private InetSocketAddress getServerAddress() {
-    if (StringUtils.isEmpty(url)) {
+    return getServerAddress(this.url);
+  }
+
+  private InetSocketAddress getServerAddress(String urlString) {
+    if (StringUtils.isEmpty(urlString)) {
       ApiLogger.error("url is empty.");
       return null;
     }
+
     URI uri;
     try {
-      uri = new URI(url);
+      uri = new URI(urlString);
     } catch (URISyntaxException e) {
-      ApiLogger.error("uri syntax exception:", e);
+      ApiLogger.error("uri syntax exception:{}", urlString, e);
       return null;
     }
     return new InetSocketAddress(uri.getHost(), uri.getPort());

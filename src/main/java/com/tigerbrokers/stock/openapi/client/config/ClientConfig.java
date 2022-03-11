@@ -15,12 +15,12 @@ import java.io.IOException;
 public class ClientConfig {
   private static final String PPRVATE_KEY_BEGIN = "-----BEGIN PRIVATE KEY-----";
   private static final String PRIVATE_KEY_END = "-----END PRIVATE KEY-----";
-  /** default client config */
-  public static final ClientConfig DEFAULT_CONFIG = new ClientConfig();
   private static final Protocol DEFAULT_PROTOCOL = Protocol.STOMP;
   private static final Env DEFAULT_ENV = Env.PROD;
   private static final License DEFAULT_LICENSE = License.TBNZ;
   private static final SslProvider DEFAULT_SSLPROVIDER = SslProvider.OPENSSL;
+  /** default client config */
+  public static final ClientConfig DEFAULT_CONFIG = new ClientConfig();
 
   private Protocol subscribeProtocol = DEFAULT_PROTOCOL;
 

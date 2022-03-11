@@ -235,6 +235,10 @@ public class NetworkUtil {
     return refreshAndGetServerAddress(ClientConfig.DEFAULT_CONFIG.getSubscribeProtocol());
   }
 
+  public static String getServerAddress(ClientConfig clientConfig) {
+    return refreshAndGetServerAddress(clientConfig.getSubscribeProtocol());
+  }
+
   private static String refreshAndGetServerAddress(Protocol protocol) {
     Env env = ClientConfig.DEFAULT_CONFIG.getEnv();
     String domainUrl = (env == Env.PROD ? TigerApiConstants.DEFAULT_PROD_DOMAIN_URL
