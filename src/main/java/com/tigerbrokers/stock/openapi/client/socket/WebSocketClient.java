@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
+import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteKeyType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
@@ -16,6 +17,7 @@ import com.tigerbrokers.stock.openapi.client.websocket.WebSocketStompFrameEncode
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -79,6 +81,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private Bootstrap bootstrap = null;
   private volatile Channel channel = null;
   private ChannelFuture future = null;
+  private SslContext sslCtx;
 
   private volatile boolean isInitial = false;
   private volatile ScheduledFuture<?> reconnectExecutorFuture = null;
@@ -186,7 +189,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
   }
 
-  private synchronized void init() {
+  private synchronized void init() throws SSLException {
     if (isInitial) {
       return;
     }
@@ -197,24 +200,24 @@ public class WebSocketClient implements SubscribeAsyncApi {
     if (protocols == null || protocols.length == 0) {
       throw new RuntimeException("supported protocols is empty.");
     }
+    SslContext sslCtx =
+        SslContextBuilder.forClient()
+            .protocols(protocols)
+            .trustManager(InsecureTrustManagerFactory.INSTANCE)
+            .sslProvider(provider)
+            .build();
 
     bootstrap.group(group).option(ChannelOption.TCP_NODELAY, true)
         .channel(NioSocketChannel.class)
         .handler(new ChannelInitializer<SocketChannel>() {
           @Override
-          protected void initChannel(SocketChannel ch) throws SSLException {
+          protected void initChannel(SocketChannel ch) {
             ChannelPipeline p = ch.pipeline();
-            SslContext sslCtx =
-                SslContextBuilder.forClient()
-                    .protocols(protocols)
-                    .trustManager(InsecureTrustManagerFactory.INSTANCE)
-                    .sslProvider(provider)
-                    .build();
             InetSocketAddress address = getNewServerAddress();
             if (address == null) {
               throw new RuntimeException("get connect address error.");
             }
-            p.addLast(sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
+            p.addLast(TigerApiConstants.SSL_HANDLER_NAME, sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
             if (isStompProtocol()) {
               p.addLast("websocketCodec", new HttpClientCodec());
               p.addLast("websocketAggregator", new HttpObjectAggregator(65535));
@@ -329,6 +332,12 @@ public class WebSocketClient implements SubscribeAsyncApi {
       if (!this.url.equals(newUrl)) {
         InetSocketAddress address = getServerAddress(newUrl);
         if (address != null) {
+          if (channel != null && channel.pipeline().get(TigerApiConstants.SSL_HANDLER_NAME) != null) {
+            ChannelHandler oldHandler = channel.pipeline().get(TigerApiConstants.SSL_HANDLER_NAME);
+            channel.pipeline().replace(oldHandler, TigerApiConstants.SSL_HANDLER_NAME,
+                sslCtx.newHandler(channel.alloc(), address.getHostName(), address.getPort()));
+            ApiLogger.info("url changed. {}-->{}. replace sslHandler", this.url, newUrl);
+          }
           this.url = newUrl;
           return address;
         }
