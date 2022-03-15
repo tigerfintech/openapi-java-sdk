@@ -9,8 +9,6 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
 import io.netty.handler.ssl.OpenSsl;
 import io.netty.handler.ssl.SslProvider;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -24,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import sun.security.ssl.ProtocolVersion;
 
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.DEFAULT_DOMAIN_KEY;
 
@@ -168,22 +165,7 @@ public class NetworkUtil {
     }
 
     Set<String> supportedProtocolsSet = Collections.emptySet();
-    if (sslProvider == SslProvider.JDK) {
-      supportedProtocolsSet = new LinkedHashSet<>();
-      try {
-        Method method = ProtocolVersion.class.getDeclaredMethod("nameOf", String.class);
-        method.setAccessible(true);
-        for (String protocol : serverSupportedProtocols) {
-          ProtocolVersion version = (ProtocolVersion)method.invoke(null, protocol);
-          if (version != null) {
-            supportedProtocolsSet.add(protocol);
-          }
-        }
-        ApiLogger.info("Local Supported protocols (JDK): {}", ProtocolVersion.values());
-      } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-        // ignore
-      }
-    } else if (sslProvider == SslProvider.OPENSSL) {
+    if (sslProvider == SslProvider.OPENSSL) {
       Set<String> localSupportedProtocols = Collections.emptySet();
       try {
         Field supportedProtocolsSetField = OpenSsl.class.getDeclaredField("SUPPORTED_PROTOCOLS_SET");

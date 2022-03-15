@@ -5,6 +5,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.License;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
 
+import io.netty.handler.ssl.SslProvider;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -104,5 +105,19 @@ public class NetworkUtilTest {
       System.out.println(NetworkUtil.getServerAddress());
       Assert.assertEquals("wss://openapi-sandbox.skytigris.cn:8885", NetworkUtil.getServerAddress());
     }
+  }
+
+  @Test
+  public void testGetOpenSslSupportedProtocolsSet() {
+    String[] protocols = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3", "TLSv1.4"};
+    String[] protocolsJdk = NetworkUtil.getOpenSslSupportedProtocolsSet(protocols, SslProvider.JDK);
+    ApiLogger.info("jdk: {}", protocolsJdk);
+    Assert.assertArrayEquals(new String[] {"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3", "TLSv1.4"}, protocolsJdk);
+    String[] protocols2 = NetworkUtil.getOpenSslSupportedProtocolsSet(protocols, SslProvider.OPENSSL);
+    ApiLogger.info("OPENSSL: {}", protocols2);
+    Assert.assertArrayEquals(new String[] {"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"}, protocols2);
+    String[] protocols3 = NetworkUtil.getOpenSslSupportedProtocolsSet(protocols, SslProvider.OPENSSL_REFCNT);
+    ApiLogger.info("OPENSSL_REFCNT: {}", protocols3);
+    Assert.assertArrayEquals(new String[] {"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3", "TLSv1.4"}, protocols3);
   }
 }
