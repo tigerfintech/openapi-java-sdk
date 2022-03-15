@@ -246,9 +246,11 @@ public class NetworkUtil {
     String port = "";
     if (protocol != Protocol.HTTP) {
       if (env == Env.PROD) {
-        port = protocol == Protocol.STOMP ? "8887" : "8883";
+        port = protocol == Protocol.STOMP ? TigerApiConstants.DEFAULT_PROD_STOMP_PORT
+            : TigerApiConstants.DEFAULT_PROD_SOCKET_PORT;
       } else {
-        port = protocol == Protocol.STOMP ? "8889" : "8885";
+        port = protocol == Protocol.STOMP ? TigerApiConstants.DEFAULT_SANDBOX_STOMP_PORT
+            : TigerApiConstants.DEFAULT_SANDBOX_SOCKET_PORT;
       }
     }
 
@@ -265,7 +267,7 @@ public class NetworkUtil {
     try {
       returnMap = JSON.parseObject(data, Map.class);
     } catch (Exception e) {
-      ApiLogger.debug("HttpUtils response data is wrong, data:{}", data);
+      ApiLogger.error("access cg.play, response data is wrong, data:{}", data);
     }
     if (returnMap == null || returnMap.get("items") == null) {
       return String.format(protocol.getUrlFormat(), domainUrl, port);

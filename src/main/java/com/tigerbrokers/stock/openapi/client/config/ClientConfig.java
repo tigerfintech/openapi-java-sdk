@@ -31,12 +31,6 @@ public class ClientConfig {
   private SslProvider sslProvider = DEFAULT_SSLPROVIDER;
 
   /**
-   * config label ：prod，sandbox
-   */
-  @Deprecated
-  public String label = "prod";
-
-  /**
    * http interface server url
    */
   public String serverUrl;
