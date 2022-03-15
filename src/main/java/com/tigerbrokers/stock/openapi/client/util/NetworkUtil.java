@@ -26,6 +26,8 @@ import java.util.Random;
 import java.util.Set;
 import sun.security.ssl.ProtocolVersion;
 
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.DEFAULT_DOMAIN_KEY;
+
 /**
  * description: Created by ltc on 2021-04-08
  */
@@ -298,13 +300,12 @@ public class NetworkUtil {
             domainUrl = value;
             match = true;
           }
-          if ("COMMON".equals(entry.getKey()) && !match) {
+          if (DEFAULT_DOMAIN_KEY.equals(entry.getKey()) && !match) {
             domainUrl = value;
           }
         }
       }
     }
-    String serverAddress = String.format(protocol.getUrlFormat(), domainUrl, port);
-    return serverAddress;
+    return  String.format(protocol.getUrlFormat(), domainUrl, port);
   }
 }
