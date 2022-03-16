@@ -240,7 +240,7 @@ public class NetworkUtil {
 
     String data = null;
     try {
-      data = HttpUtils.get(TigerApiConstants.CG_PLAY_ADDRESS);
+      data = HttpUtils.get(TigerApiConstants.DOMAIN_GARDEN_ADDRESS);
     } catch (Throwable th) {
       // ignore
     }
