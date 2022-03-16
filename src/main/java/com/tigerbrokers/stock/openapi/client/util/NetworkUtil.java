@@ -251,7 +251,7 @@ public class NetworkUtil {
     try {
       returnMap = JSON.parseObject(data, Map.class);
     } catch (Exception e) {
-      ApiLogger.error("access cg.play, response data is wrong, data:{}", data);
+      ApiLogger.error("domain config response error, data:{}", data);
     }
     if (returnMap == null || returnMap.get("items") == null) {
       return String.format(protocol.getUrlFormat(), domainUrl, port);
