@@ -260,7 +260,11 @@ public class NetworkUtil {
     List<Map<String, Object>> list = (List<Map<String, Object>>)returnMap.get("items");
     boolean match = false;
     for (Map<String, Object> configMap : list) {
-      Map<String, Object> dataMap = (Map<String, Object>) configMap.get(env.getConfigFieldName());
+      Map<String, Object> dataMap = null;
+      Object openapiConfig = configMap.get(env.getConfigFieldName());
+      if (openapiConfig instanceof Map) {
+        dataMap = (Map<String, Object>)openapiConfig;
+      }
       if (dataMap == null) {
         continue;
       }
