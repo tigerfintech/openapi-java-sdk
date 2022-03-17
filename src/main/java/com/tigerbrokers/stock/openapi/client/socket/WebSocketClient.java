@@ -130,7 +130,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   public WebSocketClient clientConfig(ClientConfig clientConfig) {
     this.clientConfig = clientConfig;
     if (StringUtils.isEmpty(clientConfig.socketServerUrl)) {
-      this.url = NetworkUtil.getServerAddress(clientConfig);
+      this.url = NetworkUtil.getServerAddress();
     } else {
       this.url = clientConfig.socketServerUrl;
     }
@@ -328,7 +328,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   private InetSocketAddress getNewServerAddress() {
     if (clientConfig != null && StringUtils.isEmpty(clientConfig.socketServerUrl)) {
-      String newUrl = NetworkUtil.getServerAddress(this.clientConfig);
+      String newUrl = NetworkUtil.getServerAddress();
       if (!this.url.equals(newUrl)) {
         InetSocketAddress address = getServerAddress(newUrl);
         if (address != null) {

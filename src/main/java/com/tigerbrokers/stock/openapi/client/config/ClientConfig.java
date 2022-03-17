@@ -60,7 +60,7 @@ public class ClientConfig {
    */
   public String secretKey = null;
 
-  public ClientConfig() {
+  private ClientConfig() {
   }
 
   public Protocol getSubscribeProtocol() {

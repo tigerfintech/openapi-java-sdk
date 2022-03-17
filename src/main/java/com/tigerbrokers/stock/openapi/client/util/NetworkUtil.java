@@ -219,17 +219,10 @@ public class NetworkUtil {
     return refreshAndGetServerAddress(ClientConfig.DEFAULT_CONFIG.getSubscribeProtocol());
   }
 
-  public static String getServerAddress(ClientConfig clientConfig) {
-    return refreshAndGetServerAddress(clientConfig.getSubscribeProtocol());
-  }
-
-  private static String refreshAndGetServerAddress(Protocol protocol) {
-    Env env = ClientConfig.DEFAULT_CONFIG.getEnv();
-    String domainUrl = (env == Env.PROD ? TigerApiConstants.DEFAULT_PROD_DOMAIN_URL
-        : TigerApiConstants.DEFAULT_SANDBOX_DOMAIN_URL);
+  private static String getDefaultPort(ClientConfig clientConfig, Protocol protocol) {
     String port = "";
     if (protocol != Protocol.HTTP) {
-      if (env == Env.PROD) {
+      if (clientConfig.getEnv() == Env.PROD) {
         port = protocol == Protocol.STOMP ? TigerApiConstants.DEFAULT_PROD_STOMP_PORT
             : TigerApiConstants.DEFAULT_PROD_SOCKET_PORT;
       } else {
@@ -237,6 +230,15 @@ public class NetworkUtil {
             : TigerApiConstants.DEFAULT_SANDBOX_SOCKET_PORT;
       }
     }
+    return port;
+  }
+
+  private static String refreshAndGetServerAddress(Protocol protocol) {
+    ClientConfig clientConfig = ClientConfig.DEFAULT_CONFIG;
+    Env env = clientConfig.getEnv();
+    String domainUrl = (env == Env.PROD ? TigerApiConstants.DEFAULT_PROD_DOMAIN_URL
+        : TigerApiConstants.DEFAULT_SANDBOX_DOMAIN_URL);
+    String port = getDefaultPort(clientConfig, protocol);
 
     String data = null;
     try {
@@ -251,12 +253,12 @@ public class NetworkUtil {
     try {
       returnMap = JSON.parseObject(data, Map.class);
     } catch (Exception e) {
-      ApiLogger.error("access cg.play, response data is wrong, data:{}", data);
+      ApiLogger.error("domain config response error, data:{}", data);
     }
     if (returnMap == null || returnMap.get("items") == null) {
       return String.format(protocol.getUrlFormat(), domainUrl, port);
     }
-    License license = ClientConfig.DEFAULT_CONFIG.getLicense();
+    License license = clientConfig.getLicense();
     List<Map<String, Object>> list = (List<Map<String, Object>>)returnMap.get("items");
     boolean match = false;
     for (Map<String, Object> configMap : list) {
