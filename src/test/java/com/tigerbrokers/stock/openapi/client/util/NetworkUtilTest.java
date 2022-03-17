@@ -27,9 +27,9 @@ public class NetworkUtilTest {
   @Before
   public void setUp() {
     domainConfigJson = "{\"ret\":0,\"serverTime\":1646652924198,\"items\":["
-        + "{\"openapi\":{\"port\":8887,\"socket_port\":8883,"
+        + "{\"openapi\":{\"port\":8887,\"socket_port\":9883,"
         + "\"COMMON\":\"https://openapi.skytigris.cn\",},"
-        + "\"openapi-sandbox\":{\"port\":8889,\"socket_port\":8885,"
+        + "\"openapi-sandbox\":{\"port\":8889,\"socket_port\":9885,"
         + "\"COMMON\":\"https://openapi-sandbox.skytigris.cn\"}"
         + "}]}";
   }

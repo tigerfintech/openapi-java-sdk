@@ -240,34 +240,26 @@ public class NetworkUtil {
         : TigerApiConstants.DEFAULT_SANDBOX_DOMAIN_URL);
     String port = getDefaultPort(clientConfig, protocol);
 
-    String data = null;
+    String response = null;
+    List<Map<String, Object>> domainConfigList = Collections.emptyList();
     try {
-      data = HttpUtils.get(TigerApiConstants.DOMAIN_GARDEN_ADDRESS);
-    } catch (Throwable th) {
-      // ignore
-    }
-    if (StringUtils.isEmpty(data)) {
-      return String.format(protocol.getUrlFormat(), domainUrl, port);
-    }
-    Map<String, Object> returnMap = null;
-    try {
-      returnMap = JSON.parseObject(data, Map.class);
-    } catch (Exception e) {
-      ApiLogger.error("domain config response error, data:{}", data);
-    }
-    if (returnMap == null || returnMap.get("items") == null) {
-      return String.format(protocol.getUrlFormat(), domainUrl, port);
-    }
-    License license = clientConfig.getLicense();
-    List<Map<String, Object>> list = (List<Map<String, Object>>)returnMap.get("items");
-    boolean match = false;
-    for (Map<String, Object> configMap : list) {
-      Map<String, Object> dataMap = null;
-      Object openapiConfig = configMap.get(env.getConfigFieldName());
-      if (openapiConfig instanceof Map) {
-        dataMap = (Map<String, Object>)openapiConfig;
+      String data = HttpUtils.get(TigerApiConstants.DOMAIN_GARDEN_ADDRESS);
+      Map<String, Object> domainConfigMap = JSON.parseObject(data, Map.class);
+      if (domainConfigMap != null && domainConfigMap.get("items") != null) {
+        domainConfigList = (List<Map<String, Object>>)domainConfigMap.get("items");
       }
-      if (dataMap == null) {
+    } catch (Throwable th) {
+      ApiLogger.error("domain config response error, data:{}", response);
+    }
+
+    License license = clientConfig.getLicense();
+    boolean match = false;
+    for (Map<String, Object> configMap : domainConfigList) {
+      Map<String, Object> dataMap;
+      Object openapiConfig = configMap.get(env.getConfigFieldName());
+      if (openapiConfig != null && openapiConfig instanceof Map) {
+        dataMap = (Map<String, Object>)openapiConfig;
+      } else {
         continue;
       }
       for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
@@ -277,23 +269,19 @@ public class NetworkUtil {
             port = entry.getValue().toString();
           }
         } else {
-          String value = entry.getValue().toString();
-          if (value.startsWith("https://")) {
-            value = value.substring("https://".length());
-          }
+          String value = entry.getValue().toString().replace("https://", "");
           if (env == Env.PROD) {
             ONLINE_DOMAIN_SET.add(value);
           }
           if (license.name().equals(entry.getKey())) {
             domainUrl = value;
             match = true;
-          }
-          if (DEFAULT_DOMAIN_KEY.equals(entry.getKey()) && !match) {
+          } else if (DEFAULT_DOMAIN_KEY.equals(entry.getKey()) && !match) {
             domainUrl = value;
           }
         }
       }
     }
-    return  String.format(protocol.getUrlFormat(), domainUrl, port);
+    return String.format(protocol.getUrlFormat(), domainUrl, port);
   }
 }
