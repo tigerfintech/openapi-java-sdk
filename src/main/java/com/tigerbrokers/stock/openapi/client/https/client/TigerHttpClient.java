@@ -31,6 +31,8 @@ import java.security.Security;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static com.tigerbrokers.stock.openapi.client.constant.ApiServiceType.CONTRACT;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCESS_TOKEN;
@@ -69,17 +71,43 @@ public class TigerHttpClient implements TigerClient {
   private String signType = TigerApiConstants.SIGN_TYPE_RSA;
   private String charset = TigerApiConstants.CHARSET_UTF8;
 
+  private static final long REFRESH_URL_INTERVAL_SECONDS = 300;
+  private ScheduledThreadPoolExecutor domainExecutorService;
+
   static {
     Security.setProperty("jdk.certpath.disabledAlgorithms", "");
   }
 
-  public TigerHttpClient(ClientConfig clientConfig) {
-    this(clientConfig.serverUrl, clientConfig.tigerId, clientConfig.privateKey);
+  private TigerHttpClient() {
   }
 
+  private static class SingletonInner {
+    private static TigerHttpClient singleton = new TigerHttpClient();
+  }
+
+  /**
+   * get TigerHttpClient instance
+   * @return TigerHttpClient
+   */
+  public static TigerHttpClient getInstance() {
+    return TigerHttpClient.SingletonInner.singleton;
+  }
+
+  public TigerHttpClient clientConfig(ClientConfig clientConfig) {
+    init(clientConfig.serverUrl, clientConfig.tigerId, clientConfig.privateKey);
+    initDomainCheck();
+    return this;
+  }
+
+  /** please use TigerHttpClient.getInstance().clientConfig(ClientConfig.DEFAULT_CONFIG) */
+  @Deprecated
   public TigerHttpClient(String serverUrl, String tigerId, String privateKey) {
+    init(serverUrl, tigerId, privateKey);
+  }
+
+  private void init(String serverUrl, String tigerId, String privateKey) {
     if (StringUtils.isEmpty(serverUrl)) {
-      serverUrl = NetworkUtil.getHttpServerAddress();
+      serverUrl = NetworkUtil.getHttpServerAddress(null);
     }
     if (serverUrl == null) {
       throw new RuntimeException("serverUrl is empty.");
@@ -108,13 +136,36 @@ public class TigerHttpClient implements TigerClient {
     validatorMap.put(TradeOrderModel.class, new PlaceOrderRequestValidator());
   }
 
+  @Deprecated
   public TigerHttpClient(String serverUrl) {
     this.serverUrl = serverUrl;
   }
 
+  @Deprecated
   public TigerHttpClient(String serverUrl, String accessToken) {
     this.serverUrl = serverUrl;
     this.accessToken = accessToken;
+  }
+
+  private void initDomainCheck() {
+    synchronized (TigerHttpClient.SingletonInner.singleton) {
+      if (domainExecutorService == null || domainExecutorService.isTerminated()) {
+        Runnable domainChecker = () -> {
+          try {
+            String newServerUrl = NetworkUtil.getHttpServerAddress(this.serverUrl);
+            if (!newServerUrl.equals(this.serverUrl)) {
+              ApiLogger.info("server url changed. {}-->{}", this.serverUrl, newServerUrl);
+            }
+            this.serverUrl = newServerUrl;
+          } catch (Throwable t) {
+            ApiLogger.error("refresh serverUrl error", t);
+          }
+        };
+        domainExecutorService = new ScheduledThreadPoolExecutor(1);
+        domainExecutorService.scheduleWithFixedDelay(domainChecker, REFRESH_URL_INTERVAL_SECONDS,
+            REFRESH_URL_INTERVAL_SECONDS, TimeUnit.SECONDS);
+      }
+    }
   }
 
   public String getAccessToken() {

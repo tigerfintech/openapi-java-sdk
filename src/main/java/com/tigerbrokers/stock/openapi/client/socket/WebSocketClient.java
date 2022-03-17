@@ -130,7 +130,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   public WebSocketClient clientConfig(ClientConfig clientConfig) {
     this.clientConfig = clientConfig;
     if (StringUtils.isEmpty(clientConfig.socketServerUrl)) {
-      this.url = NetworkUtil.getServerAddress();
+      this.url = NetworkUtil.getServerAddress(null);
     } else {
       this.url = clientConfig.socketServerUrl;
     }
@@ -144,11 +144,15 @@ public class WebSocketClient implements SubscribeAsyncApi {
     return this;
   }
 
+  /** please use clientConfig() method */
+  @Deprecated
   public WebSocketClient url(String url) {
     this.url = url;
     return this;
   }
 
+  /** please use clientConfig() method */
+  @Deprecated
   public WebSocketClient authentication(final ApiAuthentication authentication) {
     this.authentication = authentication;
     return this;
@@ -328,9 +332,9 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   private InetSocketAddress getNewServerAddress() {
     if (clientConfig != null && StringUtils.isEmpty(clientConfig.socketServerUrl)) {
-      String newUrl = NetworkUtil.getServerAddress();
+      String newUrl = NetworkUtil.getServerAddress(this.url);
       if (!this.url.equals(newUrl)) {
-        InetSocketAddress address = getServerAddress(newUrl);
+        InetSocketAddress address = getSocketAddress(newUrl);
         if (address != null) {
           ApiLogger.info("socket url changed. {}-->{}", this.url, newUrl);
           if (channel != null && channel.pipeline().get(TigerApiConstants.SSL_HANDLER_NAME) != null) {
@@ -344,14 +348,14 @@ public class WebSocketClient implements SubscribeAsyncApi {
         }
       }
     }
-    return getServerAddress();
+    return getSocketAddress();
   }
 
-  private InetSocketAddress getServerAddress() {
-    return getServerAddress(this.url);
+  private InetSocketAddress getSocketAddress() {
+    return getSocketAddress(this.url);
   }
 
-  private InetSocketAddress getServerAddress(String urlString) {
+  private InetSocketAddress getSocketAddress(String urlString) {
     if (StringUtils.isEmpty(urlString)) {
       ApiLogger.error("url is empty.");
       return null;

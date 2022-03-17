@@ -208,17 +208,6 @@ public class NetworkUtil {
     return false;
   }
 
-  /**
-   * get http server address
-   */
-  public static String getHttpServerAddress() {
-    return refreshAndGetServerAddress(Protocol.HTTP);
-  }
-
-  public static String getServerAddress() {
-    return refreshAndGetServerAddress(ClientConfig.DEFAULT_CONFIG.getSubscribeProtocol());
-  }
-
   private static String getDefaultPort(ClientConfig clientConfig, Protocol protocol) {
     String port = "";
     if (protocol != Protocol.HTTP) {
@@ -233,7 +222,18 @@ public class NetworkUtil {
     return port;
   }
 
-  private static String refreshAndGetServerAddress(Protocol protocol) {
+  /**
+   * get http server address
+   */
+  public static String getHttpServerAddress(String originalAddress) {
+    return refreshAndGetServerAddress(Protocol.HTTP, originalAddress);
+  }
+
+  public static String getServerAddress(String originalAddress) {
+    return refreshAndGetServerAddress(ClientConfig.DEFAULT_CONFIG.getSubscribeProtocol(), originalAddress);
+  }
+
+  private static String refreshAndGetServerAddress(Protocol protocol, String originalAddress) {
     ClientConfig clientConfig = ClientConfig.DEFAULT_CONFIG;
     Env env = clientConfig.getEnv();
     String domainUrl = (env == Env.PROD ? TigerApiConstants.DEFAULT_PROD_DOMAIN_URL
@@ -250,6 +250,10 @@ public class NetworkUtil {
       }
     } catch (Throwable th) {
       ApiLogger.error("domain config response error, data:{}", response);
+    }
+    // if get domain config data failed and original address is not emtpy, return original address
+    if (domainConfigList.isEmpty() && !StringUtils.isEmpty(originalAddress)) {
+      return originalAddress;
     }
 
     License license = clientConfig.getLicense();

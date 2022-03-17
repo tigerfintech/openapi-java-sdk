@@ -48,13 +48,13 @@ public class NetworkUtilTest {
       System.out.println("\r\nenv:" + config.getEnv()
           + ", license:" + config.getLicense()
           + ", subscribeProtocal:" + config.getSubscribeProtocol());
-      System.out.println(NetworkUtil.getHttpServerAddress());
-      Assert.assertEquals("https://openapi.skytigris.cn/gateway", NetworkUtil.getHttpServerAddress());
-      System.out.println(NetworkUtil.getServerAddress());
-      Assert.assertEquals("wss://openapi.skytigris.cn:8887/stomp", NetworkUtil.getServerAddress());
+      System.out.println(NetworkUtil.getHttpServerAddress(null));
+      Assert.assertEquals("https://openapi.skytigris.cn/gateway", NetworkUtil.getHttpServerAddress(null));
+      System.out.println(NetworkUtil.getServerAddress(null));
+      Assert.assertEquals("wss://openapi.skytigris.cn:8887/stomp", NetworkUtil.getServerAddress(null));
       config.setSubscribeProtocol(Protocol.SOCKET);
-      System.out.println(NetworkUtil.getServerAddress());
-      Assert.assertEquals("wss://openapi.skytigris.cn:8883", NetworkUtil.getServerAddress());
+      System.out.println(NetworkUtil.getServerAddress(null));
+      Assert.assertEquals("wss://openapi.skytigris.cn:8883", NetworkUtil.getServerAddress(null));
 
       // SANDBOX环境
       config.setEnv(Env.SANDBOX);
@@ -62,13 +62,13 @@ public class NetworkUtilTest {
       System.out.println("\r\nenv:" + config.getEnv()
           + ", license:" + config.getLicense()
           + ", subscribeProtocal:" + config.getSubscribeProtocol());
-      System.out.println(NetworkUtil.getHttpServerAddress());
-      Assert.assertEquals("https://openapi-sandbox.skytigris.cn/gateway", NetworkUtil.getHttpServerAddress());
-      System.out.println(NetworkUtil.getServerAddress());
-      Assert.assertEquals("wss://openapi-sandbox.skytigris.cn:8889/stomp", NetworkUtil.getServerAddress());
+      System.out.println(NetworkUtil.getHttpServerAddress(null));
+      Assert.assertEquals("https://openapi-sandbox.skytigris.cn/gateway", NetworkUtil.getHttpServerAddress(null));
+      System.out.println(NetworkUtil.getServerAddress(null));
+      Assert.assertEquals("wss://openapi-sandbox.skytigris.cn:8889/stomp", NetworkUtil.getServerAddress(null));
       config.setSubscribeProtocol(Protocol.SOCKET);
-      System.out.println(NetworkUtil.getServerAddress());
-      Assert.assertEquals("wss://openapi-sandbox.skytigris.cn:8885", NetworkUtil.getServerAddress());
+      System.out.println(NetworkUtil.getServerAddress(null));
+      Assert.assertEquals("wss://openapi-sandbox.skytigris.cn:8885", NetworkUtil.getServerAddress(null));
 
     }
   }
