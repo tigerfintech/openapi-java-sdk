@@ -27,6 +27,7 @@ public interface ApiServiceType {
   String HOUR_TRADING_TIMELINE = "hour_trading_timeline";
 
   String TIMELINE = "timeline";
+  String HISTORY_TIMELINE = "history_timeline";
   String KLINE = "kline";
   String TRADE_TICK = "trade_tick";
   String QUOTE_CONTRACT = "quote_contract";
