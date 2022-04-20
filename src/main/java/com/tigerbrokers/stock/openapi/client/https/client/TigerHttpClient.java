@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
+import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
@@ -13,6 +14,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.contract.model.Contrac
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
+import com.tigerbrokers.stock.openapi.client.https.response.TigerHttpResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.contract.ContractResponse;
 import com.tigerbrokers.stock.openapi.client.https.validator.ContractRequestValidator;
@@ -27,6 +29,7 @@ import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
 import com.tigerbrokers.stock.openapi.client.util.SdkVersionUtils;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import com.tigerbrokers.stock.openapi.client.util.TigerSignature;
+import com.tigerbrokers.stock.openapi.client.util.builder.AccountParamBuilder;
 import java.security.Security;
 import java.util.HashMap;
 import java.util.List;
@@ -96,6 +99,13 @@ public class TigerHttpClient implements TigerClient {
   public TigerHttpClient clientConfig(ClientConfig clientConfig) {
     init(clientConfig.serverUrl, clientConfig.tigerId, clientConfig.privateKey);
     initDomainCheck();
+    if (clientConfig.isAutoGrabPermission) {
+      TigerHttpRequest request = new TigerHttpRequest(ApiServiceType.GRAB_QUOTE_PERMISSION);
+      request.setBizContent(AccountParamBuilder.instance().buildJson());
+      TigerHttpResponse response = execute(request);
+      ApiLogger.info("tigerId:{}, grab_quote_permission:{}, data:{}",
+          tigerId, response.getMessage(), response.getData());
+    }
     return this;
   }
 

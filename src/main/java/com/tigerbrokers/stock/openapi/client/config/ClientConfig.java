@@ -56,6 +56,11 @@ public class ClientConfig {
   public String privateKey = null;
 
   /**
+   * 是否初始化实例完成时，自动抢占行情权限
+   */
+  public boolean isAutoGrabPermission = true;
+
+  /**
    * institutional trader private key 机构交易员专有密钥
    */
   public String secretKey = null;
