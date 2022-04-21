@@ -213,10 +213,10 @@ public class NetworkUtil {
     String port = "";
     if (protocol != Protocol.HTTP) {
       if (clientConfig.getEnv() == Env.PROD) {
-        port = protocol == Protocol.STOMP ? TigerApiConstants.DEFAULT_PROD_STOMP_PORT
+        port = protocol == Protocol.STOMP_WEBSOCKET ? TigerApiConstants.DEFAULT_PROD_STOMP_PORT
             : TigerApiConstants.DEFAULT_PROD_SOCKET_PORT;
       } else {
-        port = protocol == Protocol.STOMP ? TigerApiConstants.DEFAULT_SANDBOX_STOMP_PORT
+        port = protocol == Protocol.STOMP_WEBSOCKET ? TigerApiConstants.DEFAULT_SANDBOX_STOMP_PORT
             : TigerApiConstants.DEFAULT_SANDBOX_SOCKET_PORT;
       }
     }
@@ -268,8 +268,8 @@ public class NetworkUtil {
         continue;
       }
       for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
-        if (Protocol.STOMP.getPortFieldName().equals(entry.getKey())
-            || Protocol.SOCKET.getPortFieldName().equals(entry.getKey())) {
+        if (Protocol.STOMP_WEBSOCKET.getPortFieldName().equals(entry.getKey())
+            || Protocol.STOMP.getPortFieldName().equals(entry.getKey())) {
           if (protocol.getPortFieldName().equals(entry.getKey())) {
             port = entry.getValue().toString();
           }

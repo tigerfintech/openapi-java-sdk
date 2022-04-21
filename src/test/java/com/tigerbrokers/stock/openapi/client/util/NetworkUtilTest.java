@@ -27,9 +27,9 @@ public class NetworkUtilTest {
   @Before
   public void setUp() {
     domainConfigJson = "{\"ret\":0,\"serverTime\":1646652924198,\"items\":["
-        + "{\"openapi\":{\"port\":8887,\"socket_port\":9883,"
+        + "{\"openapi\":{\"port\":9887,\"socket_port\":9883,"
         + "\"COMMON\":\"https://openapi.tigerfintech.com\",},"
-        + "\"openapi-sandbox\":{\"port\":8889,\"socket_port\":9885,"
+        + "\"openapi-sandbox\":{\"port\":9889,\"socket_port\":9885,"
         + "\"COMMON\":\"https://openapi-sandbox.tigerfintech.com\"}"
         + "}]}";
   }
@@ -44,31 +44,31 @@ public class NetworkUtilTest {
 
       // 测试生产环境
       config.setEnv(Env.PROD);
-      config.setSubscribeProtocol(Protocol.STOMP);
+      config.setSubscribeProtocol(Protocol.STOMP_WEBSOCKET);
       System.out.println("\r\nenv:" + config.getEnv()
           + ", license:" + config.getLicense()
           + ", subscribeProtocal:" + config.getSubscribeProtocol());
       System.out.println(NetworkUtil.getHttpServerAddress(null));
       Assert.assertEquals("https://openapi.tigerfintech.com/gateway", NetworkUtil.getHttpServerAddress(null));
       System.out.println(NetworkUtil.getServerAddress(null));
-      Assert.assertEquals("wss://openapi.tigerfintech.com:8887/stomp", NetworkUtil.getServerAddress(null));
-      config.setSubscribeProtocol(Protocol.SOCKET);
+      Assert.assertEquals("wss://openapi.tigerfintech.com:9887/stomp", NetworkUtil.getServerAddress(null));
+      config.setSubscribeProtocol(Protocol.STOMP);
       System.out.println(NetworkUtil.getServerAddress(null));
-      Assert.assertEquals("wss://tigerfintech.com:8883", NetworkUtil.getServerAddress(null));
+      Assert.assertEquals("wss://openapi.tigerfintech.com:9883", NetworkUtil.getServerAddress(null));
 
       // SANDBOX环境
       config.setEnv(Env.SANDBOX);
-      config.setSubscribeProtocol(Protocol.STOMP);
+      config.setSubscribeProtocol(Protocol.STOMP_WEBSOCKET);
       System.out.println("\r\nenv:" + config.getEnv()
           + ", license:" + config.getLicense()
           + ", subscribeProtocal:" + config.getSubscribeProtocol());
       System.out.println(NetworkUtil.getHttpServerAddress(null));
       Assert.assertEquals("https://openapi-sandbox.tigerfintech.com/gateway", NetworkUtil.getHttpServerAddress(null));
       System.out.println(NetworkUtil.getServerAddress(null));
-      Assert.assertEquals("wss://openapi-sandbox.tigerfintech.com:8889/stomp", NetworkUtil.getServerAddress(null));
-      config.setSubscribeProtocol(Protocol.SOCKET);
+      Assert.assertEquals("wss://openapi-sandbox.tigerfintech.com:9889/stomp", NetworkUtil.getServerAddress(null));
+      config.setSubscribeProtocol(Protocol.STOMP);
       System.out.println(NetworkUtil.getServerAddress(null));
-      Assert.assertEquals("wss://openapi-sandbox.tigerfintech.com:8885", NetworkUtil.getServerAddress(null));
+      Assert.assertEquals("wss://openapi-sandbox.tigerfintech.com:9885", NetworkUtil.getServerAddress(null));
 
     }
   }
