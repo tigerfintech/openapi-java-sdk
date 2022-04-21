@@ -37,6 +37,7 @@ public class NetworkUtil {
     {
       add(TigerApiConstants.API_ONLINE_DOMAIN_URL);
       add(TigerApiConstants.API_ONLINE_DOMAIN_URL_OLD);
+      add(TigerApiConstants.API_ONLINE_DOMAIN_URL_TEMP);
     }
   };
 

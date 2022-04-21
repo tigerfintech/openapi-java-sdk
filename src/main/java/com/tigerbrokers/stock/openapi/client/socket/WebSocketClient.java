@@ -222,7 +222,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
               throw new RuntimeException("get connect address error.");
             }
             p.addLast(TigerApiConstants.SSL_HANDLER_NAME, sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
-            if (isStompProtocol()) {
+            if (isStompBaseWebSocket()) {
               p.addLast("websocketCodec", new HttpClientCodec());
               p.addLast("websocketAggregator", new HttpObjectAggregator(65535));
               p.addLast(STOMP_ENCODER, new WebSocketStompFrameDecoder());
@@ -242,7 +242,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     isInitial = true;
   }
 
-  private boolean isStompProtocol() {
+  private boolean isStompBaseWebSocket() {
     return this.url.contains("/stomp");
   }
 
@@ -297,7 +297,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
           }
         } finally {
           this.channel = newChannel;
-          if (isStompProtocol()) {
+          if (isStompBaseWebSocket()) {
             synchronized (this.channel) {
               WebSocketHandshakerHandler webSocketHandshakerHandler =
                   new WebSocketHandshakerHandler(authentication, apiComposeCallback, clientSendInterval,
