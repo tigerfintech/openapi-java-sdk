@@ -52,10 +52,6 @@ public class TigerApiConstants {
 
   public static final String DEFAULT_DOMAIN_KEY = "COMMON";
 
-  @Deprecated
-  public static final String API_ONLINE_DOMAIN_URL_OLD = "openapi.itiger.com";
-  @Deprecated
-  public static final String API_ONLINE_DOMAIN_URL_TEMP = "openapi.skytigris.cn";
   public static final String API_ONLINE_DOMAIN_URL = "openapi.tigerfintech.com";
   public static final String API_SANDBOX_DOMAIN_URL = "openapi-sandbox.tigerfintech.com";
 

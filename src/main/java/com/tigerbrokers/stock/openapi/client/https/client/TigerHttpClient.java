@@ -21,6 +21,7 @@ import com.tigerbrokers.stock.openapi.client.https.validator.ContractRequestVali
 import com.tigerbrokers.stock.openapi.client.https.validator.PlaceOrderRequestValidator;
 import com.tigerbrokers.stock.openapi.client.https.validator.RequestValidator;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.FastJsonPropertyFilter;
@@ -131,7 +132,7 @@ public class TigerHttpClient implements TigerClient {
     this.serverUrl = serverUrl;
     this.tigerId = tigerId;
     this.privateKey = privateKey;
-    if (NetworkUtil.isOnlineEnv(serverUrl)) {
+    if (ClientConfig.DEFAULT_CONFIG.getEnv() == Env.PROD) {
       this.tigerPublicKey = ONLINE_PUBLIC_KEY;
     } else {
       this.tigerPublicKey = SANDBOX_PUBLIC_KEY;

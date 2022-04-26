@@ -1,7 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.config;
 
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
-import com.tigerbrokers.stock.openapi.client.struct.enums.License;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import io.netty.handler.ssl.SslProvider;
@@ -17,7 +16,6 @@ public class ClientConfig {
   private static final String PRIVATE_KEY_END = "-----END PRIVATE KEY-----";
   private static final Protocol DEFAULT_PROTOCOL = Protocol.STOMP;
   private static final Env DEFAULT_ENV = Env.PROD;
-  private static final License DEFAULT_LICENSE = License.TBNZ;
   private static final SslProvider DEFAULT_SSLPROVIDER = SslProvider.OPENSSL;
   /** default client config */
   public static final ClientConfig DEFAULT_CONFIG = new ClientConfig();
@@ -25,8 +23,6 @@ public class ClientConfig {
   private Protocol subscribeProtocol = DEFAULT_PROTOCOL;
 
   private Env env = DEFAULT_ENV;
-
-  private License license = DEFAULT_LICENSE;
 
   private SslProvider sslProvider = DEFAULT_SSLPROVIDER;
 
@@ -88,17 +84,6 @@ public class ClientConfig {
       return;
     }
     this.env = env;
-  }
-
-  public License getLicense() {
-    return license;
-  }
-
-  public void setLicense(License license) {
-    if (license == null) {
-      return;
-    }
-    this.license = license;
   }
 
   public SslProvider getSslProvider() {

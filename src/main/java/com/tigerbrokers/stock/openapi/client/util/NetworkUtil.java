@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
-import com.tigerbrokers.stock.openapi.client.struct.enums.License;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
 import io.netty.handler.ssl.OpenSsl;
 import io.netty.handler.ssl.SslProvider;
@@ -16,7 +15,6 @@ import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,16 +28,9 @@ import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.D
  */
 public class NetworkUtil {
 
-  private static final String GET_DEVICE_ERROR = "Please check if the network connection is disconnected";
+  private static final String GET_DEVICE_ERROR = "please check network connection";
   private static final int MAC_ARRAY_LENGTH = 6;
   private static final int MAC_LENGTH = MAC_ARRAY_LENGTH * 3 - 1;
-  private static final Set<String> ONLINE_DOMAIN_SET = new HashSet<String>(){
-    {
-      add(TigerApiConstants.API_ONLINE_DOMAIN_URL);
-      add(TigerApiConstants.API_ONLINE_DOMAIN_URL_OLD);
-      add(TigerApiConstants.API_ONLINE_DOMAIN_URL_TEMP);
-    }
-  };
 
   private NetworkUtil() {
   }
@@ -200,15 +191,6 @@ public class NetworkUtil {
     return supportedProtocolsSet.toArray(new String[supportedProtocolsSet.size()]);
   }
 
-  public static boolean isOnlineEnv(String serverUrl) {
-    for (String domainName : ONLINE_DOMAIN_SET) {
-      if (serverUrl.contains(domainName)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   private static String getDefaultPort(ClientConfig clientConfig, Protocol protocol) {
     String port = "";
     if (protocol != Protocol.HTTP) {
@@ -257,8 +239,6 @@ public class NetworkUtil {
       return originalAddress;
     }
 
-    License license = clientConfig.getLicense();
-    boolean match = false;
     for (Map<String, Object> configMap : domainConfigList) {
       Map<String, Object> dataMap;
       Object openapiConfig = configMap.get(env.getConfigFieldName());
@@ -273,17 +253,8 @@ public class NetworkUtil {
           if (protocol.getPortFieldName().equals(entry.getKey())) {
             port = entry.getValue().toString();
           }
-        } else {
-          String value = entry.getValue().toString().replace("https://", "");
-          if (env == Env.PROD) {
-            ONLINE_DOMAIN_SET.add(value);
-          }
-          if (license.name().equals(entry.getKey())) {
-            domainUrl = value;
-            match = true;
-          } else if (DEFAULT_DOMAIN_KEY.equals(entry.getKey()) && !match) {
-            domainUrl = value;
-          }
+        } else if (DEFAULT_DOMAIN_KEY.equals(entry.getKey())) {
+          domainUrl = entry.getValue().toString().replace("https://", "");
         }
       }
     }
