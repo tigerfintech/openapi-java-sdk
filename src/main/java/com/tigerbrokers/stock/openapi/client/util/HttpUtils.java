@@ -57,4 +57,32 @@ public class HttpUtils {
       throw e;
     }
   }
+
+  public static String get(String url) throws Exception {
+    if (url == null) {
+      throw new RuntimeException("request url param cannot be null");
+    }
+    try {
+      okhttp3.Request request = new okhttp3.Request.Builder()
+          .url(url)
+          .build();
+
+      Response response = client.newCall(request).execute();
+      if (response == null) {
+        ApiLogger.debug("HttpUtils response is null, url:{}", url);
+        throw new RuntimeException("http response is null");
+      }
+      if(response.body() == null) {
+        ApiLogger.debug("HttpUtils response body is null, url:{}", url);
+        throw new RuntimeException("http response body is null");
+      }
+      return response.body().string();
+    } catch (IOException e) {
+      ApiLogger.error("HttpUtils execute io exception:{}", e.getMessage(), e);
+      throw e;
+    } catch (Exception e) {
+      ApiLogger.error("HttpUtils execute exception:{}", e.getMessage(), e);
+      throw e;
+    }
+  }
 }

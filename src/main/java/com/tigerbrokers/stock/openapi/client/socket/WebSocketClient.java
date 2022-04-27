@@ -1,6 +1,8 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
+import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteKeyType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
@@ -15,6 +17,7 @@ import com.tigerbrokers.stock.openapi.client.websocket.WebSocketStompFrameEncode
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -65,6 +68,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   public final static String STOMP_DECODER = "stompDecoder";
   private static final String[] PROTOCOLS = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"};
 
+  private ClientConfig clientConfig;
   private SslProvider sslProvider = null;
   private String url;
   private ApiAuthentication authentication;
@@ -77,6 +81,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private Bootstrap bootstrap = null;
   private volatile Channel channel = null;
   private ChannelFuture future = null;
+  private SslContext sslCtx;
 
   private volatile boolean isInitial = false;
   private volatile ScheduledFuture<?> reconnectExecutorFuture = null;
@@ -122,11 +127,32 @@ public class WebSocketClient implements SubscribeAsyncApi {
     return this;
   }
 
+  public WebSocketClient clientConfig(ClientConfig clientConfig) {
+    this.clientConfig = clientConfig;
+    if (StringUtils.isEmpty(clientConfig.socketServerUrl)) {
+      this.url = NetworkUtil.getServerAddress(null);
+    } else {
+      this.url = clientConfig.socketServerUrl;
+    }
+    if (this.sslProvider == null && clientConfig.getSslProvider() != null) {
+      this.sslProvider = clientConfig.getSslProvider();
+    }
+    if (this.authentication == null) {
+      ApiAuthentication authentication = ApiAuthentication.build(clientConfig.tigerId, clientConfig.privateKey);
+      this.authentication = authentication;
+    }
+    return this;
+  }
+
+  /** please use clientConfig() method */
+  @Deprecated
   public WebSocketClient url(String url) {
     this.url = url;
     return this;
   }
 
+  /** please use clientConfig() method */
+  @Deprecated
   public WebSocketClient authentication(final ApiAuthentication authentication) {
     this.authentication = authentication;
     return this;
@@ -167,13 +193,9 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
   }
 
-  private synchronized void init() {
+  private synchronized void init() throws SSLException {
     if (isInitial) {
       return;
-    }
-    InetSocketAddress address = getServerAddress();
-    if (address == null) {
-      throw new RuntimeException("get connect address error.");
     }
     group = new NioEventLoopGroup(1);
     bootstrap = new Bootstrap();
@@ -182,22 +204,25 @@ public class WebSocketClient implements SubscribeAsyncApi {
     if (protocols == null || protocols.length == 0) {
       throw new RuntimeException("supported protocols is empty.");
     }
+    SslContext sslCtx =
+        SslContextBuilder.forClient()
+            .protocols(protocols)
+            .trustManager(InsecureTrustManagerFactory.INSTANCE)
+            .sslProvider(provider)
+            .build();
 
-    final int port = address.getPort();
     bootstrap.group(group).option(ChannelOption.TCP_NODELAY, true)
         .channel(NioSocketChannel.class)
         .handler(new ChannelInitializer<SocketChannel>() {
           @Override
-          protected void initChannel(SocketChannel ch) throws SSLException {
+          protected void initChannel(SocketChannel ch) {
             ChannelPipeline p = ch.pipeline();
-            SslContext sslCtx =
-                SslContextBuilder.forClient()
-                    .protocols(protocols)
-                    .trustManager(InsecureTrustManagerFactory.INSTANCE)
-                    .sslProvider(provider)
-                    .build();
-            p.addLast(sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
-            if (port == 8887 || port == 8889) {
+            InetSocketAddress address = getNewServerAddress();
+            if (address == null) {
+              throw new RuntimeException("get connect address error.");
+            }
+            p.addLast(TigerApiConstants.SSL_HANDLER_NAME, sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
+            if (isStompBaseWebSocket()) {
               p.addLast("websocketCodec", new HttpClientCodec());
               p.addLast("websocketAggregator", new HttpObjectAggregator(65535));
               p.addLast(STOMP_ENCODER, new WebSocketStompFrameDecoder());
@@ -215,6 +240,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
         });
 
     isInitial = true;
+  }
+
+  private boolean isStompBaseWebSocket() {
+    return this.url.contains("/stomp");
   }
 
   public void connectCountDown() {
@@ -248,7 +277,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     try {
       long start = System.currentTimeMillis();
       init();
-      InetSocketAddress address = getServerAddress();
+      InetSocketAddress address = getNewServerAddress();
       if (address == null) {
         throw new RuntimeException("get connect address error.");
       }
@@ -268,7 +297,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
           }
         } finally {
           this.channel = newChannel;
-          if (address.getPort() == 8887 || address.getPort() == 8889) {
+          if (isStompBaseWebSocket()) {
             synchronized (this.channel) {
               WebSocketHandshakerHandler webSocketHandshakerHandler =
                   new WebSocketHandshakerHandler(authentication, apiComposeCallback, clientSendInterval,
@@ -301,16 +330,42 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
   }
 
-  private InetSocketAddress getServerAddress() {
-    if (StringUtils.isEmpty(url)) {
+  private InetSocketAddress getNewServerAddress() {
+    if (clientConfig != null && StringUtils.isEmpty(clientConfig.socketServerUrl)) {
+      String newUrl = NetworkUtil.getServerAddress(this.url);
+      if (!this.url.equals(newUrl)) {
+        InetSocketAddress address = getSocketAddress(newUrl);
+        if (address != null) {
+          ApiLogger.info("socket url changed. {}-->{}", this.url, newUrl);
+          if (channel != null && channel.pipeline().get(TigerApiConstants.SSL_HANDLER_NAME) != null) {
+            ChannelHandler oldHandler = channel.pipeline().get(TigerApiConstants.SSL_HANDLER_NAME);
+            channel.pipeline().replace(oldHandler, TigerApiConstants.SSL_HANDLER_NAME,
+                sslCtx.newHandler(channel.alloc(), address.getHostName(), address.getPort()));
+            ApiLogger.info("socket url changed. {}-->{}. replace sslHandler", this.url, newUrl);
+          }
+          this.url = newUrl;
+          return address;
+        }
+      }
+    }
+    return getSocketAddress();
+  }
+
+  private InetSocketAddress getSocketAddress() {
+    return getSocketAddress(this.url);
+  }
+
+  private InetSocketAddress getSocketAddress(String urlString) {
+    if (StringUtils.isEmpty(urlString)) {
       ApiLogger.error("url is empty.");
       return null;
     }
+
     URI uri;
     try {
-      uri = new URI(url);
+      uri = new URI(urlString);
     } catch (URISyntaxException e) {
-      ApiLogger.error("uri syntax exception:", e);
+      ApiLogger.error("uri syntax exception:{}", urlString, e);
       return null;
     }
     return new InetSocketAddress(uri.getHost(), uri.getPort());

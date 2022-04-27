@@ -48,7 +48,20 @@ public class TigerApiConstants {
 
   public static final String DEVICE_ID = "device_id";
 
-  @Deprecated
-  public static final String API_ONLINE_DOMAIN_URL_OLD = "openapi.itiger.com";
-  public static final String API_ONLINE_DOMAIN_URL = "openapi.skytigris.cn";
+  public static final String SSL_HANDLER_NAME = "sslHandler";
+
+  public static final String DEFAULT_DOMAIN_KEY = "COMMON";
+
+  public static final String API_ONLINE_DOMAIN_URL = "openapi.tigerfintech.com";
+  public static final String API_SANDBOX_DOMAIN_URL = "openapi-sandbox.tigerfintech.com";
+
+  public static final String DEFAULT_PROD_DOMAIN_URL = API_ONLINE_DOMAIN_URL;
+  public static final String DEFAULT_SANDBOX_DOMAIN_URL = API_SANDBOX_DOMAIN_URL;
+  public static final String DOMAIN_GARDEN_ADDRESS = "https://cg.play-analytics.com/";
+
+  public static final String DEFAULT_PROD_STOMP_PORT = "9887";
+  public static final String DEFAULT_PROD_SOCKET_PORT = "9883";
+  public static final String DEFAULT_SANDBOX_STOMP_PORT = "9889";
+  public static final String DEFAULT_SANDBOX_SOCKET_PORT = "9885";
+
 }
