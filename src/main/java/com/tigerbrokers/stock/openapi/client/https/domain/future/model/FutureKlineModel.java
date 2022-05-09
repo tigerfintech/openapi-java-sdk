@@ -20,6 +20,8 @@ public class FutureKlineModel extends ApiModel {
   private Long endTime;
   @JSONField(name = "limit")
   private Integer limit;
+  @JSONField(name = "page_token")
+  private String pageToken;
 
   public FutureKlineModel() {
   }
@@ -75,5 +77,19 @@ public class FutureKlineModel extends ApiModel {
 
   public void setLimit(Integer limit) {
     this.limit = limit;
+  }
+
+  public String getPageToken() {
+    return pageToken;
+  }
+
+  /**
+   * set pageToken，only for single contract
+   * @param pageToken
+   */
+  public void setPageToken(String pageToken) {
+    if (contractCodes != null && contractCodes.size() == 1) {
+      this.pageToken = pageToken;
+    }
   }
 }
