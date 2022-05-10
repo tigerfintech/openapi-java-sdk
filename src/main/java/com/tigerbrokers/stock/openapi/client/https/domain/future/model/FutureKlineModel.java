@@ -88,8 +88,6 @@ public class FutureKlineModel extends ApiModel {
    * @param pageToken
    */
   public void setPageToken(String pageToken) {
-    if (contractCodes != null && contractCodes.size() == 1) {
-      this.pageToken = pageToken;
-    }
+    this.pageToken = pageToken;
   }
 }

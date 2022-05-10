@@ -125,8 +125,6 @@ public class QuoteKlineModel extends QuoteSymbolModel {
    * @param pageToken
    */
   public void setPageToken(String pageToken) {
-    if (getSymbols() != null && getSymbols().size() == 1) {
-      this.pageToken = pageToken;
-    }
+    this.pageToken = pageToken;
   }
 }

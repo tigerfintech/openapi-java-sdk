@@ -11,6 +11,8 @@ import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.model.ContractModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.model.ContractsModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureKlineModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteKlineModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
@@ -18,6 +20,7 @@ import com.tigerbrokers.stock.openapi.client.https.response.TigerHttpResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.contract.ContractResponse;
 import com.tigerbrokers.stock.openapi.client.https.validator.ContractRequestValidator;
+import com.tigerbrokers.stock.openapi.client.https.validator.KlineRequestValidator;
 import com.tigerbrokers.stock.openapi.client.https.validator.PlaceOrderRequestValidator;
 import com.tigerbrokers.stock.openapi.client.https.validator.RequestValidator;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
@@ -145,6 +148,9 @@ public class TigerHttpClient implements TigerClient {
     validatorMap.put(ContractModel.class, contractRequestValidator);
     validatorMap.put(ContractsModel.class, contractRequestValidator);
     validatorMap.put(TradeOrderModel.class, new PlaceOrderRequestValidator());
+    KlineRequestValidator klineRequestValidator = new KlineRequestValidator();
+    validatorMap.put(QuoteKlineModel.class, klineRequestValidator);
+    validatorMap.put(FutureKlineModel.class, klineRequestValidator);
   }
 
   @Deprecated
