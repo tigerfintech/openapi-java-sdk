@@ -21,135 +21,196 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class PageTokenUtil {
+  public static int DEFAULT_PAGE_SIZE = 1000;
+  public static int DEFAULT_TOTAL_SIZE = 10000;
+  public static TimeZoneId DEFAULT_ZONEID = TimeZoneId.NewYork;
+  public static long DEFAULT_TIME_INTERVAL = 2000L;
+  public static final KlinePoint RETURN_KLINE = new KlinePoint();
+  public static final FutureKlineItem RETURN_FUTURE_KLINE = new FutureKlineItem();
   private PageTokenUtil() {
   }
 
   /**
-   * 分页获取K线数据，合并结果返回
-   * @param pageSize 每页大小
-   * @param total 数据总条数
-   * @param symbol
-   * @param period 默认为日K线
-   * @param right 复权方向 默认前复权
-   * @param beginTime 开始时间 "2022-04-25 00:00:00"
-   * @param endTime 结束时间 "2022-04-28 00:00:00"
-   * @param zoneId 默认纽约时区
+   * get kline data by page, return the merge result
+   * @param symbol symbol
+   * @param period kline tpye
+   * @param beginTime begin time. format:"2022-04-25 00:00:00"
+   * @param endTime end time. formae:"2022-04-28 00:00:00"
    * @throws TigerApiException
    */
-  public static List<KlinePoint> klineAggregationByPage(int pageSize, int total,
-      String symbol, KType period, RightOption right,
-      String beginTime, String endTime, TimeZoneId zoneId) throws TigerApiException {
-    if (symbol == null) {
-      throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "symbol");
-    }
-    if (total <= 0) {
-      throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "total");
-    }
-    if (pageSize <= 0) {
-      pageSize = 1200;
-    }
-    if (total < pageSize) {
-      pageSize = total;
-    }
-    List<String> symbols = new ArrayList<>();
-    symbols.add(symbol);
-    QuoteKlineRequest request = QuoteKlineRequest.newRequest(symbols, period == null ? KType.day : period,
-        beginTime, endTime, zoneId == null ? TimeZoneId.NewYork : zoneId);
-    request.withLimit(pageSize);
-    request.withRight(right == null ? RightOption.br : right);
-
-    List<KlinePoint> results = new ArrayList<>(total);
-    do {
-      QuoteKlineResponse response = TigerHttpClient.getInstance().execute(request);
-      if (!response.isSuccess()) {
-        throw new TigerApiException(response.getMessage());
-      }
-      if (response.getKlineItems().size() == 0) {
-        break;
-      }
-      KlineItem klineItem = response.getKlineItems().get(0);
-      results.addAll(klineItem.getItems());
-
-      if (klineItem.getNextPageToken() == null) {
-        break;
-      }
-      // 60 times per minute
-      try {
-        TimeUnit.SECONDS.sleep(1);
-      } catch (InterruptedException ignoreIE) {
-      }
-      // set pagination token then query the next page
-      request.withPageToken(klineItem.getNextPageToken());
-    } while (results.size() < total);
-    return results;
+  public static List<KlinePoint> getKlineByPage(String symbol, KType period,
+      String beginTime, String endTime) throws TigerApiException {
+    return getKlineByPage(symbol, period, beginTime, endTime,
+        DEFAULT_ZONEID, RightOption.br, DEFAULT_PAGE_SIZE, DEFAULT_TOTAL_SIZE, DEFAULT_TIME_INTERVAL);
   }
 
   /**
-   * 分页获取期货K线数据，合并结果返回
-   * @param pageSize 每页大小
-   * @param total 数据总条数
-   * @param contractCode contract code
-   * @param period 默认为日K线
-   * @param beginTime 开始时间 "2022-04-25 00:00:00"
-   * @param endTime 结束时间 "2022-04-28 00:00:00"
-   * @param zoneId 默认纽约时区
+   * get kline data by page, return the merge result
+   * @param symbol symbol
+   * @param period kline tpye
+   * @param beginTime begin time. format:"2022-04-25 00:00:00"
+   * @param endTime end time. formae:"2022-04-28 00:00:00"
+   * @param zoneId zone, the default is NewYork
+   * @param right adjust type. the default is br(adjusted)
+   * @param pageSize page size. the default is 1000
+   * @param totalSize total size. the default is 10000
+   * @param timeInterval request interval milliseconds, the default is 2000
    * @throws TigerApiException
    */
-  public static List<FutureKlineItem> futureKlineAggregationByPage(int pageSize, int total,
-      String contractCode, FutureKType period,
-      String beginTime, String endTime, TimeZoneId zoneId) throws TigerApiException {
-    if (contractCode == null) {
-      throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "contractCode");
+  public static List<KlinePoint> getKlineByPage(String symbol, KType period,
+      String beginTime, String endTime, TimeZoneId zoneId,
+      RightOption right, int pageSize, int totalSize, long timeInterval) throws TigerApiException {
+    return getKlineByPage(RETURN_KLINE, symbol, period == null ? null : period.name(),
+        beginTime, endTime, zoneId, right, pageSize, totalSize, timeInterval);
+  }
+
+  /**
+   * get futrue kline data by page, return the merge result
+   * @param symbol contract code
+   * @param period kline tpye
+   * @param beginTime begin time. format:"2022-04-25 00:00:00"
+   * @param endTime end time. formae:"2022-04-28 00:00:00"
+   * @throws TigerApiException
+   */
+  public static List<FutureKlineItem> getKlineByPage(String symbol, FutureKType period,
+      String beginTime, String endTime) throws TigerApiException {
+    return getKlineByPage(symbol, period, beginTime, endTime,
+        DEFAULT_ZONEID, DEFAULT_PAGE_SIZE, DEFAULT_TOTAL_SIZE, DEFAULT_TIME_INTERVAL);
+  }
+
+  /**
+   * get futrue kline data by page, return the merge result
+   * @param symbol contract code
+   * @param period kline tpye
+   * @param beginTime begin time. format:"2022-04-25 00:00:00"
+   * @param endTime end time. formae:"2022-04-28 00:00:00"
+   * @param zoneId zone, the default is NewYork
+   * @param pageSize page size. the default is 1000
+   * @param totalSize total size. the default is 10000
+   * @param timeInterval request interval milliseconds, the default is 2000
+   * @throws TigerApiException
+   */
+  public static List<FutureKlineItem> getKlineByPage(String symbol, FutureKType period,
+      String beginTime, String endTime, TimeZoneId zoneId, int pageSize, int totalSize, long timeInterval) throws TigerApiException {
+    return getKlineByPage(RETURN_FUTURE_KLINE, symbol, period == null ? null : period.name(),
+        beginTime, endTime, zoneId, null, pageSize, totalSize, timeInterval);
+  }
+
+  /**
+   * get kline data by page, return the merge result
+   * @param t return type,only for FutureKlineItem(ApiServiceType.FUTURE_KLINE) and KlineItem(ApiServiceType.KLINE)
+   * @param symbol symbol or future contract code
+   * @param period kline tpye
+   * @param beginTime begin time. format:"2022-04-25 00:00:00"
+   * @param endTime end time. formae:"2022-04-28 00:00:00"
+   * @param zoneId zone, the default is NewYork
+   * @param right adjust type（only for stock）. the default is br(adjusted)
+   * @param pageSize page size. the default is 1000
+   * @param totalSize total size. the default is 10000
+   * @param timeInterval request interval milliseconds, the default is 2000
+   * @throws TigerApiException
+   */
+  public static <T> List<T> getKlineByPage(T t, String symbol, String period,
+      String beginTime, String endTime, TimeZoneId zoneId,
+      RightOption right, int pageSize, int totalSize, long timeInterval) throws TigerApiException {
+
+    if (t == null || !(t instanceof KlinePoint || t instanceof FutureKlineItem)) {
+      throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "return type");
     }
-    if (total <= 0) {
-      throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "total");
+    boolean isKline = (t instanceof KlinePoint);
+    if (symbol == null) {
+      throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "symbol");
+    }
+    if (totalSize <= 0) {
+      totalSize = DEFAULT_TOTAL_SIZE;
     }
     if (pageSize <= 0) {
-      pageSize = 1000;
+      pageSize = DEFAULT_PAGE_SIZE;
     }
-    if (total < pageSize) {
-      pageSize = total;
+    if (totalSize < pageSize) {
+      pageSize = totalSize;
     }
     if (zoneId == null) {
       zoneId = TimeZoneId.NewYork;
     }
-    Date beginDate = DateUtils.getZoneDate(beginTime, zoneId);
-    if (beginDate == null) {
-      throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "beginTime");
-    }
-    Date endDate = DateUtils.getZoneDate(endTime, zoneId);
-    if (endDate == null) {
-      throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "endTime");
+    if (timeInterval < 1000) {
+      timeInterval = DEFAULT_TIME_INTERVAL;
     }
 
-    List<String> contractCodes = new ArrayList<>();
-    contractCodes.add(contractCode);
-    FutureKlineRequest request = FutureKlineRequest.newRequest(contractCodes, period == null ? FutureKType.day : period,
-        beginDate.getTime(), endDate.getTime(), pageSize);
+    List<T> results = new ArrayList<>(totalSize);
+    List<String> symbols = new ArrayList<>();
+    symbols.add(symbol);
+    if (isKline) {
+      KType kType = KType.day;
+      if (period != null && KType.valueOf(period) != null) {
+        kType = KType.valueOf(period);
+      }
+      QuoteKlineRequest request = QuoteKlineRequest.newRequest(symbols, kType,
+          beginTime, endTime, zoneId);
+      request.withLimit(pageSize);
+      request.withRight(right == null ? RightOption.br : right);
 
-    List<FutureKlineItem> results = new ArrayList<>(total);
-    do {
-      FutureKlineResponse response = TigerHttpClient.getInstance().execute(request);
-      if (!response.isSuccess()) {
-        throw new TigerApiException(response.getMessage());
-      }
-      if (response.getFutureKlineItems().size() == 0) {
-        break;
-      }
-      FutureKlineBatchItem klineItem = response.getFutureKlineItems().get(0);
-      results.addAll(klineItem.getItems());
+      do {
+        QuoteKlineResponse response = TigerHttpClient.getInstance().execute(request);
+        if (!response.isSuccess()) {
+          throw new TigerApiException(response.getMessage());
+        }
+        if (response.getKlineItems().size() == 0) {
+          break;
+        }
+        KlineItem klineItem = response.getKlineItems().get(0);
+        results.addAll((List<T>) klineItem.getItems());
 
-      if (klineItem.getNextPageToken() == null) {
-        break;
+        if (klineItem.getNextPageToken() == null) {
+          break;
+        }
+        // 60 times per minute
+        try {
+          TimeUnit.MILLISECONDS.sleep(timeInterval);
+        } catch (InterruptedException ignoreIE) {
+        }
+        // set pagination token then query the next page
+        request.withPageToken(klineItem.getNextPageToken());
+      } while (results.size() < totalSize);
+    } else {
+      Date beginDate = DateUtils.getZoneDate(beginTime, zoneId);
+      if (beginDate == null) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "beginTime");
       }
-      // 60 times per minute
-      try {
-        TimeUnit.SECONDS.sleep(1);
-      } catch (InterruptedException ignoreIE) {
+      Date endDate = DateUtils.getZoneDate(endTime, zoneId);
+      if (endDate == null) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "endTime");
       }
-      // set nextPageToken and search next page data
-      request.withPageToken(klineItem.getNextPageToken());
-    } while (results.size() < total);
+      FutureKType kType = FutureKType.day;
+      if (period != null && FutureKType.valueOf(period) != null) {
+        kType = FutureKType.valueOf(period);
+      }
+
+      FutureKlineRequest request = FutureKlineRequest.newRequest(symbols, kType,
+              beginDate.getTime(), endDate.getTime(), pageSize);
+      do {
+        FutureKlineResponse response = TigerHttpClient.getInstance().execute(request);
+        if (!response.isSuccess()) {
+          throw new TigerApiException(response.getMessage());
+        }
+        if (response.getFutureKlineItems().size() == 0) {
+          break;
+        }
+        FutureKlineBatchItem klineItem = response.getFutureKlineItems().get(0);
+        results.addAll((List<T>)klineItem.getItems());
+
+        if (klineItem.getNextPageToken() == null) {
+          break;
+        }
+        // 60 times per minute
+        try {
+          TimeUnit.MILLISECONDS.sleep(timeInterval);
+        } catch (InterruptedException ignoreIE) {
+        }
+        // set pagination token then query the next page
+        request.withPageToken(klineItem.getNextPageToken());
+      } while (results.size() < totalSize);
+    }
     return results;
   }
 
