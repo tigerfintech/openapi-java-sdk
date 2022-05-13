@@ -21,6 +21,8 @@ public class QuoteKlineModel extends QuoteSymbolModel {
   @JSONField(name = "end_time")
   private Long endTime;
   private Integer limit;
+  @JSONField(name = "page_token")
+  private String pageToken;
 
   public QuoteKlineModel() {
 
@@ -112,5 +114,17 @@ public class QuoteKlineModel extends QuoteSymbolModel {
 
   public void setLimit(Integer limit) {
     this.limit = limit;
+  }
+
+  public String getPageToken() {
+    return pageToken;
+  }
+
+  /**
+   * set pageToken，only for single symbol
+   * @param pageToken
+   */
+  public void setPageToken(String pageToken) {
+    this.pageToken = pageToken;
   }
 }
