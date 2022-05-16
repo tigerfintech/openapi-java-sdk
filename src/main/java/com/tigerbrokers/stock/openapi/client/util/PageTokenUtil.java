@@ -4,8 +4,10 @@ import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.https.client.TigerHttpClient;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.item.FutureKlineBatchItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.item.FutureKlineItem;
+import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureKlineModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.item.KlineItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.item.KlinePoint;
+import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteKlineModel;
 import com.tigerbrokers.stock.openapi.client.https.request.future.FutureKlineRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.quote.QuoteKlineRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.future.FutureKlineResponse;
@@ -171,6 +173,9 @@ public class PageTokenUtil {
         }
         // set pagination token then query the next page
         request.withPageToken(klineItem.getNextPageToken());
+        if (results.size() + pageSize > totalSize) {
+          ((QuoteKlineModel)request.getApiModel()).setLimit(totalSize - results.size());
+        }
       } while (results.size() < totalSize);
     } else {
       Date beginDate = DateUtils.getZoneDate(beginTime, zoneId);
@@ -209,6 +214,9 @@ public class PageTokenUtil {
         }
         // set pagination token then query the next page
         request.withPageToken(klineItem.getNextPageToken());
+        if (results.size() + pageSize > totalSize) {
+          ((FutureKlineModel)request.getApiModel()).setLimit(totalSize - results.size());
+        }
       } while (results.size() < totalSize);
     }
     return results;
