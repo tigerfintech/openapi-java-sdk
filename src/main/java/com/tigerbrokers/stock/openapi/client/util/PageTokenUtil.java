@@ -24,7 +24,8 @@ import java.util.concurrent.TimeUnit;
 
 public class PageTokenUtil {
   public static int DEFAULT_PAGE_SIZE = 1000;
-  public static int DEFAULT_TOTAL_SIZE = 10000;
+  public static int DEFAULT_BATCH_TIME = 10;
+  public static int MAX_TOTAL_SIZE = 10000;
   public static TimeZoneId DEFAULT_ZONEID = TimeZoneId.NewYork;
   public static long DEFAULT_TIME_INTERVAL = 2000L;
   public static final KlinePoint RETURN_KLINE = new KlinePoint();
@@ -33,7 +34,7 @@ public class PageTokenUtil {
   }
 
   /**
-   * get kline data by page, return the merge result
+   * get kline data by page, return the merge result(use default pageSize:1000, 10 queries in total)
    * @param symbol symbol
    * @param period kline tpye
    * @param beginTime begin time. format:"2022-04-25 00:00:00"
@@ -43,7 +44,22 @@ public class PageTokenUtil {
   public static List<KlinePoint> getKlineByPage(String symbol, KType period,
       String beginTime, String endTime) throws TigerApiException {
     return getKlineByPage(symbol, period, beginTime, endTime,
-        DEFAULT_ZONEID, RightOption.br, DEFAULT_PAGE_SIZE, DEFAULT_TOTAL_SIZE, DEFAULT_TIME_INTERVAL);
+        DEFAULT_ZONEID, RightOption.br, DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE * DEFAULT_BATCH_TIME, DEFAULT_TIME_INTERVAL);
+  }
+
+  /**
+   * get kline data by page, return the merge result(use default pageSize:1000, 10 queries in total)
+   * @param symbol symbol
+   * @param period kline tpye
+   * @param beginTime begin time. format:"2022-04-25 00:00:00"
+   * @param endTime end time. formae:"2022-04-28 00:00:00"
+   * @param totalSize total size. the max value is 10000
+   * @throws TigerApiException
+   */
+  public static List<KlinePoint> getKlineByPage(String symbol, KType period,
+      String beginTime, String endTime, int totalSize) throws TigerApiException {
+    return getKlineByPage(symbol, period, beginTime, endTime,
+        DEFAULT_ZONEID, RightOption.br, DEFAULT_PAGE_SIZE, totalSize, DEFAULT_TIME_INTERVAL);
   }
 
   /**
@@ -67,7 +83,7 @@ public class PageTokenUtil {
   }
 
   /**
-   * get futrue kline data by page, return the merge result
+   * get futrue kline data by page, return the merge result(use default pageSize:1000, 10 queries in total)
    * @param symbol contract code
    * @param period kline tpye
    * @param beginTime begin time. format:"2022-04-25 00:00:00"
@@ -77,7 +93,22 @@ public class PageTokenUtil {
   public static List<FutureKlineItem> getKlineByPage(String symbol, FutureKType period,
       String beginTime, String endTime) throws TigerApiException {
     return getKlineByPage(symbol, period, beginTime, endTime,
-        DEFAULT_ZONEID, DEFAULT_PAGE_SIZE, DEFAULT_TOTAL_SIZE, DEFAULT_TIME_INTERVAL);
+        DEFAULT_ZONEID, DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE * DEFAULT_BATCH_TIME, DEFAULT_TIME_INTERVAL);
+  }
+
+  /**
+   * get futrue kline data by page, return the merge result(use default pageSize:1000, 10 queries in total)
+   * @param symbol contract code
+   * @param period kline tpye
+   * @param beginTime begin time. format:"2022-04-25 00:00:00"
+   * @param endTime end time. formae:"2022-04-28 00:00:00"
+   * @param totalSize total size. the max value is 10000
+   * @throws TigerApiException
+   */
+  public static List<FutureKlineItem> getKlineByPage(String symbol, FutureKType period,
+      String beginTime, String endTime, int totalSize) throws TigerApiException {
+    return getKlineByPage(symbol, period, beginTime, endTime,
+        DEFAULT_ZONEID, DEFAULT_PAGE_SIZE, totalSize, DEFAULT_TIME_INTERVAL);
   }
 
   /**
@@ -124,7 +155,10 @@ public class PageTokenUtil {
       throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "symbol");
     }
     if (totalSize <= 0) {
-      totalSize = DEFAULT_TOTAL_SIZE;
+      totalSize = DEFAULT_PAGE_SIZE * DEFAULT_BATCH_TIME;
+    }
+    if (totalSize > MAX_TOTAL_SIZE) {
+      throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_ERROR, "'totalSize' exceeds maximum: 10000");
     }
     if (pageSize <= 0) {
       pageSize = DEFAULT_PAGE_SIZE;
