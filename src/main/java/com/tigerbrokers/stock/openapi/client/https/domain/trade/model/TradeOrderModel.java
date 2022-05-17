@@ -139,6 +139,10 @@ public class TradeOrderModel extends ApiModel {
   private List<TagValue> algoParams;
 
   private String source;
+  /**
+   * 用户备注信息
+   */
+  private String remark;
 
   /**
    * 附加订单类型：
@@ -397,6 +401,14 @@ public class TradeOrderModel extends ApiModel {
 
   public void setSource(String source) {
     this.source = source;
+  }
+
+  public String getRemark() {
+    return remark;
+  }
+
+  public void setRemark(String remark) {
+    this.remark = remark;
   }
 
   public AttachType getAttachType() {
