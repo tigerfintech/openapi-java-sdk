@@ -158,7 +158,7 @@ public class PageTokenUtil {
       totalSize = DEFAULT_PAGE_SIZE * DEFAULT_BATCH_TIME;
     }
     if (totalSize > MAX_TOTAL_SIZE) {
-      throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_ERROR, "'totalSize' exceeds maximum: 10000");
+      throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_ERROR, "'totalSize' exceeds maximum: " + MAX_TOTAL_SIZE);
     }
     if (pageSize <= 0) {
       pageSize = DEFAULT_PAGE_SIZE;

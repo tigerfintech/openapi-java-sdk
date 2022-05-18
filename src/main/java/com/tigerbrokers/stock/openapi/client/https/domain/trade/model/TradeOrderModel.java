@@ -142,7 +142,8 @@ public class TradeOrderModel extends ApiModel {
   /**
    * 用户备注信息
    */
-  private String remark;
+  @JSONField(name = "user_mark")
+  private String userMark;
 
   /**
    * 附加订单类型：
@@ -403,12 +404,12 @@ public class TradeOrderModel extends ApiModel {
     this.source = source;
   }
 
-  public String getRemark() {
-    return remark;
+  public String getUserMark() {
+    return userMark;
   }
 
-  public void setRemark(String remark) {
-    this.remark = remark;
+  public void setUserMark(String userMark) {
+    this.userMark = userMark;
   }
 
   public AttachType getAttachType() {
