@@ -24,7 +24,13 @@ public class OptionKlinePoint extends KlinePoint {
   @Override
   public String toString() {
     return "OptionKlinePoint{" +
-        "openInterest=" + openInterest +
+        "open=" + getOpen() +
+        ", close=" + getClose() +
+        ", high=" + getHigh() +
+        ", low=" + getLow() +
+        ", time=" + getTime() +
+        ", volume=" + getVolume() +
+        ", openInterest=" + openInterest +
         '}';
   }
 }

@@ -193,6 +193,12 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     model.setStopLossTif(stopLossTif);
   }
 
+  public TradeOrderRequest withUserMark(String userMark) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setUserMark(userMark);
+    return this;
+  }
+
   @Override
   public Class<TradeOrderResponse> getResponseClass() {
     return TradeOrderResponse.class;
