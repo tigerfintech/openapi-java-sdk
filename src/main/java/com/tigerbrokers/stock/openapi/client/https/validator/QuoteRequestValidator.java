@@ -34,11 +34,12 @@ public class QuoteRequestValidator implements RequestValidator<ApiModel> {
       if (StringUtils.isEmpty(quoteDepthModel.getMarket())) {
         throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "market");
       }
-      Market market = Market.valueOf(quoteDepthModel.getMarket().toUpperCase());
-      if (null == market) {
+      try {
+        Market market = Market.valueOf(quoteDepthModel.getMarket().toUpperCase());
+        quoteDepthModel.setMarket(market.name());
+      } catch (Exception e) {
         throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "market");
       }
-      quoteDepthModel.setMarket(market.name());
     } else if (model instanceof QuoteMarketModel) {
       // interface: ALL_SYMBOLS(need market or package_name) ALL_SYMBOL_NAMES(must have market)  MARKET_STATE(must have market)
       // in the server side Market Enume is StockMarket

@@ -17,8 +17,10 @@ public class FutureExchangeRequestValidator implements RequestValidator<FutureEx
     if (StringUtils.isEmpty(model.getSecType())) {
       throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "sec_type");
     }
-    SecType secType = SecType.valueOf(model.getSecType().toUpperCase());
-    if (null == secType) {
+    SecType secType;
+    try {
+      secType = SecType.valueOf(model.getSecType().toUpperCase());
+    } catch (Exception e) {
       throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "sec_type");
     }
     if (SecType.FUT != secType && SecType.FOP != secType) {

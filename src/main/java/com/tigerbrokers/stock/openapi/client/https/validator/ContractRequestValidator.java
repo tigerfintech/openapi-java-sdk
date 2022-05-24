@@ -22,11 +22,12 @@ public class ContractRequestValidator implements RequestValidator<BaseContractMo
     if (StringUtils.isEmpty(model.getSecType())) {
       throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "sec_type");
     }
-    SecType secType = SecType.valueOf(model.getSecType().toUpperCase());
-    if (secType == null) {
+    try {
+      SecType secType = SecType.valueOf(model.getSecType().toUpperCase());
+      model.setSecType(secType.name());
+    } catch (Exception e) {
       throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "sec_type");
     }
-    model.setSecType(secType.name());
 
     if (model instanceof ContractModel) {
       if (StringUtils.isEmpty(((ContractModel) model).getSymbol())) {

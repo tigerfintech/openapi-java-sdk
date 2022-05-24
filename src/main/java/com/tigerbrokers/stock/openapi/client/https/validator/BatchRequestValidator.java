@@ -36,11 +36,12 @@ public class BatchRequestValidator implements RequestValidator<BatchApiModel<? e
           throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "expiry");
         }
 
-        Right rightEnum = Right.valueOf(model.getRight().toUpperCase());
-        if (null == rightEnum) {
+        try {
+          Right rightEnum = Right.valueOf(model.getRight().toUpperCase());
+          model.setRight(rightEnum.name());
+        } catch (Exception e) {
           throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "right");
         }
-        model.setRight(rightEnum.name());
 
         if (null == model.getBeginTime()) {
           throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "begin_time");
@@ -67,11 +68,12 @@ public class BatchRequestValidator implements RequestValidator<BatchApiModel<? e
           throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "expiry");
         }
 
-        Right rightEnum = Right.valueOf(model.getRight().toUpperCase());
-        if (null == rightEnum) {
+        try {
+          Right rightEnum = Right.valueOf(model.getRight().toUpperCase());
+          model.setRight(rightEnum.name());
+        } catch (Exception e) {
           throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "right");
         }
-        model.setRight(rightEnum.name());
       }
     }
   }
