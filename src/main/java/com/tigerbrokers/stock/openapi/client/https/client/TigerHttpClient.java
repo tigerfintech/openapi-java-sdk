@@ -200,6 +200,7 @@ public class TigerHttpClient implements TigerClient {
     String data = null;
     try {
       validate(request);
+      // after successful verification（string enumeration values may be reset）, generate JSON data
       param = JSONObject.toJSONString(buildParams(request));
       ApiLogger.debug("request param:{}", param);
 

@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.https.validator;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionChainModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionCommonModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionKlineModel;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Right;
@@ -73,6 +74,28 @@ public class BatchRequestValidator implements RequestValidator<BatchApiModel<? e
           model.setRight(rightEnum.name());
         } catch (Exception e) {
           throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "right");
+        }
+
+        if (model instanceof OptionKlineModel) {
+          OptionKlineModel optionKlineModel = (OptionKlineModel)model;
+          if (null == optionKlineModel.getBeginTime()) {
+            throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "begin_time");
+          }
+          if (null == optionKlineModel.getEndTime()) {
+            throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "end_time");
+          }
+          if (optionKlineModel.getBeginTime().compareTo(optionKlineModel.getEndTime()) >= 0) {
+            throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_RANGE_ERROR, "begin_time", "end_time");
+          }
+        }
+      }
+    } else if (models.get(0) instanceof OptionChainModel) {
+      for (OptionChainModel model : (List<OptionChainModel>) batchApiModel.getItems()) {
+        if (StringUtils.isEmpty(model.getSymbol())) {
+          throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "symbol");
+        }
+        if (null == model.getExpiry()) {
+          throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "expiry");
         }
       }
     }

@@ -59,7 +59,7 @@ public class QuoteRequestValidator implements RequestValidator<ApiModel> {
           throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "sec_type");
         }
         if (SecType.OPT != secType && SecType.WAR != secType && SecType.IOPT != secType) {
-          throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_CONCTRACT_SECTYPE_ERROR, "sec_type");
+          throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_CONCTRACT_SECTYPE_ERROR, secType.name());
         }
         if (SecType.OPT == secType && StringUtils.isEmpty(quoteContractModel.getExpiry())) {
           throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "expiry");
