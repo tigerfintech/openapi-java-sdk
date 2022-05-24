@@ -20,7 +20,14 @@ import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureTra
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionChainModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionChainV3Model;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionExpirationModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteContractModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteDepthModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteHistoryTimelineModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteKlineModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteMarketModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteStockTradeModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteTimelineModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteTradeTickModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +45,15 @@ public class ValidatorManager {
     ContractRequestValidator contractRequestValidator = new ContractRequestValidator();
     validatorMap.put(ContractModel.class, contractRequestValidator);
     validatorMap.put(ContractsModel.class, contractRequestValidator);
+
+    QuoteRequestValidator quoteRequestValidator = new QuoteRequestValidator();
+    validatorMap.put(QuoteDepthModel.class, quoteRequestValidator);
+    validatorMap.put(QuoteMarketModel.class, quoteRequestValidator);
+    validatorMap.put(QuoteStockTradeModel.class, quoteRequestValidator);
+    validatorMap.put(QuoteContractModel.class, quoteRequestValidator);
+    validatorMap.put(QuoteTimelineModel.class, quoteRequestValidator);
+    validatorMap.put(QuoteHistoryTimelineModel.class, quoteRequestValidator);
+    validatorMap.put(QuoteTradeTickModel.class, quoteRequestValidator);
 
     FutureContractRequestValidator futureContractRequestValidator = new FutureContractRequestValidator();
     validatorMap.put(FutureContinuousContractModel.class, futureContractRequestValidator);

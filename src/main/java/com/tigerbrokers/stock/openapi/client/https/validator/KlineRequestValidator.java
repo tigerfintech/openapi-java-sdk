@@ -20,6 +20,9 @@ public class KlineRequestValidator implements RequestValidator<ApiModel> {
       if (klineModel.getSymbols() == null || klineModel.getSymbols().isEmpty()) {
         throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "symbols");
       }
+      if (StringUtils.isEmpty(klineModel.getkType())) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "period");
+      }
       if (!StringUtils.isEmpty(klineModel.getPageToken()) && klineModel.getSymbols().size() != 1) {
         throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_ERROR, "pageToken is only for single symbol");
       }

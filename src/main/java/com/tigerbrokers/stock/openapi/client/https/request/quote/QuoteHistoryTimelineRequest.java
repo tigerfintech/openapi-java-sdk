@@ -30,19 +30,15 @@ public class QuoteHistoryTimelineRequest extends TigerCommonRequest implements T
 
   public static QuoteHistoryTimelineRequest newRequest(List<String> symbols, String date, Language lang) {
     QuoteHistoryTimelineRequest request = new QuoteHistoryTimelineRequest();
-    QuoteHistoryTimelineModel model = new QuoteHistoryTimelineModel(symbols, date);
-    model.setLang(lang);
+    QuoteHistoryTimelineModel model = new QuoteHistoryTimelineModel(symbols, date, lang);
+    model.setRight(RightOption.br);
     request.setApiModel(model);
     return request;
   }
 
   public QuoteHistoryTimelineRequest withRight(RightOption rightOption) {
-    if (rightOption != null) {
-      if (apiModel instanceof QuoteHistoryTimelineModel) {
-        QuoteHistoryTimelineModel timelimeModel = (QuoteHistoryTimelineModel) apiModel;
-        timelimeModel.setRight(rightOption);
-      }
-    }
+    QuoteHistoryTimelineModel timelimeModel = (QuoteHistoryTimelineModel) apiModel;
+    timelimeModel.setRight(rightOption);
     return this;
   }
 
