@@ -29,6 +29,19 @@ public class KlineRequestValidator implements RequestValidator<ApiModel> {
       if (symbols == null || symbols.isEmpty()) {
         throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "contractCodes");
       }
+      if (StringUtils.isEmpty(klineModel.getPeriod())) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "period");
+      }
+      if (null == klineModel.getBeginTime()) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "begin_time");
+      }
+      if (null == klineModel.getEndTime()) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "end_time");
+      }
+      if (klineModel.getBeginTime().compareTo(klineModel.getEndTime()) >= 0) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_RANGE_ERROR, "begin_time", "end_time");
+      }
+
       if (!StringUtils.isEmpty(klineModel.getPageToken()) && klineModel.getContractCodes().size() != 1) {
         throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_ERROR, "pageToken is only for single contractCode");
       }

@@ -46,7 +46,6 @@ public class NetworkUtilTest {
       config.setEnv(Env.PROD);
       config.setSubscribeProtocol(Protocol.STOMP_WEBSOCKET);
       System.out.println("\r\nenv:" + config.getEnv()
-          + ", license:" + config.getLicense()
           + ", subscribeProtocal:" + config.getSubscribeProtocol());
       System.out.println(NetworkUtil.getHttpServerAddress(null));
       Assert.assertEquals("https://openapi.tigerfintech.com/gateway", NetworkUtil.getHttpServerAddress(null));
@@ -60,7 +59,6 @@ public class NetworkUtilTest {
       config.setEnv(Env.SANDBOX);
       config.setSubscribeProtocol(Protocol.STOMP_WEBSOCKET);
       System.out.println("\r\nenv:" + config.getEnv()
-          + ", license:" + config.getLicense()
           + ", subscribeProtocal:" + config.getSubscribeProtocol());
       System.out.println(NetworkUtil.getHttpServerAddress(null));
       Assert.assertEquals("https://openapi-sandbox.tigerfintech.com/gateway", NetworkUtil.getHttpServerAddress(null));

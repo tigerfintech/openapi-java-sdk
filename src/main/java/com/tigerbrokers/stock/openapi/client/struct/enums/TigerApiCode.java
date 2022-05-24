@@ -40,6 +40,7 @@ public enum TigerApiCode implements CodeEnumType {
   HTTP_BIZ_PARAM_ERROR(10100, "client biz param error(%s)"),
   HTTP_BIZ_PARAM_EMPTY_ERROR(10101, "client biz param error(%s is requried)"),
   HTTP_BIZ_PARAM_VALUE_ERROR(10102, "client biz param error(%s is incorrect)"),
+  HTTP_BIZ_PARAM_RANGE_ERROR(10103, "client biz param error('%s' cannot be greater than '%s')"),
   ;
 
   int code;
