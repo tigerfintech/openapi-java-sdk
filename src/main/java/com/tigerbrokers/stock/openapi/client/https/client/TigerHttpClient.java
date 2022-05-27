@@ -9,20 +9,13 @@ import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
-import com.tigerbrokers.stock.openapi.client.https.domain.contract.model.ContractModel;
-import com.tigerbrokers.stock.openapi.client.https.domain.contract.model.ContractsModel;
-import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureKlineModel;
-import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteKlineModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerHttpResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.contract.ContractResponse;
-import com.tigerbrokers.stock.openapi.client.https.validator.ContractRequestValidator;
-import com.tigerbrokers.stock.openapi.client.https.validator.KlineRequestValidator;
-import com.tigerbrokers.stock.openapi.client.https.validator.PlaceOrderRequestValidator;
-import com.tigerbrokers.stock.openapi.client.https.validator.RequestValidator;
+import com.tigerbrokers.stock.openapi.client.https.validator.ValidatorManager;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
@@ -67,7 +60,6 @@ public class TigerHttpClient implements TigerClient {
   private String tradeToken;
   private String accountType;
   private String deviceId;
-  private Map<Class<? extends ApiModel>, RequestValidator> validatorMap = new HashMap<>();
 
   private static final String ONLINE_PUBLIC_KEY =
       "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDNF3G8SoEcCZh2rshUbayDgLLrj6rKgzNMxDL2HSnKcB0+GPOsndqSv+a4IBu9+I3fyBp5hkyMMG2+AXugd9pMpy6VxJxlNjhX1MYbNTZJUT4nudki4uh+LMOkIBHOceGNXjgB+cXqmlUnjlqha/HgboeHSnSgpM3dKSJQlIOsDwIDAQAB";
@@ -141,16 +133,6 @@ public class TigerHttpClient implements TigerClient {
       this.tigerPublicKey = SANDBOX_PUBLIC_KEY;
     }
     this.deviceId = NetworkUtil.getDeviceId();
-    initValidator();
-  }
-  private void initValidator() {
-    ContractRequestValidator contractRequestValidator = new ContractRequestValidator();
-    validatorMap.put(ContractModel.class, contractRequestValidator);
-    validatorMap.put(ContractsModel.class, contractRequestValidator);
-    validatorMap.put(TradeOrderModel.class, new PlaceOrderRequestValidator());
-    KlineRequestValidator klineRequestValidator = new KlineRequestValidator();
-    validatorMap.put(QuoteKlineModel.class, klineRequestValidator);
-    validatorMap.put(FutureKlineModel.class, klineRequestValidator);
   }
 
   @Deprecated
@@ -218,6 +200,7 @@ public class TigerHttpClient implements TigerClient {
     String data = null;
     try {
       validate(request);
+      // after successful verification（string enumeration values may be reset）, generate JSON data
       param = JSONObject.toJSONString(buildParams(request));
       ApiLogger.debug("request param:{}", param);
 
@@ -349,11 +332,6 @@ public class TigerHttpClient implements TigerClient {
       return;
     }
     // TigerCommonRequest
-    ApiModel apiModel = request.getApiModel();
-    RequestValidator validator = validatorMap.get(apiModel.getClass());
-    if (validator == null) {
-      return;
-    }
-    validator.validate(apiModel);
+    ValidatorManager.getInstance().validate(request.getApiModel());
   }
 }
