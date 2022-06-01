@@ -81,6 +81,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private Bootstrap bootstrap = null;
   private volatile Channel channel = null;
   private ChannelFuture future = null;
+  private SslContext sslCtx;
 
   private volatile boolean isInitial = false;
   private volatile ScheduledFuture<?> reconnectExecutorFuture = null;
@@ -203,7 +204,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     if (protocols == null || protocols.length == 0) {
       throw new RuntimeException("supported protocols is empty.");
     }
-    SslContext sslCtx =
+    sslCtx =
         SslContextBuilder.forClient()
             .protocols(protocols)
             .trustManager(InsecureTrustManagerFactory.INSTANCE)
