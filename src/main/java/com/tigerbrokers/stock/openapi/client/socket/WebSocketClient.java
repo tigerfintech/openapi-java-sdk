@@ -81,7 +81,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private Bootstrap bootstrap = null;
   private volatile Channel channel = null;
   private ChannelFuture future = null;
-  private SslContext sslCtx;
 
   private volatile boolean isInitial = false;
   private volatile ScheduledFuture<?> reconnectExecutorFuture = null;
