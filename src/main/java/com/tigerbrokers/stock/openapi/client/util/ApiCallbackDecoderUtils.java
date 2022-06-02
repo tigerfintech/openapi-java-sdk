@@ -32,6 +32,7 @@ public class ApiCallbackDecoderUtils {
 
     switch (frame.command()) {
       case CONNECTED:
+        ApiLogger.info("connect token validation succeeded:{}", frame);
         if (decoder.getCallback() != null) {
           if (frame.headers().contains(HEART_BEAT)) {
             String value = frame.headers().getAsString(HEART_BEAT);
