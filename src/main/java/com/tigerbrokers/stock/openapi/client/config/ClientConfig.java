@@ -27,7 +27,7 @@ public class ClientConfig {
 
   private SslProvider sslProvider = DEFAULT_SSLPROVIDER;
 
-  public String stompVersion = StompHeaderBuilder.VERSION;
+  public String stompVersion = StompHeaderBuilder.DEFAULT_STOMP_VERSION;
 
   /**
    * http interface server url

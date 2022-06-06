@@ -20,7 +20,10 @@ public class StompHeaderBuilder {
 
   public static final String REQ_TYPE = ReqProtocolType.REQ_HEADER;
   public static final String FOCUS_KEYS = "keys";
-  public static final String VERSION = "1.0";
+  public static final String STOMP_VERSION_10 = "1.0";
+  public static final String STOMP_VERSION_11 = "1.1";
+  public static final String STOMP_VERSION_12 = "1.2";
+  public static final String DEFAULT_STOMP_VERSION = STOMP_VERSION_10;
   public static final String HOST = "localhost";
   public static final String ACCOUNT = "account";
   public static final String SYMBOLS = "symbols";
@@ -37,7 +40,7 @@ public class StompHeaderBuilder {
   }
 
   public StompHeaderBuilder version() {
-    return version(VERSION);
+    return version(DEFAULT_STOMP_VERSION);
   }
 
   public StompHeaderBuilder version(String version) {

@@ -13,7 +13,7 @@ public class ApiAuthentication {
 
   private String tigerId;
   private String sign;
-  private String version = StompHeaderBuilder.VERSION;
+  private String version = StompHeaderBuilder.DEFAULT_STOMP_VERSION;
 
   public ApiAuthentication(String tigerId) {
     this.tigerId = tigerId;
@@ -40,7 +40,7 @@ public class ApiAuthentication {
   }
 
   public static ApiAuthentication build(String tigerId, String privateKey) {
-    return build(tigerId, privateKey, StompHeaderBuilder.VERSION);
+    return build(tigerId, privateKey, StompHeaderBuilder.DEFAULT_STOMP_VERSION);
   }
 
   public static ApiAuthentication build(String tigerId, String privateKey, String version) {
