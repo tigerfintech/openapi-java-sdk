@@ -74,11 +74,14 @@ public class NetworkUtilTest {
   @Test
   public void testGetOpenSslSupportedProtocolsSet() {
     String[] protocols = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3", "TLSv1.4"};
-    String[] protocolsJdk = NetworkUtil.getOpenSslSupportedProtocolsSet(protocols, SslProvider.JDK);
-    ApiLogger.info("jdk: {}", protocolsJdk);
-    Assert.assertArrayEquals(new String[] {"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3", "TLSv1.4"}, protocolsJdk);
-    String[] protocols2 = NetworkUtil.getOpenSslSupportedProtocolsSet(protocols, SslProvider.OPENSSL);
-    ApiLogger.info("OPENSSL: {}", protocols2);
-    Assert.assertArrayEquals(new String[] {"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"}, protocols2);
+    String[] protocolsJdk = NetworkUtil.getSupportedProtocolsSet(protocols, SslProvider.JDK);
+    ApiLogger.info("JDK: {}", protocolsJdk);
+    Assert.assertArrayEquals(new String[] {"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"}, protocolsJdk);
+    String[] opensslProtocols = NetworkUtil.getSupportedProtocolsSet(protocols, SslProvider.OPENSSL);
+    ApiLogger.info("OPENSSL: {}", opensslProtocols);
+    Assert.assertArrayEquals(new String[] {"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"}, opensslProtocols);
+    String[] opensslProtocols2 = NetworkUtil.getSupportedProtocolsSet(protocols, SslProvider.OPENSSL_REFCNT);
+    ApiLogger.info("OPENSSL_REFCNT: {}", opensslProtocols2);
+    Assert.assertArrayEquals(new String[] {"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"}, opensslProtocols2);
   }
 }

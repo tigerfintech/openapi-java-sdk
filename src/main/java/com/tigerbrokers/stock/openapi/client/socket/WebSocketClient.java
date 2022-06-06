@@ -204,7 +204,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     group = new NioEventLoopGroup(1);
     bootstrap = new Bootstrap();
     SslProvider provider = this.sslProvider == null ? SslProvider.OPENSSL : this.sslProvider;
-    final String[] protocols = NetworkUtil.getOpenSslSupportedProtocolsSet(PROTOCOLS, provider);
+    final String[] protocols = NetworkUtil.getSupportedProtocolsSet(PROTOCOLS, provider);
     if (protocols == null || protocols.length == 0) {
       throw new RuntimeException("supported protocols is empty.");
     }

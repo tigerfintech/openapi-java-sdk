@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.DEFAULT_DOMAIN_KEY;
 
@@ -149,36 +152,27 @@ public class NetworkUtil {
     }
   }
 
-  public static String[] getOpenSslSupportedProtocolsSet(String[] serverSupportedProtocols,
-      SslProvider sslProvider) {
+  public static String[] getSupportedProtocolsSet(String[] serverSupportedProtocols, SslProvider sslProvider) {
     if (serverSupportedProtocols == null || serverSupportedProtocols.length == 0) {
       ApiLogger.error("Server Supported protocols (OpenSSL) is empty. serverSupportedProtocols:{}", serverSupportedProtocols);
       return serverSupportedProtocols;
     }
+    Set<String> localSupportedProtocols;
+    if (sslProvider == SslProvider.JDK) {
+      localSupportedProtocols = getJdkSupportedProtocolsSet();
+    } else {
+      localSupportedProtocols = getOpenSSLSupportedProtocolsSet();
+    }
+    if (localSupportedProtocols.isEmpty()) {
+      ApiLogger.error("Local Supported protocols ({}): {}, is empty", sslProvider, localSupportedProtocols);
+      return null;
+    }
 
-    Set<String> supportedProtocolsSet = Collections.emptySet();
-    if (sslProvider == SslProvider.OPENSSL) {
-      Set<String> localSupportedProtocols = Collections.emptySet();
-      try {
-        Field supportedProtocolsSetField = OpenSsl.class.getDeclaredField("SUPPORTED_PROTOCOLS_SET");
-        if (supportedProtocolsSetField != null) {
-          supportedProtocolsSetField.setAccessible(true);
-          localSupportedProtocols = (Set<String>) supportedProtocolsSetField.get(OpenSsl.class);
-        }
-      } catch (Throwable th) {
-        ApiLogger.error("getOpenSslSupportedProtocolsSet exception:{}", th.getMessage(), th);
-      }
-      if (localSupportedProtocols.isEmpty()) {
-        ApiLogger.error("Local Supported protocols (OpenSSL): {}, is empty", localSupportedProtocols);
-        return null;
-      }
-
-      ApiLogger.info("Local Supported protocols (OpenSSL): {}", localSupportedProtocols);
-      supportedProtocolsSet = new LinkedHashSet<>();
-      for (String protocol : serverSupportedProtocols) {
-        if (localSupportedProtocols.contains(protocol)) {
-          supportedProtocolsSet.add(protocol);
-        }
+    ApiLogger.info("Local Supported protocols ({}): {}", sslProvider, localSupportedProtocols);
+    Set<String> supportedProtocolsSet = new LinkedHashSet<>();
+    for (String protocol : serverSupportedProtocols) {
+      if (localSupportedProtocols.contains(protocol)) {
+        supportedProtocolsSet.add(protocol);
       }
     }
 
@@ -189,6 +183,40 @@ public class NetworkUtil {
       return supportedProtocols;
     }
     return supportedProtocolsSet.toArray(new String[supportedProtocolsSet.size()]);
+  }
+
+  private static Set<String> getJdkSupportedProtocolsSet() {
+    SSLSocket socket = null;
+    try {
+      SSLContext context = SSLContext.getInstance("TLS");
+      context.init(null, null, null);
+      SSLSocketFactory factory = context.getSocketFactory();
+      socket = (SSLSocket) factory.createSocket();
+    } catch (Throwable th) {
+      ApiLogger.error("getJdkSupportedProtocolsSet exception:{}", th.getMessage(), th);
+    }
+    if (socket == null || socket.getSupportedProtocols() == null) {
+      return Collections.emptySet();
+    }
+    Set<String> localSupportedProtocols = new LinkedHashSet<>();
+    for (String protocol : socket.getSupportedProtocols()) {
+      localSupportedProtocols.add(protocol);
+    }
+    return localSupportedProtocols;
+  }
+
+  private static Set<String> getOpenSSLSupportedProtocolsSet() {
+    Set<String> localSupportedProtocols = Collections.emptySet();
+    try {
+      Field supportedProtocolsSetField = OpenSsl.class.getDeclaredField("SUPPORTED_PROTOCOLS_SET");
+      if (supportedProtocolsSetField != null) {
+        supportedProtocolsSetField.setAccessible(true);
+        localSupportedProtocols = (Set<String>) supportedProtocolsSetField.get(OpenSsl.class);
+      }
+    } catch (Throwable th) {
+      ApiLogger.error("getOpenSSLSupportedProtocolsSet exception:{}", th.getMessage(), th);
+    }
+    return localSupportedProtocols;
   }
 
   private static String getDefaultPort(ClientConfig clientConfig, Protocol protocol) {
