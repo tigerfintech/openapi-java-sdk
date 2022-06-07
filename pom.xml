@@ -9,6 +9,11 @@
   <artifactId>openapi-java-sdk</artifactId>
   <packaging>jar</packaging>
 
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
+
   <name>openapi-java-sdk</name>
   <description>tiger open-api sdk in java version</description>
   <licenses>
@@ -42,7 +47,7 @@
     <dependency>
       <groupId>com.alibaba</groupId>
       <artifactId>fastjson</artifactId>
-      <version>1.2.47</version>
+      <version>1.2.83</version>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
@@ -87,6 +92,7 @@
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
+          <encoding>utf-8</encoding>
         </configuration>
       </plugin>
       <plugin>
