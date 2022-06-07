@@ -87,8 +87,8 @@ public class ApiCallbackDecoderUtils {
               JSONObject jsonObject = JSONObject.parseObject(content);
               if (jsonObject.getIntValue("code") == TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode()) {
                 ApiLogger.info(content);
-                // stop reconnect and close the connection(Do not send reconnect command)
-                WebSocketClient.getInstance().destroyConnect(false);
+                // close the connection(Do not send disconnect command)
+                WebSocketClient.getInstance().closeConnect(false);
                 String errMessage = jsonObject.getString("message");
                 // callback
                 decoder.getCallback().connectionKickoff(TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode(),

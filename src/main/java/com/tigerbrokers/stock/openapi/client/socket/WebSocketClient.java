@@ -380,18 +380,18 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   /**
-   * destroy the reconnect thread then send disconnect command and close the connection
+   * destroy the reconnect thread, then send disconnect command and close the connection
    * <p>Note: Sending the disconnect command will cancel all subscription data</p>
    */
   public void disconnect() {
-    destroyConnect(true);
+    closeConnect(true);
   }
 
   /**
-   * destroy the reconnect thread then close the connection
+   * close the connection
    * @sendDisconnectCommand true:send disconnect command
    */
-  public void destroyConnect(boolean sendDisconnectCommand) {
+  public void closeConnect(boolean sendDisconnectCommand) {
     destroyConnectCommand();
     if (sendDisconnectCommand) {
       sendDisconnectFrame();
