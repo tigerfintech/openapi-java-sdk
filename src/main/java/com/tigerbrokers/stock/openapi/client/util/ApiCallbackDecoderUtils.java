@@ -34,7 +34,7 @@ public class ApiCallbackDecoderUtils {
 
     switch (frame.command()) {
       case CONNECTED:
-        ApiLogger.info("connect token validation succeeded:{}", frame);
+        ApiLogger.info("connect token validation success:{}", frame);
         if (decoder.getCallback() != null) {
           // set stomp version
           StompHeaderBuilder.setUseStompVersion(frame.headers().getAsString(VERSION));
