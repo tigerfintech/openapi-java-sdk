@@ -8,6 +8,8 @@ import com.tigerbrokers.stock.openapi.client.util.ApiCallbackDecoderUtils;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -63,7 +65,7 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
 
   @Override
   public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-    ApiLogger.info("netty channel inactive!，channel:{}", ctx.channel());
+    ApiLogger.info("netty channel inactive! channel:{}", ctx.channel());
     super.channelInactive(ctx);
     ctx.close();
   }
@@ -76,7 +78,7 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
 
   @Override
   protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-    ApiLogger.debug("WebSocketHandshakerHandler channelRead0  {}", this.handshaker.isHandshakeComplete());
+    ApiLogger.info("WebSocketHandshakerHandler channelRead0 isHandshakeComplete:{}", this.handshaker.isHandshakeComplete());
 
     Channel ch = ctx.channel();
     FullHttpResponse response;
@@ -85,17 +87,30 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
       //握手协议返回，设置结束握手
       handshaker.finishHandshake(ch, response);
       //发送stomp connect请求
+      StompFrame connectFrame;
       if (0 == this.clientReceiveInterval && 0 == this.clientSendInterval) {
-        ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
-            authentication.getVersion()));
+        connectFrame = StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
+            authentication.getVersion());
       } else {
-        ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
+        connectFrame = StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
             authentication.getVersion(),
             this.clientSendInterval == 0 ? 0 : this.clientSendInterval + WebSocketHandler.HEART_BEAT_SPAN,
-            this.clientReceiveInterval == 0 ? 0 : this.clientReceiveInterval - WebSocketHandler.HEART_BEAT_SPAN));
+            this.clientReceiveInterval == 0 ? 0 : this.clientReceiveInterval - WebSocketHandler.HEART_BEAT_SPAN);
       }
+      ApiLogger.info("WebSocket Client connected. channel:{}, response headers[sec-websocket-extensions]:{},"
+          + " then preparing to send connect token frame:{}", ch.id().asShortText(), response.headers(), connectFrame);
 
-      ApiLogger.info("WebSocket Client connected! response headers[sec-websocket-extensions]:{}", response.headers());
+      ctx.writeAndFlush(connectFrame).addListener(new ChannelFutureListener() {
+        @Override
+        public void operationComplete(ChannelFuture future) {
+          if (future.isSuccess()) {
+            ApiLogger.info("WebSocket Client send connect token frame successfully. channel:{}", ch.id().asShortText());
+          } else {
+            ApiLogger.error("WebSocket Client failed to send connect token. channel:{}, isDone:{}, cause:{}",
+                ch.id().asShortText(), future.isDone(), future.cause().getMessage());
+          }
+        }
+      });
     } else if (msg instanceof FullHttpResponse) {
       response = (FullHttpResponse) msg;
       throw new IllegalStateException(
@@ -104,7 +119,11 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
     } else {
       StompFrame stompFrame = (StompFrame) msg;
       ApiLogger.debug("received stop frame from server: {}", stompFrame);
-      ApiCallbackDecoderUtils.executor(ctx, stompFrame, decoder);
+      try {
+        ApiCallbackDecoderUtils.executor(ctx, stompFrame, decoder);
+      } catch (Throwable th) {
+        ApiLogger.error("api callback fail. stompFrame:{}", stompFrame, th);
+      }
     }
   }
 }

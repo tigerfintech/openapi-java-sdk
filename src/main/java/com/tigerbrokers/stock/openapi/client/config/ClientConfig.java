@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.config;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
+import com.tigerbrokers.stock.openapi.client.util.builder.StompHeaderBuilder;
 import io.netty.handler.ssl.SslProvider;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,6 +26,8 @@ public class ClientConfig {
   private Env env = DEFAULT_ENV;
 
   private SslProvider sslProvider = DEFAULT_SSLPROVIDER;
+
+  public String stompVersion = StompHeaderBuilder.DEFAULT_STOMP_VERSION;
 
   /**
    * http interface server url
@@ -95,7 +98,7 @@ public class ClientConfig {
   }
 
   /**
-   * read private key from file
+   * read private key from file(Remove first and last lines and line breaks)
    *
    * @param privateKeyFile absolute path
    * @return privateKey String

@@ -75,7 +75,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private ApiComposeCallback apiComposeCallback;
   private final Set<Subject> subscribeList = new CopyOnWriteArraySet<>();
   private final Set<String> subscribeSymbols = new ConcurrentSet<>();
-  private CountDownLatch connectCountDown = new CountDownLatch(1);
+  private volatile CountDownLatch connectCountDown = new CountDownLatch(1);
 
   private EventLoopGroup group = null;
   private Bootstrap bootstrap = null;
@@ -92,6 +92,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private AtomicBoolean reconnectErrorLogFlag = new AtomicBoolean(false);
 
   private static final int CONNECT_TIMEOUT = 5000;
+  private static final int OP_TIMEOUT = 5000;
   private static final long SHUTDOWN_TIMEOUT = 1000 * 60 * 15;
   private static final int RECONNECT_WARNING_PERIOD = 1800;
   private static final long RECONNECT_DELAY_TIME = 3 * 1000;
@@ -139,6 +140,9 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
     if (this.authentication == null) {
       ApiAuthentication authentication = ApiAuthentication.build(clientConfig.tigerId, clientConfig.privateKey);
+      if (!StringUtils.isEmpty(clientConfig.stompVersion)) {
+        authentication.setVersion(clientConfig.stompVersion);
+      }
       this.authentication = authentication;
     }
     return this;
@@ -200,11 +204,11 @@ public class WebSocketClient implements SubscribeAsyncApi {
     group = new NioEventLoopGroup(1);
     bootstrap = new Bootstrap();
     SslProvider provider = this.sslProvider == null ? SslProvider.OPENSSL : this.sslProvider;
-    final String[] protocols = NetworkUtil.getOpenSslSupportedProtocolsSet(PROTOCOLS, provider);
+    final String[] protocols = NetworkUtil.getSupportedProtocolsSet(PROTOCOLS, provider);
     if (protocols == null || protocols.length == 0) {
       throw new RuntimeException("supported protocols is empty.");
     }
-    SslContext sslCtx =
+    sslCtx =
         SslContextBuilder.forClient()
             .protocols(protocols)
             .trustManager(InsecureTrustManagerFactory.INSTANCE)
@@ -212,6 +216,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
             .build();
 
     bootstrap.group(group).option(ChannelOption.TCP_NODELAY, true)
+        .option(ChannelOption.SO_KEEPALIVE, true)
         .channel(NioSocketChannel.class)
         .handler(new ChannelInitializer<SocketChannel>() {
           @Override
@@ -312,7 +317,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
               channelFuture.sync();
             }
           }
-          connectCountDown.await(5000, TimeUnit.MILLISECONDS);
+          connectCountDown.await(OP_TIMEOUT, TimeUnit.MILLISECONDS);
+          if (connectCountDown.getCount() > 0) {
+            this.channel.close();
+          }
         }
       } else if (future.cause() != null) {
         throw new Exception("client failed to connect to server, error message is:" + future.cause().getMessage(),
@@ -372,11 +380,22 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   /**
-   * destroy the reconnect thread and close the connection
+   * destroy the reconnect thread, then send disconnect command and close the connection
+   * <p>Note: Sending the disconnect command will cancel all subscription data</p>
    */
   public void disconnect() {
+    closeConnect(true);
+  }
+
+  /**
+   * close the connection
+   * @sendDisconnectCommand true:send disconnect command
+   */
+  public void closeConnect(boolean sendDisconnectCommand) {
     destroyConnectCommand();
-    sendDisconnectFrame();
+    if (sendDisconnectCommand) {
+      sendDisconnectFrame();
+    }
     try {
       if (channel != null) {
         channel.close();
@@ -427,7 +446,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   public boolean isConnected() {
-    if (channel == null) {
+    if (channel == null || connectCountDown.getCount() > 0) {
       return false;
     }
     return channel.isActive();

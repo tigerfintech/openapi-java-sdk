@@ -65,7 +65,7 @@ public class StompMessageUtil {
     } else {
       stompFrame = new DefaultStompFrame(StompCommand.SEND);
     }
-    StompHeaders headers = StompHeaderBuilder.instance().id(id).version().host().reqType(reqType).build();
+    StompHeaders headers = StompHeaderBuilder.instance().id(id).host().reqType(reqType).build();
     stompFrame.headers().set(headers);
 
     return stompFrame;
@@ -80,7 +80,7 @@ public class StompMessageUtil {
     } else {
       stompFrame = new DefaultStompFrame(StompCommand.SEND);
     }
-    StompHeaders headers = StompHeaderBuilder.instance().id(id).version().host().build();
+    StompHeaders headers = StompHeaderBuilder.instance().id(id).host().build();
     stompFrame.headers().set(headers);
 
     return stompFrame;
@@ -89,7 +89,7 @@ public class StompMessageUtil {
   public static StompFrame buildSubscribeMessage(Subject subject) {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
     int id = increment.addAndGet(1);
-    StompHeaders headers = StompHeaderBuilder.instance().id(id).version().host().subject(subject).build();
+    StompHeaders headers = StompHeaderBuilder.instance().id(id).host().subject(subject).build();
     stompFrame.headers().set(headers);
     return stompFrame;
   }
@@ -99,7 +99,6 @@ public class StompMessageUtil {
     int id = increment.addAndGet(1);
     StompHeaders headers = StompHeaderBuilder.instance()
         .id(id)
-        .version()
         .account(account)
         .host()
         .subject(subject)
@@ -115,7 +114,6 @@ public class StompMessageUtil {
     StompHeaders headers =
         StompHeaderBuilder.instance()
             .id(id)
-            .version()
             .host()
             .subject(subject.name())
             .symbols(symbols)
@@ -130,7 +128,6 @@ public class StompMessageUtil {
     StompHeaders headers =
         StompHeaderBuilder.instance()
             .id(id)
-            .version()
             .host()
             .subject(subject.name())
             .symbols(symbols)
@@ -144,7 +141,7 @@ public class StompMessageUtil {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
     int id = increment.addAndGet(1);
     StompHeaders headers =
-        StompHeaderBuilder.instance().id(id).version().host().subject(subject).focusKeys(focusKeys).build();
+        StompHeaderBuilder.instance().id(id).host().subject(subject).focusKeys(focusKeys).build();
     stompFrame.headers().set(headers);
     return stompFrame;
   }
@@ -152,7 +149,7 @@ public class StompMessageUtil {
   public static StompFrame buildUnSubscribeMessage(Subject subject) {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.UNSUBSCRIBE);
     int id = increment.addAndGet(1);
-    StompHeaders headers = StompHeaderBuilder.instance().id(id).version().host().subject(subject).build();
+    StompHeaders headers = StompHeaderBuilder.instance().id(id).host().subject(subject).build();
     stompFrame.headers().set(headers);
     return stompFrame;
   }
@@ -161,14 +158,14 @@ public class StompMessageUtil {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.UNSUBSCRIBE);
     int id = increment.addAndGet(1);
     StompHeaders headers =
-        StompHeaderBuilder.instance().id(id).version().host().subject(subject.name()).symbols(symbols).build();
+        StompHeaderBuilder.instance().id(id).host().subject(subject.name()).symbols(symbols).build();
     stompFrame.headers().set(headers);
     return stompFrame;
   }
 
   public static StompFrame buildDisconnectMessage(String login) {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.DISCONNECT);
-    StompHeaders headers = StompHeaderBuilder.instance().login(login).version().host().build();
+    StompHeaders headers = StompHeaderBuilder.instance().login(login).host().build();
     stompFrame.headers().set(headers);
     return stompFrame;
   }
