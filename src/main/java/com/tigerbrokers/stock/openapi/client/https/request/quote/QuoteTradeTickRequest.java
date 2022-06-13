@@ -30,6 +30,14 @@ public class QuoteTradeTickRequest extends TigerCommonRequest implements TigerRe
     return request;
   }
 
+  public static QuoteTradeTickRequest newRequest(List<String> symbols, Language lang, Integer limit) {
+    QuoteTradeTickRequest request = new QuoteTradeTickRequest();
+    QuoteTradeTickModel model = new QuoteTradeTickModel(symbols, lang);
+    model.setLimit(limit);
+    request.setApiModel(model);
+    return request;
+  }
+
   @Deprecated
   public static QuoteTradeTickRequest newRequest(List<String> symbols, Long beginIndex, Long endIndex) {
     QuoteTradeTickRequest request = new QuoteTradeTickRequest();

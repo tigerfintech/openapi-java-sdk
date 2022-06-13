@@ -14,6 +14,7 @@ public class QuoteTradeTickModel extends QuoteSymbolModel {
   private Long beginIndex;
   @JSONField(name = "end_index")
   private Long endIndex;
+  private Integer limit;
 
   public QuoteTradeTickModel() {
 
@@ -53,5 +54,13 @@ public class QuoteTradeTickModel extends QuoteSymbolModel {
 
   public void setEndIndex(Long endIndex) {
     this.endIndex = endIndex;
+  }
+
+  public Integer getLimit() {
+    return limit;
+  }
+
+  public void setLimit(Integer limit) {
+    this.limit = limit;
   }
 }
