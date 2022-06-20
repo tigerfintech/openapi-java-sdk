@@ -12,7 +12,7 @@ public class SdkVersionUtils {
   private SdkVersionUtils(){}
 
   /**
-   * 获取sdk版本信息
+   * generate sdk version
    * @return sdk version
    */
   public static String getSdkVersion() {

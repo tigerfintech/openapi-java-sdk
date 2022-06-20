@@ -91,6 +91,22 @@ public interface SubscribeAsyncApi {
   String cancelSubscribeQuote(Set<String> symbols);
 
   /**
+   * subscribe stock trade tick data
+   *
+   * @param symbols symbol list
+   * @return string id
+   */
+  String subscribeTradeTick(Set<String> symbols);
+
+  /**
+   * cancel subscribe stock trade tick data
+   *
+   * @param symbols symbol list
+   * @return string id
+   */
+  String cancelSubscribeTradeTick(Set<String> symbols);
+
+  /**
    * subscribe option data
    *
    * @param symbols symbol list

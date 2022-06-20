@@ -6,6 +6,7 @@ import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
+import com.tigerbrokers.stock.openapi.client.util.TradeTickUtil;
 import io.netty.handler.codec.stomp.StompFrame;
 import java.nio.charset.Charset;
 
@@ -115,16 +116,28 @@ public class ApiCallbackDecoder {
     if (type == null) {
       return;
     }
-    if (type.equals(QuoteSubject.Quote.name())) {
-      callback.quoteChange(jsonObject);
-    } else if (type.equals(QuoteSubject.Option.name())) {
-      callback.optionChange(jsonObject);
-    } else if (type.equals(QuoteSubject.Future.name())) {
-      callback.futureChange(jsonObject);
-    } else if (type.equals(QuoteSubject.QuoteDepth.name())) {
-      callback.depthQuoteChange(jsonObject);
-    } else {
-      callback.quoteChange(jsonObject);
+    QuoteSubject subject = QuoteSubject.valueOf(type);
+    if (type == null) {
+      return;
+    }
+    switch (subject) {
+      case Quote:
+        callback.quoteChange(jsonObject);
+        break;
+      case Option:
+        callback.optionChange(jsonObject);
+        break;
+      case TradeTick:
+        callback.tradeTickChange(TradeTickUtil.decodeData(jsonObject));
+        break;
+      case Future:
+        callback.futureChange(jsonObject);
+        break;
+      case QuoteDepth:
+        callback.depthQuoteChange(jsonObject);
+        break;
+      default:
+        callback.quoteChange(jsonObject);
     }
   }
 

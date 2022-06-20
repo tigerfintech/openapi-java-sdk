@@ -4,8 +4,8 @@ import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.struct.OptionSymbol;
 
 /**
- * 作者：ltc
- * 时间：2019/09/04
+ * author：ltc
+ * date：2019/09/04
  */
 public class SymbolUtil {
 
