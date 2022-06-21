@@ -2,7 +2,6 @@ package com.tigerbrokers.stock.openapi.client.util;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.tigerbrokers.stock.openapi.client.struct.enums.USTradeCond;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,12 +18,13 @@ public class TradeTickUtilTest {
   @Test
   public void testDecodeData01() {
 
-    String content = "{\"symbol\":\"XXX\","
+    String content = "{\"symbol\":\"00999\","
         + "\"times\":[1655436459646, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 41, 0, 0, 0],"
         + "\"type\":\"-----------------------------------+\","
         + "\"priceOffset\":1,"
         + "\"volumes\":[200, 109, 2, 3, 31, 348, 19, 118, 500, 177, 367, 52, 50, 514, 250, 299, 50, 3, 50, 240, 136, 10, 1, 1, 101, 661, 188, 141, 159, 653, 78, 27, 29, 1, 1, 2],"
-        + "\"priceBase\":192, \"sn\":16693, \"partCode\":[\"a\", \"c\",\"z\"], \"cond\":\"\","
+        + "\"priceBase\":192, \"sn\":16693, \"partCode\":[\"t\", \"c\",\"z\"],"
+        + "\"cond\":\"DXM *M\","
         + "\"prices\":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3],"
         + "\"timestamp\":1655436460251}";
 
@@ -35,6 +35,7 @@ public class TradeTickUtilTest {
     JSONArray timeArray = jsonObject.getJSONArray("times");
     JSONArray pricesArray = jsonObject.getJSONArray("prices");
     JSONArray partCodeArray = jsonObject.getJSONArray("partCode");
+    JSONArray tadeCondArray = jsonObject.getJSONArray("tradeCond");
     Assert.assertEquals(36, timeArray.size());
     Assert.assertEquals(1655436459646L, timeArray.getLongValue(0));
     Assert.assertEquals(1655436459656L, timeArray.getLongValue(31));
@@ -45,6 +46,10 @@ public class TradeTickUtilTest {
     Assert.assertEquals(19.2D, pricesArray.getDoubleValue(34), 0.0001d);
     Assert.assertEquals(19.5D, pricesArray.getDoubleValue(35), 0.0001d);
 
+    Assert.assertEquals("NASDAQ Stock Market, LLC (NASDAQ)", partCodeArray.getString(0));
+
+    Assert.assertEquals("HK_ODD_LOT_TRADE", tadeCondArray.getString(0));
+    Assert.assertEquals("HK_OVERSEAS_TRADE", tadeCondArray.getString(4));
   }
   @Test
   public void testDecodeData02() {
@@ -65,9 +70,9 @@ public class TradeTickUtilTest {
     System.out.println(jsonObject);
     JSONArray tadeCondArray = jsonObject.getJSONArray("tradeCond");
     Assert.assertEquals(6, tadeCondArray.size());
-    Assert.assertEquals(USTradeCond.US_ODD_LOT_TRADE, tadeCondArray.getObject(0, USTradeCond.class));
-    Assert.assertEquals(USTradeCond.US_AUTOMATCH_NORMAL, tadeCondArray.getObject(3, USTradeCond.class));
-    Assert.assertEquals(USTradeCond.US_SELLER, tadeCondArray.getObject(4, USTradeCond.class));
+    Assert.assertEquals("US_ODD_LOT_TRADE", tadeCondArray.getString(0));
+    Assert.assertEquals("US_REGULAR_SALE", tadeCondArray.getString(3));
+    Assert.assertEquals("US_SELLER", tadeCondArray.getString(4));
 
   }
 }
