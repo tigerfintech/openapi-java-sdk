@@ -15,6 +15,7 @@ import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_QUOTE_CHANGE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUBSCRIBE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUB_SYMBOLS_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_TRADING_TICK_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.ID_HEADER;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.RET_HEADER;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ASSET;
@@ -58,6 +59,9 @@ public class ApiCallbackDecoder {
         processOrderStatus();
         break;
       case GET_QUOTE_CHANGE_END:
+        processSubscribeQuoteChange();
+        break;
+      case GET_TRADING_TICK_END:
         processSubscribeQuoteChange();
         break;
       case GET_SUB_SYMBOLS_END:
