@@ -67,22 +67,6 @@ public class TradeTickUtil {
     return Collections.unmodifiableMap(map);
   }
 
-  private static String getPartNameByCode(String code) {
-    if (StringUtils.isEmpty(code)) {
-      return code;
-    }
-    String name = PART_CODE_NAME_MAP.get(code);
-    return name == null ? code : name;
-  }
-
-  private static String getPartShortNameByCode(String code) {
-    if (StringUtils.isEmpty(code)) {
-      return code;
-    }
-    String name = PART_CODE_SHORT_NAME_MAP.get(code);
-    return name == null ? code : name;
-  }
-
   private static final Map<Character, String> usTradeCondMap = initUsTradeCondMap();
 
   private static final Map<Character, String> hkTradeCondMap = initHkTradeCondMap();
@@ -131,6 +115,22 @@ public class TradeTickUtil {
     map.put('X', "HK_DIRECT_OFF_EXCHG_TRADE");     // 同券商自动对盘
     map.put('Y', "HK_AUTOMATIC_INTERNALIZED");     // 同券商非自动对盘
     return Collections.unmodifiableMap(map);
+  }
+
+  private static String getPartNameByCode(String code) {
+    if (StringUtils.isEmpty(code)) {
+      return code;
+    }
+    String name = PART_CODE_NAME_MAP.get(code);
+    return name == null ? code : name;
+  }
+
+  private static String getPartShortNameByCode(String code) {
+    if (StringUtils.isEmpty(code)) {
+      return code;
+    }
+    String name = PART_CODE_SHORT_NAME_MAP.get(code);
+    return name == null ? code : name;
   }
 
   private static String getTradeCondByCode(boolean isUsStockSymbol, Character code) {
