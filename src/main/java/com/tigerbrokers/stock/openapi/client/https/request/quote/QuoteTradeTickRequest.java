@@ -6,6 +6,7 @@ import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteTradeTickResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradeStatus;
 import java.util.List;
 
 /**
@@ -52,6 +53,10 @@ public class QuoteTradeTickRequest extends TigerCommonRequest implements TigerRe
     QuoteTradeTickModel model = new QuoteTradeTickModel(symbols, beginIndex, endIndex, lang);
     request.setApiModel(model);
     return request;
+  }
+
+  public void setTradeStatus(TradeStatus tradeStatus) {
+    ((QuoteTradeTickModel)apiModel).setTradeStatus(tradeStatus);
   }
 
   @Override
