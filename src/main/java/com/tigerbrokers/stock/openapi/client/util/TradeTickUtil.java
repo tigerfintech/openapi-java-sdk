@@ -2,10 +2,8 @@ package com.tigerbrokers.stock.openapi.client.util;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -77,6 +75,13 @@ public class TradeTickUtil {
     return name == null ? code : name;
   }
 
+  private static String getPartShortNameByCode(String code) {
+    if (StringUtils.isEmpty(code)) {
+      return code;
+    }
+    String name = PART_CODE_SHORT_NAME_MAP.get(code);
+    return name == null ? code : name;
+  }
 
   private static final Map<Character, String> usTradeCondMap = initUsTradeCondMap();
 
@@ -128,9 +133,12 @@ public class TradeTickUtil {
     return Collections.unmodifiableMap(map);
   }
 
-  private static String getTradeCondByCode(String symbol, char code) {
+  private static String getTradeCondByCode(boolean isUsStockSymbol, Character code) {
+    if (code == null) {
+      code = ' ';
+    }
     String tradeCond = null;
-    if (SymbolUtil.isUsStockSymbol(symbol)) {
+    if (isUsStockSymbol) {
       tradeCond = usTradeCondMap.get(code);
     } else {
       tradeCond = hkTradeCondMap.get(code);
@@ -145,31 +153,53 @@ public class TradeTickUtil {
     JSONArray timeArray = jsonObject.getJSONArray("times");
     JSONArray pricesArray = jsonObject.getJSONArray("prices");
     JSONArray partCodeArray = jsonObject.getJSONArray("partCode");
+    JSONArray volumeArray = jsonObject.getJSONArray("volumes");
+    String cond = (String)jsonObject.remove("cond");
+    String tickType = (String)jsonObject.remove("tickType");
+
+    boolean isUsStockSymbol = SymbolUtil.isUsStockSymbol(symbol);
+
+    JSONArray tickDetail = new JSONArray(timeArray.size());
+    jsonObject.put("ticks", tickDetail);
     if (timeArray != null && timeArray.size() > 0) {
       long previousTime = 0;
       double priceBase = jsonObject.getLongValue("priceBase");
       double denominator = Math.pow(10, jsonObject.getIntValue("priceOffset"));
       for (int i = 0; i < timeArray.size(); i++) {
+        JSONObject tickData = new JSONObject();
+        tickDetail.set(i, tickData);
+
         // recover time: time[i] = time[i] + time[i-1]
         previousTime += timeArray.getLongValue(i);
         timeArray.set(i, previousTime);
         // recover price: price[i] = (priceBase + price[i]) / 10^priceOffset
         pricesArray.set(i, (priceBase + pricesArray.getDoubleValue(i)) / denominator);
+
+        tickData.put("volume", volumeArray.get(i));
+        tickData.put("time", timeArray.get(i));
+        tickData.put("price", pricesArray.get(i));
+        if (i < partCodeArray.size()) {
+          tickData.put("partCode", getPartShortNameByCode(partCodeArray.getString(i)));
+          tickData.put("partName", getPartNameByCode(partCodeArray.getString(i)));
+        }
+
+        Character condChar = null;
+        if (cond != null && cond.length() > i) {
+          condChar = cond.charAt(i);
+        }
+        tickData.put("cond", getTradeCondByCode(isUsStockSymbol, condChar));
+        if (tickType != null && tickType.length() > i) {
+          tickData.put("tickType", tickType.substring(i, i+1));
+        }
       }
     }
-    if (partCodeArray != null && partCodeArray.size() > 0) {
-      for (int i = 0; i < partCodeArray.size(); i++) {
-        partCodeArray.set(i, getPartNameByCode(partCodeArray.getString(i)));
-      }
-    }
-    String cond = (String)jsonObject.remove("cond");
-    if (cond != null || cond.length() > 0) {
-      List<String> tradeCondList = new ArrayList<>(cond.length());
-      for (int i = 0; i < cond.length(); i++) {
-        tradeCondList.add(i, getTradeCondByCode(symbol, cond.charAt(i)));
-      }
-      jsonObject.put("tradeCond", tradeCondList);
-    }
+    jsonObject.remove("times");
+    jsonObject.remove("prices");
+    jsonObject.remove("partCode");
+    jsonObject.remove("volumes");
+    jsonObject.remove("priceBase");
+    jsonObject.remove("priceOffset");
+
     return jsonObject;
   }
 }
