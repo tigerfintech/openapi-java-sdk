@@ -6,6 +6,7 @@ import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
+import com.tigerbrokers.stock.openapi.client.util.TradeTickUtil;
 import io.netty.handler.codec.stomp.StompFrame;
 import java.nio.charset.Charset;
 
@@ -14,6 +15,7 @@ import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_QUOTE_CHANGE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUBSCRIBE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUB_SYMBOLS_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_TRADING_TICK_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.ID_HEADER;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.RET_HEADER;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ASSET;
@@ -57,6 +59,9 @@ public class ApiCallbackDecoder {
         processOrderStatus();
         break;
       case GET_QUOTE_CHANGE_END:
+        processSubscribeQuoteChange();
+        break;
+      case GET_TRADING_TICK_END:
         processSubscribeQuoteChange();
         break;
       case GET_SUB_SYMBOLS_END:
@@ -115,16 +120,28 @@ public class ApiCallbackDecoder {
     if (type == null) {
       return;
     }
-    if (type.equals(QuoteSubject.Quote.name())) {
-      callback.quoteChange(jsonObject);
-    } else if (type.equals(QuoteSubject.Option.name())) {
-      callback.optionChange(jsonObject);
-    } else if (type.equals(QuoteSubject.Future.name())) {
-      callback.futureChange(jsonObject);
-    } else if (type.equals(QuoteSubject.QuoteDepth.name())) {
-      callback.depthQuoteChange(jsonObject);
-    } else {
-      callback.quoteChange(jsonObject);
+    QuoteSubject subject = QuoteSubject.valueOf(type);
+    if (type == null) {
+      return;
+    }
+    switch (subject) {
+      case Quote:
+        callback.quoteChange(jsonObject);
+        break;
+      case Option:
+        callback.optionChange(jsonObject);
+        break;
+      case TradeTick:
+        callback.tradeTickChange(TradeTickUtil.decodeData(jsonObject));
+        break;
+      case Future:
+        callback.futureChange(jsonObject);
+        break;
+      case QuoteDepth:
+        callback.depthQuoteChange(jsonObject);
+        break;
+      default:
+        callback.quoteChange(jsonObject);
     }
   }
 

@@ -576,6 +576,16 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   @Override
+  public String subscribeTradeTick(Set<String> symbols) {
+    return subscribeQuote(symbols, QuoteSubject.TradeTick);
+  }
+
+  @Override
+  public String cancelSubscribeTradeTick(Set<String> symbols) {
+    return cancelSubscribeQuote(symbols, QuoteSubject.TradeTick);
+  }
+
+  @Override
   public String subscribeOption(Set<String> symbols) {
     return subscribeQuote(symbols, QuoteSubject.Option);
   }

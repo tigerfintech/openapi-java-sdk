@@ -28,6 +28,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteMarke
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteStockTradeModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteTimelineModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteTradeTickModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.TradeCalendarModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,6 +55,7 @@ public class ValidatorManager {
     validatorMap.put(QuoteTimelineModel.class, quoteRequestValidator);
     validatorMap.put(QuoteHistoryTimelineModel.class, quoteRequestValidator);
     validatorMap.put(QuoteTradeTickModel.class, quoteRequestValidator);
+    validatorMap.put(TradeCalendarModel.class, new TradeCalendarRequestValidator());
 
     FutureContractRequestValidator futureContractRequestValidator = new FutureContractRequestValidator();
     validatorMap.put(FutureContinuousContractModel.class, futureContractRequestValidator);
