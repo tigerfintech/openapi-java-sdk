@@ -17,6 +17,10 @@ public class TradeTickUtil {
 
   private static final Map<String, String> PART_CODE_SHORT_NAME_MAP = initPartCodeShortNameMap();
 
+  private static final Map<Character, String> usTradeCondMap = initUsTradeCondMap();
+
+  private static final Map<Character, String> hkTradeCondMap = initHkTradeCondMap();
+
   private static Map<String, String> initPartCodeNameMap() {
     Map<String, String> map = new HashMap<>();
     map.put("a", "NYSE American, LLC (NYSE American)");
@@ -66,10 +70,6 @@ public class TradeTickUtil {
     map.put("z", "BZX");
     return Collections.unmodifiableMap(map);
   }
-
-  private static final Map<Character, String> usTradeCondMap = initUsTradeCondMap();
-
-  private static final Map<Character, String> hkTradeCondMap = initHkTradeCondMap();
 
   private static Map<Character, String> initUsTradeCondMap() {
     Map<Character, String> map = new HashMap<>();
