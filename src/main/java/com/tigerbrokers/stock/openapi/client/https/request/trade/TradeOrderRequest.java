@@ -46,9 +46,15 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
 
   public static TradeOrderRequest buildLimitOrder(String account, ContractItem contract,
       ActionType action, Integer quantity, Double limitPrice) {
+    return buildLimitOrder(account, contract, action, quantity, limitPrice, 0D);
+  }
+
+  public static TradeOrderRequest buildLimitOrder(String account, ContractItem contract,
+      ActionType action, Integer quantity, Double limitPrice, Double adjustLimit) {
     TradeOrderModel tradeOrderModel = buildTradeOrderModel(account, contract, action, quantity);
     tradeOrderModel.setOrderType(OrderType.LMT);
     tradeOrderModel.setLimitPrice(limitPrice);
+    tradeOrderModel.setAdjustLimit(adjustLimit);
     return newRequest(tradeOrderModel);
   }
 
@@ -60,9 +66,15 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
 
   public static TradeOrderRequest buildStopOrder(String account, ContractItem contract,
       ActionType action, Integer quantity, Double auxPrice) {
+    return buildStopOrder(account, contract, action, quantity, auxPrice, 0D);
+  }
+
+  public static TradeOrderRequest buildStopOrder(String account, ContractItem contract,
+      ActionType action, Integer quantity, Double auxPrice, Double adjustLimit) {
     TradeOrderModel tradeOrderModel = buildTradeOrderModel(account, contract, action, quantity);
     tradeOrderModel.setOrderType(OrderType.STP);
     tradeOrderModel.setAuxPrice(auxPrice);
+    tradeOrderModel.setAdjustLimit(adjustLimit);
     return newRequest(tradeOrderModel);
   }
 
@@ -74,10 +86,16 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
 
   public static TradeOrderRequest buildStopLimitOrder(String account, ContractItem contract,
       ActionType action, Integer quantity, Double limitPrice, Double auxPrice) {
+    return buildStopLimitOrder(account, contract, action, quantity, limitPrice, auxPrice, 0D);
+  }
+
+  public static TradeOrderRequest buildStopLimitOrder(String account, ContractItem contract,
+      ActionType action, Integer quantity, Double limitPrice, Double auxPrice, Double adjustLimit) {
     TradeOrderModel tradeOrderModel = buildTradeOrderModel(account, contract, action, quantity);
     tradeOrderModel.setOrderType(OrderType.STP_LMT);
     tradeOrderModel.setLimitPrice(limitPrice);
     tradeOrderModel.setAuxPrice(auxPrice);
+    tradeOrderModel.setAdjustLimit(adjustLimit);
     return newRequest(tradeOrderModel);
   }
 
@@ -154,6 +172,15 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     model.setStopLossTif(stopLossTif);
   }
 
+  public static void addStopLossLimitOrder(TradeOrderRequest tradeOrderRequest,
+      double stopLossPrice, double stopLossLimitPrice, TimeInForce stopLossTif) {
+    TradeOrderModel model = (TradeOrderModel) tradeOrderRequest.getApiModel();
+    model.setAttachType(AttachType.LOSS);
+    model.setStopLossPrice(stopLossPrice);
+    model.setStopLossLimitPrice(stopLossLimitPrice);
+    model.setStopLossTif(stopLossTif);
+  }
+
   public static void addBracketsOrder(TradeOrderRequest tradeOrderRequest,
       double profitTakerPrice, TimeInForce profitTakerTif, Boolean profitTakerRth,
       double stopLossPrice, TimeInForce stopLossTif) {
@@ -164,6 +191,12 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     model.setProfitTakerRth(profitTakerRth);
     model.setStopLossPrice(stopLossPrice);
     model.setStopLossTif(stopLossTif);
+  }
+
+  public TradeOrderRequest withUserMark(String userMark) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setUserMark(userMark);
+    return this;
   }
 
   @Override

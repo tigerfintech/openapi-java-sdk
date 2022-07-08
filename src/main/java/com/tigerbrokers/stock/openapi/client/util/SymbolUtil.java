@@ -2,12 +2,15 @@ package com.tigerbrokers.stock.openapi.client.util;
 
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.struct.OptionSymbol;
+import java.util.regex.Pattern;
 
 /**
- * 作者：ltc
- * 时间：2019/09/04
+ * author：ltc
+ * date：2019/09/04
  */
 public class SymbolUtil {
+
+  private static Pattern CHAR_SYMBOL_PATTERN = Pattern.compile("[A-Z]+(.[A-Z0-9]+)?");
 
   public static OptionSymbol convertToOptionSymbolObject(String identifier) throws TigerApiException {
     if (identifier == null || identifier.length() != 21) {
@@ -31,5 +34,15 @@ public class SymbolUtil {
         Integer.parseInt(expiryRightStrike.substring(7, 12)) + "." + expiryRightStrike.substring(12, 13));
 
     return optionSymbol;
+  }
+
+  public static boolean isUsStockSymbol(String symbol) {
+    if (symbol == null || symbol.isEmpty()) {
+      return false;
+    }
+    if (CHAR_SYMBOL_PATTERN.matcher(symbol).matches()) {
+      return true;
+    }
+    return false;
   }
 }

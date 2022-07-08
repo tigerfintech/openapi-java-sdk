@@ -72,6 +72,17 @@ public class QuoteKlineRequest extends TigerCommonRequest implements TigerReques
     return this;
   }
 
+  /**
+   * set pageToken，only for single symbol
+   * @param pageToken
+   */
+  public void withPageToken(String pageToken) {
+    if (apiModel != null && apiModel instanceof QuoteKlineModel) {
+      QuoteKlineModel klineModel = (QuoteKlineModel) apiModel;
+      klineModel.setPageToken(pageToken);
+    }
+  }
+
   @Override
   public Class<QuoteKlineResponse> getResponseClass() {
     return QuoteKlineResponse.class;

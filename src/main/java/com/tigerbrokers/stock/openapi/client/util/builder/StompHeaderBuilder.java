@@ -20,12 +20,16 @@ public class StompHeaderBuilder {
 
   public static final String REQ_TYPE = ReqProtocolType.REQ_HEADER;
   public static final String FOCUS_KEYS = "keys";
-  public static final String VERSION = "1.0";
+  public static final String STOMP_VERSION_10 = "1.0";
+  public static final String STOMP_VERSION_11 = "1.1";
+  public static final String STOMP_VERSION_12 = "1.2";
+  public static final String DEFAULT_STOMP_VERSION = STOMP_VERSION_10;
   public static final String HOST = "localhost";
   public static final String ACCOUNT = "account";
   public static final String SYMBOLS = "symbols";
   private static AsciiString SDK_VERSION_HEADER = AsciiString.cached(TigerApiConstants.SDK_VERSION);
 
+  private static String USE_STOMP_VERSION = STOMP_VERSION_10;
   private StompHeaders stompHeaders;
 
   private StompHeaderBuilder() {
@@ -36,8 +40,16 @@ public class StompHeaderBuilder {
     return new StompHeaderBuilder();
   }
 
-  public StompHeaderBuilder version() {
-    return version(VERSION);
+  public static String getUseStompVersion() {
+    return USE_STOMP_VERSION;
+  }
+
+  public static void setUseStompVersion(String stompVersion) {
+    if (STOMP_VERSION_12.equals(stompVersion)
+        || STOMP_VERSION_11.equals(stompVersion)
+        || STOMP_VERSION_10.equals(stompVersion)) {
+      USE_STOMP_VERSION = stompVersion;
+    }
   }
 
   public StompHeaderBuilder version(String version) {

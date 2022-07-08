@@ -38,6 +38,15 @@ public class FutureKlineRequest extends TigerCommonRequest implements TigerReque
         limit);
   }
 
+  /**
+   * return values is in reverse chronological order
+   * @param contractCodes
+   * @param kType
+   * @param beginTime included
+   * @param endTime excluded
+   * @param limit
+   * @return
+   */
   public static FutureKlineRequest newRequest(List<String> contractCodes, FutureKType kType, Long beginTime,
       Long endTime,
       Integer limit) {
@@ -47,6 +56,17 @@ public class FutureKlineRequest extends TigerCommonRequest implements TigerReque
             endTime, limit);
     request.setApiModel(model);
     return request;
+  }
+
+  /**
+   * set pageToken，only for single contract
+   * @param pageToken
+   */
+  public void withPageToken(String pageToken) {
+    if (apiModel != null && apiModel instanceof FutureKlineModel) {
+      FutureKlineModel model = (FutureKlineModel)this.getApiModel();
+      model.setPageToken(pageToken);
+    }
   }
 
   @Override

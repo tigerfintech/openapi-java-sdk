@@ -6,6 +6,7 @@ import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteTradeTickResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
 import java.util.List;
 
 /**
@@ -30,6 +31,14 @@ public class QuoteTradeTickRequest extends TigerCommonRequest implements TigerRe
     return request;
   }
 
+  public static QuoteTradeTickRequest newRequest(List<String> symbols, Language lang, Integer limit) {
+    QuoteTradeTickRequest request = new QuoteTradeTickRequest();
+    QuoteTradeTickModel model = new QuoteTradeTickModel(symbols, lang);
+    model.setLimit(limit);
+    request.setApiModel(model);
+    return request;
+  }
+
   @Deprecated
   public static QuoteTradeTickRequest newRequest(List<String> symbols, Long beginIndex, Long endIndex) {
     QuoteTradeTickRequest request = new QuoteTradeTickRequest();
@@ -44,6 +53,10 @@ public class QuoteTradeTickRequest extends TigerCommonRequest implements TigerRe
     QuoteTradeTickModel model = new QuoteTradeTickModel(symbols, beginIndex, endIndex, lang);
     request.setApiModel(model);
     return request;
+  }
+
+  public void setTradeSession(TradeSession tradeSession) {
+    ((QuoteTradeTickModel)apiModel).setTradeSession(tradeSession);
   }
 
   @Override

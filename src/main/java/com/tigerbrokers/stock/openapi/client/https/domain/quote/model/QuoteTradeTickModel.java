@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.https.domain.quote.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
 import java.util.List;
 
 /**
@@ -14,6 +15,9 @@ public class QuoteTradeTickModel extends QuoteSymbolModel {
   private Long beginIndex;
   @JSONField(name = "end_index")
   private Long endIndex;
+  private Integer limit;
+  @JSONField(name = "trade_session")
+  private TradeSession tradeSession;
 
   public QuoteTradeTickModel() {
 
@@ -53,5 +57,21 @@ public class QuoteTradeTickModel extends QuoteSymbolModel {
 
   public void setEndIndex(Long endIndex) {
     this.endIndex = endIndex;
+  }
+
+  public Integer getLimit() {
+    return limit;
+  }
+
+  public void setLimit(Integer limit) {
+    this.limit = limit;
+  }
+
+  public TradeSession getTradeSession() {
+    return tradeSession;
+  }
+
+  public void setTradeSession(TradeSession tradeSession) {
+    this.tradeSession = tradeSession;
   }
 }

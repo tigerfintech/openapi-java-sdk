@@ -6,12 +6,14 @@ import com.tigerbrokers.stock.openapi.client.socket.IdleTriggerHandler;
 import com.tigerbrokers.stock.openapi.client.socket.WebSocketClient;
 import com.tigerbrokers.stock.openapi.client.socket.WebSocketHandler;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
+import com.tigerbrokers.stock.openapi.client.util.builder.StompHeaderBuilder;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.stomp.StompFrame;
 import io.netty.handler.timeout.IdleStateHandler;
 import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.VERSION;
 import static io.netty.handler.codec.stomp.StompHeaders.HEART_BEAT;
 
 /**
@@ -32,7 +34,11 @@ public class ApiCallbackDecoderUtils {
 
     switch (frame.command()) {
       case CONNECTED:
+        ApiLogger.info("connect token validation success:{}", frame);
         if (decoder.getCallback() != null) {
+          // set stomp version
+          StompHeaderBuilder.setUseStompVersion(frame.headers().getAsString(VERSION));
+          // set hearbeat time
           if (frame.headers().contains(HEART_BEAT)) {
             String value = frame.headers().getAsString(HEART_BEAT);
             if (!StringUtils.isEmpty(value)) {
@@ -81,8 +87,8 @@ public class ApiCallbackDecoderUtils {
               JSONObject jsonObject = JSONObject.parseObject(content);
               if (jsonObject.getIntValue("code") == TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode()) {
                 ApiLogger.info(content);
-                // stop reconnect and close the connection
-                WebSocketClient.getInstance().disconnect();
+                // close the connection(Do not send disconnect command)
+                WebSocketClient.getInstance().closeConnect(false);
                 String errMessage = jsonObject.getString("message");
                 // callback
                 decoder.getCallback().connectionKickoff(TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode(),

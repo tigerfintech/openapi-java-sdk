@@ -1,6 +1,10 @@
 package com.tigerbrokers.stock.openapi.client.config;
 
+import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
+import com.tigerbrokers.stock.openapi.client.util.builder.StompHeaderBuilder;
+import io.netty.handler.ssl.SslProvider;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -11,13 +15,19 @@ import java.io.IOException;
 public class ClientConfig {
   private static final String PPRVATE_KEY_BEGIN = "-----BEGIN PRIVATE KEY-----";
   private static final String PRIVATE_KEY_END = "-----END PRIVATE KEY-----";
+  private static final Protocol DEFAULT_PROTOCOL = Protocol.STOMP;
+  private static final Env DEFAULT_ENV = Env.PROD;
+  private static final SslProvider DEFAULT_SSLPROVIDER = SslProvider.OPENSSL;
   /** default client config */
   public static final ClientConfig DEFAULT_CONFIG = new ClientConfig();
 
-  /**
-   * config label ：prod，sandbox
-   */
-  public String label = "prod";
+  private Protocol subscribeProtocol = DEFAULT_PROTOCOL;
+
+  private Env env = DEFAULT_ENV;
+
+  private SslProvider sslProvider = DEFAULT_SSLPROVIDER;
+
+  public String stompVersion = StompHeaderBuilder.DEFAULT_STOMP_VERSION;
 
   /**
    * http interface server url
@@ -45,17 +55,50 @@ public class ClientConfig {
   public String privateKey = null;
 
   /**
+   * 是否初始化实例完成时，自动抢占行情权限
+   */
+  public boolean isAutoGrabPermission = true;
+
+  /**
    * institutional trader private key 机构交易员专有密钥
    */
   public String secretKey = null;
 
-  public ClientConfig() {
-    this.serverUrl = "https://openapi.itiger.com/gateway";
-    this.socketServerUrl = "wss://openapi.itiger.com:8887/stomp";
+  private ClientConfig() {
+  }
+
+  public Protocol getSubscribeProtocol() {
+    return subscribeProtocol;
+  }
+
+  public void setSubscribeProtocol(Protocol subscribeProtocol) {
+    if (subscribeProtocol == null || subscribeProtocol == Protocol.HTTP) {
+      return;
+    }
+    this.subscribeProtocol = subscribeProtocol;
+  }
+
+  public Env getEnv() {
+    return env;
+  }
+
+  public void setEnv(Env env) {
+    if (env == null) {
+      return;
+    }
+    this.env = env;
+  }
+
+  public SslProvider getSslProvider() {
+    return sslProvider;
+  }
+
+  public void setSslProvider(SslProvider sslProvider) {
+    this.sslProvider = sslProvider;
   }
 
   /**
-   * read private key from file
+   * read private key from file(Remove first and last lines and line breaks)
    *
    * @param privateKeyFile absolute path
    * @return privateKey String

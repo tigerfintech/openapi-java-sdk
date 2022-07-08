@@ -1,19 +1,37 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
+import com.alibaba.fastjson.JSON;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
+import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
+import io.netty.handler.ssl.OpenSsl;
+import io.netty.handler.ssl.SslProvider;
+import java.lang.reflect.Field;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.DEFAULT_DOMAIN_KEY;
 
 /**
  * description: Created by ltc on 2021-04-08
  */
 public class NetworkUtil {
 
-  private static final String GET_DEVICE_ERROR = "Please check if the network connection is disconnected";
+  private static final String GET_DEVICE_ERROR = "please check network connection";
   private static final int MAC_ARRAY_LENGTH = 6;
   private static final int MAC_LENGTH = MAC_ARRAY_LENGTH * 3 - 1;
 
@@ -132,5 +150,142 @@ public class NetworkUtil {
       unknownHostException.initCause(e);
       throw unknownHostException;
     }
+  }
+
+  public static String[] getSupportedProtocolsSet(String[] serverSupportedProtocols, SslProvider sslProvider) {
+    if (serverSupportedProtocols == null || serverSupportedProtocols.length == 0) {
+      ApiLogger.error("Server Supported protocols (OpenSSL) is empty. serverSupportedProtocols:{}", serverSupportedProtocols);
+      return serverSupportedProtocols;
+    }
+    Set<String> localSupportedProtocols;
+    if (sslProvider == SslProvider.JDK) {
+      localSupportedProtocols = getJdkSupportedProtocolsSet();
+    } else {
+      localSupportedProtocols = getOpenSSLSupportedProtocolsSet();
+    }
+    if (localSupportedProtocols.isEmpty()) {
+      ApiLogger.error("Local Supported protocols ({}): {}, is empty", sslProvider, localSupportedProtocols);
+      return null;
+    }
+
+    ApiLogger.info("Local Supported protocols ({}): {}", sslProvider, localSupportedProtocols);
+    Set<String> supportedProtocolsSet = new LinkedHashSet<>();
+    for (String protocol : serverSupportedProtocols) {
+      if (localSupportedProtocols.contains(protocol)) {
+        supportedProtocolsSet.add(protocol);
+      }
+    }
+
+    if (supportedProtocolsSet.isEmpty()) {
+      String[] supportedProtocols = new String[serverSupportedProtocols.length];
+      System.arraycopy(serverSupportedProtocols,0,
+          supportedProtocols,0, serverSupportedProtocols.length);
+      return supportedProtocols;
+    }
+    return supportedProtocolsSet.toArray(new String[supportedProtocolsSet.size()]);
+  }
+
+  private static Set<String> getJdkSupportedProtocolsSet() {
+    SSLSocket socket = null;
+    try {
+      SSLContext context = SSLContext.getInstance("TLS");
+      context.init(null, null, null);
+      SSLSocketFactory factory = context.getSocketFactory();
+      socket = (SSLSocket) factory.createSocket();
+    } catch (Throwable th) {
+      ApiLogger.error("getJdkSupportedProtocolsSet exception:{}", th.getMessage(), th);
+    }
+    if (socket == null || socket.getSupportedProtocols() == null) {
+      return Collections.emptySet();
+    }
+    Set<String> localSupportedProtocols = new LinkedHashSet<>();
+    for (String protocol : socket.getSupportedProtocols()) {
+      localSupportedProtocols.add(protocol);
+    }
+    return localSupportedProtocols;
+  }
+
+  private static Set<String> getOpenSSLSupportedProtocolsSet() {
+    Set<String> localSupportedProtocols = Collections.emptySet();
+    try {
+      Field supportedProtocolsSetField = OpenSsl.class.getDeclaredField("SUPPORTED_PROTOCOLS_SET");
+      if (supportedProtocolsSetField != null) {
+        supportedProtocolsSetField.setAccessible(true);
+        localSupportedProtocols = (Set<String>) supportedProtocolsSetField.get(OpenSsl.class);
+      }
+    } catch (Throwable th) {
+      ApiLogger.error("getOpenSSLSupportedProtocolsSet exception:{}", th.getMessage(), th);
+    }
+    return localSupportedProtocols;
+  }
+
+  private static String getDefaultPort(ClientConfig clientConfig, Protocol protocol) {
+    String port = "";
+    if (protocol != Protocol.HTTP) {
+      if (clientConfig.getEnv() == Env.PROD) {
+        port = protocol == Protocol.STOMP_WEBSOCKET ? TigerApiConstants.DEFAULT_PROD_STOMP_PORT
+            : TigerApiConstants.DEFAULT_PROD_SOCKET_PORT;
+      } else {
+        port = protocol == Protocol.STOMP_WEBSOCKET ? TigerApiConstants.DEFAULT_SANDBOX_STOMP_PORT
+            : TigerApiConstants.DEFAULT_SANDBOX_SOCKET_PORT;
+      }
+    }
+    return port;
+  }
+
+  /**
+   * get http server address
+   */
+  public static String getHttpServerAddress(String originalAddress) {
+    return refreshAndGetServerAddress(Protocol.HTTP, originalAddress);
+  }
+
+  public static String getServerAddress(String originalAddress) {
+    return refreshAndGetServerAddress(ClientConfig.DEFAULT_CONFIG.getSubscribeProtocol(), originalAddress);
+  }
+
+  private static String refreshAndGetServerAddress(Protocol protocol, String originalAddress) {
+    ClientConfig clientConfig = ClientConfig.DEFAULT_CONFIG;
+    Env env = clientConfig.getEnv();
+    String domainUrl = (env == Env.PROD ? TigerApiConstants.DEFAULT_PROD_DOMAIN_URL
+        : TigerApiConstants.DEFAULT_SANDBOX_DOMAIN_URL);
+    String port = getDefaultPort(clientConfig, protocol);
+
+    String response = null;
+    List<Map<String, Object>> domainConfigList = Collections.emptyList();
+    try {
+      String data = HttpUtils.get(TigerApiConstants.DOMAIN_GARDEN_ADDRESS);
+      Map<String, Object> domainConfigMap = JSON.parseObject(data, Map.class);
+      if (domainConfigMap != null && domainConfigMap.get("items") != null) {
+        domainConfigList = (List<Map<String, Object>>)domainConfigMap.get("items");
+      }
+    } catch (Throwable th) {
+      ApiLogger.error("domain config response error, data:{}", response);
+    }
+    // if get domain config data failed and original address is not emtpy, return original address
+    if (domainConfigList.isEmpty() && !StringUtils.isEmpty(originalAddress)) {
+      return originalAddress;
+    }
+
+    for (Map<String, Object> configMap : domainConfigList) {
+      Map<String, Object> dataMap;
+      Object openapiConfig = configMap.get(env.getConfigFieldName());
+      if (openapiConfig != null && openapiConfig instanceof Map) {
+        dataMap = (Map<String, Object>)openapiConfig;
+      } else {
+        continue;
+      }
+      for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
+        if (Protocol.STOMP_WEBSOCKET.getPortFieldName().equals(entry.getKey())
+            || Protocol.STOMP.getPortFieldName().equals(entry.getKey())) {
+          if (protocol.getPortFieldName().equals(entry.getKey())) {
+            port = entry.getValue().toString();
+          }
+        } else if (DEFAULT_DOMAIN_KEY.equals(entry.getKey())) {
+          domainUrl = entry.getValue().toString().replace("https://", "");
+        }
+      }
+    }
+    return String.format(protocol.getUrlFormat(), domainUrl, port);
   }
 }

@@ -20,6 +20,11 @@ public class KlineItem extends ApiModel {
   private String period;
 
   /**
+   * Token that can be used to query the next page. Nullable
+   */
+  private String nextPageToken;
+
+  /**
    * K线数组
    */
   private List<KlinePoint> items;
@@ -40,6 +45,14 @@ public class KlineItem extends ApiModel {
     this.period = period;
   }
 
+  public String getNextPageToken() {
+    return nextPageToken;
+  }
+
+  public void setNextPageToken(String nextPageToken) {
+    this.nextPageToken = nextPageToken;
+  }
+
   public List<KlinePoint> getItems() {
     return items;
   }
@@ -53,6 +66,7 @@ public class KlineItem extends ApiModel {
     return "KlineItem{" +
         "symbol='" + symbol + '\'' +
         ", period='" + period + '\'' +
+        ", nextPageToken=" + nextPageToken +
         ", items=" + items +
         '}';
   }

@@ -42,43 +42,47 @@ public class ApiLogger {
   }
 
   private static void initConfig(String logPath) {
-    String filename = "tiger_openapi_" + LocalDateTime.now().format(DateUtils.DATE_FORMAT) + ".log";
-    File logFilePath;
-    if (logPath == null) {
-      logFilePath = new File("log/");
-    } else {
-      logFilePath = new File(logPath);
-    }
-    if (!logFilePath.exists()) {
-      logFilePath.mkdir();
-    }
-    String filePath = (logPath == null ? "log/" : logPath) + filename;
-    File logFile = new File(filePath);
-    if (!logFilePath.exists()) {
-      try {
-        logFile.createNewFile();
-      } catch (IOException e) {
-        throw new RuntimeException("create log error:" + e.getMessage());
+    try {
+      String filename = "tiger_openapi_" + LocalDateTime.now().format(DateUtils.DATE_FORMAT) + ".log";
+      File logFilePath;
+      if (logPath == null) {
+        logFilePath = new File("log/");
+      } else {
+        logFilePath = new File(logPath);
       }
+      if (!logFilePath.exists()) {
+        logFilePath.mkdir();
+      }
+      String filePath = (logPath == null ? "log/" : logPath) + filename;
+      File logFile = new File(filePath);
+      if (!logFilePath.exists()) {
+        try {
+          logFile.createNewFile();
+        } catch (IOException e) {
+          throw new RuntimeException("create log error:" + e.getMessage());
+        }
+      }
+      LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+      PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+      encoder.setContext(loggerContext);
+      encoder.setCharset(Charset.forName("UTF-8"));
+      encoder.setPattern("%d %level - %msg%n");
+      encoder.start();
+
+      FileAppender fileAppender = new FileAppender();
+      fileAppender.setName("TigerOpenApi");
+      fileAppender.setContext(loggerContext);
+      fileAppender.setFile(filePath);
+      fileAppender.setEncoder(encoder);
+      fileAppender.start();
+
+      logger = loggerContext.getLogger("com.tigerbrokers.openapi.client");
+      logger.addAppender(fileAppender);
+      logger.setLevel(Level.INFO);
+    } catch (Throwable e) {
+      throw new RuntimeException("an error occurred while init log config, error message:{}" + e.getMessage());
     }
-    LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-
-    PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-    encoder.setContext(loggerContext);
-    encoder.setCharset(Charset.forName("UTF-8"));
-    encoder.setPattern("%d %level - %msg%n");
-    encoder.start();
-
-    FileAppender fileAppender = new FileAppender();
-    fileAppender.setName("TigerOpenApi");
-    fileAppender.setContext(loggerContext);
-    fileAppender.setFile(filePath);
-    fileAppender.setEncoder(encoder);
-    fileAppender.start();
-
-    logger = loggerContext.getLogger("com.tigerbrokers.openapi.client");
-    logger.addAppender(fileAppender);
-    logger.setLevel(Level.INFO);
   }
 
   public static void setDebugEnabled(boolean debugEnabled) {
@@ -103,24 +107,28 @@ public class ApiLogger {
       return;
     }
 
-    DateTimeFormatter dtf = DateUtils.DATE_FORMAT;
+    try {
+      DateTimeFormatter dtf = DateUtils.DATE_FORMAT;
 
-    StringBuilder builder = new StringBuilder();
-    builder.append(dtf.format(LocalDateTime.now(ZoneId.of(TimeZoneId.Shanghai.getZoneId()))));
-    builder.append(SPLITTER);
-    builder.append(method);
-    builder.append(SPLITTER);
-    builder.append(version);
-    builder.append(SPLITTER);
-    builder.append(bizContent);
-    builder.append(SPLITTER);
-    builder.append(appKey);
-    builder.append(SPLITTER);
-    builder.append(responseData);
-    builder.append(SPLITTER);
-    builder.append(e.getMessage());
+      StringBuilder builder = new StringBuilder();
+      builder.append(dtf.format(LocalDateTime.now(ZoneId.of(TimeZoneId.Shanghai.getZoneId()))));
+      builder.append(SPLITTER);
+      builder.append(method);
+      builder.append(SPLITTER);
+      builder.append(version);
+      builder.append(SPLITTER);
+      builder.append(bizContent);
+      builder.append(SPLITTER);
+      builder.append(appKey);
+      builder.append(SPLITTER);
+      builder.append(responseData);
+      builder.append(SPLITTER);
+      builder.append(e.getMessage());
 
-    logger.error(builder.toString().replaceAll("\r\n", " "));
+      logger.error(builder.toString().replaceAll("\r\n", " "));
+    } catch (Exception ex) {
+      throw new RuntimeException("an error occurred while writing the error log, origin error message:{}" + e.getMessage());
+    }
   }
 
   public static void error(String message, Object value, Object exception) {

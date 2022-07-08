@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.https.validator;
 
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
+import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AttachType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
@@ -77,6 +78,16 @@ public class PlaceOrderRequestValidator implements RequestValidator<TradeOrderMo
       }
       if (model.getStopLossTif() == null) {
         throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "stop_loss_tif");
+      }
+      if (model.getStopLossLimitPrice() != null) {
+        if (ActionType.BUY == model.getAction()
+            && model.getStopLossPrice().compareTo(model.getStopLossLimitPrice()) <= 0) {
+          throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "stop_loss_limit_price");
+        }
+        if (ActionType.SELL == model.getAction()
+            && model.getStopLossPrice().compareTo(model.getStopLossLimitPrice()) >= 0) {
+          throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "stop_loss_limit_price");
+        }
       }
     }
   }

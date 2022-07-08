@@ -7,7 +7,7 @@ package com.tigerbrokers.stock.openapi.client.constant;
 public interface ApiServiceType {
 
   /**
-   * 交易
+   * trade
    */
   String ORDER_NO = "order_no";
   String PREVIEW_ORDER = "preview_order";
@@ -17,7 +17,7 @@ public interface ApiServiceType {
   String MODIFY_ORDER = "modify_order";
 
   /**
-   * 行情
+   * quote
    */
   String MARKET_STATE = "market_state";
   String ALL_SYMBOLS = "all_symbols";
@@ -27,6 +27,7 @@ public interface ApiServiceType {
   String HOUR_TRADING_TIMELINE = "hour_trading_timeline";
 
   String TIMELINE = "timeline";
+  String HISTORY_TIMELINE = "history_timeline";
   String KLINE = "kline";
   String TRADE_TICK = "trade_tick";
   String QUOTE_CONTRACT = "quote_contract";
@@ -35,9 +36,11 @@ public interface ApiServiceType {
   String QUOTE_STOCK_TRADE = "quote_stock_trade";
   String QUOTE_DEPTH = "quote_depth";
   String QUOTE_DELAY = "quote_delay";
+  /** trading calendar */
+  String TRADING_CALENDAR = "trading_calendar";
 
   /**
-   * 期权行情
+   * option quote
    */
   String OPTION_EXPIRATION = "option_expiration";
   String OPTION_CHAIN = "option_chain";
@@ -46,7 +49,7 @@ public interface ApiServiceType {
   String OPTION_TRADE_TICK = "option_trade_tick";
 
   /**
-   * 期货行情
+   * future quote
    */
   String FUTURE_EXCHANGE = "future_exchange";
   String FUTURE_CONTRACT_BY_CONTRACT_CODE = "future_contract_by_contract_code";
@@ -59,7 +62,7 @@ public interface ApiServiceType {
   String FUTURE_TRADING_DATE = "future_trading_date";
 
   /**
-   * 账户/资产
+   * account/asset
    */
   String ACCOUNTS = "accounts";
   String ASSETS = "assets";
@@ -72,13 +75,13 @@ public interface ApiServiceType {
   String ORDER_TRANSACTIONS = "order_transactions";
 
   /**
-   * 合约
+   * contract
    */
   String CONTRACT = "contract";
   String CONTRACTS = "contracts";
 
   /**
-   * 基础数据
+   * fundmental data
    */
   String FINANCIAL_DAILY = "financial_daily";
   String FINANCIAL_REPORT = "financial_report";
@@ -88,7 +91,7 @@ public interface ApiServiceType {
   String STOCK_INDUSTRY = "stock_industry";
 
   /**
-   * 用户
+   * user
    */
   String USER_LOGIN = "user_login";
   String USER_TRADE_TOKEN = "user_trade_token";
@@ -96,7 +99,7 @@ public interface ApiServiceType {
   String USER_TRADE_PASSWORD_RESET = "user_trade_password_reset";
 
   /**
-   * 行情抢占
+   * grab quote
    */
   String GRAB_QUOTE_PERMISSION = "grab_quote_permission";
   String GET_QUOTE_PERMISSION = "get_quote_permission";

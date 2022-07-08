@@ -4,21 +4,20 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
+import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
-import com.tigerbrokers.stock.openapi.client.https.domain.contract.model.ContractModel;
-import com.tigerbrokers.stock.openapi.client.https.domain.contract.model.ContractsModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
+import com.tigerbrokers.stock.openapi.client.https.response.TigerHttpResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.contract.ContractResponse;
-import com.tigerbrokers.stock.openapi.client.https.validator.ContractRequestValidator;
-import com.tigerbrokers.stock.openapi.client.https.validator.PlaceOrderRequestValidator;
-import com.tigerbrokers.stock.openapi.client.https.validator.RequestValidator;
+import com.tigerbrokers.stock.openapi.client.https.validator.ValidatorManager;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.FastJsonPropertyFilter;
@@ -27,10 +26,13 @@ import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
 import com.tigerbrokers.stock.openapi.client.util.SdkVersionUtils;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import com.tigerbrokers.stock.openapi.client.util.TigerSignature;
+import com.tigerbrokers.stock.openapi.client.util.builder.AccountParamBuilder;
 import java.security.Security;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static com.tigerbrokers.stock.openapi.client.constant.ApiServiceType.CONTRACT;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCESS_TOKEN;
@@ -58,7 +60,6 @@ public class TigerHttpClient implements TigerClient {
   private String tradeToken;
   private String accountType;
   private String deviceId;
-  private Map<Class<? extends ApiModel>, RequestValidator> validatorMap = new HashMap<>();
 
   private static final String ONLINE_PUBLIC_KEY =
       "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDNF3G8SoEcCZh2rshUbayDgLLrj6rKgzNMxDL2HSnKcB0+GPOsndqSv+a4IBu9+I3fyBp5hkyMMG2+AXugd9pMpy6VxJxlNjhX1MYbNTZJUT4nudki4uh+LMOkIBHOceGNXjgB+cXqmlUnjlqha/HgboeHSnSgpM3dKSJQlIOsDwIDAQAB";
@@ -69,15 +70,51 @@ public class TigerHttpClient implements TigerClient {
   private String signType = TigerApiConstants.SIGN_TYPE_RSA;
   private String charset = TigerApiConstants.CHARSET_UTF8;
 
+  private static final long REFRESH_URL_INTERVAL_SECONDS = 300;
+  private ScheduledThreadPoolExecutor domainExecutorService;
+
   static {
     Security.setProperty("jdk.certpath.disabledAlgorithms", "");
   }
 
-  public TigerHttpClient(ClientConfig clientConfig) {
-    this(clientConfig.serverUrl, clientConfig.tigerId, clientConfig.privateKey);
+  private TigerHttpClient() {
   }
 
+  private static class SingletonInner {
+    private static TigerHttpClient singleton = new TigerHttpClient();
+  }
+
+  /**
+   * get TigerHttpClient instance
+   * @return TigerHttpClient
+   */
+  public static TigerHttpClient getInstance() {
+    return TigerHttpClient.SingletonInner.singleton;
+  }
+
+  public TigerHttpClient clientConfig(ClientConfig clientConfig) {
+    init(clientConfig.serverUrl, clientConfig.tigerId, clientConfig.privateKey);
+    initDomainCheck();
+    if (clientConfig.isAutoGrabPermission) {
+      TigerHttpRequest request = new TigerHttpRequest(ApiServiceType.GRAB_QUOTE_PERMISSION);
+      request.setBizContent(AccountParamBuilder.instance().buildJson());
+      TigerHttpResponse response = execute(request);
+      ApiLogger.info("tigerId:{}, grab_quote_permission:{}, data:{}",
+          tigerId, response.getMessage(), response.getData());
+    }
+    return this;
+  }
+
+  /** please use TigerHttpClient.getInstance().clientConfig(ClientConfig.DEFAULT_CONFIG) */
+  @Deprecated
   public TigerHttpClient(String serverUrl, String tigerId, String privateKey) {
+    init(serverUrl, tigerId, privateKey);
+  }
+
+  private void init(String serverUrl, String tigerId, String privateKey) {
+    if (StringUtils.isEmpty(serverUrl)) {
+      serverUrl = NetworkUtil.getHttpServerAddress(null);
+    }
     if (serverUrl == null) {
       throw new RuntimeException("serverUrl is empty.");
     }
@@ -90,28 +127,44 @@ public class TigerHttpClient implements TigerClient {
     this.serverUrl = serverUrl;
     this.tigerId = tigerId;
     this.privateKey = privateKey;
-    if (serverUrl.contains(TigerApiConstants.API_ONLINE_DOMAIN_URL)) {
+    if (ClientConfig.DEFAULT_CONFIG.getEnv() == Env.PROD) {
       this.tigerPublicKey = ONLINE_PUBLIC_KEY;
     } else {
       this.tigerPublicKey = SANDBOX_PUBLIC_KEY;
     }
     this.deviceId = NetworkUtil.getDeviceId();
-    initValidator();
-  }
-  private void initValidator() {
-    ContractRequestValidator contractRequestValidator = new ContractRequestValidator();
-    validatorMap.put(ContractModel.class, contractRequestValidator);
-    validatorMap.put(ContractsModel.class, contractRequestValidator);
-    validatorMap.put(TradeOrderModel.class, new PlaceOrderRequestValidator());
   }
 
+  @Deprecated
   public TigerHttpClient(String serverUrl) {
     this.serverUrl = serverUrl;
   }
 
+  @Deprecated
   public TigerHttpClient(String serverUrl, String accessToken) {
     this.serverUrl = serverUrl;
     this.accessToken = accessToken;
+  }
+
+  private void initDomainCheck() {
+    synchronized (TigerHttpClient.SingletonInner.singleton) {
+      if (domainExecutorService == null || domainExecutorService.isTerminated()) {
+        Runnable domainChecker = () -> {
+          try {
+            String newServerUrl = NetworkUtil.getHttpServerAddress(this.serverUrl);
+            if (!newServerUrl.equals(this.serverUrl)) {
+              ApiLogger.info("server url changed. {}-->{}", this.serverUrl, newServerUrl);
+            }
+            this.serverUrl = newServerUrl;
+          } catch (Throwable t) {
+            ApiLogger.error("refresh serverUrl error", t);
+          }
+        };
+        domainExecutorService = new ScheduledThreadPoolExecutor(1);
+        domainExecutorService.scheduleWithFixedDelay(domainChecker, REFRESH_URL_INTERVAL_SECONDS,
+            REFRESH_URL_INTERVAL_SECONDS, TimeUnit.SECONDS);
+      }
+    }
   }
 
   public String getAccessToken() {
@@ -147,6 +200,7 @@ public class TigerHttpClient implements TigerClient {
     String data = null;
     try {
       validate(request);
+      // after successful verification（string enumeration values may be reset）, generate JSON data
       param = JSONObject.toJSONString(buildParams(request));
       ApiLogger.debug("request param:{}", param);
 
@@ -278,11 +332,6 @@ public class TigerHttpClient implements TigerClient {
       return;
     }
     // TigerCommonRequest
-    ApiModel apiModel = request.getApiModel();
-    RequestValidator validator = validatorMap.get(apiModel.getClass());
-    if (validator == null) {
-      return;
-    }
-    validator.validate(apiModel);
+    ValidatorManager.getInstance().validate(request.getApiModel());
   }
 }

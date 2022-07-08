@@ -78,6 +78,12 @@ public class TradeOrderModel extends ApiModel {
   @JSONField(name = "limit_price")
   private Double limitPrice;
   /**
+   * 价格微调幅度（默认为0表示不调整，正数为向上调整，负数向下调整），对传入价格自动调整到合法价位上
+   * 例如：0.001 代表向上调整且幅度不超过 0.1%；-0.001 代表向下调整且幅度不超过 0.1%。默认 0 表示不调整
+   */
+  @JSONField(name = "adjust_limit")
+  private Double adjustLimit;
+  /**
    * 股票止损价。当 order_type 为STP,STP_LMT时该参数必需，当 order_type 为 TRAIL时,aux_price为跟踪额
    */
   @JSONField(name = "aux_price")
@@ -133,6 +139,11 @@ public class TradeOrderModel extends ApiModel {
   private List<TagValue> algoParams;
 
   private String source;
+  /**
+   * 用户备注信息
+   */
+  @JSONField(name = "user_mark")
+  private String userMark;
 
   /**
    * 附加订单类型：
@@ -161,6 +172,8 @@ public class TradeOrderModel extends ApiModel {
   private Integer stopLossOrderId;
   @JSONField(name = "stop_loss_price")
   private Double stopLossPrice;
+  @JSONField(name = "stop_loss_limit_price")
+  private Double stopLossLimitPrice;
   @JSONField(name = "stop_loss_tif")
   private TimeInForce stopLossTif;
 
@@ -261,6 +274,14 @@ public class TradeOrderModel extends ApiModel {
 
   public void setLimitPrice(Double limitPrice) {
     this.limitPrice = limitPrice;
+  }
+
+  public Double getAdjustLimit() {
+    return adjustLimit;
+  }
+
+  public void setAdjustLimit(Double adjustLimit) {
+    this.adjustLimit = adjustLimit;
   }
 
   public Double getAuxPrice() {
@@ -383,6 +404,14 @@ public class TradeOrderModel extends ApiModel {
     this.source = source;
   }
 
+  public String getUserMark() {
+    return userMark;
+  }
+
+  public void setUserMark(String userMark) {
+    this.userMark = userMark;
+  }
+
   public AttachType getAttachType() {
     return attachType;
   }
@@ -439,6 +468,14 @@ public class TradeOrderModel extends ApiModel {
     this.stopLossPrice = stopLossPrice;
   }
 
+  public Double getStopLossLimitPrice() {
+    return stopLossLimitPrice;
+  }
+
+  public void setStopLossLimitPrice(Double stopLossLimitPrice) {
+    this.stopLossLimitPrice = stopLossLimitPrice;
+  }
+
   public TimeInForce getStopLossTif() {
     return stopLossTif;
   }
@@ -463,6 +500,7 @@ public class TradeOrderModel extends ApiModel {
         ", orderType=" + orderType +
         ", limitPrice=" + limitPrice +
         ", auxPrice=" + auxPrice +
+        ", adjustLimit=" + adjustLimit +
         ", trailingPercent=" + trailingPercent +
         ", outsideRth=" + outsideRth +
         ", market='" + market + '\'' +

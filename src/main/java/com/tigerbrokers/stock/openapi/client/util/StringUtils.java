@@ -1,7 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
 /**
- * 字符串工具类。
+ * String Util Class
  */
 public abstract class StringUtils {
 

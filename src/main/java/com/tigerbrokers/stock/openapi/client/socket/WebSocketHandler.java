@@ -3,6 +3,8 @@ package com.tigerbrokers.stock.openapi.client.socket;
 import com.tigerbrokers.stock.openapi.client.util.ApiCallbackDecoderUtils;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -32,20 +34,34 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
 
   @Override
   public void channelActive(ChannelHandlerContext ctx) throws Exception {
+    StompFrame connectFrame;
     if (0 == this.clientSendInterval && 0 == this.clientReceiveInterval) {
-      ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
-          authentication.getVersion()));
+      connectFrame = StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
+          authentication.getVersion());
     } else {
-      ctx.writeAndFlush(StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
+      connectFrame = StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
           authentication.getVersion(), this.clientSendInterval == 0 ? 0 : this.clientSendInterval + HEART_BEAT_SPAN,
-          this.clientReceiveInterval == 0 ? 0 : this.clientReceiveInterval - HEART_BEAT_SPAN));
+          this.clientReceiveInterval == 0 ? 0 : this.clientReceiveInterval - HEART_BEAT_SPAN);
     }
+    ApiLogger.info("netty channel active. channel:{}, preparing to send connect token frame:{}",
+        ctx.channel().id().asShortText(), connectFrame);
+    ctx.writeAndFlush(connectFrame).addListener(new ChannelFutureListener() {
+      @Override
+      public void operationComplete(ChannelFuture future) {
+        if (future.isSuccess()) {
+          ApiLogger.info("send connect token frame successfully. channel:{}", ctx.channel().id().asShortText());
+        } else {
+          ApiLogger.error("failed to send connect token. channel:{}, isDone:{}, cause:{}",
+              ctx.channel().id().asShortText(), future.isDone(), future.cause().getMessage());
+        }
+      }
+    });
     super.channelActive(ctx);
   }
 
   @Override
   public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-    ApiLogger.info("netty channel inactive!");
+    ApiLogger.info("netty channel inactive! channel:{}", ctx.channel().id().asShortText());
     super.channelInactive(ctx);
     ctx.close();
   }
@@ -54,7 +70,11 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
   public void channelRead0(ChannelHandlerContext ctx, StompFrame frame) throws Exception {
     ApiLogger.debug("received frame from server: {}", frame);
 
-    ApiCallbackDecoderUtils.executor(ctx, frame, decoder);
+    try {
+      ApiCallbackDecoderUtils.executor(ctx, frame, decoder);
+    } catch (Throwable th) {
+      ApiLogger.error("api callback fail. frame:{}", frame, th);
+    }
   }
 
   @Override

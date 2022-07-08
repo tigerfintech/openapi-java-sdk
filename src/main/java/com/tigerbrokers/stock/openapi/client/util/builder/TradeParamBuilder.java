@@ -67,6 +67,13 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder adjustLimit(Double adjustLimit) {
+    if (adjustLimit != null) {
+      this.orderParameter.setAdjustLimit(adjustLimit);
+    }
+    return this;
+  }
+
   public TradeParamBuilder auxPrice(Double auxPrice) {
     if (auxPrice != null) {
       this.orderParameter.setAuxPrice(auxPrice);
