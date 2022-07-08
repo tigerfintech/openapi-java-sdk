@@ -9,8 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * @author liutongping
- * @version 1.0
- * @date 2022/6/17 下午5:15
+ * @date 2022/6/17
  */
 @RunWith(MockitoJUnitRunner.class)
 public class TradeTickUtilTest {
