@@ -67,6 +67,7 @@ public interface ApiServiceType {
   String ACCOUNTS = "accounts";
   String ASSETS = "assets";
   String PRIME_ASSETS = "prime_assets";
+  String ANALYTICS_ASSET = "analytics_asset";
   String POSITIONS = "positions";
   String ORDERS = "orders";
   String ACTIVE_ORDERS = "active_orders";
