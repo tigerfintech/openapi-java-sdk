@@ -9,8 +9,8 @@ import java.util.List;
  * Stock price check Util Class
  */
 public class StockPriceUtils {
-  private static final String Infinity = "Infinity";
-  private static final BigDecimal maxPrice = BigDecimal.valueOf(Double.MAX_VALUE);
+  private static final String INFINITY = "Infinity";
+  private static final BigDecimal MAX_PRICE = BigDecimal.valueOf(Double.MAX_VALUE);
 
   private StockPriceUtils() {
   }
@@ -65,7 +65,7 @@ public class StockPriceUtils {
     }
     for (TickSizeItem item : tickSizes) {
       BigDecimal begin = new BigDecimal(item.getBegin());
-      BigDecimal end = Infinity.equals(item.getEnd()) ? maxPrice : new BigDecimal(item.getEnd());
+      BigDecimal end = INFINITY.equals(item.getEnd()) ? MAX_PRICE : new BigDecimal(item.getEnd());
       TickSizeType type = item.getType();
 
       if (TickSizeType.OPEN == type) {
