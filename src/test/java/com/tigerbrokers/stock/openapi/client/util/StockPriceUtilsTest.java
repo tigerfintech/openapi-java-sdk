@@ -38,6 +38,9 @@ public class StockPriceUtilsTest {
     Assert.assertTrue(StockPriceUtils.matchTickSize(10.34d, tickSizeItemList));
     Assert.assertFalse(StockPriceUtils.matchTickSize(10.35d, tickSizeItemList));
     Assert.assertTrue(StockPriceUtils.matchTickSize(10.36d, tickSizeItemList));
+    //
+    Assert.assertTrue(StockPriceUtils.matchTickSize(10.360d, tickSizeItemList));
+    Assert.assertFalse(StockPriceUtils.matchTickSize(10.361d, tickSizeItemList));
   }
 
 }
