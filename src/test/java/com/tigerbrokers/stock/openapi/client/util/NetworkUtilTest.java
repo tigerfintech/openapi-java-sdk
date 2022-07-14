@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 /**
  * @author liutongping
  * @version 1.0
- * @date 2022/3/9 下午5:15
+ * @date 2022/3/9
  */
 @RunWith(MockitoJUnitRunner.class)
 public class NetworkUtilTest {

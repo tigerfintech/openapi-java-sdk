@@ -42,6 +42,7 @@ public enum TigerApiCode implements CodeEnumType {
   HTTP_BIZ_PARAM_VALUE_ERROR(10102, "client biz param error(%s is incorrect)"),
   HTTP_BIZ_PARAM_RANGE_ERROR(10103, "client biz param error('%s' cannot be greater than '%s')"),
   HTTP_BIZ_PARAM_CONCTRACT_SECTYPE_ERROR(10104, "client biz param error('sec_type':'%s' is not supported, all supported sec_type include:['OPT','WAR','IOPT'])"),
+  HTTP_BIZ_PARAM_PRICE_ERROR(10105, "client biz param error(%s)"),
   ;
 
   int code;
