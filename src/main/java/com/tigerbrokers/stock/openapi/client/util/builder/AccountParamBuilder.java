@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.util.builder;
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
+import com.tigerbrokers.stock.openapi.client.struct.enums.OrderSortBy;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
@@ -221,6 +222,13 @@ public class AccountParamBuilder {
   public AccountParamBuilder secretKey(String secretKey) {
     if (secretKey != null) {
       paramMap.put("secret_key", secretKey);
+    }
+    return this;
+  }
+
+  public AccountParamBuilder sortBy(OrderSortBy orderSortBy) {
+    if (orderSortBy != null) {
+      paramMap.put("sort_by", orderSortBy.name());
     }
     return this;
   }
