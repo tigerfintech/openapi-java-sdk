@@ -105,4 +105,28 @@ public class SubscribedSymbol {
   public void setSymbolFocusKeys(Map<String, Set<String>> symbolFocusKeys) {
     this.symbolFocusKeys = symbolFocusKeys;
   }
+
+  public int getTradeTickLimit() {
+    return tradeTickLimit;
+  }
+
+  public void setTradeTickLimit(int tradeTickLimit) {
+    this.tradeTickLimit = tradeTickLimit;
+  }
+
+  public int getTradeTickUsed() {
+    return tradeTickUsed;
+  }
+
+  public void setTradeTickUsed(int tradeTickUsed) {
+    this.tradeTickUsed = tradeTickUsed;
+  }
+
+  public Set<String> getSubscribedTradeTickSymbols() {
+    return subscribedTradeTickSymbols;
+  }
+
+  public void setSubscribedTradeTickSymbols(Set<String> subscribedTradeTickSymbols) {
+    this.subscribedTradeTickSymbols = subscribedTradeTickSymbols;
+  }
 }
