@@ -13,12 +13,12 @@ public class SubscribedSymbol {
   public static final int MAX_ASK_BID_SYMBOLS = 100;
 
   /**
-   * 订阅限制数
+   * subscribed quote symbol limit
    */
   private int limit;
 
   /**
-   * 已订阅数
+   * subscribed quote symbol size
    */
   private int used;
 
@@ -26,18 +26,27 @@ public class SubscribedSymbol {
 
   private int askBidUsed;
 
+  private int tradeTickLimit;
+
+  private int tradeTickUsed;
+
   /**
-   * 订阅详情
+   * subscribed quote symbol's detail
    */
   Set<String> subscribedSymbols;
 
   /**
-   * 订阅深度数据
+   * subscribed depth-quote symbol's detail
    */
   Set<String> subscribedAskBidSymbols;
 
   /**
-   * 关注keys
+   * subscribed trade-tick symbol's detail
+   */
+  Set<String> subscribedTradeTickSymbols;
+
+  /**
+   * stock quote focus keys
    */
   Map<String, Set<String>> symbolFocusKeys;
 
