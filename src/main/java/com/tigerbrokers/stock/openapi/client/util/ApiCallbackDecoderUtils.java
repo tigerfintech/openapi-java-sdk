@@ -35,6 +35,7 @@ public class ApiCallbackDecoderUtils {
     switch (frame.command()) {
       case CONNECTED:
         ApiLogger.info("connect token validation success:{}", frame);
+        WebSocketClient.getInstance().connectCountDown();
         if (decoder.getCallback() != null) {
           // set stomp version
           StompHeaderBuilder.setUseStompVersion(frame.headers().getAsString(VERSION));
@@ -72,7 +73,6 @@ public class ApiCallbackDecoderUtils {
             decoder.getCallback().connectionAck();
           }
         }
-        WebSocketClient.getInstance().connectCountDown();
         break;
       case MESSAGE:
         decoder.handle(frame);

@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.util.builder;
 
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderSortBy;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
@@ -25,6 +26,13 @@ public class AccountParamBuilder {
 
   public static AccountParamBuilder instance() {
     return new AccountParamBuilder();
+  }
+
+  public AccountParamBuilder lang(Language lang) {
+    if (lang != null) {
+      paramMap.put("lang", lang.name());
+    }
+    return this;
   }
 
   public AccountParamBuilder conid(String conid) {
