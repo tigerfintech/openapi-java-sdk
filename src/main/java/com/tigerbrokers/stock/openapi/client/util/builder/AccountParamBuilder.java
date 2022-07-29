@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.util.builder;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
@@ -141,7 +142,7 @@ public class AccountParamBuilder {
   }
 
   public AccountParamBuilder startDate(String startDate) {
-    return setTime("start_date", startDate, TimeZoneId.Shanghai);
+    return setTime("start_date", startDate, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
   }
 
   public AccountParamBuilder startDate(String startDate, TimeZoneId zoneId) {
@@ -156,7 +157,7 @@ public class AccountParamBuilder {
   }
 
   public AccountParamBuilder endDate(String endDate) {
-    return setTime("end_date", endDate, TimeZoneId.Shanghai);
+    return setTime("end_date", endDate, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
   }
 
   public AccountParamBuilder endDate(String endDate, TimeZoneId zoneId) {

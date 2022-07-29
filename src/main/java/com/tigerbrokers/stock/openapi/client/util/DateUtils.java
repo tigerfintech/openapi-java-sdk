@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -18,9 +19,11 @@ public class DateUtils {
   private static final String FORMAT_FULL = "yyyy-MM-dd HH:mm:ss";
   private static final String FORMAT_FULL_WITH_ZONE = "yyyy-MM-dd HH:mm:ss.SSS";
   private static final String SUFFIX = " 00:00:00";
-  private static final String FORMAT_DATE = "yyyy-MM-dd";
+  public static final String FORMAT_DATE = "yyyy-MM-dd";
   public static final DateTimeFormatter DATE_FORMAT =
       DateTimeFormatter.ofPattern(FORMAT_DATE).withZone(ZoneId.of(TimeZoneId.Shanghai.getZoneId()));
+  public static final DateTimeFormatter DATE_FORMAT_NY =
+      DateTimeFormatter.ofPattern(FORMAT_DATE).withZone(ZoneId.of(TimeZoneId.NewYork.getZoneId()));
   public static final DateTimeFormatter DATE_FORMAT_EST =
       DateTimeFormatter.ofPattern(FORMAT_FULL_WITH_ZONE).withZone(ZoneId.of(TimeZoneId.NewYork.getZoneId()));
   public static final DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern(FORMAT_FULL);
@@ -42,18 +45,41 @@ public class DateUtils {
     }
   }
 
+  /**
+   * Is the date before today
+   * @param date "yyyy-MM-dd"
+   * @return
+   */
   public static boolean isDateBeforeToday(String date) {
+    return isDateBeforeToday(date, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
+  }
+
+  /**
+   * Is the date before today
+   * @param date "yyyy-MM-dd"
+   * @param zoneId TimeZoneId
+   * @return
+   */
+  public static boolean isDateBeforeToday(String date, TimeZoneId zoneId) {
     if (date == null || date.isEmpty()) {
       return false;
     }
-    LocalDate expiryDate = LocalDate.parse(date, DATE_FORMAT);
-    LocalDate now = LocalDate.now(ZoneId.of(TimeZoneId.Shanghai.getZoneId()));
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(FORMAT_DATE)
+        .withZone(ZoneId.of(zoneId.getZoneId()));
+    LocalDate expiryDate = LocalDate.parse(date, formatter);
+    LocalDate now = LocalDate.now(ZoneId.of(zoneId.getZoneId()));
     if (now.compareTo(expiryDate) > 0) {
       return false;
     }
     return true;
   }
 
+  /**
+   * parse date
+   * @param date "yyyy-MM-dd"
+   * @param zoneId TimeZoneId
+   * @return
+   */
   public static long parseEpochMill(String date, TimeZoneId zoneId) {
     if (date == null) {
       return 0;
@@ -62,7 +88,7 @@ public class DateUtils {
   }
 
   public static long parseEpochMill(LocalDate localDate) {
-    return parseEpochMill(localDate, TimeZoneId.Shanghai);
+    return parseEpochMill(localDate, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
   }
 
   public static long parseEpochMill(LocalDate localDate, TimeZoneId zoneId) {
@@ -72,6 +98,11 @@ public class DateUtils {
     return localDate.atStartOfDay(ZoneId.of(zoneId.getZoneId())).toInstant().toEpochMilli();
   }
 
+  /**
+   * Convert to Eastern Time
+   * @param timestamp
+   * @return
+   */
   public static String printTimeZoneET(long timestamp) {
     return DATE_FORMAT_EST.format(Instant.ofEpochMilli(timestamp));
   }

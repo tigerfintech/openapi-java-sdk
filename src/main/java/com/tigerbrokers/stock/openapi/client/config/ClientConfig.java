@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.config;
 
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.builder.StompHeaderBuilder;
 import io.netty.handler.ssl.SslProvider;
@@ -60,11 +61,20 @@ public class ClientConfig {
   public boolean isAutoGrabPermission = true;
 
   /**
+   * 使用的默认时区
+   */
+  public TimeZoneId defaultTimeZone = TimeZoneId.Shanghai;
+
+  /**
    * institutional trader private key 机构交易员专有密钥
    */
   public String secretKey = null;
 
   private ClientConfig() {
+  }
+
+  public TimeZoneId getDefaultTimeZone() {
+    return defaultTimeZone == null ? TimeZoneId.Shanghai : defaultTimeZone;
   }
 
   public Protocol getSubscribeProtocol() {

@@ -5,6 +5,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.core.FileAppender;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +44,9 @@ public class ApiLogger {
 
   private static void initConfig(String logPath) {
     try {
-      String filename = "tiger_openapi_" + LocalDateTime.now().format(DateUtils.DATE_FORMAT) + ".log";
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DateUtils.FORMAT_DATE)
+          .withZone(ZoneId.of(ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone().getZoneId()));
+      String filename = "tiger_openapi_" + LocalDateTime.now().format(formatter) + ".log";
       File logFilePath;
       if (logPath == null) {
         logFilePath = new File("log/");
@@ -109,9 +112,14 @@ public class ApiLogger {
 
     try {
       DateTimeFormatter dtf = DateUtils.DATE_FORMAT;
+      if (ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone() != TimeZoneId.Shanghai) {
+        dtf = DateTimeFormatter.ofPattern(DateUtils.FORMAT_DATE)
+            .withZone(ZoneId.of(ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone().getZoneId()));
+      }
 
       StringBuilder builder = new StringBuilder();
-      builder.append(dtf.format(LocalDateTime.now(ZoneId.of(TimeZoneId.Shanghai.getZoneId()))));
+      builder.append(dtf.format(LocalDateTime.now(ZoneId.of(
+          ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone().getZoneId()))));
       builder.append(SPLITTER);
       builder.append(method);
       builder.append(SPLITTER);
