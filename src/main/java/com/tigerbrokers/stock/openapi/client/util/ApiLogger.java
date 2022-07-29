@@ -44,9 +44,7 @@ public class ApiLogger {
 
   private static void initConfig(String logPath) {
     try {
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DateUtils.FORMAT_DATE)
-          .withZone(ZoneId.of(ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone().getZoneId()));
-      String filename = "tiger_openapi_" + LocalDateTime.now().format(formatter) + ".log";
+      String filename = "tiger_openapi_" + DateUtils.getSystemDate() + ".log";
       File logFilePath;
       if (logPath == null) {
         logFilePath = new File("log/");

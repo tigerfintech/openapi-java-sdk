@@ -106,4 +106,13 @@ public class DateUtils {
   public static String printTimeZoneET(long timestamp) {
     return DATE_FORMAT_EST.format(Instant.ofEpochMilli(timestamp));
   }
+
+  /**
+   * get system date(yyyy-MM-dd)
+   * @return
+   */
+  public static String getSystemDate() {
+    return LocalDateTime.now().format(DateTimeFormatter.ofPattern(FORMAT_DATE)
+        .withZone(ZoneId.of(ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone().getZoneId())));
+  }
 }
