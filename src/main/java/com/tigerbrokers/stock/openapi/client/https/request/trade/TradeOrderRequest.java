@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.https.request.trade;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
+import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
@@ -12,6 +13,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AttachType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
@@ -196,6 +198,12 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
   public TradeOrderRequest withUserMark(String userMark) {
     TradeOrderModel model = (TradeOrderModel) getApiModel();
     model.setUserMark(userMark);
+    return this;
+  }
+
+  public TradeOrderRequest setLang(Language lang) {
+    ApiModel model = getApiModel();
+    model.setLang(lang);
     return this;
   }
 

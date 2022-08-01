@@ -14,8 +14,6 @@ public class QuoteSymbolModel extends ApiModel {
   private List<String> symbols;
   @JSONField(name = "include_hour_trading")
   private Boolean includeHourTrading;
-  @JSONField(name = "lang")
-  private Language lang;
 
   public QuoteSymbolModel() {
   }
@@ -52,13 +50,5 @@ public class QuoteSymbolModel extends ApiModel {
 
   public void setIncludeHourTrading(Boolean includeHourTrading) {
     this.includeHourTrading = includeHourTrading;
-  }
-
-  public Language getLang() {
-    return lang;
-  }
-
-  public void setLang(Language lang) {
-    this.lang = lang;
   }
 }

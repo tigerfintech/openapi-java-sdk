@@ -13,8 +13,6 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.PackageName;
 public class QuoteMarketModel extends ApiModel {
 
   private Market market;
-  @JSONField(name = "lang")
-  private Language language;
   @JSONField(name = "package_name")
   private PackageName packageName;
 
@@ -27,7 +25,7 @@ public class QuoteMarketModel extends ApiModel {
 
   public QuoteMarketModel(Market market, Language language) {
     this.market = market;
-    this.language = language;
+    this.lang = language;
   }
 
   public QuoteMarketModel(PackageName packageName) {
@@ -43,11 +41,11 @@ public class QuoteMarketModel extends ApiModel {
   }
 
   public Language getLanguage() {
-    return language;
+    return lang;
   }
 
   public void setLanguage(Language language) {
-    this.language = language;
+    this.lang = language;
   }
 
   public PackageName getPackageName() {

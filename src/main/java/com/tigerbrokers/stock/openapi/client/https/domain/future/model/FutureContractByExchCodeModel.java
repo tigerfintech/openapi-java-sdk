@@ -12,7 +12,6 @@ public class FutureContractByExchCodeModel extends ApiModel {
 
   @JSONField(name = "exchange_code")
   private String exchangeCode;
-  private Language lang;
 
   public FutureContractByExchCodeModel() {
   }
@@ -32,13 +31,5 @@ public class FutureContractByExchCodeModel extends ApiModel {
 
   public void setExchangeCode(String exchangeCode) {
     this.exchangeCode = exchangeCode;
-  }
-
-  public Language getLang() {
-    return lang;
-  }
-
-  public void setLang(Language lang) {
-    this.lang = lang;
   }
 }

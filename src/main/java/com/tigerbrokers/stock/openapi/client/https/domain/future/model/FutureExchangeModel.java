@@ -12,7 +12,6 @@ public class FutureExchangeModel extends ApiModel {
 
   @JSONField(name = "sec_type")
   private String secType;
-  private Language lang;
 
   public FutureExchangeModel() {
   }
@@ -32,13 +31,5 @@ public class FutureExchangeModel extends ApiModel {
 
   public void setSecType(String secType) {
     this.secType = secType;
-  }
-
-  public Language getLang() {
-    return lang;
-  }
-
-  public void setLang(Language lang) {
-    this.lang = lang;
   }
 }

@@ -10,7 +10,6 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 public class FutureContinuousContractModel extends ApiModel {
 
   private String type;
-  private Language lang;
 
   public FutureContinuousContractModel() {
   }
@@ -30,13 +29,5 @@ public class FutureContinuousContractModel extends ApiModel {
 
   public void setType(String type) {
     this.type = type;
-  }
-
-  public Language getLang() {
-    return lang;
-  }
-
-  public void setLang(Language lang) {
-    this.lang = lang;
   }
 }

@@ -12,7 +12,6 @@ public class FutureContractByConCodeModel extends ApiModel {
 
   @JSONField(name = "contract_code")
   private String contractCode;
-  private Language lang;
 
   public FutureContractByConCodeModel() {
   }
@@ -32,13 +31,5 @@ public class FutureContractByConCodeModel extends ApiModel {
 
   public void setContractCode(String contractCode) {
     this.contractCode = contractCode;
-  }
-
-  public Language getLang() {
-    return lang;
-  }
-
-  public void setLang(Language lang) {
-    this.lang = lang;
   }
 }
