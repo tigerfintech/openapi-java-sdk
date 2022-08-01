@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.quote.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import java.util.List;
@@ -16,6 +17,7 @@ public class QuoteSymbolModel extends ApiModel {
   private Boolean includeHourTrading;
 
   public QuoteSymbolModel() {
+    this.lang = ClientConfig.DEFAULT_CONFIG.getDefaultLanguage();
   }
 
   public QuoteSymbolModel(List<String> symbols) {
@@ -27,7 +29,7 @@ public class QuoteSymbolModel extends ApiModel {
   }
 
   public QuoteSymbolModel(List<String> symbols, Boolean includeHourTrading) {
-    this(symbols, includeHourTrading, Language.en_US);
+    this(symbols, includeHourTrading, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
   }
 
   public QuoteSymbolModel(List<String> symbols, Boolean includeHourTrading, Language lang) {

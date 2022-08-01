@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.request.quote;
 
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteTradeTickModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
@@ -21,7 +22,7 @@ public class QuoteTradeTickRequest extends TigerCommonRequest implements TigerRe
   }
 
   public static QuoteTradeTickRequest newRequest(List<String> symbols) {
-    return newRequest(symbols, Language.en_US);
+    return newRequest(symbols, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
   }
 
   public static QuoteTradeTickRequest newRequest(List<String> symbols, Language lang) {
@@ -42,7 +43,8 @@ public class QuoteTradeTickRequest extends TigerCommonRequest implements TigerRe
   @Deprecated
   public static QuoteTradeTickRequest newRequest(List<String> symbols, Long beginIndex, Long endIndex) {
     QuoteTradeTickRequest request = new QuoteTradeTickRequest();
-    QuoteTradeTickModel model = new QuoteTradeTickModel(symbols, beginIndex, endIndex, Language.en_US);
+    QuoteTradeTickModel model = new QuoteTradeTickModel(symbols, beginIndex, endIndex,
+        ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
     request.setApiModel(model);
     return request;
   }

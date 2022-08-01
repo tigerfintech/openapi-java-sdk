@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.future.model;
 
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 
@@ -16,6 +17,7 @@ public class FutureCurrentContractModel extends ApiModel {
 
   public FutureCurrentContractModel(String type) {
     this.type = type;
+    this.lang = ClientConfig.DEFAULT_CONFIG.getDefaultLanguage();
   }
 
   public FutureCurrentContractModel(String type, Language lang) {

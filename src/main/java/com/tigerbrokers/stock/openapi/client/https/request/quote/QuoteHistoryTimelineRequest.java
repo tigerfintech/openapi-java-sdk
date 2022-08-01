@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.request.quote;
 
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteHistoryTimelineModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
@@ -25,7 +26,7 @@ public class QuoteHistoryTimelineRequest extends TigerCommonRequest implements T
   }
 
   public static QuoteHistoryTimelineRequest newRequest(List<String> symbols, String date) {
-    return newRequest(symbols, date, Language.en_US);
+    return newRequest(symbols, date, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
   }
 
   public static QuoteHistoryTimelineRequest newRequest(List<String> symbols, String date, Language lang) {

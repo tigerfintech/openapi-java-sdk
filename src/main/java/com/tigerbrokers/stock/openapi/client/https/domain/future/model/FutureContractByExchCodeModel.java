@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.future.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 
@@ -18,6 +19,7 @@ public class FutureContractByExchCodeModel extends ApiModel {
 
   public FutureContractByExchCodeModel(String exchangeCode) {
     this.exchangeCode = exchangeCode;
+    this.lang = ClientConfig.DEFAULT_CONFIG.getDefaultLanguage();
   }
 
   public FutureContractByExchCodeModel(String exchangeCode, Language lang) {

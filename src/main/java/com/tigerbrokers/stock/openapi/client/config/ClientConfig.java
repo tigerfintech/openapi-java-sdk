@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.config;
 
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
@@ -56,17 +57,22 @@ public class ClientConfig {
   public String privateKey = null;
 
   /**
-   * 是否初始化实例完成时，自动抢占行情权限
+   * whether to automatically grab quote permission when the initialization instance is completed
    */
   public boolean isAutoGrabPermission = true;
 
   /**
-   * 使用的默认时区
+   * default time zone
    */
-  public TimeZoneId defaultTimeZone = TimeZoneId.Shanghai;
+  public TimeZoneId timeZone = TimeZoneId.Shanghai;
 
   /**
-   * institutional trader private key 机构交易员专有密钥
+   * default language
+   */
+  public Language language = Language.en_US;
+
+  /**
+   * institutional trader private key
    */
   public String secretKey = null;
 
@@ -74,7 +80,11 @@ public class ClientConfig {
   }
 
   public TimeZoneId getDefaultTimeZone() {
-    return defaultTimeZone == null ? TimeZoneId.Shanghai : defaultTimeZone;
+    return timeZone == null ? TimeZoneId.Shanghai : timeZone;
+  }
+
+  public Language getDefaultLanguage() {
+    return language == null ? Language.en_US : language;
   }
 
   public Protocol getSubscribeProtocol() {
