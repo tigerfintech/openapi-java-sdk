@@ -45,6 +45,11 @@ public class DateUtils {
     }
   }
 
+  public static Long getTimestamp(String time, TimeZoneId zoneId) {
+    Date date = DateUtils.getZoneDate(time, zoneId);
+    return date == null ? null : date.getTime();
+  }
+
   /**
    * Is the date before today
    * @param date "yyyy-MM-dd"
@@ -105,6 +110,17 @@ public class DateUtils {
    */
   public static String printTimeZoneET(long timestamp) {
     return DATE_FORMAT_EST.format(Instant.ofEpochMilli(timestamp));
+  }
+
+  /**
+   * Convert to yyyy-MM-dd
+   * @param timestamp
+   * @return
+   */
+  public static String printDate(long timestamp, TimeZoneId timeZoneId) {
+    return DateTimeFormatter.ofPattern(FORMAT_DATE).format(
+        LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp),
+            ZoneId.of(timeZoneId.getZoneId())));
   }
 
   /**

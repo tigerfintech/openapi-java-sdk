@@ -8,6 +8,9 @@ import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteTimelineResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeLineType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
+import com.tigerbrokers.stock.openapi.client.util.DateUtils;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -53,6 +56,32 @@ public class QuoteTimelineRequest extends TigerCommonRequest implements TigerReq
       TimeLineType timeLineType, Language lang) {
     QuoteTimelineRequest request = new QuoteTimelineRequest();
     QuoteTimelineModel model = new QuoteTimelineModel(symbols, beginTime, includeHourTrading, timeLineType, lang);
+    request.setApiModel(model);
+    return request;
+  }
+
+  public static QuoteTimelineRequest newRequest(List<String> symbols, String beginTime,
+      TimeLineType timeLineType) {
+    return newRequest(symbols, beginTime, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone(),
+        false, timeLineType, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
+  }
+
+  public static QuoteTimelineRequest newRequest(List<String> symbols,
+      String beginTime, boolean includeHourTrading, TimeLineType timeLineType) {
+    return newRequest(symbols, beginTime, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone(),
+        includeHourTrading, timeLineType, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
+  }
+
+  public static QuoteTimelineRequest newRequest(List<String> symbols,
+      String beginTime, TimeZoneId zoneId, boolean includeHourTrading,
+      TimeLineType timeLineType, Language lang) {
+    QuoteTimelineRequest request = new QuoteTimelineRequest();
+    if (zoneId == null) {
+      zoneId = ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone();
+    }
+    Date beginDate = DateUtils.getZoneDate(beginTime, zoneId);
+    QuoteTimelineModel model = new QuoteTimelineModel(symbols, beginDate == null ? null : beginDate.getTime(),
+        includeHourTrading, timeLineType, lang);
     request.setApiModel(model);
     return request;
   }

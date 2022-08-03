@@ -19,4 +19,18 @@ public enum TimeZoneId {
   public String getZoneId() {
     return zoneId;
   }
+
+  public static TimeZoneId getTimeZoneIdByMarket(Market market) {
+    if (market == null) {
+      return Shanghai;
+    }
+    switch (market) {
+      case US:
+        return NewYork;
+      case HK:
+        return Shanghai;
+      default:
+        return Shanghai;
+    }
+  }
 }
