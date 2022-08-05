@@ -247,6 +247,9 @@ public class AccountParamBuilder {
     if (paramMap.get("account") == null) {
       paramMap.put("account", ClientConfig.DEFAULT_CONFIG.defaultAccount);
     }
+    if (paramMap.get("lang") == null) {
+      paramMap.put("lang", ClientConfig.DEFAULT_CONFIG.getDefaultLanguage().name());
+    }
     jsonObject.putAll(paramMap);
     return jsonObject.toJSONString();
   }
