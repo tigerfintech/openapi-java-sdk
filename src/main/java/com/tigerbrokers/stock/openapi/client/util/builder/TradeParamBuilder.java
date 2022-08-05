@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.util.builder;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.struct.TagValue;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
@@ -13,6 +14,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
 import com.tigerbrokers.stock.openapi.client.struct.param.OrderParameter;
 import com.tigerbrokers.stock.openapi.client.util.FastJsonPropertyFilter;
 
+import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -323,10 +325,13 @@ public class TradeParamBuilder {
   }
 
   public OrderParameter build() {
+    if (StringUtils.isEmpty(this.orderParameter.getAccount())) {
+      this.orderParameter.setAccount(ClientConfig.DEFAULT_CONFIG.defaultAccount);
+    }
     return this.orderParameter;
   }
 
   public String buildJson() {
-    return JSONObject.toJSONString(orderParameter, FastJsonPropertyFilter.getPropertyFilter());
+    return JSONObject.toJSONString(build(), FastJsonPropertyFilter.getPropertyFilter());
   }
 }

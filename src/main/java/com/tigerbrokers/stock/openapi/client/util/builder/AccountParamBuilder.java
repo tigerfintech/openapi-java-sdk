@@ -244,6 +244,9 @@ public class AccountParamBuilder {
 
   public String buildJson() {
     JSONObject jsonObject = new JSONObject();
+    if (paramMap.get("account") == null) {
+      paramMap.put("account", ClientConfig.DEFAULT_CONFIG.defaultAccount);
+    }
     jsonObject.putAll(paramMap);
     return jsonObject.toJSONString();
   }
