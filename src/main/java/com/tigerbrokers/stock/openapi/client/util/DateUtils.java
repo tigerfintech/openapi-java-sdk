@@ -118,9 +118,15 @@ public class DateUtils {
    * @return
    */
   public static String printDate(long timestamp, TimeZoneId timeZoneId) {
-    return DateTimeFormatter.ofPattern(FORMAT_DATE).format(
-        LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp),
-            ZoneId.of(timeZoneId.getZoneId())));
+    timeZoneId = timeZoneId == null ? ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone() : timeZoneId;
+    if (TimeZoneId.Shanghai == timeZoneId) {
+      return DATE_FORMAT.format(Instant.ofEpochMilli(timestamp));
+    } else if (TimeZoneId.NewYork == timeZoneId) {
+      return DATE_FORMAT_NY.format(Instant.ofEpochMilli(timestamp));
+    } else {
+      return DateTimeFormatter.ofPattern(FORMAT_DATE).withZone(ZoneId.of(timeZoneId.getZoneId()))
+          .format(Instant.ofEpochMilli(timestamp));
+    }
   }
 
   /**
@@ -128,7 +134,6 @@ public class DateUtils {
    * @return
    */
   public static String getSystemDate() {
-    return LocalDateTime.now().format(DateTimeFormatter.ofPattern(FORMAT_DATE)
-        .withZone(ZoneId.of(ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone().getZoneId())));
+    return printDate(System.currentTimeMillis(), ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
   }
 }
