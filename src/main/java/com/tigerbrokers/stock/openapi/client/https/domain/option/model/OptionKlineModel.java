@@ -2,7 +2,6 @@ package com.tigerbrokers.stock.openapi.client.https.domain.option.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
-import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 import com.tigerbrokers.stock.openapi.client.util.SymbolUtil;
@@ -36,13 +35,7 @@ public class OptionKlineModel extends OptionCommonModel {
   }
 
   public void setBeginTime(String beginTime) {
-    TimeZoneId zoneId;
-    if (this.symbol != null) {
-      zoneId = SymbolUtil.getZoneIdBySymbol(this.symbol);
-    } else {
-      zoneId = ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone();
-    }
-    setBeginTime(beginTime, zoneId);
+    setBeginTime(beginTime, SymbolUtil.getZoneIdBySymbol(this.symbol));
   }
 
   public void setBeginTime(String beginTime, TimeZoneId zoneId) {
@@ -61,13 +54,7 @@ public class OptionKlineModel extends OptionCommonModel {
   }
 
   public void setEndTime(String endTime) {
-    TimeZoneId zoneId;
-    if (this.symbol != null) {
-      zoneId = SymbolUtil.getZoneIdBySymbol(this.symbol);
-    } else {
-      zoneId = ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone();
-    }
-    setEndTime(endTime, zoneId);
+    setEndTime(endTime, SymbolUtil.getZoneIdBySymbol(this.symbol));
   }
 
   public void setEndTime(String endTime, TimeZoneId zoneId) {

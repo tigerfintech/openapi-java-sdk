@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.struct.OptionSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import java.util.regex.Pattern;
@@ -48,6 +49,9 @@ public class SymbolUtil {
   }
 
   public static TimeZoneId getZoneIdBySymbol(String symbol) {
+    if (StringUtils.isEmpty(symbol)) {
+      return ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone();
+    }
     return SymbolUtil.isUsStockSymbol(symbol) ? TimeZoneId.NewYork : TimeZoneId.Shanghai;
   }
 }
