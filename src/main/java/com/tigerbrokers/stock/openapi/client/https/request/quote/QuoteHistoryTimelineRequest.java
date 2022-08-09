@@ -24,7 +24,7 @@ public class QuoteHistoryTimelineRequest extends TigerCommonRequest implements T
   }
 
   public static QuoteHistoryTimelineRequest newRequest(List<String> symbols) {
-    return newRequest(symbols, DateUtils.getSystemDate());
+    return newRequest(symbols, DateUtils.printSystemDate());
   }
 
   public static QuoteHistoryTimelineRequest newRequest(List<String> symbols, String date) {

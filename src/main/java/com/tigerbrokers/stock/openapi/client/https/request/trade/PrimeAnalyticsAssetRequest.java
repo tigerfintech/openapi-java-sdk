@@ -48,14 +48,13 @@ public class PrimeAnalyticsAssetRequest extends TigerCommonRequest implements Ti
         return this;
     }
 
-    public PrimeAnalyticsAssetRequest startDate(Long startTime) {
-        return startDate(startTime, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
+    public PrimeAnalyticsAssetRequest startDate(Long startDate) {
+        return startDate(startDate, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
     }
 
-    public PrimeAnalyticsAssetRequest startDate(Long startTime, TimeZoneId zoneId) {
-        if (startTime != null) {
-            String startDate = DateUtils.printDate(startTime, zoneId);
-            getPrimeAnalyticsAssetModel().setStartDate(startDate);
+    public PrimeAnalyticsAssetRequest startDate(Long startDate, TimeZoneId zoneId) {
+        if (startDate != null) {
+            getPrimeAnalyticsAssetModel().setStartDate(DateUtils.printDate(startDate, zoneId));
         }
         return this;
     }
@@ -70,14 +69,13 @@ public class PrimeAnalyticsAssetRequest extends TigerCommonRequest implements Ti
         return this;
     }
 
-    public PrimeAnalyticsAssetRequest endDate(Long endTime) {
-        return endDate(endTime, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
+    public PrimeAnalyticsAssetRequest endDate(Long endDate) {
+        return endDate(endDate, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
     }
 
-    public PrimeAnalyticsAssetRequest endDate(Long endTime, TimeZoneId zoneId) {
-        if (endTime != null) {
-            String endDate = DateUtils.printDate(endTime, zoneId);
-            getPrimeAnalyticsAssetModel().setEndDate(endDate);
+    public PrimeAnalyticsAssetRequest endDate(Long endDate, TimeZoneId zoneId) {
+        if (endDate != null) {
+            getPrimeAnalyticsAssetModel().setEndDate(DateUtils.printDate(endDate, zoneId));
         }
         return this;
     }

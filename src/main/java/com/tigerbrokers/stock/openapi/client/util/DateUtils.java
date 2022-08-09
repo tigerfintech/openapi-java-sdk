@@ -19,7 +19,7 @@ public class DateUtils {
   private static final String FORMAT_FULL = "yyyy-MM-dd HH:mm:ss";
   private static final String FORMAT_FULL_WITH_ZONE = "yyyy-MM-dd HH:mm:ss.SSS";
   private static final String SUFFIX = " 00:00:00";
-  public static final String FORMAT_DATE = "yyyy-MM-dd";
+  private static final String FORMAT_DATE = "yyyy-MM-dd";
   public static final DateTimeFormatter DATE_FORMAT =
       DateTimeFormatter.ofPattern(FORMAT_DATE).withZone(ZoneId.of(TimeZoneId.Shanghai.getZoneId()));
   public static final DateTimeFormatter DATE_FORMAT_NY =
@@ -133,7 +133,7 @@ public class DateUtils {
    * get system date(yyyy-MM-dd)
    * @return
    */
-  public static String getSystemDate() {
+  public static String printSystemDate() {
     return printDate(System.currentTimeMillis(), ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
   }
 }
