@@ -158,7 +158,7 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
   }
 
   public static void addProfitTakerOrder(TradeOrderRequest tradeOrderRequest,
-      double profitTakerPrice, TimeInForce profitTakerTif, Boolean profitTakerRth) {
+      Double profitTakerPrice, TimeInForce profitTakerTif, Boolean profitTakerRth) {
     TradeOrderModel model = (TradeOrderModel) tradeOrderRequest.getApiModel();
     model.setAttachType(AttachType.PROFIT);
     model.setProfitTakerPrice(profitTakerPrice);
@@ -167,7 +167,7 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
   }
 
   public static void addStopLossOrder(TradeOrderRequest tradeOrderRequest,
-      double stopLossPrice, TimeInForce stopLossTif) {
+      Double stopLossPrice, TimeInForce stopLossTif) {
     TradeOrderModel model = (TradeOrderModel) tradeOrderRequest.getApiModel();
     model.setAttachType(AttachType.LOSS);
     model.setStopLossPrice(stopLossPrice);
@@ -175,7 +175,7 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
   }
 
   public static void addStopLossLimitOrder(TradeOrderRequest tradeOrderRequest,
-      double stopLossPrice, double stopLossLimitPrice, TimeInForce stopLossTif) {
+      Double stopLossPrice, Double stopLossLimitPrice, TimeInForce stopLossTif) {
     TradeOrderModel model = (TradeOrderModel) tradeOrderRequest.getApiModel();
     model.setAttachType(AttachType.LOSS);
     model.setStopLossPrice(stopLossPrice);
@@ -184,14 +184,22 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
   }
 
   public static void addBracketsOrder(TradeOrderRequest tradeOrderRequest,
-      double profitTakerPrice, TimeInForce profitTakerTif, Boolean profitTakerRth,
-      double stopLossPrice, TimeInForce stopLossTif) {
+      Double profitTakerPrice, TimeInForce profitTakerTif, Boolean profitTakerRth,
+      Double stopLossPrice, TimeInForce stopLossTif) {
+    addBracketsOrder(tradeOrderRequest, profitTakerPrice, profitTakerTif, profitTakerRth,
+        stopLossPrice, null, stopLossTif);
+  }
+
+  public static void addBracketsOrder(TradeOrderRequest tradeOrderRequest,
+      Double profitTakerPrice, TimeInForce profitTakerTif, Boolean profitTakerRth,
+      Double stopLossPrice, Double stopLossLimitPrice, TimeInForce stopLossTif) {
     TradeOrderModel model = (TradeOrderModel) tradeOrderRequest.getApiModel();
     model.setAttachType(AttachType.BRACKETS);
     model.setProfitTakerPrice(profitTakerPrice);
     model.setProfitTakerTif(profitTakerTif);
     model.setProfitTakerRth(profitTakerRth);
     model.setStopLossPrice(stopLossPrice);
+    model.setStopLossLimitPrice(stopLossLimitPrice);
     model.setStopLossTif(stopLossTif);
   }
 
