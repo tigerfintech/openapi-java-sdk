@@ -17,6 +17,9 @@ import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteRealTimeQ
 import com.tigerbrokers.stock.openapi.client.struct.OptionFundamentals;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -413,7 +416,7 @@ public class OptionCalcUtils {
   public static OptionFundamentals getOptionFundamentals(TigerHttpClient client, String symbol, String right,
       String strike, String expiry) throws Exception {
     if (!DateUtils.isDateBeforeToday(expiry)) {
-      throw new RuntimeException("期权过期日无效");
+      throw new RuntimeException("Option expiration date cannot be earlier than the current date.");
     }
 
     FutureTask<CorporateDividendItem> dividendTask = getCorporateDividendTask(client, symbol);
@@ -430,7 +433,7 @@ public class OptionCalcUtils {
       optionBriefItem.setBidPrice(0D);
     }
     if (optionBriefItem.getStrike() == null) {
-      throw new RuntimeException("无法获取期权摘要信息！");
+      throw new RuntimeException("Unable to obtain option summary information.");
     }
     double target = (optionBriefItem.getAskPrice() + optionBriefItem.getBidPrice()) / 2;
 
@@ -488,15 +491,15 @@ public class OptionCalcUtils {
         if (!isEmpty(realTimeQuoteItems)) {
           Double latestPrice = realTimeQuoteItems.get(0).getLatestPrice();
           if (latestPrice == null) {
-            throw new RuntimeException("无法获取股票最新价格！");
+            throw new RuntimeException("Failed to get the latest price of the stock.");
           }
           return latestPrice;
         }
       }
       if (quoteRealTimeQuoteResponse == null) {
-        throw new RuntimeException("无法获取股票最新价格！");
+        throw new RuntimeException("Failed to get the latest price of the stock.");
       }
-      throw new RuntimeException("实时行情返回：" + quoteRealTimeQuoteResponse.getMessage());
+      throw new RuntimeException("Get realtime-quotes return error description: " + quoteRealTimeQuoteResponse.getMessage());
     });
     executorService.execute(realTimeQuoteItemTask);
     return realTimeQuoteItemTask;
@@ -515,9 +518,9 @@ public class OptionCalcUtils {
         }
       }
       if (optionBriefResponse == null) {
-        throw new RuntimeException("无法获取期权摘要信息！");
+        throw new RuntimeException("Unable to obtain option summary info.");
       }
-      throw new RuntimeException("期权摘要返回：" + optionBriefResponse.getMessage());
+      throw new RuntimeException("Obtain option brief summary info return error description:" + optionBriefResponse.getMessage());
     });
     executorService.execute(optionBriefItemTask);
     return optionBriefItemTask;
@@ -590,137 +593,85 @@ public class OptionCalcUtils {
     this.insideValue = insideValue;
   }
 
-  public String getTimeValueString() {
-    return formatDoubleString(timeValue, 2);
-  }
-
-  public String getPremiumRateString() {
-    return doubleToPercentageString(premiumRate, 2);
-  }
-
-  public String getProfitRateString() {
-    return doubleToPercentageString(profitRate, 2);
-  }
-
-  public String getVolatilityString() {
-    return doubleToPercentageString(volatility, 2);
-  }
-
-  public String getLeverageString() {
-    return formatDoubleString(leverage, 2);
-  }
-
-  public String getInsideValueString() {
-    return formatDoubleString(insideValue, 2);
-  }
-
   static class OptionIndex {
 
-    double Delta;
-    double Gamma;
-    double Theta;
-    double Vega;
-    double Rho;
+    double delta;
+    double gamma;
+    double theta;
+    double vega;
+    double rho;
 
     public OptionIndex(double delta, double gamma, double theta, double vega, double rho) {
-      Delta = delta;
-      Gamma = gamma;
-      Theta = theta;
-      Vega = vega;
-      Rho = rho;
-    }
-
-    public String getDeltaString() {
-      return formatDoubleString(Delta, 3);
-    }
-
-    public String getGammaString() {
-      return formatDoubleString(Gamma, 3);
-    }
-
-    public String getThetaString() {
-      return formatDoubleString(Theta, 3);
-    }
-
-    public String getVegaString() {
-      return formatDoubleString(Vega, 3);
-    }
-
-    public String getRhoString() {
-      return formatDoubleString(Rho, 3);
+      this.delta = delta;
+      this.gamma = gamma;
+      this.theta = theta;
+      this.vega = vega;
+      this.rho = rho;
     }
 
     public double getDelta() {
-      return Delta;
+      return delta;
     }
 
     public void setDelta(double delta) {
-      Delta = delta;
+      this.delta = delta;
     }
 
     public double getGamma() {
-      return Gamma;
+      return gamma;
     }
 
     public void setGamma(double gamma) {
-      Gamma = gamma;
+      this.gamma = gamma;
     }
 
     public double getTheta() {
-      return Theta;
+      return theta;
     }
 
     public void setTheta(double theta) {
-      Theta = theta;
+      this.theta = theta;
     }
 
     public double getVega() {
-      return Vega;
+      return vega;
     }
 
     public void setVega(double vega) {
-      Vega = vega;
+      this.vega = vega;
     }
 
     public double getRho() {
-      return Rho;
+      return rho;
     }
 
     public void setRho(double rho) {
-      Rho = rho;
+      this.rho = rho;
     }
-  }
-
-  private static String doubleToPercentageString(double src, int fractionDigits) {
-    NumberFormat nf = NumberFormat.getPercentInstance();
-    nf.setMinimumFractionDigits(fractionDigits);
-    nf.setMaximumFractionDigits(fractionDigits);
-    String res = nf.format(src);
-    return res;
-  }
-
-  private static String formatDoubleString(double src, int fractionDigits) {
-    NumberFormat nf = NumberFormat.getNumberInstance();
-    nf.setMinimumFractionDigits(fractionDigits);
-    nf.setMaximumFractionDigits(fractionDigits);
-    String res = nf.format(src);
-    return res;
   }
 
   public OptionFundamentals toOptionFundamentals(int openInterest, String volatility) {
     OptionFundamentals optionFundamentals = new OptionFundamentals();
-    optionFundamentals.setPremiumRate(getPremiumRateString());
-    optionFundamentals.setOpenInterest(openInterest + "");
-    optionFundamentals.setVolatility(getVolatilityString());
-    optionFundamentals.setHistoryVolatility(volatility);
-    optionFundamentals.setDelta(getIndex().getDeltaString());
-    optionFundamentals.setTheta(getIndex().getThetaString());
-    optionFundamentals.setGamma(getIndex().getGammaString());
-    optionFundamentals.setVega(getIndex().getVegaString());
-    optionFundamentals.setTimeValue(getTimeValueString());
-    optionFundamentals.setInsideValue(getInsideValueString());
-    optionFundamentals.setLeverage(getLeverageString());
-    optionFundamentals.setProfitRate(getProfitRateString());
+    optionFundamentals.setPremiumRate(getPremiumRate());
+    optionFundamentals.setOpenInterest(openInterest);
+    optionFundamentals.setVolatility(getVolatility());
+    double historyVolatility = volatility == null || volatility.isEmpty() ? 0.0 : Double.parseDouble(volatility);
+    optionFundamentals.setHistoryVolatility(historyVolatility);
+
+    optionFundamentals.setDelta(formatDouble(getIndex().getDelta()));
+    optionFundamentals.setTheta(formatDouble(getIndex().getTheta()));
+    optionFundamentals.setGamma(formatDouble(getIndex().getGamma()));
+    optionFundamentals.setVega(formatDouble(getIndex().getVega()));
+    optionFundamentals.setRho(formatDouble(getIndex().getRho()));
+
+    optionFundamentals.setTimeValue(getTimeValue());
+    optionFundamentals.setInsideValue(getInsideValue());
+    optionFundamentals.setLeverage(getLeverage());
+    optionFundamentals.setProfitRate(getProfitRate());
     return optionFundamentals;
   }
-}
+
+   private static double formatDouble(double value) {
+     return new BigDecimal(value).setScale(3, RoundingMode.HALF_DOWN).doubleValue();
+   }
+ }
