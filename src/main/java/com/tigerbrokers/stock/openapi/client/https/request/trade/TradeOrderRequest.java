@@ -170,6 +170,7 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
       Double stopLossPrice, TimeInForce stopLossTif) {
     TradeOrderModel model = (TradeOrderModel) tradeOrderRequest.getApiModel();
     model.setAttachType(AttachType.LOSS);
+    model.setStopLossOrderType(OrderType.STP);
     model.setStopLossPrice(stopLossPrice);
     model.setStopLossTif(stopLossTif);
   }
@@ -178,8 +179,19 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
       Double stopLossPrice, Double stopLossLimitPrice, TimeInForce stopLossTif) {
     TradeOrderModel model = (TradeOrderModel) tradeOrderRequest.getApiModel();
     model.setAttachType(AttachType.LOSS);
+    model.setStopLossOrderType(OrderType.STP_LMT);
     model.setStopLossPrice(stopLossPrice);
     model.setStopLossLimitPrice(stopLossLimitPrice);
+    model.setStopLossTif(stopLossTif);
+  }
+
+  public static void addStopLossTrailOrder(TradeOrderRequest tradeOrderRequest,
+      Double stopLossTrailingPercent, Double stopLossTrailingAmount, TimeInForce stopLossTif) {
+    TradeOrderModel model = (TradeOrderModel) tradeOrderRequest.getApiModel();
+    model.setAttachType(AttachType.LOSS);
+    model.setStopLossOrderType(OrderType.TRAIL);
+    model.setStopLossTrailingPercent(stopLossTrailingPercent);
+    model.setStopLossTrailingAmount(stopLossTrailingAmount);
     model.setStopLossTif(stopLossTif);
   }
 
