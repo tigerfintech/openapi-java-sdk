@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.request.future;
 
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureContinuousContractModel;
@@ -21,7 +22,7 @@ public class FutureContinuousContractRequest extends TigerCommonRequest
   }
 
   public static FutureContinuousContractRequest newRequest(String type) {
-    return newRequest(type, Language.en_US);
+    return newRequest(type, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
   }
 
   public static FutureContinuousContractRequest newRequest(String type, Language lang) {

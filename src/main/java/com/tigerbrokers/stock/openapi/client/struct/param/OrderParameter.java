@@ -180,6 +180,8 @@ public class OrderParameter implements Serializable {
   @JSONField(name = "oca_orders")
   private List<OrderParameter> ocaOrders;
 
+  private String lang;
+
   public Long getId() {
     return id;
   }
@@ -474,6 +476,14 @@ public class OrderParameter implements Serializable {
 
   public void setOcaOrders(List<OrderParameter> ocaOrders) {
     this.ocaOrders = ocaOrders;
+  }
+
+  public String getLang() {
+    return lang;
+  }
+
+  public void setLang(String lang) {
+    this.lang = lang;
   }
 
   @Override

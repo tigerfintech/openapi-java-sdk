@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.option.model;
 
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.struct.OptionSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
@@ -27,7 +28,7 @@ public class OptionCommonModel extends ApiModel {
     setSymbol(optionSymbol.getSymbol());
     setRight(optionSymbol.getRight());
     setStrike(optionSymbol.getStrike());
-    setExpiry(optionSymbol.getExpiry());
+    setExpiry(optionSymbol.getExpiry(), SymbolUtil.getZoneIdBySymbol(optionSymbol.getSymbol()));
   }
 
   public OptionCommonModel(String symbol, String right, String strike, Long expiry) {
@@ -70,7 +71,14 @@ public class OptionCommonModel extends ApiModel {
   }
 
   public void setExpiry(String expiry) {
-    Date date = DateUtils.getZoneDate(expiry, TimeZoneId.NewYork);
+    Date date = DateUtils.getZoneDate(expiry, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
+    if (date != null) {
+      this.expiry = date.getTime();
+    }
+  }
+
+  public void setExpiry(String expiry, TimeZoneId zoneId) {
+    Date date = DateUtils.getZoneDate(expiry, zoneId);
     if (date != null) {
       this.expiry = date.getTime();
     }

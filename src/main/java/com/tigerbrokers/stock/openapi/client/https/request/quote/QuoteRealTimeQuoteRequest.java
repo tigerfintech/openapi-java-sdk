@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.request.quote;
 
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteSymbolModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
@@ -24,7 +25,7 @@ public class QuoteRealTimeQuoteRequest extends TigerCommonRequest implements Tig
   }
 
   public static QuoteRealTimeQuoteRequest newRequest(List<String> symbols, boolean includeHourTrading) {
-    return newRequest(symbols, includeHourTrading, Language.en_US);
+    return newRequest(symbols, includeHourTrading, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
   }
 
   public static QuoteRealTimeQuoteRequest newRequest(List<String> symbols, boolean includeHourTrading, Language lang) {

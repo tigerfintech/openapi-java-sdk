@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.https.request.trade;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
+import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
@@ -12,6 +13,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AttachType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
@@ -156,7 +158,7 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
   }
 
   public static void addProfitTakerOrder(TradeOrderRequest tradeOrderRequest,
-      double profitTakerPrice, TimeInForce profitTakerTif, Boolean profitTakerRth) {
+      Double profitTakerPrice, TimeInForce profitTakerTif, Boolean profitTakerRth) {
     TradeOrderModel model = (TradeOrderModel) tradeOrderRequest.getApiModel();
     model.setAttachType(AttachType.PROFIT);
     model.setProfitTakerPrice(profitTakerPrice);
@@ -165,7 +167,7 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
   }
 
   public static void addStopLossOrder(TradeOrderRequest tradeOrderRequest,
-      double stopLossPrice, TimeInForce stopLossTif) {
+      Double stopLossPrice, TimeInForce stopLossTif) {
     TradeOrderModel model = (TradeOrderModel) tradeOrderRequest.getApiModel();
     model.setAttachType(AttachType.LOSS);
     model.setStopLossPrice(stopLossPrice);
@@ -173,7 +175,7 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
   }
 
   public static void addStopLossLimitOrder(TradeOrderRequest tradeOrderRequest,
-      double stopLossPrice, double stopLossLimitPrice, TimeInForce stopLossTif) {
+      Double stopLossPrice, Double stopLossLimitPrice, TimeInForce stopLossTif) {
     TradeOrderModel model = (TradeOrderModel) tradeOrderRequest.getApiModel();
     model.setAttachType(AttachType.LOSS);
     model.setStopLossPrice(stopLossPrice);
@@ -182,20 +184,34 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
   }
 
   public static void addBracketsOrder(TradeOrderRequest tradeOrderRequest,
-      double profitTakerPrice, TimeInForce profitTakerTif, Boolean profitTakerRth,
-      double stopLossPrice, TimeInForce stopLossTif) {
+      Double profitTakerPrice, TimeInForce profitTakerTif, Boolean profitTakerRth,
+      Double stopLossPrice, TimeInForce stopLossTif) {
+    addBracketsOrder(tradeOrderRequest, profitTakerPrice, profitTakerTif, profitTakerRth,
+        stopLossPrice, null, stopLossTif);
+  }
+
+  public static void addBracketsOrder(TradeOrderRequest tradeOrderRequest,
+      Double profitTakerPrice, TimeInForce profitTakerTif, Boolean profitTakerRth,
+      Double stopLossPrice, Double stopLossLimitPrice, TimeInForce stopLossTif) {
     TradeOrderModel model = (TradeOrderModel) tradeOrderRequest.getApiModel();
     model.setAttachType(AttachType.BRACKETS);
     model.setProfitTakerPrice(profitTakerPrice);
     model.setProfitTakerTif(profitTakerTif);
     model.setProfitTakerRth(profitTakerRth);
     model.setStopLossPrice(stopLossPrice);
+    model.setStopLossLimitPrice(stopLossLimitPrice);
     model.setStopLossTif(stopLossTif);
   }
 
   public TradeOrderRequest withUserMark(String userMark) {
     TradeOrderModel model = (TradeOrderModel) getApiModel();
     model.setUserMark(userMark);
+    return this;
+  }
+
+  public TradeOrderRequest setLang(Language lang) {
+    ApiModel model = getApiModel();
+    model.setLang(lang);
     return this;
   }
 

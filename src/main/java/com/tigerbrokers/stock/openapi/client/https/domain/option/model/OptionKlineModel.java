@@ -4,6 +4,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
+import com.tigerbrokers.stock.openapi.client.util.SymbolUtil;
 import java.util.Date;
 
 /**
@@ -34,7 +35,7 @@ public class OptionKlineModel extends OptionCommonModel {
   }
 
   public void setBeginTime(String beginTime) {
-    setBeginTime(beginTime, TimeZoneId.NewYork);
+    setBeginTime(beginTime, SymbolUtil.getZoneIdBySymbol(this.symbol));
   }
 
   public void setBeginTime(String beginTime, TimeZoneId zoneId) {
@@ -53,7 +54,7 @@ public class OptionKlineModel extends OptionCommonModel {
   }
 
   public void setEndTime(String endTime) {
-    setEndTime(endTime, TimeZoneId.NewYork);
+    setEndTime(endTime, SymbolUtil.getZoneIdBySymbol(this.symbol));
   }
 
   public void setEndTime(String endTime, TimeZoneId zoneId) {

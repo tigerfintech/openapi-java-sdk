@@ -9,6 +9,8 @@ import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.PrimeAnalyticsAssetResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SegmentType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
+import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 
 /**
  * Description:
@@ -46,6 +48,17 @@ public class PrimeAnalyticsAssetRequest extends TigerCommonRequest implements Ti
         return this;
     }
 
+    public PrimeAnalyticsAssetRequest startDate(Long startDate) {
+        return startDate(startDate, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
+    }
+
+    public PrimeAnalyticsAssetRequest startDate(Long startDate, TimeZoneId zoneId) {
+        if (startDate != null) {
+            getPrimeAnalyticsAssetModel().setStartDate(DateUtils.printDate(startDate, zoneId));
+        }
+        return this;
+    }
+
     /**
      * set end date
      * @param endDate yyyy-MM-dd
@@ -53,6 +66,17 @@ public class PrimeAnalyticsAssetRequest extends TigerCommonRequest implements Ti
      */
     public PrimeAnalyticsAssetRequest endDate(String endDate) {
         getPrimeAnalyticsAssetModel().setEndDate(endDate);
+        return this;
+    }
+
+    public PrimeAnalyticsAssetRequest endDate(Long endDate) {
+        return endDate(endDate, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
+    }
+
+    public PrimeAnalyticsAssetRequest endDate(Long endDate, TimeZoneId zoneId) {
+        if (endDate != null) {
+            getPrimeAnalyticsAssetModel().setEndDate(DateUtils.printDate(endDate, zoneId));
+        }
         return this;
     }
 
