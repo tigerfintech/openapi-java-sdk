@@ -1,8 +1,9 @@
 package com.tigerbrokers.stock.openapi.client.https.request.future;
 
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
-import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureContinuousContractModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureCurrentContractModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.future.FutureContractsResponse;
@@ -22,12 +23,12 @@ public class FutureContractsRequest extends TigerCommonRequest implements TigerR
     }
 
     public static FutureContractsRequest newRequest(String type) {
-        return newRequest(type, Language.en_US);
+        return newRequest(type, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
     }
 
     public static FutureContractsRequest newRequest(String type, Language lang) {
         FutureContractsRequest request = new FutureContractsRequest();
-        FutureContinuousContractModel model = new FutureContinuousContractModel(type, lang);
+        FutureCurrentContractModel model = new FutureCurrentContractModel(type, lang);
         request.setApiModel(model);
         return request;
     }
