@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.request.future;
 
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureKlineModel;
@@ -7,6 +8,8 @@ import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.future.FutureKlineResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.FutureKType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
+import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 import java.util.List;
 
 /**
@@ -54,6 +57,34 @@ public class FutureKlineRequest extends TigerCommonRequest implements TigerReque
     FutureKlineModel model =
         new FutureKlineModel(contractCodes, kType != null ? kType.getValue() : FutureKType.day.getValue(), beginTime,
             endTime, limit);
+    request.setApiModel(model);
+    return request;
+  }
+
+  public static FutureKlineRequest newRequest(List<String> contractCodes, FutureKType kType,
+      String beginTime, String endTime, Integer limit) {
+    return newRequest(contractCodes, kType, beginTime, endTime,
+        ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone(), limit);
+  }
+
+  /**
+   * return values is in reverse chronological order
+   * @param contractCodes
+   * @param kType
+   * @param beginTime included, yyyy-MM-dd HH:mm:ss
+   * @param endTime excluded, yyyy-MM-dd HH:mm:ss
+   * @param zoneId time zone
+   * @param limit
+   * @return
+   */
+  public static FutureKlineRequest newRequest(List<String> contractCodes, FutureKType kType,
+      String beginTime, String endTime, TimeZoneId zoneId, Integer limit) {
+    FutureKlineRequest request = new FutureKlineRequest();
+
+    FutureKlineModel model =
+        new FutureKlineModel(contractCodes, kType != null ? kType.getValue() : FutureKType.day.getValue(),
+            DateUtils.getTimestamp(beginTime, zoneId), DateUtils.getTimestamp(endTime, zoneId),
+            limit);
     request.setApiModel(model);
     return request;
   }

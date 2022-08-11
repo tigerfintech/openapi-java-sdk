@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.request.quote;
 
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteSymbolModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
@@ -21,7 +22,7 @@ public class QuoteShortableStockRequest extends TigerCommonRequest
   }
 
   public static QuoteShortableStockRequest newRequest(List<String> symbols) {
-    return newRequest(symbols, Language.en_US);
+    return newRequest(symbols, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
   }
 
   public static QuoteShortableStockRequest newRequest(List<String> symbols, Language lang) {

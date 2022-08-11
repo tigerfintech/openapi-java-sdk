@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.request.quote;
 
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteKlineModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
@@ -37,7 +38,7 @@ public class QuoteKlineRequest extends TigerCommonRequest implements TigerReques
   }
 
   public static QuoteKlineRequest newRequest(List<String> symbols, KType kType, String beginTime, String endTime) {
-    return newRequest(symbols, kType, beginTime, endTime, TimeZoneId.NewYork);
+    return newRequest(symbols, kType, beginTime, endTime, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
   }
 
   public static QuoteKlineRequest newRequest(List<String> symbols, KType kType, String beginTime, String endTime,

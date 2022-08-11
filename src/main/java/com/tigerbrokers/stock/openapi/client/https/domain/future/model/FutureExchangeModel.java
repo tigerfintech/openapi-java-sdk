@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.future.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 
@@ -12,13 +13,13 @@ public class FutureExchangeModel extends ApiModel {
 
   @JSONField(name = "sec_type")
   private String secType;
-  private Language lang;
 
   public FutureExchangeModel() {
   }
 
   public FutureExchangeModel(String secType) {
     this.secType = secType;
+    this.lang = ClientConfig.DEFAULT_CONFIG.getDefaultLanguage();
   }
 
   public FutureExchangeModel(String secType, Language lang) {
@@ -32,13 +33,5 @@ public class FutureExchangeModel extends ApiModel {
 
   public void setSecType(String secType) {
     this.secType = secType;
-  }
-
-  public Language getLang() {
-    return lang;
-  }
-
-  public void setLang(Language lang) {
-    this.lang = lang;
   }
 }

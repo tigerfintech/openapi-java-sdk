@@ -1,7 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.request.financial;
 
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
-import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.financial.model.FinancialDailyModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
@@ -30,8 +30,13 @@ public class FinancialDailyRequest extends TigerCommonRequest implements TigerRe
 
   public static FinancialDailyRequest newRequest(List<String> symbols, List<String> fields, String beginDate,
       String endDate) {
-    return newRequest(symbols, Market.US, fields, DateUtils.getZoneDate(beginDate, TimeZoneId.Shanghai),
-        DateUtils.getZoneDate(endDate, TimeZoneId.Shanghai));
+    return newRequest(symbols, fields, beginDate, endDate, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
+  }
+
+  public static FinancialDailyRequest newRequest(List<String> symbols, List<String> fields, String beginDate,
+      String endDate, TimeZoneId zoneId) {
+    return newRequest(symbols, Market.US, fields, DateUtils.getZoneDate(beginDate, zoneId),
+        DateUtils.getZoneDate(endDate, zoneId));
   }
 
   public static FinancialDailyRequest newRequest(List<String> symbols, Market market, List<String> fields,

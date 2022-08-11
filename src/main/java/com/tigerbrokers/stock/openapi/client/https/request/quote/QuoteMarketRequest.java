@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.request.quote;
 
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteMarketModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
@@ -20,7 +21,7 @@ public class QuoteMarketRequest extends TigerCommonRequest implements TigerReque
   }
 
   public static QuoteMarketRequest newRequest(Market market) {
-    return newRequest(market, Language.en_US);
+    return newRequest(market, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
   }
 
   public static QuoteMarketRequest newRequest(Market market, Language lang) {

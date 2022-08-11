@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.quote.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.struct.enums.RightOption;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
@@ -79,7 +80,7 @@ public class QuoteKlineModel extends QuoteSymbolModel {
   }
 
   public void setBeginTime(String beginTime) {
-    setBeginTime(beginTime, TimeZoneId.Shanghai);
+    setBeginTime(beginTime, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
   }
 
   public void setBeginTime(String beginTime, TimeZoneId zoneId) {
@@ -98,7 +99,7 @@ public class QuoteKlineModel extends QuoteSymbolModel {
   }
 
   public void setEndTime(String endTime) {
-    setEndTime(endTime, TimeZoneId.Shanghai);
+    setEndTime(endTime, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
   }
 
   public void setEndTime(String endTime, TimeZoneId zoneId) {
