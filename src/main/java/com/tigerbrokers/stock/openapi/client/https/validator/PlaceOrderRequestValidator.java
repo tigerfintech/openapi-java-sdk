@@ -6,7 +6,6 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AttachType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
-import com.tigerbrokers.stock.openapi.client.struct.enums.Right;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
@@ -73,20 +72,30 @@ public class PlaceOrderRequestValidator implements RequestValidator<TradeOrderMo
     }
 
     if (model.getAttachType() == AttachType.BRACKETS || model.getAttachType() == AttachType.LOSS) {
-      if (model.getStopLossPrice() == null) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "stop_loss_price");
-      }
-      if (model.getStopLossTif() == null) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "stop_loss_tif");
-      }
-      if (model.getStopLossLimitPrice() != null) {
-        if (ActionType.BUY == model.getAction()
-            && model.getStopLossPrice().compareTo(model.getStopLossLimitPrice()) <= 0) {
-          throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "stop_loss_limit_price");
+      if (OrderType.TRAIL == model.getStopLossOrderType()) {
+        if (model.getStopLossTrailingPercent() == null && model.getStopLossTrailingAmount() == null) {
+          throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR,
+              "'stop_loss_trailing_percent' or 'stop_loss_trailing_amount'");
         }
-        if (ActionType.SELL == model.getAction()
-            && model.getStopLossPrice().compareTo(model.getStopLossLimitPrice()) >= 0) {
-          throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "stop_loss_limit_price");
+      } else {
+        if (model.getStopLossPrice() == null) {
+          throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "stop_loss_price");
+        }
+        if (model.getStopLossTif() == null) {
+          throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "stop_loss_tif");
+        }
+        if (OrderType.STP_LMT == model.getStopLossOrderType()) {
+          if (model.getStopLossLimitPrice() == null) {
+            throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "stop_loss_limit_price");
+          }
+          if (ActionType.BUY == model.getAction()
+              && model.getStopLossPrice().compareTo(model.getStopLossLimitPrice()) <= 0) {
+            throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "stop_loss_limit_price");
+          }
+          if (ActionType.SELL == model.getAction()
+              && model.getStopLossPrice().compareTo(model.getStopLossLimitPrice()) >= 0) {
+            throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "stop_loss_limit_price");
+          }
         }
       }
     }
