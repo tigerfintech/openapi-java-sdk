@@ -2,7 +2,6 @@ package com.tigerbrokers.stock.openapi.client.https.response.future;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.item.FutureTickBatchItem;
-import com.tigerbrokers.stock.openapi.client.https.domain.future.item.FutureTickItem;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 import java.util.List;
 

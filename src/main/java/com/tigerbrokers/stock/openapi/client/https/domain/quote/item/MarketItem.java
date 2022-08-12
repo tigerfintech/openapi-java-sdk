@@ -9,22 +9,22 @@ import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 public class MarketItem extends ApiModel {
 
   /**
-   * US:美股，CN:沪深，HK:港股
+   * US:US Stock，CN:China Stock，HK:Hong Kong Stock
    **/
   private String market;
 
   /**
-   * 市场状态，包括：NOT_YET_OPEN:未开盘,PRE_HOUR_TRADING:盘前交易,TRADING:交易中,MIDDLE_CLOSE:午间休市,POST_HOUR_TRADING:盘后交易,CLOSING:已收盘,EARLY_CLOSED:提前休市,MARKET_CLOSED:休市
+   * Market status，including：NOT_YET_OPEN:未开盘,PRE_HOUR_TRADING:盘前交易,TRADING:交易中,MIDDLE_CLOSE:午间休市,POST_HOUR_TRADING:盘后交易,CLOSING:已收盘,EARLY_CLOSED:提前休市,MARKET_CLOSED:休市
    **/
   private String status;
 
   /**
-   * 市场状态描述(未开盘，交易中，休市等）
+   * Market status description(未开盘，交易中，休市等）
    **/
   private String marketStatus;
 
   /**
-   * 最近开盘、交易时间  MM-dd HH:mm:ss z
+   * market latest open time、trading time  MM-dd HH:mm:ss z
    **/
   private String openTime;
 

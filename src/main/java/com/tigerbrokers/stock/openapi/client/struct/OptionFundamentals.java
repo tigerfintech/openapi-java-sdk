@@ -10,145 +10,171 @@ public class OptionFundamentals {
   /**
    * delta
    */
-  String delta;
+  double delta;
   /**
    * gamma
    */
-  String gamma;
+  double gamma;
   /**
    * theta
    */
-  String theta;
+  double theta;
   /**
    * vega
    */
-  String vega;
+  double vega;
+  /**
+   * rho
+   */
+  double rho;
+
+  /**
+   * 期权预测价值
+   */
+  double predictedValue;
+
   /**
    * 时间价值
    */
-  String timeValue;
+  double timeValue;
   /**
    * 溢价率
    */
-  String premiumRate;
+  double premiumRate;
   /**
    * 买入盈利率
    */
-  String profitRate;
+  double profitRate;
   /**
    * 隐含波动率
    */
-  String volatility;
+  double volatility;
   /**
    * 杠杆率
    */
-  String leverage;
+  double leverage;
   /**
    * 内在价值
    */
-  String insideValue;
+  double insideValue;
   /**
    * 历史波动率
    */
-  String historyVolatility;
+  double historyVolatility;
   /**
    * 未平合约数
    */
-  String openInterest;
+  double openInterest;
 
-  public String getDelta() {
+  public double getDelta() {
     return delta;
   }
 
-  public void setDelta(String delta) {
+  public void setDelta(double delta) {
     this.delta = delta;
   }
 
-  public String getGamma() {
+  public double getGamma() {
     return gamma;
   }
 
-  public void setGamma(String gamma) {
+  public void setGamma(double gamma) {
     this.gamma = gamma;
   }
 
-  public String getTheta() {
+  public double getTheta() {
     return theta;
   }
 
-  public void setTheta(String theta) {
+  public void setTheta(double theta) {
     this.theta = theta;
   }
 
-  public String getVega() {
+  public double getVega() {
     return vega;
   }
 
-  public void setVega(String vega) {
+  public void setVega(double vega) {
     this.vega = vega;
   }
 
-  public String getTimeValue() {
+  public double getRho() {
+    return rho;
+  }
+
+  public void setRho(double rho) {
+    this.rho = rho;
+  }
+
+  public double getPredictedValue() {
+    return predictedValue;
+  }
+
+  public void setPredictedValue(double predictedValue) {
+    this.predictedValue = predictedValue;
+  }
+
+  public double getTimeValue() {
     return timeValue;
   }
 
-  public void setTimeValue(String timeValue) {
+  public void setTimeValue(double timeValue) {
     this.timeValue = timeValue;
   }
 
-  public String getPremiumRate() {
+  public double getPremiumRate() {
     return premiumRate;
   }
 
-  public void setPremiumRate(String premiumRate) {
+  public void setPremiumRate(double premiumRate) {
     this.premiumRate = premiumRate;
   }
 
-  public String getProfitRate() {
+  public double getProfitRate() {
     return profitRate;
   }
 
-  public void setProfitRate(String profitRate) {
+  public void setProfitRate(double profitRate) {
     this.profitRate = profitRate;
   }
 
-  public String getVolatility() {
+  public double getVolatility() {
     return volatility;
   }
 
-  public void setVolatility(String volatility) {
+  public void setVolatility(double volatility) {
     this.volatility = volatility;
   }
 
-  public String getLeverage() {
+  public double getLeverage() {
     return leverage;
   }
 
-  public void setLeverage(String leverage) {
+  public void setLeverage(double leverage) {
     this.leverage = leverage;
   }
 
-  public String getInsideValue() {
+  public double getInsideValue() {
     return insideValue;
   }
 
-  public void setInsideValue(String insideValue) {
+  public void setInsideValue(double insideValue) {
     this.insideValue = insideValue;
   }
 
-  public String getHistoryVolatility() {
+  public double getHistoryVolatility() {
     return historyVolatility;
   }
 
-  public void setHistoryVolatility(String historyVolatility) {
+  public void setHistoryVolatility(double historyVolatility) {
     this.historyVolatility = historyVolatility;
   }
 
-  public String getOpenInterest() {
+  public double getOpenInterest() {
     return openInterest;
   }
 
-  public void setOpenInterest(String openInterest) {
+  public void setOpenInterest(double openInterest) {
     this.openInterest = openInterest;
   }
 }

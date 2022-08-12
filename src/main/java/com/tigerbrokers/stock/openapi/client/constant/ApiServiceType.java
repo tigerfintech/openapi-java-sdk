@@ -56,6 +56,7 @@ public interface ApiServiceType {
   String FUTURE_CONTRACT_BY_EXCHANGE_CODE = "future_contract_by_exchange_code";
   String FUTURE_CONTINUOUS_CONTRACTS = "future_continuous_contracts";
   String FUTURE_CURRENT_CONTRACT = "future_current_contract";
+  String FUTURE_CONTRACTS = "future_contracts";
   String FUTURE_KLINE = "future_kline";
   String FUTURE_REAL_TIME_QUOTE = "future_real_time_quote";
   String FUTURE_TICK = "future_tick";
