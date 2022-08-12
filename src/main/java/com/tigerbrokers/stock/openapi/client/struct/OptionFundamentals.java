@@ -27,6 +27,12 @@ public class OptionFundamentals {
    * rho
    */
   double rho;
+
+  /**
+   * 期权预测价值
+   */
+  double predictedValue;
+
   /**
    * 时间价值
    */
@@ -98,6 +104,14 @@ public class OptionFundamentals {
 
   public void setRho(double rho) {
     this.rho = rho;
+  }
+
+  public double getPredictedValue() {
+    return predictedValue;
+  }
+
+  public void setPredictedValue(double predictedValue) {
+    this.predictedValue = predictedValue;
   }
 
   public double getTimeValue() {

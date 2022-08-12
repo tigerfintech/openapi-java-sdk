@@ -15,12 +15,13 @@ import com.tigerbrokers.stock.openapi.client.https.response.option.OptionBriefRe
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteMarketResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteRealTimeQuoteResponse;
 import com.tigerbrokers.stock.openapi.client.struct.OptionFundamentals;
+import com.tigerbrokers.stock.openapi.client.struct.OptionMetrics;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Right;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
+import org.jquantlib.helper.FDAmericanDividendOptionHelper;
+import org.jquantlib.instruments.Option;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -285,11 +286,11 @@ public class OptionCalcUtils {
     return sig;
   }
 
-  private static OptionResult.OptionIndex optionPricePartialsCallBlackScholes(double S,     // spot price
-      double K,     // Strike (exercise) price,
-      double r,     // interest rate
-      double sigma, // volatility
-      double time) {   // partial wrt r
+  private static OptionMetrics optionPricePartialsCallBlackScholes(double S,     // spot price
+                                                                              double K,     // Strike (exercise) price,
+                                                                              double r,     // interest rate
+                                                                              double sigma, // volatility
+                                                                              double time) {   // partial wrt r
     double time_sqrt = Math.sqrt(time);
     double d1 = (Math.log(S / K) + r * time) / (sigma * time_sqrt) + 0.5 * sigma * time_sqrt;
     double d2 = d1 - (sigma * time_sqrt);
@@ -298,13 +299,13 @@ public class OptionCalcUtils {
     double Theta = (-(S * sigma * n(d1)) / (2 * time_sqrt) - r * K * Math.exp(-r * time) * N(d2)) / 365f;
     double Vega = S * time_sqrt * n(d1) / 100f;
     double Rho = K * time * Math.exp(-r * time) * N(d2);
-    return new OptionResult.OptionIndex(Delta, Gamma, Theta, Vega, Rho);
+    return new OptionMetrics(Delta, Gamma, Theta, Vega, Rho);
   }
 
-  private static OptionResult.OptionIndex optionPricePartialsPutBlackScholes(double S, // spot price
-      double K, // Strike (exercise) price,
-      double r,  // interest rate
-      double sigma, double time) {    // partial wrt r
+  private static OptionMetrics optionPricePartialsPutBlackScholes(double S, // spot price
+                                                                  double K, // Strike (exercise) price,
+                                                                  double r,  // interest rate
+                                                                  double sigma, double time) {    // partial wrt r
     double time_sqrt = Math.sqrt(time);
     double d1 = (Math.log(S / K) + r * time) / (sigma * time_sqrt) + 0.5 * sigma * time_sqrt;
     double d2 = d1 - (sigma * time_sqrt);
@@ -313,7 +314,7 @@ public class OptionCalcUtils {
     double Theta = (-(S * sigma * n(d1)) / (2 * time_sqrt) + r * K * Math.exp(-r * time) * N(-d2)) / 365f;
     double Vega = S * time_sqrt * n(d1) / 100f;
     double Rho = -K * time * Math.exp(-r * time) * N(-d2);
-    return new OptionResult.OptionIndex(Delta, Gamma, Theta, Vega, Rho);
+    return new OptionMetrics(Delta, Gamma, Theta, Vega, Rho);
   }
 
   /**
@@ -362,11 +363,11 @@ public class OptionCalcUtils {
    * @param currentTime 当前时间（long类型），与expiryLong保持时区一致
    * @param isTrading 是否在正股交易时间
    */
-  private static OptionResult calcOptionIndex(double r, long expiryLong, long executeDateLong,
+  private static OptionFundamentals calcOptionIndex(double r, long expiryLong, long executeDateLong,
       double latestPrice, double targetPrice, double dividendAmount, double strike, String type, long currentTime,
       boolean isTrading) {
 
-    OptionResult result = new OptionResult();
+    OptionFundamentals result = new OptionFundamentals();
     double diff = ((expiryLong - currentTime) /
         (24.0f * TIME_MILLIS_IN_ONE_HOUR) + 1 + (isTrading ? 0 : 1)) / 365.0f;
     final boolean needDividend =
@@ -377,23 +378,29 @@ public class OptionCalcUtils {
       return null;
     }
     double sigma = 0;
-    if ("PUT".equalsIgnoreCase(type) && targetPrice > strike - latestPrice) {
+    OptionMetrics optionMetrics;
+    if (Right.PUT.name().equalsIgnoreCase(type) && targetPrice > strike - latestPrice) {
       result.setTimeValue(getTimeValuePut(strike, latestPrice, targetPrice));
       sigma = getVolatilityPut(targetPrice, latestPrice, strike, r, r, diff);
-      result.setIndex(optionPricePartialsPutBlackScholes(latestPrice, strike, r, sigma, diff));
+      optionMetrics = optionPricePartialsPutBlackScholes(latestPrice, strike, r, sigma, diff);
       result.setPremiumRate(calcPutPremiumRate(targetPrice, latestPrice, strike));
       result.setProfitRate(optionBuyPutProfitRate(latestPrice, strike, targetPrice, r, sigma, diff));
-    } else if ("CALL".equalsIgnoreCase(type) && targetPrice > latestPrice - strike) {
+    } else if (Right.CALL.name().equalsIgnoreCase(type) && targetPrice > latestPrice - strike) {
       result.setTimeValue(getTimeValueCall(strike, latestPrice, targetPrice));
       sigma = getVolatilityCall(targetPrice, latestPrice, strike, r, r, diff);
       result.setPremiumRate(calcCallPremiumRate(targetPrice, latestPrice, strike));
       result.setProfitRate(optionBuyCallProfitRate(latestPrice, strike, targetPrice, r, sigma, diff));
-      result.setIndex(optionPricePartialsCallBlackScholes(latestPrice, strike, r, sigma, diff));
+      optionMetrics = optionPricePartialsCallBlackScholes(latestPrice, strike, r, sigma, diff);
     } else {
-      result.setIndex(new OptionResult.OptionIndex(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN));
+      optionMetrics = new OptionMetrics(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
     }
+    result.setDelta(optionMetrics.getDelta());
+    result.setGamma(optionMetrics.getGamma());
+    result.setTheta(optionMetrics.getTheta());
+    result.setVega(optionMetrics.getVega());
+    result.setRho(optionMetrics.getRho());
     result.setVolatility(sigma);
-    result.setLeverage(getLeverage(targetPrice, latestPrice, result.getIndex().getDelta()));
+    result.setLeverage(getLeverage(targetPrice, latestPrice, result.getDelta()));
     result.setInsideValue(getInsideValue(type, latestPrice, strike));
     return result;
   }
@@ -437,13 +444,15 @@ public class OptionCalcUtils {
     }
     double target = (optionBriefItem.getAskPrice() + optionBriefItem.getBidPrice()) / 2;
 
-    OptionResult result =
+    OptionFundamentals result =
         calcOptionIndex(optionBriefItem.getRatesBonds(), optionBriefItem.getExpiry(),
             DateUtils.parseEpochMill(dividendTask.get().getExecuteDate()), latestPriceTask.get(), target,
             dividendTask.get().getAmount(), Double.parseDouble(optionBriefItem.getStrike()), optionBriefItem.getRight(),
             System.currentTimeMillis(), marketStateTask.get());
-
-    return result.toOptionFundamentals(optionBriefItem.getOpenInterest(), optionBriefItem.getVolatility());
+    result.setOpenInterest(optionBriefItem.getOpenInterest());
+    double historyVolatility = optionBriefItem.getVolatility() == null || optionBriefItem.getVolatility().isEmpty() ? 0.0 : Double.parseDouble(optionBriefItem.getVolatility());
+    result.setHistoryVolatility(historyVolatility);
+    return result;
   }
 
   private static FutureTask<CorporateDividendItem> getCorporateDividendTask(TigerHttpClient client, String symbol) {
@@ -525,153 +534,25 @@ public class OptionCalcUtils {
     executorService.execute(optionBriefItemTask);
     return optionBriefItemTask;
   }
-}
 
- class OptionResult {
+  public static OptionFundamentals calcOptionIndex(Right optionType, double underlying, double strike, double riskFreeRate,
+                                                         double dividendRate, double impliedVolatility, LocalDate settlementDate, LocalDate expirationDate) {
 
-  OptionIndex index;
-  double timeValue;
-  double premiumRate;
-  double profitRate;
-  double volatility;
-  double leverage;
-  double insideValue;
+    FDAmericanDividendOptionHelper helper = new FDAmericanDividendOptionHelper(optionType == Right.CALL ? Option.Type.Call : Option.Type.Put, underlying, strike,
+            riskFreeRate, dividendRate, impliedVolatility,
+            new org.jquantlib.time.Date(settlementDate.getDayOfMonth(), settlementDate.getMonthValue(), settlementDate.getYear()),
+            new org.jquantlib.time.Date(expirationDate.getDayOfMonth(), expirationDate.getMonthValue(), expirationDate.getYear()),
+            new ArrayList<>(), new ArrayList<>());
 
-  public OptionIndex getIndex() {
-    return index;
-  }
-
-  public void setIndex(OptionIndex index) {
-    this.index = index;
-  }
-
-  public double getTimeValue() {
-    return timeValue;
-  }
-
-  public void setTimeValue(double timeValue) {
-    this.timeValue = timeValue;
-  }
-
-  public double getPremiumRate() {
-    return premiumRate;
-  }
-
-  public void setPremiumRate(double premiumRate) {
-    this.premiumRate = premiumRate;
-  }
-
-  public double getProfitRate() {
-    return profitRate;
-  }
-
-  public void setProfitRate(double profitRate) {
-    this.profitRate = profitRate;
-  }
-
-  public double getVolatility() {
-    return volatility;
-  }
-
-  public void setVolatility(double volatility) {
-    this.volatility = volatility;
-  }
-
-  public double getLeverage() {
-    return leverage;
-  }
-
-  public void setLeverage(double leverage) {
-    this.leverage = leverage;
-  }
-
-  public double getInsideValue() {
-    return insideValue;
-  }
-
-  public void setInsideValue(double insideValue) {
-    this.insideValue = insideValue;
-  }
-
-  static class OptionIndex {
-
-    double delta;
-    double gamma;
-    double theta;
-    double vega;
-    double rho;
-
-    public OptionIndex(double delta, double gamma, double theta, double vega, double rho) {
-      this.delta = delta;
-      this.gamma = gamma;
-      this.theta = theta;
-      this.vega = vega;
-      this.rho = rho;
-    }
-
-    public double getDelta() {
-      return delta;
-    }
-
-    public void setDelta(double delta) {
-      this.delta = delta;
-    }
-
-    public double getGamma() {
-      return gamma;
-    }
-
-    public void setGamma(double gamma) {
-      this.gamma = gamma;
-    }
-
-    public double getTheta() {
-      return theta;
-    }
-
-    public void setTheta(double theta) {
-      this.theta = theta;
-    }
-
-    public double getVega() {
-      return vega;
-    }
-
-    public void setVega(double vega) {
-      this.vega = vega;
-    }
-
-    public double getRho() {
-      return rho;
-    }
-
-    public void setRho(double rho) {
-      this.rho = rho;
-    }
-  }
-
-  public OptionFundamentals toOptionFundamentals(int openInterest, String volatility) {
+    OptionMetrics optionIndex = new OptionMetrics(helper.delta(), helper.gamma(), helper.theta(), helper.vega(), helper.rho());
     OptionFundamentals optionFundamentals = new OptionFundamentals();
-    optionFundamentals.setPremiumRate(getPremiumRate());
-    optionFundamentals.setOpenInterest(openInterest);
-    optionFundamentals.setVolatility(getVolatility());
-    double historyVolatility = volatility == null || volatility.isEmpty() ? 0.0 : Double.parseDouble(volatility);
-    optionFundamentals.setHistoryVolatility(historyVolatility);
-
-    optionFundamentals.setDelta(formatDouble(getIndex().getDelta()));
-    optionFundamentals.setTheta(formatDouble(getIndex().getTheta()));
-    optionFundamentals.setGamma(formatDouble(getIndex().getGamma()));
-    optionFundamentals.setVega(formatDouble(getIndex().getVega()));
-    optionFundamentals.setRho(formatDouble(getIndex().getRho()));
-
-    optionFundamentals.setTimeValue(getTimeValue());
-    optionFundamentals.setInsideValue(getInsideValue());
-    optionFundamentals.setLeverage(getLeverage());
-    optionFundamentals.setProfitRate(getProfitRate());
+    optionFundamentals.setDelta(optionIndex.getDelta());
+    optionFundamentals.setGamma(optionIndex.getGamma());
+    optionFundamentals.setTheta(optionIndex.getTheta());
+    optionFundamentals.setVega(optionIndex.getVega());
+    optionFundamentals.setRho(optionIndex.getRho());
+    optionFundamentals.setPredictedValue(helper.NPV());
     return optionFundamentals;
   }
+}
 
-   private static double formatDouble(double value) {
-     return new BigDecimal(value).setScale(3, RoundingMode.HALF_DOWN).doubleValue();
-   }
- }
