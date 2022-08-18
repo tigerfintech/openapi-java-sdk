@@ -383,13 +383,13 @@ public class OptionCalcUtils {
       result.setTimeValue(getTimeValuePut(strike, latestPrice, targetPrice));
       sigma = getVolatilityPut(targetPrice, latestPrice, strike, r, r, diff);
       optionMetrics = optionPricePartialsPutBlackScholes(latestPrice, strike, r, sigma, diff);
-      result.setPremiumRate(calcPutPremiumRate(targetPrice, latestPrice, strike));
-      result.setProfitRate(optionBuyPutProfitRate(latestPrice, strike, targetPrice, r, sigma, diff));
+      result.setPremiumRate(calcPutPremiumRate(targetPrice, latestPrice, strike) * 100);
+      result.setProfitRate(optionBuyPutProfitRate(latestPrice, strike, targetPrice, r, sigma, diff) * 100);
     } else if (Right.CALL.name().equalsIgnoreCase(type) && targetPrice > latestPrice - strike) {
       result.setTimeValue(getTimeValueCall(strike, latestPrice, targetPrice));
       sigma = getVolatilityCall(targetPrice, latestPrice, strike, r, r, diff);
-      result.setPremiumRate(calcCallPremiumRate(targetPrice, latestPrice, strike));
-      result.setProfitRate(optionBuyCallProfitRate(latestPrice, strike, targetPrice, r, sigma, diff));
+      result.setPremiumRate(calcCallPremiumRate(targetPrice, latestPrice, strike) * 100);
+      result.setProfitRate(optionBuyCallProfitRate(latestPrice, strike, targetPrice, r, sigma, diff) * 100);
       optionMetrics = optionPricePartialsCallBlackScholes(latestPrice, strike, r, sigma, diff);
     } else {
       optionMetrics = new OptionMetrics(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
@@ -399,7 +399,7 @@ public class OptionCalcUtils {
     result.setTheta(optionMetrics.getTheta());
     result.setVega(optionMetrics.getVega());
     result.setRho(optionMetrics.getRho());
-    result.setVolatility(sigma);
+    result.setVolatility(sigma * 100);
     result.setLeverage(getLeverage(targetPrice, latestPrice, result.getDelta()));
     result.setInsideValue(getInsideValue(type, latestPrice, strike));
     return result;
@@ -450,7 +450,11 @@ public class OptionCalcUtils {
             dividendTask.get().getAmount(), Double.parseDouble(optionBriefItem.getStrike()), optionBriefItem.getRight(),
             System.currentTimeMillis(), marketStateTask.get());
     result.setOpenInterest(optionBriefItem.getOpenInterest());
-    double historyVolatility = optionBriefItem.getVolatility() == null || optionBriefItem.getVolatility().isEmpty() ? 0.0 : Double.parseDouble(optionBriefItem.getVolatility());
+    String volatility = null;
+    if (optionBriefItem.getVolatility() != null && optionBriefItem.getVolatility().contains("%")) {
+      volatility = optionBriefItem.getVolatility().replaceAll("%", "");
+    }
+    double historyVolatility = volatility == null || volatility.isEmpty() ? 0.0 : Double.parseDouble(volatility);
     result.setHistoryVolatility(historyVolatility);
     return result;
   }
