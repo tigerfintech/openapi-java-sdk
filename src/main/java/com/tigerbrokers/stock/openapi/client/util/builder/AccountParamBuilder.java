@@ -7,6 +7,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderSortBy;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.SegmentType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 import java.util.Date;
@@ -189,6 +190,13 @@ public class AccountParamBuilder {
   public AccountParamBuilder secType(SecType secType) {
     if (secType != null) {
       paramMap.put("sec_type", secType.name());
+    }
+    return this;
+  }
+
+  public AccountParamBuilder segType(SegmentType segType) {
+    if (segType != null) {
+      paramMap.put("seg_type", segType.name());
     }
     return this;
   }
