@@ -5,5 +5,5 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
  * Created by lijiawen on 2022/07/12.
  */
 public enum SegmentType {
-  SEC, FUT;
+  ALL, SEC, FUT;
 }
