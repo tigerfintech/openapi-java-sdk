@@ -1,10 +1,10 @@
 package com.tigerbrokers.stock.openapi.client.https.request.future;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureTickModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.future.FutureTickResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 
 /**
  * Description:
@@ -14,7 +14,7 @@ public class FutureTickRequest extends TigerCommonRequest implements TigerReques
 
   public FutureTickRequest() {
     setApiVersion(V3_0);
-    setApiMethodName(ApiServiceType.FUTURE_TICK);
+    setApiMethodName(MethodName.FUTURE_TICK);
   }
 
   public static FutureTickRequest newRequest(String contractCode) {

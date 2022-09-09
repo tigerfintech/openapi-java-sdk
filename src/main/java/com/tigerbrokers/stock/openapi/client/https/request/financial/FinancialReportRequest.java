@@ -1,12 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.https.request.financial;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.financial.model.FinancialReportModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.financial.FinancialReportResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.FinancialPeriodType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import java.util.List;
 
 /**
@@ -16,7 +16,7 @@ import java.util.List;
 public class FinancialReportRequest extends TigerCommonRequest implements TigerRequest<FinancialReportResponse> {
 
   public FinancialReportRequest() {
-    setApiMethodName(ApiServiceType.FINANCIAL_REPORT);
+    setApiMethodName(MethodName.FINANCIAL_REPORT);
     setApiVersion(V2_0);
   }
 

@@ -1,12 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.https.request.quote;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteHistoryTimelineModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteHistoryTimelineResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.RightOption;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
@@ -20,7 +20,7 @@ public class QuoteHistoryTimelineRequest extends TigerCommonRequest implements T
 
   public QuoteHistoryTimelineRequest() {
     setApiVersion(V2_0);
-    setApiMethodName(ApiServiceType.HISTORY_TIMELINE);
+    setApiMethodName(MethodName.HISTORY_TIMELINE);
   }
 
   public static QuoteHistoryTimelineRequest newRequest(List<String> symbols) {

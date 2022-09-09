@@ -1,11 +1,11 @@
 package com.tigerbrokers.stock.openapi.client.https.request.quote;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.TradeCalendarModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteTradeCalendarResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 
@@ -17,7 +17,7 @@ public class QuoteTradeCalendarRequest extends TigerCommonRequest implements Tig
 
   public QuoteTradeCalendarRequest() {
     setApiVersion(V2_0);
-    setApiMethodName(ApiServiceType.TRADING_CALENDAR);
+    setApiMethodName(MethodName.TRADING_CALENDAR);
   }
 
   /**

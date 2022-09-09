@@ -1,13 +1,13 @@
 package com.tigerbrokers.stock.openapi.client.https.request.trade;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.PrimeAnalyticsAssetModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.PrimeAnalyticsAssetResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SegmentType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
@@ -21,7 +21,7 @@ import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 public class PrimeAnalyticsAssetRequest extends TigerCommonRequest implements TigerRequest<PrimeAnalyticsAssetResponse> {
     public PrimeAnalyticsAssetRequest() {
         setApiVersion(TigerApiConstants.DEFAULT_VERSION);
-        setApiMethodName(ApiServiceType.ANALYTICS_ASSET);
+        setApiMethodName(MethodName.ANALYTICS_ASSET);
     }
 
     public static PrimeAnalyticsAssetRequest buildPrimeAnalyticsAssetRequest() {

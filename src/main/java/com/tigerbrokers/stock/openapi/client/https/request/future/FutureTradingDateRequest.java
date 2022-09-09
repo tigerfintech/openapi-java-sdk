@@ -1,12 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.https.request.future;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureTradingDateModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.future.FutureTradingDateResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 
@@ -18,7 +18,7 @@ public class FutureTradingDateRequest extends TigerCommonRequest implements Tige
 
   public FutureTradingDateRequest() {
     setApiVersion(TigerApiConstants.DEFAULT_VERSION);
-    setApiMethodName(ApiServiceType.FUTURE_TRADING_DATE);
+    setApiMethodName(MethodName.FUTURE_TRADING_DATE);
   }
 
   public static FutureTradingDateRequest newRequest(String contractCode) {

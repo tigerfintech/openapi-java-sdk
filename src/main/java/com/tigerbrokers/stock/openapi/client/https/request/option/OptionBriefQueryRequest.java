@@ -1,12 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.https.request.option;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionCommonModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.option.OptionBriefResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +18,7 @@ public class OptionBriefQueryRequest extends TigerCommonRequest implements Tiger
 
   public OptionBriefQueryRequest() {
     setApiVersion(TigerApiConstants.DEFAULT_VERSION);
-    setApiMethodName(ApiServiceType.OPTION_BRIEF);
+    setApiMethodName(MethodName.OPTION_BRIEF);
   }
 
   public OptionBriefQueryRequest(List<OptionCommonModel> items) {
