@@ -132,6 +132,6 @@ public enum MethodName {
         return methodName;
       }
     }
-    return null;
+    throw new RuntimeException("api method not supported: " + value);
   }
 }

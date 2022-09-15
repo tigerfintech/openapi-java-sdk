@@ -97,7 +97,7 @@ public class TigerHttpClient implements TigerClient {
 
   public TigerHttpClient clientConfig(ClientConfig clientConfig) {
     init(clientConfig.serverUrl, clientConfig.tigerId, clientConfig.privateKey);
-    initDomainCheck();
+    initDomainRefreshTask();
     if (clientConfig.isAutoGrabPermission) {
       TigerHttpRequest request = new TigerHttpRequest(MethodName.GRAB_QUOTE_PERMISSION);
       request.setBizContent(AccountParamBuilder.instance().buildJsonWithoutDefaultAccount());
@@ -150,7 +150,7 @@ public class TigerHttpClient implements TigerClient {
     this.accessToken = accessToken;
   }
 
-  private void initDomainCheck() {
+  private void initDomainRefreshTask() {
     synchronized (TigerHttpClient.SingletonInner.singleton) {
       if (domainExecutorService == null || domainExecutorService.isTerminated()) {
         domainExecutorService = new ScheduledThreadPoolExecutor(1);
