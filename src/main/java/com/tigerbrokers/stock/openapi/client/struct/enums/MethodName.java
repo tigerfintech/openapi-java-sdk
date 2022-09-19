@@ -8,109 +8,109 @@ public enum MethodName {
   /**
    * trade
    */
-  ORDER_NO("order_no", 1),
-  PLACE_ORDER("place_order", 1),
-  BATCH_PLACE_ORDER("batch_place_order", 1),
-  CANCEL_ORDER("cancel_order", 1),
-  MODIFY_ORDER("modify_order", 1),
-  PREVIEW_ORDER("preview_order", 1),
+  ORDER_NO("order_no", MethodType.TRADE),
+  PLACE_ORDER("place_order", MethodType.TRADE),
+  BATCH_PLACE_ORDER("batch_place_order", MethodType.TRADE),
+  CANCEL_ORDER("cancel_order", MethodType.TRADE),
+  MODIFY_ORDER("modify_order", MethodType.TRADE),
+  PREVIEW_ORDER("preview_order", MethodType.TRADE),
 
   /**
    * account/asset
    */
-  ACCOUNTS("accounts", 1),
-  ASSETS("assets", 1),
-  PRIME_ASSETS("prime_assets", 1),
-  ANALYTICS_ASSET("analytics_asset", 1),
-  POSITIONS("positions", 1),
-  ORDERS("orders", 1),
-  ACTIVE_ORDERS("active_orders", 1),
-  INACTIVE_ORDERS("inactive_orders", 1),
-  FILLED_ORDERS("filled_orders", 1),
-  ORDER_TRANSACTIONS("order_transactions", 1),
+  ACCOUNTS("accounts", MethodType.TRADE),
+  ASSETS("assets", MethodType.TRADE),
+  PRIME_ASSETS("prime_assets", MethodType.TRADE),
+  ANALYTICS_ASSET("analytics_asset", MethodType.TRADE),
+  POSITIONS("positions", MethodType.TRADE),
+  ORDERS("orders", MethodType.TRADE),
+  ACTIVE_ORDERS("active_orders", MethodType.TRADE),
+  INACTIVE_ORDERS("inactive_orders", MethodType.TRADE),
+  FILLED_ORDERS("filled_orders", MethodType.TRADE),
+  ORDER_TRANSACTIONS("order_transactions", MethodType.TRADE),
 
   /**
    * contract
    */
-  CONTRACT("contract", 1),
-  CONTRACTS("contracts", 1),
+  CONTRACT("contract", MethodType.TRADE),
+  CONTRACTS("contracts", MethodType.TRADE),
 
   /**
    * quote
    */
-  MARKET_STATE("market_state", 2),
-  ALL_SYMBOLS("all_symbols", 2),
-  ALL_SYMBOL_NAMES("all_symbol_names", 2),
-  BRIEF("brief", 2),
-  STOCK_DETAIL("stock_detail", 2),
-  HOUR_TRADING_TIMELINE("hour_trading_timeline", 2),
+  MARKET_STATE("market_state", MethodType.QUOTE),
+  ALL_SYMBOLS("all_symbols", MethodType.QUOTE),
+  ALL_SYMBOL_NAMES("all_symbol_names", MethodType.QUOTE),
+  BRIEF("brief", MethodType.QUOTE),
+  STOCK_DETAIL("stock_detail", MethodType.QUOTE),
+  HOUR_TRADING_TIMELINE("hour_trading_timeline", MethodType.QUOTE),
 
-  TIMELINE("timeline", 2),
-  HISTORY_TIMELINE("history_timeline", 2),
-  KLINE("kline", 2),
-  TRADE_TICK("trade_tick", 2),
-  QUOTE_CONTRACT("quote_contract", 2),
-  QUOTE_REAL_TIME("quote_real_time", 2),
-  QUOTE_SHORTABLE_STOCKS("quote_shortable_stocks", 2),
-  QUOTE_STOCK_TRADE("quote_stock_trade", 2),
-  QUOTE_DEPTH("quote_depth", 2),
-  QUOTE_DELAY("quote_delay", 2),
+  TIMELINE("timeline", MethodType.QUOTE),
+  HISTORY_TIMELINE("history_timeline", MethodType.QUOTE),
+  KLINE("kline", MethodType.QUOTE),
+  TRADE_TICK("trade_tick", MethodType.QUOTE),
+  QUOTE_CONTRACT("quote_contract", MethodType.QUOTE),
+  QUOTE_REAL_TIME("quote_real_time", MethodType.QUOTE),
+  QUOTE_SHORTABLE_STOCKS("quote_shortable_stocks", MethodType.QUOTE),
+  QUOTE_STOCK_TRADE("quote_stock_trade", MethodType.QUOTE),
+  QUOTE_DEPTH("quote_depth", MethodType.QUOTE),
+  QUOTE_DELAY("quote_delay", MethodType.QUOTE),
   /** trading calendar */
-  TRADING_CALENDAR("trading_calendar", 2),
+  TRADING_CALENDAR("trading_calendar", MethodType.QUOTE),
 
   /**
    * option quote
    */
-  OPTION_EXPIRATION("option_expiration", 2),
-  OPTION_CHAIN("option_chain", 2),
-  OPTION_BRIEF("option_brief", 2),
-  OPTION_KLINE("option_kline", 2),
-  OPTION_TRADE_TICK("option_trade_tick", 2),
+  OPTION_EXPIRATION("option_expiration", MethodType.QUOTE),
+  OPTION_CHAIN("option_chain", MethodType.QUOTE),
+  OPTION_BRIEF("option_brief", MethodType.QUOTE),
+  OPTION_KLINE("option_kline", MethodType.QUOTE),
+  OPTION_TRADE_TICK("option_trade_tick", MethodType.QUOTE),
 
   /**
    * future quote
    */
-  FUTURE_EXCHANGE("future_exchange", 2),
-  FUTURE_CONTRACT_BY_CONTRACT_CODE("future_contract_by_contract_code", 2),
-  FUTURE_CONTRACT_BY_EXCHANGE_CODE("future_contract_by_exchange_code", 2),
-  FUTURE_CONTINUOUS_CONTRACTS("future_continuous_contracts", 2),
-  FUTURE_CURRENT_CONTRACT("future_current_contract", 2),
-  FUTURE_CONTRACTS("future_contracts", 2),
-  FUTURE_KLINE("future_kline", 2),
-  FUTURE_REAL_TIME_QUOTE("future_real_time_quote", 2),
-  FUTURE_TICK("future_tick", 2),
-  FUTURE_TRADING_DATE("future_trading_date", 2),
+  FUTURE_EXCHANGE("future_exchange", MethodType.QUOTE),
+  FUTURE_CONTRACT_BY_CONTRACT_CODE("future_contract_by_contract_code", MethodType.QUOTE),
+  FUTURE_CONTRACT_BY_EXCHANGE_CODE("future_contract_by_exchange_code", MethodType.QUOTE),
+  FUTURE_CONTINUOUS_CONTRACTS("future_continuous_contracts", MethodType.QUOTE),
+  FUTURE_CURRENT_CONTRACT("future_current_contract", MethodType.QUOTE),
+  FUTURE_CONTRACTS("future_contracts", MethodType.QUOTE),
+  FUTURE_KLINE("future_kline", MethodType.QUOTE),
+  FUTURE_REAL_TIME_QUOTE("future_real_time_quote", MethodType.QUOTE),
+  FUTURE_TICK("future_tick", MethodType.QUOTE),
+  FUTURE_TRADING_DATE("future_trading_date", MethodType.QUOTE),
 
   /**
    * fundmental data
    */
-  FINANCIAL_DAILY("financial_daily", 2),
-  FINANCIAL_REPORT("financial_report", 2),
-  CORPORATE_ACTION("corporate_action", 2),
-  INDUSTRY_LIST("industry_list", 2),
-  INDUSTRY_STOCKS("industry_stocks", 2),
-  STOCK_INDUSTRY("stock_industry", 2),
+  FINANCIAL_DAILY("financial_daily", MethodType.QUOTE),
+  FINANCIAL_REPORT("financial_report", MethodType.QUOTE),
+  CORPORATE_ACTION("corporate_action", MethodType.QUOTE),
+  INDUSTRY_LIST("industry_list", MethodType.QUOTE),
+  INDUSTRY_STOCKS("industry_stocks", MethodType.QUOTE),
+  STOCK_INDUSTRY("stock_industry", MethodType.QUOTE),
 
   /**
    * grab quote
    */
-  GRAB_QUOTE_PERMISSION("grab_quote_permission", 2),
-  GET_QUOTE_PERMISSION("get_quote_permission", 2),
+  GRAB_QUOTE_PERMISSION("grab_quote_permission", MethodType.QUOTE),
+  GET_QUOTE_PERMISSION("get_quote_permission", MethodType.QUOTE),
 
   /**
    * user
    */
-  USER_LOGIN("user_login", 0),
-  USER_TRADE_TOKEN("user_trade_token", 0),
-  USER_TRADE_PASSWORD_VERIFY("user_trade_password_verify", 0),
-  USER_TRADE_PASSWORD_RESET("user_trade_password_reset", 0),
+  USER_LOGIN("user_login", MethodType.OTHER),
+  USER_TRADE_TOKEN("user_trade_token", MethodType.OTHER),
+  USER_TRADE_PASSWORD_VERIFY("user_trade_password_verify", MethodType.OTHER),
+  USER_TRADE_PASSWORD_RESET("user_trade_password_reset", MethodType.OTHER),
   ;
 
   private String value;
-  /** method type，0:login; 1：trade; 2:quote */
-  private int type;
+  /** method type，TRADE, QUOTE, OTHER */
+  private MethodType type;
 
-  MethodName(String value, int type) {
+  MethodName(String value, MethodType type) {
     this.value = value;
     this.type = type;
   }
@@ -120,9 +120,9 @@ public enum MethodName {
   }
 
   /**
-   * get method type. 0:login; 1：trade; 2:quote
+   * get method type. TRADE, QUOTE, OTHER
    */
-  public int getType() {
+  public MethodType getType() {
     return type;
   }
 

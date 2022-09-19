@@ -19,6 +19,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.BizType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.util.AccountUtil;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
@@ -368,11 +369,10 @@ public class TigerHttpClient implements TigerClient {
 
   private String getServerUrl(TigerRequest request) {
     String url = null;
-    int methodType = request.getApiMethodName().getType();
-    // method type(0:login; 1：trade; 2:quote)
-    if (methodType == 2) {
+    MethodType methodType = request.getApiMethodName().getType();
+    if (MethodType.QUOTE == methodType) {
       url = this.quoteServerUrl;
-    } else if (methodType == 1 && paperServerUrl != null) {
+    } else if (MethodType.TRADE == methodType && paperServerUrl != null) {
       String account = AccountUtil.parseAccount(request);
       if (!StringUtils.isEmpty(account) && AccountType.PAPER == AccountUtil.getAccountType(account)) {
         url = this.paperServerUrl;
