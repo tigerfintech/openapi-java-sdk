@@ -11,6 +11,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
  */
 public class PrimeAssetModel extends ApiModel {
     private String account;
+    private String currency;
     @JSONField(name = "secret_key")
     private String secretKey;
 
@@ -23,12 +24,26 @@ public class PrimeAssetModel extends ApiModel {
         this.secretKey = secretKey;
     }
 
+    public PrimeAssetModel(String account, String currency, String secretKey) {
+        this.account = account;
+        this.currency = currency;
+        this.secretKey = secretKey;
+    }
+
     public void setAccount(String account) {
         this.account = account;
     }
 
     public String getAccount() {
         return this.account;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 
     public String getSecretKey() {
