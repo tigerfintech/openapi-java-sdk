@@ -57,9 +57,9 @@ public class TigerApiConstants {
   public static final String DEFAULT_SANDBOX_DOMAIN_URL = API_SANDBOX_DOMAIN_URL;
   public static final String DOMAIN_GARDEN_ADDRESS = "https://cg.play-analytics.com/";
 
-  public static final String DEFAULT_PROD_STOMP_PORT = "9887";
-  public static final String DEFAULT_PROD_SOCKET_PORT = "9883";
-  public static final String DEFAULT_SANDBOX_STOMP_PORT = "9889";
-  public static final String DEFAULT_SANDBOX_SOCKET_PORT = "9885";
+  public static final String DEFAULT_PROD_SOCKET_PORT = "9887";
+  public static final String DEFAULT_PROD_SOCKET_SSL_PORT = "9883";
+  public static final String DEFAULT_SANDBOX_SOCKET_PORT = "9889";
+  public static final String DEFAULT_SANDBOX_SOCKET_SSL_PORT = "9885";
 
 }

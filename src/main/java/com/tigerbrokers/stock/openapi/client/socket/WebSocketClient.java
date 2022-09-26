@@ -4,6 +4,7 @@ import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteKeyType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
@@ -12,8 +13,6 @@ import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import com.tigerbrokers.stock.openapi.client.websocket.WebSocketHandshakerHandler;
-import com.tigerbrokers.stock.openapi.client.websocket.WebSocketStompFrameDecoder;
-import com.tigerbrokers.stock.openapi.client.websocket.WebSocketStompFrameEncoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -27,9 +26,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
-import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
@@ -130,7 +127,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   public WebSocketClient clientConfig(ClientConfig clientConfig) {
     this.clientConfig = clientConfig;
-    if (StringUtils.isEmpty(clientConfig.socketServerUrl)) {
+    if (StringUtils.isEmpty(clientConfig.socketServerUrl) || Env.PROD == clientConfig.getEnv()) {
       this.url = NetworkUtil.getServerAddress(null);
     } else {
       this.url = clientConfig.socketServerUrl;
@@ -203,17 +200,18 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
     group = new NioEventLoopGroup(1);
     bootstrap = new Bootstrap();
-    SslProvider provider = this.sslProvider == null ? SslProvider.OPENSSL : this.sslProvider;
-    final String[] protocols = NetworkUtil.getSupportedProtocolsSet(PROTOCOLS, provider);
-    if (protocols == null || protocols.length == 0) {
-      throw new RuntimeException("supported protocols is empty.");
+    if (!isStompBaseWebSocket()) {
+      SslProvider provider = this.sslProvider == null ? SslProvider.OPENSSL : this.sslProvider;
+      final String[] protocols = NetworkUtil.getSupportedProtocolsSet(PROTOCOLS, provider);
+      if (protocols == null || protocols.length == 0) {
+        throw new RuntimeException("supported protocols is empty.");
+      }
+      sslCtx = SslContextBuilder.forClient()
+              .protocols(protocols)
+              .trustManager(InsecureTrustManagerFactory.INSTANCE)
+              .sslProvider(provider)
+              .build();
     }
-    sslCtx =
-        SslContextBuilder.forClient()
-            .protocols(protocols)
-            .trustManager(InsecureTrustManagerFactory.INSTANCE)
-            .sslProvider(provider)
-            .build();
 
     bootstrap.group(group).option(ChannelOption.TCP_NODELAY, true)
         .option(ChannelOption.SO_KEEPALIVE, true)
@@ -226,21 +224,16 @@ public class WebSocketClient implements SubscribeAsyncApi {
             if (address == null) {
               throw new RuntimeException("get connect address error.");
             }
-            p.addLast(TigerApiConstants.SSL_HANDLER_NAME, sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
-            if (isStompBaseWebSocket()) {
-              p.addLast("websocketCodec", new HttpClientCodec());
-              p.addLast("websocketAggregator", new HttpObjectAggregator(65535));
-              p.addLast(STOMP_ENCODER, new WebSocketStompFrameDecoder());
-              p.addLast(STOMP_DECODER, new WebSocketStompFrameEncoder());
-              p.addLast("stompAggregator", new StompSubframeAggregator(65535));
-            } else {
-              final WebSocketHandler handler =
-                  new WebSocketHandler(authentication, apiComposeCallback, clientSendInterval, clientReceiveInterval);
-              p.addLast(STOMP_ENCODER, new StompSubframeEncoder());
-              p.addLast(STOMP_DECODER, new StompSubframeDecoder());
-              p.addLast("aggregator", new StompSubframeAggregator(65535));
-              p.addLast("webSocketHandler", handler);
+            if (!isStompBaseWebSocket()) {
+              p.addLast(TigerApiConstants.SSL_HANDLER_NAME,
+                  sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
             }
+            final WebSocketHandler handler =
+                new WebSocketHandler(authentication, apiComposeCallback, clientSendInterval, clientReceiveInterval);
+            p.addLast(STOMP_ENCODER, new StompSubframeEncoder());
+            p.addLast(STOMP_DECODER, new StompSubframeDecoder());
+            p.addLast("aggregator", new StompSubframeAggregator(65535));
+            p.addLast("webSocketHandler", handler);
           }
         });
 
@@ -339,7 +332,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   private InetSocketAddress getNewServerAddress() {
-    if (clientConfig != null && StringUtils.isEmpty(clientConfig.socketServerUrl)) {
+    if (clientConfig != null && (StringUtils.isEmpty(clientConfig.socketServerUrl)
+        || Env.PROD == clientConfig.getEnv())) {
       String newUrl = NetworkUtil.getServerAddress(this.url);
       if (!this.url.equals(newUrl)) {
         InetSocketAddress address = getSocketAddress(newUrl);

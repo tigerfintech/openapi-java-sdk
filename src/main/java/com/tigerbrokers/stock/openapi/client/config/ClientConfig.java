@@ -37,11 +37,13 @@ public class ClientConfig {
   /**
    * http interface server url
    */
+  @Deprecated
   public String serverUrl;
 
   /**
    * socket server url
    */
+  @Deprecated
   public String socketServerUrl;
 
   /**

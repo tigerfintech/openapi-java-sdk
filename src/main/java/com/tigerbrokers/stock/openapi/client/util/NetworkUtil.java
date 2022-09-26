@@ -224,11 +224,11 @@ public class NetworkUtil {
     String port = "";
     if (protocol != Protocol.HTTP) {
       if (clientConfig.getEnv() == Env.PROD) {
-        port = protocol == Protocol.STOMP_WEBSOCKET ? TigerApiConstants.DEFAULT_PROD_STOMP_PORT
-            : TigerApiConstants.DEFAULT_PROD_SOCKET_PORT;
+        port = protocol == Protocol.STOMP_WEBSOCKET ? TigerApiConstants.DEFAULT_PROD_SOCKET_PORT
+            : TigerApiConstants.DEFAULT_PROD_SOCKET_SSL_PORT;
       } else {
-        port = protocol == Protocol.STOMP_WEBSOCKET ? TigerApiConstants.DEFAULT_SANDBOX_STOMP_PORT
-            : TigerApiConstants.DEFAULT_SANDBOX_SOCKET_PORT;
+        port = protocol == Protocol.STOMP_WEBSOCKET ? TigerApiConstants.DEFAULT_SANDBOX_SOCKET_PORT
+            : TigerApiConstants.DEFAULT_SANDBOX_SOCKET_SSL_PORT;
       }
     }
     return port;
