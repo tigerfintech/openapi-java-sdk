@@ -6,7 +6,8 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
  */
 public enum Env {
   PROD("openapi"),
-  SANDBOX("openapi-sandbox");
+  SANDBOX("openapi-sandbox"),
+  TEST("openapi-test");
 
   private String configFieldName;
   Env(String configFieldName) {

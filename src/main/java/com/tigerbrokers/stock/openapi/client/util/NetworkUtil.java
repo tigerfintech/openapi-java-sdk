@@ -295,14 +295,26 @@ public class NetworkUtil {
       }
     }
     if (commonUrl == null) {
-      commonUrl = (env == Env.PROD ? TigerApiConstants.DEFAULT_PROD_DOMAIN_URL
-        : TigerApiConstants.DEFAULT_SANDBOX_DOMAIN_URL);
-      domainUrlMap.put(BizType.COMMON, String.format(protocol.getUrlFormat(), commonUrl, port));
+      domainUrlMap.put(BizType.COMMON, String.format(protocol.getUrlFormat(), getDefaultUrl(env), port));
     }
     if (protocol != Protocol.HTTP) {
       domainUrlMap.put(BizType.SOCKET, String.format(protocol.getUrlFormat(), commonUrl, port));
     }
     return domainUrlMap;
+  }
+
+  private static String getDefaultUrl(Env env) {
+    if (env == null) {
+      return TigerApiConstants.DEFAULT_PROD_DOMAIN_URL;
+    }
+    switch (env) {
+      case SANDBOX:
+        return TigerApiConstants.DEFAULT_SANDBOX_DOMAIN_URL;
+      case TEST:
+        return TigerApiConstants.DEFAULT_TEST_DOMAIN_URL;
+      default:
+        return TigerApiConstants.DEFAULT_PROD_DOMAIN_URL;
+    }
   }
 
   private static BizType convertBizType(License license, String key) {

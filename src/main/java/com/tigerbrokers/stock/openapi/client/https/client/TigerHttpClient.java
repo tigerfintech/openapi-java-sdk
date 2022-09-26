@@ -9,6 +9,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.user.item.LicenseItem;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerHttpResponse;
@@ -18,6 +19,7 @@ import com.tigerbrokers.stock.openapi.client.https.validator.ValidatorManager;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.BizType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
+import com.tigerbrokers.stock.openapi.client.struct.enums.License;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
@@ -116,14 +118,6 @@ public class TigerHttpClient implements TigerClient {
   }
 
   private void init(String serverUrl, String tigerId, String privateKey) {
-    if (StringUtils.isEmpty(serverUrl)) {
-      refreshUrl();
-    } else {
-      this.serverUrl = serverUrl;
-    }
-    if (this.serverUrl == null) {
-      throw new RuntimeException("serverUrl is empty.");
-    }
     if (tigerId == null) {
       throw new RuntimeException("tigerId is empty.");
     }
@@ -138,6 +132,16 @@ public class TigerHttpClient implements TigerClient {
       this.tigerPublicKey = SANDBOX_PUBLIC_KEY;
     }
     this.deviceId = NetworkUtil.getDeviceId();
+
+    initLicense();
+    if (Env.PROD == ClientConfig.DEFAULT_CONFIG.getEnv() || StringUtils.isEmpty(serverUrl)) {
+      refreshUrl();
+    } else {
+      this.serverUrl = serverUrl;
+    }
+    if (this.serverUrl == null) {
+      throw new RuntimeException("serverUrl is empty.");
+    }
   }
 
   @Deprecated
@@ -149,6 +153,25 @@ public class TigerHttpClient implements TigerClient {
   public TigerHttpClient(String serverUrl, String accessToken) {
     this.serverUrl = serverUrl;
     this.accessToken = accessToken;
+  }
+
+  private void initLicense() {
+    if (null == ClientConfig.DEFAULT_CONFIG.license) {
+      try {
+        Map<BizType, String> urlMap = NetworkUtil.getHttpServerAddress(null, this.serverUrl);
+        this.serverUrl = urlMap.get(BizType.COMMON);
+        TigerHttpRequest request = new TigerHttpRequest(MethodName.USER_LICENSE);
+        request.setBizContent(AccountParamBuilder.instance().buildJsonWithoutDefaultAccount());
+        TigerHttpResponse response = execute(request);
+        if (response.isSuccess()) {
+          LicenseItem data = JSON.parseObject(response.getData(), LicenseItem.class);
+          ApiLogger.debug("license:{}", data);
+          ClientConfig.DEFAULT_CONFIG.license = License.valueOf(data.getLicense());
+        }
+      } catch (Exception e) {
+        ApiLogger.debug("get license fail. tigerId:{}", tigerId);
+      }
+    }
   }
 
   private void initDomainRefreshTask() {
