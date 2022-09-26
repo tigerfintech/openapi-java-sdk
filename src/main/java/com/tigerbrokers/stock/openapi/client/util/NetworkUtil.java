@@ -295,7 +295,8 @@ public class NetworkUtil {
       }
     }
     if (commonUrl == null) {
-      domainUrlMap.put(BizType.COMMON, String.format(protocol.getUrlFormat(), getDefaultUrl(env), port));
+      commonUrl = getDefaultUrl(env);
+      domainUrlMap.put(BizType.COMMON, String.format(protocol.getUrlFormat(), commonUrl, port));
     }
     if (protocol != Protocol.HTTP) {
       domainUrlMap.put(BizType.SOCKET, String.format(protocol.getUrlFormat(), commonUrl, port));

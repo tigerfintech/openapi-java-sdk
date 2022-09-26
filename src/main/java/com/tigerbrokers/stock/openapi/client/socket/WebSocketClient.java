@@ -12,7 +12,6 @@ import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
-import com.tigerbrokers.stock.openapi.client.websocket.WebSocketHandshakerHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -20,16 +19,10 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
-import io.netty.channel.ChannelPromise;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.DefaultHttpHeaders;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
-import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
-import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.codec.stomp.StompFrame;
 import io.netty.handler.codec.stomp.StompHeaders;
 import io.netty.handler.codec.stomp.StompSubframeAggregator;
@@ -285,9 +278,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
       if (completed && future.isSuccess()) {
         Channel newChannel = future.channel();
-        URI uri = null;
         try {
-          uri = new URI(url);
           Channel oldChannel = this.channel;
           if (oldChannel != null && oldChannel.isActive()) {
             ApiLogger.info("close old netty channel:{} , create new netty channel:{} ", oldChannel, newChannel);
@@ -295,21 +286,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
           }
         } finally {
           this.channel = newChannel;
-          if (isStompBaseWebSocket()) {
-            synchronized (this.channel) {
-              WebSocketHandshakerHandler webSocketHandshakerHandler =
-                  new WebSocketHandshakerHandler(authentication, apiComposeCallback, clientSendInterval,
-                      clientReceiveInterval);
-              HttpHeaders httpHeaders = new DefaultHttpHeaders();
-              WebSocketClientHandshaker handshaker =
-                  WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, true, httpHeaders);
-              webSocketHandshakerHandler.setHandshaker(handshaker);
-              channel.pipeline().addLast("handshakeHandler", webSocketHandshakerHandler);
-              webSocketHandshakerHandler.setHandshaker(handshaker);
-              ChannelPromise channelFuture = (ChannelPromise) handshaker.handshake(this.channel);
-              channelFuture.sync();
-            }
-          }
           connectCountDown.await(OP_TIMEOUT, TimeUnit.MILLISECONDS);
           if (connectCountDown.getCount() > 0) {
             this.channel.close();
@@ -371,6 +347,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
       return null;
     }
     return new InetSocketAddress(uri.getHost(), uri.getPort());
+  }
+
+  public String getUrl() {
+    return this.url;
   }
 
   /**
