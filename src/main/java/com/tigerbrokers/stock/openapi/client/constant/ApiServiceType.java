@@ -1,9 +1,10 @@
 package com.tigerbrokers.stock.openapi.client.constant;
 
 /**
- * Description:
+ * Description: please use enume 'MethodName'
  * Created by lijiawen on 2018/05/31.
  */
+@Deprecated
 public interface ApiServiceType {
 
   /**

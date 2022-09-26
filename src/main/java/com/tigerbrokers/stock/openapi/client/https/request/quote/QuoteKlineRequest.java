@@ -1,12 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.https.request.quote;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteKlineModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteKlineResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.KType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.RightOption;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import java.util.List;
@@ -19,7 +19,7 @@ public class QuoteKlineRequest extends TigerCommonRequest implements TigerReques
 
   public QuoteKlineRequest() {
     setApiVersion(V2_0);
-    setApiMethodName(ApiServiceType.KLINE);
+    setApiMethodName(MethodName.KLINE);
   }
 
   public static QuoteKlineRequest newRequest(List<String> symbols, KType kType) {

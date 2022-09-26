@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.config;
 
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
+import com.tigerbrokers.stock.openapi.client.struct.enums.License;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
@@ -28,6 +29,8 @@ public class ClientConfig {
   private Env env = DEFAULT_ENV;
 
   private SslProvider sslProvider = DEFAULT_SSLPROVIDER;
+
+  public License license;
 
   public String stompVersion = StompHeaderBuilder.DEFAULT_STOMP_VERSION;
 

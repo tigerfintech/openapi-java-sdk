@@ -1,11 +1,11 @@
 package com.tigerbrokers.stock.openapi.client.https.request.contract;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.model.ContractModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.contract.ContractResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 
 /**
@@ -15,7 +15,7 @@ import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 public class ContractRequest extends TigerCommonRequest implements TigerRequest<ContractResponse> {
 
   public ContractRequest() {
-    setApiMethodName(ApiServiceType.CONTRACT);
+    setApiMethodName(MethodName.CONTRACT);
     setApiVersion(V2_0);
   }
 

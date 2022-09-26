@@ -135,7 +135,7 @@ public class PageTokenUtil {
 
   /**
    * get kline data by page, return the merge result
-   * @param t return type,only for FutureKlineItem(ApiServiceType.FUTURE_KLINE) and KlineItem(ApiServiceType.KLINE)
+   * @param t return type,only for FutureKlineItem(MethodName.FUTURE_KLINE) and KlineItem(MethodName.KLINE)
    * @param symbol symbol or future contract code
    * @param period kline tpye
    * @param beginTime begin time. format:"2022-04-25 00:00:00"

@@ -1,12 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.https.request.option;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionCommonModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.option.OptionTradeTickResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +18,7 @@ public class OptionTradeTickQueryRequest extends TigerCommonRequest implements T
 
   public OptionTradeTickQueryRequest() {
     setApiVersion(TigerApiConstants.DEFAULT_VERSION);
-    setApiMethodName(ApiServiceType.OPTION_TRADE_TICK);
+    setApiMethodName(MethodName.OPTION_TRADE_TICK);
   }
 
   public OptionTradeTickQueryRequest(List<OptionCommonModel> items) {
