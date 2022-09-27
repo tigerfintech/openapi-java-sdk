@@ -178,7 +178,13 @@ public class TigerHttpClient implements TigerClient {
     synchronized (TigerHttpClient.SingletonInner.singleton) {
       if (domainExecutorService == null || domainExecutorService.isTerminated()) {
         domainExecutorService = new ScheduledThreadPoolExecutor(1);
-        domainExecutorService.scheduleWithFixedDelay(() -> refreshUrl(), REFRESH_URL_INTERVAL_SECONDS,
+        domainExecutorService.scheduleWithFixedDelay(
+            new Runnable() {
+              @Override
+              public void run() {
+                refreshUrl();
+              }
+            }, REFRESH_URL_INTERVAL_SECONDS,
             REFRESH_URL_INTERVAL_SECONDS, TimeUnit.SECONDS);
       }
     }
@@ -191,32 +197,12 @@ public class TigerHttpClient implements TigerClient {
       if (newServerUrl == null) {
         newServerUrl = urlMap.get(BizType.COMMON);
       }
-      String newQuoteServerUrl = urlMap.get(BizType.QUOTE);
-      String newPaperServerUrl = urlMap.get(BizType.PAPER);
+      String newQuoteServerUrl = urlMap.get(BizType.QUOTE) == null ? newServerUrl : urlMap.get(BizType.QUOTE);
+      String newPaperServerUrl = urlMap.get(BizType.PAPER) == null ? newServerUrl : urlMap.get(BizType.PAPER);
 
-      if (this.serverUrl != null && newServerUrl != null && !this.serverUrl.equals(newServerUrl)) {
-        ApiLogger.info("server url changed. {}-->{}", this.serverUrl, newServerUrl);
-      }
       this.serverUrl = newServerUrl;
-      if (newQuoteServerUrl != null) {
-        if (this.quoteServerUrl != null && !newQuoteServerUrl.equals(this.quoteServerUrl)) {
-          ApiLogger.info("quoteServerUrl changed. {}-->{}", this.quoteServerUrl, newQuoteServerUrl);
-        }
-        this.quoteServerUrl = newQuoteServerUrl;
-      }
-      if (newPaperServerUrl != null) {
-        if (this.paperServerUrl != null && !newPaperServerUrl.equals(this.paperServerUrl)) {
-          ApiLogger.info("paperServerUrl changed. {}-->{}", this.paperServerUrl, newPaperServerUrl);
-        }
-        this.paperServerUrl = newPaperServerUrl;
-      }
-
-      if (StringUtils.isEmpty(newQuoteServerUrl)) {
-        this.quoteServerUrl = serverUrl;
-      }
-      if (StringUtils.isEmpty(newPaperServerUrl)) {
-        this.paperServerUrl = serverUrl;
-      }
+      this.quoteServerUrl = newQuoteServerUrl;
+      this.paperServerUrl = newPaperServerUrl;
     } catch (Throwable t) {
       ApiLogger.error("refresh serverUrl error", t);
     }

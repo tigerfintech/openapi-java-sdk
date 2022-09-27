@@ -429,27 +429,30 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private void initReconnectCommand() {
     synchronized (SingletonInner.singleton) {
       if (reconnectExecutorFuture == null || reconnectExecutorFuture.isCancelled()) {
-        Runnable reconnectCommand = () -> {
-          try {
-            if (!isConnected()) {
-              connect();
-            } else {
-              lastConnectedTime = System.currentTimeMillis();
-            }
-          } catch (Throwable t) {
-            if (System.currentTimeMillis() - lastConnectedTime > SHUTDOWN_TIMEOUT) {
-              if (!reconnectErrorLogFlag.get()) {
-                reconnectErrorLogFlag.set(true);
+        Runnable reconnectCommand = new Runnable() {
+          @Override
+          public void run() {
+            try {
+              if (!isConnected()) {
+                connect();
+              } else {
+                lastConnectedTime = System.currentTimeMillis();
+              }
+            } catch (Throwable t) {
+              if (System.currentTimeMillis() - lastConnectedTime > SHUTDOWN_TIMEOUT) {
+                if (!reconnectErrorLogFlag.get()) {
+                  reconnectErrorLogFlag.set(true);
+                  ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}",
+                      lastConnectedTime,
+                      System.currentTimeMillis(), t);
+                  return;
+                }
+              }
+              if (reconnectCount.getAndIncrement() % RECONNECT_WARNING_PERIOD == 0) {
                 ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}",
                     lastConnectedTime,
                     System.currentTimeMillis(), t);
-                return;
               }
-            }
-            if (reconnectCount.getAndIncrement() % RECONNECT_WARNING_PERIOD == 0) {
-              ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}",
-                  lastConnectedTime,
-                  System.currentTimeMillis(), t);
             }
           }
         };
