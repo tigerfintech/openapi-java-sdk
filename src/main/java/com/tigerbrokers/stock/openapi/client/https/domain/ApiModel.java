@@ -20,4 +20,8 @@ public abstract class ApiModel implements Serializable {
   public void setLang(Language lang) {
     this.lang = lang;
   }
+
+  public String getAccount() {
+    return null;
+  }
 }

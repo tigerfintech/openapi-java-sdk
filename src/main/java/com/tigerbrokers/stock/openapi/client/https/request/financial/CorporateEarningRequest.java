@@ -1,6 +1,5 @@
 package com.tigerbrokers.stock.openapi.client.https.request.financial;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.financial.model.CorporateActionModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
@@ -8,6 +7,7 @@ import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateEarningResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.CorporateActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import java.util.Date;
 
 /**
@@ -17,7 +17,7 @@ import java.util.Date;
 public class CorporateEarningRequest extends TigerCommonRequest implements TigerRequest<CorporateEarningResponse> {
 
   public CorporateEarningRequest() {
-    setApiMethodName(ApiServiceType.CORPORATE_ACTION);
+    setApiMethodName(MethodName.CORPORATE_ACTION);
     setApiVersion(TigerApiConstants.DEFAULT_VERSION);
   }
 

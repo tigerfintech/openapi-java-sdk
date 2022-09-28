@@ -4,12 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.user.item.LicenseItem;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerHttpResponse;
@@ -17,8 +17,13 @@ import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.contract.ContractResponse;
 import com.tigerbrokers.stock.openapi.client.https.validator.ValidatorManager;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.BizType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
+import com.tigerbrokers.stock.openapi.client.struct.enums.License;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
+import com.tigerbrokers.stock.openapi.client.util.AccountUtil;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.FastJsonPropertyFilter;
 import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
@@ -34,7 +39,6 @@ import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static com.tigerbrokers.stock.openapi.client.constant.ApiServiceType.CONTRACT;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCESS_TOKEN;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCOUNT_TYPE;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.BIZ_CONTENT;
@@ -53,6 +57,8 @@ import static com.tigerbrokers.stock.openapi.client.https.request.TigerCommonReq
 public class TigerHttpClient implements TigerClient {
 
   private String serverUrl;
+  private String quoteServerUrl;
+  private String paperServerUrl;
   private String tigerId;
   private String privateKey;
   private String tigerPublicKey;
@@ -94,10 +100,10 @@ public class TigerHttpClient implements TigerClient {
 
   public TigerHttpClient clientConfig(ClientConfig clientConfig) {
     init(clientConfig.serverUrl, clientConfig.tigerId, clientConfig.privateKey);
-    initDomainCheck();
+    initDomainRefreshTask();
     if (clientConfig.isAutoGrabPermission) {
-      TigerHttpRequest request = new TigerHttpRequest(ApiServiceType.GRAB_QUOTE_PERMISSION);
-      request.setBizContent(AccountParamBuilder.instance().buildJson());
+      TigerHttpRequest request = new TigerHttpRequest(MethodName.GRAB_QUOTE_PERMISSION);
+      request.setBizContent(AccountParamBuilder.instance().buildJsonWithoutDefaultAccount());
       TigerHttpResponse response = execute(request);
       ApiLogger.info("tigerId:{}, grab_quote_permission:{}, data:{}",
           tigerId, response.getMessage(), response.getData());
@@ -112,19 +118,12 @@ public class TigerHttpClient implements TigerClient {
   }
 
   private void init(String serverUrl, String tigerId, String privateKey) {
-    if (StringUtils.isEmpty(serverUrl)) {
-      serverUrl = NetworkUtil.getHttpServerAddress(null);
-    }
-    if (serverUrl == null) {
-      throw new RuntimeException("serverUrl is empty.");
-    }
     if (tigerId == null) {
       throw new RuntimeException("tigerId is empty.");
     }
     if (privateKey == null) {
       throw new RuntimeException("privateKey is empty.");
     }
-    this.serverUrl = serverUrl;
     this.tigerId = tigerId;
     this.privateKey = privateKey;
     if (ClientConfig.DEFAULT_CONFIG.getEnv() == Env.PROD) {
@@ -133,6 +132,16 @@ public class TigerHttpClient implements TigerClient {
       this.tigerPublicKey = SANDBOX_PUBLIC_KEY;
     }
     this.deviceId = NetworkUtil.getDeviceId();
+
+    initLicense();
+    if (Env.PROD == ClientConfig.DEFAULT_CONFIG.getEnv() || StringUtils.isEmpty(serverUrl)) {
+      refreshUrl();
+    } else {
+      this.serverUrl = serverUrl;
+    }
+    if (this.serverUrl == null) {
+      throw new RuntimeException("serverUrl is empty.");
+    }
   }
 
   @Deprecated
@@ -146,24 +155,56 @@ public class TigerHttpClient implements TigerClient {
     this.accessToken = accessToken;
   }
 
-  private void initDomainCheck() {
+  private void initLicense() {
+    if (null == ClientConfig.DEFAULT_CONFIG.license) {
+      try {
+        Map<BizType, String> urlMap = NetworkUtil.getHttpServerAddress(null, this.serverUrl);
+        this.serverUrl = urlMap.get(BizType.COMMON);
+        TigerHttpRequest request = new TigerHttpRequest(MethodName.USER_LICENSE);
+        request.setBizContent(AccountParamBuilder.instance().buildJsonWithoutDefaultAccount());
+        TigerHttpResponse response = execute(request);
+        if (response.isSuccess()) {
+          LicenseItem data = JSON.parseObject(response.getData(), LicenseItem.class);
+          ApiLogger.debug("license:{}", data);
+          ClientConfig.DEFAULT_CONFIG.license = License.valueOf(data.getLicense());
+        }
+      } catch (Exception e) {
+        ApiLogger.debug("get license fail. tigerId:{}", tigerId);
+      }
+    }
+  }
+
+  private void initDomainRefreshTask() {
     synchronized (TigerHttpClient.SingletonInner.singleton) {
       if (domainExecutorService == null || domainExecutorService.isTerminated()) {
-        Runnable domainChecker = () -> {
-          try {
-            String newServerUrl = NetworkUtil.getHttpServerAddress(this.serverUrl);
-            if (!newServerUrl.equals(this.serverUrl)) {
-              ApiLogger.info("server url changed. {}-->{}", this.serverUrl, newServerUrl);
-            }
-            this.serverUrl = newServerUrl;
-          } catch (Throwable t) {
-            ApiLogger.error("refresh serverUrl error", t);
-          }
-        };
         domainExecutorService = new ScheduledThreadPoolExecutor(1);
-        domainExecutorService.scheduleWithFixedDelay(domainChecker, REFRESH_URL_INTERVAL_SECONDS,
+        domainExecutorService.scheduleWithFixedDelay(
+            new Runnable() {
+              @Override
+              public void run() {
+                refreshUrl();
+              }
+            }, REFRESH_URL_INTERVAL_SECONDS,
             REFRESH_URL_INTERVAL_SECONDS, TimeUnit.SECONDS);
       }
+    }
+  }
+
+  private void refreshUrl() {
+    try {
+      Map<BizType, String> urlMap = NetworkUtil.getHttpServerAddress(ClientConfig.DEFAULT_CONFIG.license, this.serverUrl);
+      String newServerUrl = urlMap.get(BizType.TRADE);
+      if (newServerUrl == null) {
+        newServerUrl = urlMap.get(BizType.COMMON);
+      }
+      String newQuoteServerUrl = urlMap.get(BizType.QUOTE) == null ? newServerUrl : urlMap.get(BizType.QUOTE);
+      String newPaperServerUrl = urlMap.get(BizType.PAPER) == null ? newServerUrl : urlMap.get(BizType.PAPER);
+
+      this.serverUrl = newServerUrl;
+      this.quoteServerUrl = newQuoteServerUrl;
+      this.paperServerUrl = newPaperServerUrl;
+    } catch (Throwable t) {
+      ApiLogger.error("refresh serverUrl error", t);
     }
   }
 
@@ -204,13 +245,13 @@ public class TigerHttpClient implements TigerClient {
       param = JSONObject.toJSONString(buildParams(request));
       ApiLogger.debug("request param:{}", param);
 
-      data = HttpUtils.post(serverUrl, param);
+      data = HttpUtils.post(getServerUrl(request), param);
 
       if (StringUtils.isEmpty(data)) {
         throw new TigerApiException(TigerApiCode.EMPTY_DATA_ERROR);
       }
       response = JSON.parseObject(data, request.getResponseClass());
-      if (CONTRACT.equals(request.getApiMethodName())) {
+      if (MethodName.CONTRACT == request.getApiMethodName()) {
         convertContractItem(response, request.getApiVersion());
       }
       if (StringUtils.isEmpty(this.tigerPublicKey) || response.getSign() == null) {
@@ -283,7 +324,7 @@ public class TigerHttpClient implements TigerClient {
 
   private Map<String, Object> buildParams(TigerRequest request) {
     Map<String,Object> params = new HashMap<>();
-    params.put(METHOD, request.getApiMethodName());
+    params.put(METHOD, request.getApiMethodName().getValue());
     params.put(VERSION, request.getApiVersion());
     params.put(SDK_VERSION, SdkVersionUtils.getSdkVersion());
     if (request instanceof TigerHttpRequest) {
@@ -334,4 +375,19 @@ public class TigerHttpClient implements TigerClient {
     // TigerCommonRequest
     ValidatorManager.getInstance().validate(request.getApiModel());
   }
+
+  private String getServerUrl(TigerRequest request) {
+    String url = null;
+    MethodType methodType = request.getApiMethodName().getType();
+    if (MethodType.QUOTE == methodType) {
+      url = this.quoteServerUrl;
+    } else if (MethodType.TRADE == methodType && paperServerUrl != null) {
+      String account = AccountUtil.parseAccount(request);
+      if (!StringUtils.isEmpty(account) && AccountType.PAPER == AccountUtil.getAccountType(account)) {
+        url = this.paperServerUrl;
+      }
+    }
+    return url == null ? this.serverUrl : url;
+  }
+
 }

@@ -1,12 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.https.request.option;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionKlineModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.option.OptionKlineResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +18,7 @@ public class OptionKlineQueryRequest extends TigerCommonRequest implements Tiger
 
   public OptionKlineQueryRequest() {
     setApiVersion(TigerApiConstants.DEFAULT_VERSION);
-    setApiMethodName(ApiServiceType.OPTION_KLINE);
+    setApiMethodName(MethodName.OPTION_KLINE);
   }
 
   public OptionKlineQueryRequest(List<OptionKlineModel> items) {

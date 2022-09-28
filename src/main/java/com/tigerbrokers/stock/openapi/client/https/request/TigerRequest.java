@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.https.request;
 
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 
 /**
  * 请求接口。
@@ -14,7 +15,7 @@ public interface TigerRequest<T extends TigerResponse> {
    *
    * @return API名称
    */
-  String getApiMethodName();
+  MethodName getApiMethodName();
 
   /**
    * 设置当前接口的版本

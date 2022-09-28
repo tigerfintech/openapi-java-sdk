@@ -1,13 +1,13 @@
 package com.tigerbrokers.stock.openapi.client.https.request.future;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureCurrentContractModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.future.FutureContractsResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 
 /**
  * Description:
@@ -19,7 +19,7 @@ public class FutureContractsRequest extends TigerCommonRequest implements TigerR
 
     public FutureContractsRequest() {
         setApiVersion(TigerApiConstants.DEFAULT_VERSION);
-        setApiMethodName(ApiServiceType.FUTURE_CONTRACTS);
+        setApiMethodName(MethodName.FUTURE_CONTRACTS);
     }
 
     public static FutureContractsRequest newRequest(String type) {

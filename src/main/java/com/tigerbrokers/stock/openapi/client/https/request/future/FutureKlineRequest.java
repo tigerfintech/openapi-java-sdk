@@ -1,13 +1,13 @@
 package com.tigerbrokers.stock.openapi.client.https.request.future;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureKlineModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.future.FutureKlineResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.FutureKType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 import java.util.List;
@@ -23,7 +23,7 @@ public class FutureKlineRequest extends TigerCommonRequest implements TigerReque
 
   public FutureKlineRequest() {
     setApiVersion(TigerApiConstants.DEFAULT_VERSION);
-    setApiMethodName(ApiServiceType.FUTURE_KLINE);
+    setApiMethodName(MethodName.FUTURE_KLINE);
   }
 
   public static FutureKlineRequest newRequest(List<String> contractCodes) {

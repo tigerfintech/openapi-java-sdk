@@ -1,13 +1,13 @@
 package com.tigerbrokers.stock.openapi.client.https.request.quote;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteMarketModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteMarketResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 
 /**
  * Description:
@@ -17,7 +17,7 @@ public class QuoteMarketRequest extends TigerCommonRequest implements TigerReque
 
   public QuoteMarketRequest() {
     setApiVersion(V2_0);
-    setApiMethodName(ApiServiceType.MARKET_STATE);
+    setApiMethodName(MethodName.MARKET_STATE);
   }
 
   public static QuoteMarketRequest newRequest(Market market) {

@@ -1,12 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.https.request.quote;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteTradeTickModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteTradeTickResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
 import java.util.List;
 
@@ -18,7 +18,7 @@ public class QuoteTradeTickRequest extends TigerCommonRequest implements TigerRe
 
   public QuoteTradeTickRequest() {
     setApiVersion(V2_0);
-    setApiMethodName(ApiServiceType.TRADE_TICK);
+    setApiMethodName(MethodName.TRADE_TICK);
   }
 
   public static QuoteTradeTickRequest newRequest(List<String> symbols) {
