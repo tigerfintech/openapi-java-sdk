@@ -6,6 +6,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.PrimeAsset
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.PrimeAssetResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 
 
 /**
@@ -32,9 +33,15 @@ public class PrimeAssetRequest extends TigerCommonRequest implements TigerReques
         return primeAssetRequest;
     }
 
-    public static PrimeAssetRequest buildPrimeAssetRequest(String account, String baseCurrency, String secretKey) {
+    public static PrimeAssetRequest buildPrimeAssetRequest(String account, Currency baseCurrency) {
         PrimeAssetRequest primeAssetRequest = new PrimeAssetRequest();
-        primeAssetRequest.setApiModel(new PrimeAssetModel(account, baseCurrency, secretKey));
+        primeAssetRequest.setApiModel(new PrimeAssetModel(account, baseCurrency.name()));
+        return primeAssetRequest;
+    }
+
+    public static PrimeAssetRequest buildPrimeAssetRequest(String account, Currency baseCurrency, String secretKey) {
+        PrimeAssetRequest primeAssetRequest = new PrimeAssetRequest();
+        primeAssetRequest.setApiModel(new PrimeAssetModel(account, baseCurrency.name(), secretKey));
         return primeAssetRequest;
     }
 
