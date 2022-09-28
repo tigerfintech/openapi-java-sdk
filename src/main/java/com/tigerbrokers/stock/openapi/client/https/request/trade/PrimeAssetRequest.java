@@ -35,7 +35,9 @@ public class PrimeAssetRequest extends TigerCommonRequest implements TigerReques
 
     public static PrimeAssetRequest buildPrimeAssetRequest(String account, Currency baseCurrency) {
         PrimeAssetRequest primeAssetRequest = new PrimeAssetRequest();
-        primeAssetRequest.setApiModel(new PrimeAssetModel(account, baseCurrency.name()));
+        PrimeAssetModel primeAssetModel = new PrimeAssetModel(account);
+        primeAssetModel.setBaseCurrency(baseCurrency.name());
+        primeAssetRequest.setApiModel(primeAssetModel);
         return primeAssetRequest;
     }
 
