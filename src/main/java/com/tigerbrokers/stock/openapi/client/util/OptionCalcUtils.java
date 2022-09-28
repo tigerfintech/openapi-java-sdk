@@ -19,6 +19,8 @@ import com.tigerbrokers.stock.openapi.client.struct.OptionMetrics;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Right;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ThreadFactory;
 import org.jquantlib.helper.FDAmericanDividendOptionHelper;
 import org.jquantlib.instruments.Option;
 
@@ -49,11 +51,15 @@ public class OptionCalcUtils {
   }
 
   private static ExecutorService executorService = new ThreadPoolExecutor(4, 4,
-      0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(1024), (r) -> {
-    Thread t = Executors.defaultThreadFactory().newThread(r);
-    t.setDaemon(true);
-    return t;
-  }, new ThreadPoolExecutor.AbortPolicy());
+      0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(1024), new ThreadFactory() {
+        @Override
+        public Thread newThread(Runnable r) {
+          Thread t = Executors.defaultThreadFactory().newThread(r);
+          t.setDaemon(true);
+          return t;
+        }
+      }
+      , new ThreadPoolExecutor.AbortPolicy());
 
   private static double N(double z) {
     if (z > 6.0) {
@@ -460,59 +466,68 @@ public class OptionCalcUtils {
   }
 
   private static FutureTask<CorporateDividendItem> getCorporateDividendTask(TigerHttpClient client, String symbol) {
-    FutureTask<CorporateDividendItem> corporateDividendTask = new FutureTask<>(() -> {
-      List<String> symbols = new ArrayList<>();
-      symbols.add(symbol);
-      Date date = Date.from(LocalDate.now().atStartOfDay(ZoneId.of(TimeZoneId.Shanghai.getZoneId())).toInstant());
-      CorporateDividendRequest request = CorporateDividendRequest.newRequest(symbols, Market.US, date, date);
-      CorporateDividendResponse corporateDividendResponse = client.execute(request);
-      if (corporateDividendResponse != null && corporateDividendResponse.isSuccess()) {
-        List<CorporateDividendItem> corporateDividendItems = corporateDividendResponse.getItems().get(symbol);
-        if (!isEmpty(corporateDividendItems)) {
-          return corporateDividendItems.get(0);
+    FutureTask<CorporateDividendItem> corporateDividendTask = new FutureTask<>(new Callable<CorporateDividendItem>() {
+      @Override
+      public CorporateDividendItem call() throws Exception {
+        List<String> symbols = new ArrayList<>();
+        symbols.add(symbol);
+        Date date = Date.from(LocalDate.now().atStartOfDay(ZoneId.of(TimeZoneId.Shanghai.getZoneId())).toInstant());
+        CorporateDividendRequest request = CorporateDividendRequest.newRequest(symbols, Market.US, date, date);
+        CorporateDividendResponse corporateDividendResponse = client.execute(request);
+        if (corporateDividendResponse != null && corporateDividendResponse.isSuccess()) {
+          List<CorporateDividendItem> corporateDividendItems = corporateDividendResponse.getItems().get(symbol);
+          if (!isEmpty(corporateDividendItems)) {
+            return corporateDividendItems.get(0);
+          }
         }
+        CorporateDividendItem item = new CorporateDividendItem();
+        item.setAmount(0D);
+        return item;
       }
-      CorporateDividendItem item = new CorporateDividendItem();
-      item.setAmount(0D);
-      return item;
     });
     executorService.execute(corporateDividendTask);
     return corporateDividendTask;
   }
 
   private static FutureTask<Boolean> getMarketStateTask(TigerHttpClient client) {
-    FutureTask<Boolean> marketItemTask = new FutureTask<>(() -> {
-      QuoteMarketResponse quoteMarketResponse = client.execute(QuoteMarketRequest.newRequest(Market.US));
-      if (quoteMarketResponse != null && quoteMarketResponse.isSuccess()) {
-        List<MarketItem> marketItems = quoteMarketResponse.getMarketItems();
-        if (!isEmpty(marketItems)) {
-          return "交易中".equals(marketItems.get(0).getMarketStatus());
+    FutureTask<Boolean> marketItemTask = new FutureTask<>(new Callable<Boolean>() {
+      @Override
+      public Boolean call() throws Exception {
+        QuoteMarketResponse quoteMarketResponse = client.execute(QuoteMarketRequest.newRequest(Market.US));
+        if (quoteMarketResponse != null && quoteMarketResponse.isSuccess()) {
+          List<MarketItem> marketItems = quoteMarketResponse.getMarketItems();
+          if (!isEmpty(marketItems)) {
+            return "交易中".equals(marketItems.get(0).getMarketStatus());
+          }
         }
+        return false;
       }
-      return false;
     });
     executorService.execute(marketItemTask);
     return marketItemTask;
   }
 
   private static FutureTask<Double> getLatestPriceTask(TigerHttpClient client, String symbol) {
-    FutureTask<Double> realTimeQuoteItemTask = new FutureTask<>(() -> {
-      QuoteRealTimeQuoteResponse quoteRealTimeQuoteResponse =
-          client.execute(QuoteRealTimeQuoteRequest.newRequest(Arrays.asList(symbol)));
-      if (quoteRealTimeQuoteResponse != null && quoteRealTimeQuoteResponse.isSuccess()) {
-        List<RealTimeQuoteItem> realTimeQuoteItems = quoteRealTimeQuoteResponse.getRealTimeQuoteItems();
-        if (!isEmpty(realTimeQuoteItems)) {
-          Double latestPrice = realTimeQuoteItems.get(0).getLatestPrice();
-          if (latestPrice == null) {
-            throw new RuntimeException("Failed to get the latest price of the stock.");
+    FutureTask<Double> realTimeQuoteItemTask = new FutureTask<>(new Callable<Double>() {
+      @Override
+      public Double call() throws Exception {
+        QuoteRealTimeQuoteResponse quoteRealTimeQuoteResponse =
+            client.execute(QuoteRealTimeQuoteRequest.newRequest(Arrays.asList(symbol)));
+        if (quoteRealTimeQuoteResponse != null && quoteRealTimeQuoteResponse.isSuccess()) {
+          List<RealTimeQuoteItem> realTimeQuoteItems = quoteRealTimeQuoteResponse.getRealTimeQuoteItems();
+          if (!isEmpty(realTimeQuoteItems)) {
+            Double latestPrice = realTimeQuoteItems.get(0).getLatestPrice();
+            if (latestPrice == null) {
+              throw new RuntimeException("Failed to get the latest price of the stock.");
+            }
+            return latestPrice;
           }
-          return latestPrice;
         }
+        if (quoteRealTimeQuoteResponse == null) {
+          throw new RuntimeException("Failed to get the latest price of the stock.");
+        }
+        throw new RuntimeException("Get realtime-quotes return error description: " + quoteRealTimeQuoteResponse.getMessage());
       }
-      if (quoteRealTimeQuoteResponse == null) {
-        throw new RuntimeException("Failed to get the latest price of the stock.");
-      }
-      throw new RuntimeException("Get realtime-quotes return error description: " + quoteRealTimeQuoteResponse.getMessage());
     });
     executorService.execute(realTimeQuoteItemTask);
     return realTimeQuoteItemTask;
@@ -520,20 +535,23 @@ public class OptionCalcUtils {
 
   private static FutureTask<OptionBriefItem> getOptionBriefTask(TigerHttpClient client, String symbol, String right,
       String strike, long expiryDate) {
-    FutureTask<OptionBriefItem> optionBriefItemTask = new FutureTask<>(() -> {
-      OptionCommonModel model = new OptionCommonModel(symbol, right, strike, expiryDate);
-      OptionBriefResponse optionBriefResponse = client.execute(OptionBriefQueryRequest.of(model));
-      List<OptionBriefItem> briefItems;
-      if (optionBriefResponse != null && optionBriefResponse.isSuccess()) {
-        briefItems = optionBriefResponse.getOptionBriefItems();
-        if (!isEmpty(briefItems)) {
-          return briefItems.get(0);
+    FutureTask<OptionBriefItem> optionBriefItemTask = new FutureTask<>(new Callable<OptionBriefItem>() {
+      @Override
+      public OptionBriefItem call() throws Exception {
+        OptionCommonModel model = new OptionCommonModel(symbol, right, strike, expiryDate);
+        OptionBriefResponse optionBriefResponse = client.execute(OptionBriefQueryRequest.of(model));
+        List<OptionBriefItem> briefItems;
+        if (optionBriefResponse != null && optionBriefResponse.isSuccess()) {
+          briefItems = optionBriefResponse.getOptionBriefItems();
+          if (!isEmpty(briefItems)) {
+            return briefItems.get(0);
+          }
         }
+        if (optionBriefResponse == null) {
+          throw new RuntimeException("Unable to obtain option summary info.");
+        }
+        throw new RuntimeException("Obtain option brief summary info return error description:" + optionBriefResponse.getMessage());
       }
-      if (optionBriefResponse == null) {
-        throw new RuntimeException("Unable to obtain option summary info.");
-      }
-      throw new RuntimeException("Obtain option brief summary info return error description:" + optionBriefResponse.getMessage());
     });
     executorService.execute(optionBriefItemTask);
     return optionBriefItemTask;

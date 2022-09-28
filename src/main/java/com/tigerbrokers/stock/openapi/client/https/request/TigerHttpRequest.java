@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.https.request;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerHttpResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 import java.time.LocalDateTime;
@@ -14,13 +15,19 @@ public class TigerHttpRequest implements TigerRequest<TigerHttpResponse> {
   private String apiVersion = TigerApiConstants.DEFAULT_VERSION;
   private String tigerId;
   private String signType;
-  private String apiMethodName;
+  private MethodName apiMethodName;
   private String bizContent;
   private String charset;
   private String timestamp;
   private String sign;
 
+  /** please use TigerHttpRequest(MethodName apiMethodName) */
+  @Deprecated
   public TigerHttpRequest(String apiMethodName) {
+    this(MethodName.getMethodNameByValue(apiMethodName));
+  }
+
+  public TigerHttpRequest(MethodName apiMethodName) {
     this.apiMethodName = apiMethodName;
     DateTimeFormatter dtf = DateUtils.DATETIME_FORMAT;
     timestamp = dtf.format(LocalDateTime.now(ZoneId.of(TimeZoneId.Shanghai.getZoneId())));
@@ -39,7 +46,7 @@ public class TigerHttpRequest implements TigerRequest<TigerHttpResponse> {
     this.apiVersion = apiVersion;
   }
 
-  public String getApiMethodName() {
+  public MethodName getApiMethodName() {
     return apiMethodName;
   }
 

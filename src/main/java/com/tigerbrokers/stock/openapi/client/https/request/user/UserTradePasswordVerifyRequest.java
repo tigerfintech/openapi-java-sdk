@@ -1,10 +1,10 @@
 package com.tigerbrokers.stock.openapi.client.https.request.user;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.user.model.UserTradePasswordVerifyModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.user.UserTradePasswordVerifyResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 
 /**
  * Description:
@@ -14,7 +14,7 @@ public class UserTradePasswordVerifyRequest extends TigerCommonRequest
     implements TigerRequest<UserTradePasswordVerifyResponse> {
 
   public UserTradePasswordVerifyRequest() {
-    setApiMethodName(ApiServiceType.USER_TRADE_PASSWORD_VERIFY);
+    setApiMethodName(MethodName.USER_TRADE_PASSWORD_VERIFY);
   }
 
   public static UserTradePasswordVerifyRequest newRequest(String idNo) {

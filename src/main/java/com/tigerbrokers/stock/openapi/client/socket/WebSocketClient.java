@@ -4,6 +4,7 @@ import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteKeyType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
@@ -11,9 +12,6 @@ import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
-import com.tigerbrokers.stock.openapi.client.websocket.WebSocketHandshakerHandler;
-import com.tigerbrokers.stock.openapi.client.websocket.WebSocketStompFrameDecoder;
-import com.tigerbrokers.stock.openapi.client.websocket.WebSocketStompFrameEncoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -21,18 +19,10 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
-import io.netty.channel.ChannelPromise;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.DefaultHttpHeaders;
-import io.netty.handler.codec.http.HttpClientCodec;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
-import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
-import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.codec.stomp.StompFrame;
 import io.netty.handler.codec.stomp.StompHeaders;
 import io.netty.handler.codec.stomp.StompSubframeAggregator;
@@ -98,8 +88,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private static final long RECONNECT_DELAY_TIME = 3 * 1000;
   private static final long RECONNECT_INTERVAL_TIME = 10 * 1000;
 
-  private int clientSendInterval = 0;
-  private int clientReceiveInterval = 0;
+  private int clientSendInterval = 30000;
+  private int clientReceiveInterval = 30000;
   private static final int CLIENT_SEND_INTERVAL_MIN = 10000;
   private static final int CLIENT_RECEIVE_INTERVAL_MIN = 10000;
 
@@ -130,7 +120,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   public WebSocketClient clientConfig(ClientConfig clientConfig) {
     this.clientConfig = clientConfig;
-    if (StringUtils.isEmpty(clientConfig.socketServerUrl)) {
+    if (StringUtils.isEmpty(clientConfig.socketServerUrl) || Env.PROD == clientConfig.getEnv()) {
       this.url = NetworkUtil.getServerAddress(null);
     } else {
       this.url = clientConfig.socketServerUrl;
@@ -203,17 +193,18 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
     group = new NioEventLoopGroup(1);
     bootstrap = new Bootstrap();
-    SslProvider provider = this.sslProvider == null ? SslProvider.OPENSSL : this.sslProvider;
-    final String[] protocols = NetworkUtil.getSupportedProtocolsSet(PROTOCOLS, provider);
-    if (protocols == null || protocols.length == 0) {
-      throw new RuntimeException("supported protocols is empty.");
+    if (!isStompBaseWebSocket()) {
+      SslProvider provider = this.sslProvider == null ? SslProvider.OPENSSL : this.sslProvider;
+      final String[] protocols = NetworkUtil.getSupportedProtocolsSet(PROTOCOLS, provider);
+      if (protocols == null || protocols.length == 0) {
+        throw new RuntimeException("supported protocols is empty.");
+      }
+      sslCtx = SslContextBuilder.forClient()
+              .protocols(protocols)
+              .trustManager(InsecureTrustManagerFactory.INSTANCE)
+              .sslProvider(provider)
+              .build();
     }
-    sslCtx =
-        SslContextBuilder.forClient()
-            .protocols(protocols)
-            .trustManager(InsecureTrustManagerFactory.INSTANCE)
-            .sslProvider(provider)
-            .build();
 
     bootstrap.group(group).option(ChannelOption.TCP_NODELAY, true)
         .option(ChannelOption.SO_KEEPALIVE, true)
@@ -226,21 +217,16 @@ public class WebSocketClient implements SubscribeAsyncApi {
             if (address == null) {
               throw new RuntimeException("get connect address error.");
             }
-            p.addLast(TigerApiConstants.SSL_HANDLER_NAME, sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
-            if (isStompBaseWebSocket()) {
-              p.addLast("websocketCodec", new HttpClientCodec());
-              p.addLast("websocketAggregator", new HttpObjectAggregator(65535));
-              p.addLast(STOMP_ENCODER, new WebSocketStompFrameDecoder());
-              p.addLast(STOMP_DECODER, new WebSocketStompFrameEncoder());
-              p.addLast("stompAggregator", new StompSubframeAggregator(65535));
-            } else {
-              final WebSocketHandler handler =
-                  new WebSocketHandler(authentication, apiComposeCallback, clientSendInterval, clientReceiveInterval);
-              p.addLast(STOMP_ENCODER, new StompSubframeEncoder());
-              p.addLast(STOMP_DECODER, new StompSubframeDecoder());
-              p.addLast("aggregator", new StompSubframeAggregator(65535));
-              p.addLast("webSocketHandler", handler);
+            if (!isStompBaseWebSocket()) {
+              p.addLast(TigerApiConstants.SSL_HANDLER_NAME,
+                  sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
             }
+            final WebSocketHandler handler =
+                new WebSocketHandler(authentication, apiComposeCallback, clientSendInterval, clientReceiveInterval);
+            p.addLast(STOMP_ENCODER, new StompSubframeEncoder());
+            p.addLast(STOMP_DECODER, new StompSubframeDecoder());
+            p.addLast("aggregator", new StompSubframeAggregator(65535));
+            p.addLast("webSocketHandler", handler);
           }
         });
 
@@ -292,9 +278,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
       if (completed && future.isSuccess()) {
         Channel newChannel = future.channel();
-        URI uri = null;
         try {
-          uri = new URI(url);
           Channel oldChannel = this.channel;
           if (oldChannel != null && oldChannel.isActive()) {
             ApiLogger.info("close old netty channel:{} , create new netty channel:{} ", oldChannel, newChannel);
@@ -302,21 +286,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
           }
         } finally {
           this.channel = newChannel;
-          if (isStompBaseWebSocket()) {
-            synchronized (this.channel) {
-              WebSocketHandshakerHandler webSocketHandshakerHandler =
-                  new WebSocketHandshakerHandler(authentication, apiComposeCallback, clientSendInterval,
-                      clientReceiveInterval);
-              HttpHeaders httpHeaders = new DefaultHttpHeaders();
-              WebSocketClientHandshaker handshaker =
-                  WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null, true, httpHeaders);
-              webSocketHandshakerHandler.setHandshaker(handshaker);
-              channel.pipeline().addLast("handshakeHandler", webSocketHandshakerHandler);
-              webSocketHandshakerHandler.setHandshaker(handshaker);
-              ChannelPromise channelFuture = (ChannelPromise) handshaker.handshake(this.channel);
-              channelFuture.sync();
-            }
-          }
           connectCountDown.await(OP_TIMEOUT, TimeUnit.MILLISECONDS);
           if (connectCountDown.getCount() > 0) {
             this.channel.close();
@@ -339,7 +308,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   private InetSocketAddress getNewServerAddress() {
-    if (clientConfig != null && StringUtils.isEmpty(clientConfig.socketServerUrl)) {
+    if (clientConfig != null && (StringUtils.isEmpty(clientConfig.socketServerUrl)
+        || Env.PROD == clientConfig.getEnv())) {
       String newUrl = NetworkUtil.getServerAddress(this.url);
       if (!this.url.equals(newUrl)) {
         InetSocketAddress address = getSocketAddress(newUrl);
@@ -377,6 +347,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
       return null;
     }
     return new InetSocketAddress(uri.getHost(), uri.getPort());
+  }
+
+  public String getUrl() {
+    return this.url;
   }
 
   /**
@@ -455,27 +429,30 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private void initReconnectCommand() {
     synchronized (SingletonInner.singleton) {
       if (reconnectExecutorFuture == null || reconnectExecutorFuture.isCancelled()) {
-        Runnable reconnectCommand = () -> {
-          try {
-            if (!isConnected()) {
-              connect();
-            } else {
-              lastConnectedTime = System.currentTimeMillis();
-            }
-          } catch (Throwable t) {
-            if (System.currentTimeMillis() - lastConnectedTime > SHUTDOWN_TIMEOUT) {
-              if (!reconnectErrorLogFlag.get()) {
-                reconnectErrorLogFlag.set(true);
+        Runnable reconnectCommand = new Runnable() {
+          @Override
+          public void run() {
+            try {
+              if (!isConnected()) {
+                connect();
+              } else {
+                lastConnectedTime = System.currentTimeMillis();
+              }
+            } catch (Throwable t) {
+              if (System.currentTimeMillis() - lastConnectedTime > SHUTDOWN_TIMEOUT) {
+                if (!reconnectErrorLogFlag.get()) {
+                  reconnectErrorLogFlag.set(true);
+                  ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}",
+                      lastConnectedTime,
+                      System.currentTimeMillis(), t);
+                  return;
+                }
+              }
+              if (reconnectCount.getAndIncrement() % RECONNECT_WARNING_PERIOD == 0) {
                 ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}",
                     lastConnectedTime,
                     System.currentTimeMillis(), t);
-                return;
               }
-            }
-            if (reconnectCount.getAndIncrement() % RECONNECT_WARNING_PERIOD == 0) {
-              ApiLogger.error("client reconnect to server error, lastConnectedTime:{}, currentTime:{}",
-                  lastConnectedTime,
-                  System.currentTimeMillis(), t);
             }
           }
         };

@@ -1,13 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.https.request.trade;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.PrimeAssetModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.PrimeAssetResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
-
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 
 /**
  * Description:
@@ -18,7 +17,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 public class PrimeAssetRequest extends TigerCommonRequest implements TigerRequest<PrimeAssetResponse> {
     public PrimeAssetRequest() {
         setApiVersion(TigerApiConstants.DEFAULT_VERSION);
-        setApiMethodName(ApiServiceType.PRIME_ASSETS);
+        setApiMethodName(MethodName.PRIME_ASSETS);
     }
 
     public static PrimeAssetRequest buildPrimeAssetRequest(String account) {
