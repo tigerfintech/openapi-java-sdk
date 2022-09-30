@@ -36,7 +36,9 @@ import java.security.Security;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCESS_TOKEN;
@@ -177,7 +179,14 @@ public class TigerHttpClient implements TigerClient {
   private void initDomainRefreshTask() {
     synchronized (TigerHttpClient.SingletonInner.singleton) {
       if (domainExecutorService == null || domainExecutorService.isTerminated()) {
-        domainExecutorService = new ScheduledThreadPoolExecutor(1);
+        domainExecutorService = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
+          @Override
+          public Thread newThread(Runnable r) {
+            Thread t = Executors.defaultThreadFactory().newThread(r);
+            t.setDaemon(true);
+            return t;
+          }
+        });
         domainExecutorService.scheduleWithFixedDelay(
             new Runnable() {
               @Override

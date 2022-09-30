@@ -41,8 +41,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -457,7 +459,14 @@ public class WebSocketClient implements SubscribeAsyncApi {
           }
         };
         if (reconnectExecutorService.isShutdown()) {
-          reconnectExecutorService = new ScheduledThreadPoolExecutor(1);
+          reconnectExecutorService = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable r) {
+              Thread t = Executors.defaultThreadFactory().newThread(r);
+              t.setDaemon(true);
+              return t;
+            }
+          });
         }
         reconnectExecutorFuture =
             reconnectExecutorService.scheduleWithFixedDelay(reconnectCommand, RECONNECT_DELAY_TIME,
