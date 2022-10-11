@@ -392,7 +392,7 @@ public class TigerHttpClient implements TigerClient {
       url = this.quoteServerUrl;
     } else if (MethodType.TRADE == methodType && paperServerUrl != null) {
       String account = AccountUtil.parseAccount(request);
-      if (!StringUtils.isEmpty(account) && AccountType.PAPER == AccountUtil.getAccountType(account)) {
+      if (AccountUtil.isVirtualAccount(account)) {
         url = this.paperServerUrl;
       }
     }

@@ -303,7 +303,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     } catch (Exception e) {
       ApiLogger.error("client failed to connect to server: ", e);
     } finally {
-      if (!isConnected()) {
+      if (future != null && !isConnected()) {
         future.cancel(true);
       }
     }

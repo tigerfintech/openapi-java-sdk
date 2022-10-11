@@ -52,7 +52,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
           ApiLogger.info("send connect token frame successfully. channel:{}", ctx.channel().id().asShortText());
         } else {
           ApiLogger.error("failed to send connect token. channel:{}, isDone:{}, cause:{}",
-              ctx.channel().id().asShortText(), future.isDone(), future.cause().getMessage());
+              ctx.channel().id().asShortText(), future.isDone(), future.cause() == null ? null : future.cause().getMessage());
         }
       }
     });
