@@ -18,17 +18,30 @@ import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.A
 public class AccountUtil {
 
   private static final Logger log = LoggerFactory.getLogger(AccountUtil.class);
+  private static final int PAPER_ACCOUNT_LEN = 17;
 
   public static boolean isOmnibusAccount(String account) {
     if (StringUtils.isEmpty(account)) {
       return false;
     }
     try {
-      return StringUtils.isNumeric(account) && account.length() >= 6 && account.length() <= 8;
+      return StringUtils.isNumeric(account) && account.length() < PAPER_ACCOUNT_LEN;
     } catch (Exception e) {
       log.error("isOmnibusAccount {}", e.getMessage(), e);
       return false;
     }
+  }
+
+  public static boolean isVirtualAccount(String account) {
+    if (StringUtils.isEmpty(account)) {
+      return false;
+    }
+    try {
+      return StringUtils.isNumeric(account) && account.length() == PAPER_ACCOUNT_LEN;
+    } catch (Exception e) {
+      log.error("isVirtualAccount {}", e.getMessage(), e);
+    }
+    return false;
   }
 
   public static boolean isGlobalAccount(String account) {

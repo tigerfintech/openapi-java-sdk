@@ -8,7 +8,6 @@ import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrder
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.TradeOrderResponse;
-import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AttachType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
@@ -121,7 +120,6 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     if (contract == null) {
       throw new IllegalArgumentException("parameter 'contract' is null");
     }
-    AccountType accountType = AccountUtil.getAccountType(account);
     TradeOrderModel model = new TradeOrderModel();
     model.setAccount(account);
     model.setAction(action);
@@ -137,7 +135,7 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     model.setRight(contract.getRight());
     model.setMultiplier(contract.getMultiplier() == null ? null : contract.getMultiplier().floatValue());
     if (model.getSecType() == SecType.FUT) {
-      if (accountType == AccountType.GLOBAL) {
+      if (AccountUtil.isGlobalAccount(account)) {
         if (!StringUtils.isEmpty(contract.getType())) {
           model.setSymbol(contract.getType());
         }
