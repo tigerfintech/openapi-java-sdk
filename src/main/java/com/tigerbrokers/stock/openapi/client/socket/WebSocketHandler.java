@@ -85,7 +85,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-    ApiLogger.error("handler exception caught:", cause);
+    ApiLogger.error("handler exception caught, channel:{}", ctx.channel().id(), cause);
     ctx.close();
   }
 }
