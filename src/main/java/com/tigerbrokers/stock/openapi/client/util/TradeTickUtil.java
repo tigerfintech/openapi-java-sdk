@@ -148,6 +148,15 @@ public class TradeTickUtil {
   }
 
   public static JSONObject decodeData(JSONObject jsonObject) {
+    String symbol = jsonObject.getString("symbol");
+    if (SymbolUtil.isFutureSymbol(symbol)) {
+      return decodeFutureData(jsonObject);
+    } else {
+      return decodeStockData(jsonObject);
+    }
+  }
+
+  public static JSONObject decodeStockData(JSONObject jsonObject) {
 
     String symbol = jsonObject.getString("symbol");
     JSONArray timeArray = jsonObject.getJSONArray("times");
@@ -156,6 +165,7 @@ public class TradeTickUtil {
     JSONArray volumeArray = jsonObject.getJSONArray("volumes");
     String cond = (String)jsonObject.remove("cond");
     String tickType = (String)jsonObject.remove("tickType");
+    int startSn = jsonObject.getIntValue("sn");
 
     boolean isUsStockSymbol = SymbolUtil.isUsStockSymbol(symbol);
 
@@ -175,6 +185,7 @@ public class TradeTickUtil {
         // recover price: price[i] = (priceBase + price[i]) / 10^priceOffset
         pricesArray.set(i, (priceBase + pricesArray.getDoubleValue(i)) / denominator);
 
+        tickData.put("sn", startSn++);
         tickData.put("volume", volumeArray.get(i));
         tickData.put("time", timeArray.get(i));
         tickData.put("price", pricesArray.get(i));
@@ -199,6 +210,54 @@ public class TradeTickUtil {
     jsonObject.remove("volumes");
     jsonObject.remove("priceBase");
     jsonObject.remove("priceOffset");
+
+    return jsonObject;
+  }
+
+  public static JSONObject decodeFutureData(JSONObject jsonObject) {
+    JSONArray timeArray = jsonObject.getJSONArray("times");
+    JSONArray pricesArray = jsonObject.getJSONArray("prices");
+    int startSn = jsonObject.getIntValue("sn");
+    JSONArray mergedVolsArray = jsonObject.getJSONArray("mergedVols");
+    int totalCount = 0;
+    for (int i = 0; i < mergedVolsArray.size(); i++) {
+      totalCount += mergedVolsArray.getJSONObject(i).getIntValue("mergeTimes");
+    }
+
+    JSONArray tickDetail = new JSONArray(totalCount);
+    jsonObject.put("ticks", tickDetail);
+    if (timeArray != null && timeArray.size() > 0) {
+      long previousTime = 0;
+      double priceBase = jsonObject.getLongValue("priceBase");
+      double denominator = Math.pow(10, jsonObject.getIntValue("priceOffset"));
+      int idx = 0;
+      for (int i = 0; i < timeArray.size(); i++) {
+
+        // recover time: time[i] = time[i] + time[i-1]
+        previousTime += timeArray.getLongValue(i);
+        timeArray.set(i, previousTime);
+        // recover price: price[i] = (priceBase + price[i]) / 10^priceOffset
+        pricesArray.set(i, (priceBase + pricesArray.getDoubleValue(i)) / denominator);
+
+        JSONArray volsArray = mergedVolsArray.getJSONObject(i).getJSONArray("vols");
+        int mergeTimes = mergedVolsArray.getJSONObject(i).getIntValue("mergeTimes");
+        for (int j = 0; j < mergeTimes; j++) {
+          JSONObject tickData = new JSONObject();
+          tickDetail.set(idx++, tickData);
+          tickData.put("sn", startSn * 10 + j);
+          tickData.put("volume", volsArray.get(j));
+          tickData.put("time", timeArray.get(i));
+          tickData.put("price", pricesArray.get(i));
+        }
+        startSn++;
+      }
+    }
+    jsonObject.remove("times");
+    jsonObject.remove("prices");
+    jsonObject.remove("volumes");
+    jsonObject.remove("priceBase");
+    jsonObject.remove("priceOffset");
+    jsonObject.remove("mergedVols");
 
     return jsonObject;
   }
