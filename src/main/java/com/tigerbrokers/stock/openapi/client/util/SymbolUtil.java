@@ -13,8 +13,7 @@ import java.util.regex.Pattern;
 public class SymbolUtil {
 
   private static Pattern CHAR_SYMBOL_PATTERN = Pattern.compile("[A-Z]+(.[A-Z0-9]+)?");
-  private static final Pattern FUTURE_PATTERN = Pattern.compile("^[0-9A-Z]+(main|[0-9]{4})$");
-  private static final Pattern NOT_FUTURE_PATTERN = Pattern.compile("^[0-9]{5,}$");
+  private static Pattern FUTURE_SYMBOL_PATTERN = Pattern.compile("^[0-9A-Z]+([0-9]{4}|main){1}$");
 
   public static OptionSymbol convertToOptionSymbolObject(String identifier) throws TigerApiException {
     if (identifier == null || identifier.length() != 21) {
@@ -58,14 +57,11 @@ public class SymbolUtil {
   }
 
   public static boolean isFutureSymbol(String symbol) {
-    if (null != symbol && symbol.length() > 4 && !symbol.startsWith("BK") && symbol.length() < 12) {
-      if (NOT_FUTURE_PATTERN.matcher(symbol).matches()) {
-        return false;
-      } else {
-        return FUTURE_PATTERN.matcher(symbol).matches();
-      }
-    } else {
+    if (symbol == null || symbol.isEmpty()
+        || symbol.length() <= 4 || symbol.length() >= 12
+        || symbol.startsWith("BK") || StringUtils.isNumeric(symbol)) {
       return false;
     }
+    return FUTURE_SYMBOL_PATTERN.matcher(symbol).matches();
   }
 }
