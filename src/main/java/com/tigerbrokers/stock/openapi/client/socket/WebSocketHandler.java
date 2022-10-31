@@ -9,7 +9,6 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.stomp.StompFrame;
-import java.util.concurrent.TimeUnit;
 
 @ChannelHandler.Sharable
 public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
@@ -46,11 +45,6 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
     }
     ApiLogger.info("netty channel active. channel:{}, preparing to send connect token frame:{}",
         ctx.channel().id().asShortText(), connectFrame);
-    try {
-      TimeUnit.MILLISECONDS.sleep(200);
-    } catch (InterruptedException ie) {
-      // ignore
-    }
     ctx.writeAndFlush(connectFrame).addListener(new ChannelFutureListener() {
       @Override
       public void operationComplete(ChannelFuture future) {
