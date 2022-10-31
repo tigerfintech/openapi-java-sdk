@@ -28,6 +28,19 @@ public class FinancialFilter implements Serializable {
     /** SortDir 排序方向，默认不排序。仅仅 filterValType = Rank 此参数生效！ */
     private int sortDir;
 
+    public FinancialFilter(Integer fieldName, Double filterMin, Double filterMax, boolean isNoFilter, FinancialPeriod quarter, int filterValType, int sortDir) {
+        this.fieldName = fieldName;
+        this.filterMin = filterMin;
+        this.filterMax = filterMax;
+        this.isNoFilter = isNoFilter;
+        this.quarter = quarter;
+        this.filterValType = filterValType;
+        this.sortDir = sortDir;
+    }
+
+    public FinancialFilter() {
+    }
+
     /**
      * 验证参数是否传递ok
      */
@@ -104,5 +117,66 @@ public class FinancialFilter implements Serializable {
 
     public void setSortDir(int sortDir) {
         this.sortDir = sortDir;
+    }
+
+    public static FinancialFilter.FinancialFilterBuilder builder() {
+        return new FinancialFilter.FinancialFilterBuilder();
+    }
+
+    public static class FinancialFilterBuilder {
+        private Integer fieldName;
+        private Double filterMin;
+        private Double filterMax;
+        private boolean isNoFilter;
+        private FinancialPeriod quarter;
+        private int filterValType;
+        private int sortDir;
+
+        FinancialFilterBuilder() {
+        }
+
+        public FinancialFilter.FinancialFilterBuilder fieldName(Integer fieldName) {
+            this.fieldName = fieldName;
+            return this;
+        }
+
+        public FinancialFilter.FinancialFilterBuilder filterMin(Double filterMin) {
+            this.filterMin = filterMin;
+            return this;
+        }
+
+        public FinancialFilter.FinancialFilterBuilder filterMax(Double filterMax) {
+            this.filterMax = filterMax;
+            return this;
+        }
+
+        public FinancialFilter.FinancialFilterBuilder isNoFilter(boolean isNoFilter) {
+            this.isNoFilter = isNoFilter;
+            return this;
+        }
+
+        public FinancialFilter.FinancialFilterBuilder quarter(FinancialPeriod quarter) {
+            this.quarter = quarter;
+            return this;
+        }
+
+        public FinancialFilter.FinancialFilterBuilder filterValType(int filterValType) {
+            this.filterValType = filterValType;
+            return this;
+        }
+
+        public FinancialFilter.FinancialFilterBuilder sortDir(int sortDir) {
+            this.sortDir = sortDir;
+            return this;
+        }
+
+        public FinancialFilter build() {
+            return new FinancialFilter(this.fieldName, this.filterMin, this.filterMax, this.isNoFilter, this.quarter, this.filterValType, this.sortDir);
+        }
+
+        @Override
+        public String toString() {
+            return "FinancialFilter.FinancialFilterBuilder(fieldName=" + this.fieldName + ", filterMin=" + this.filterMin + ", filterMax=" + this.filterMax + ", isNoFilter=" + this.isNoFilter + ", quarter=" + this.quarter + ", filterValType=" + this.filterValType + ", sortDir=" + this.sortDir + ")";
+        }
     }
 }

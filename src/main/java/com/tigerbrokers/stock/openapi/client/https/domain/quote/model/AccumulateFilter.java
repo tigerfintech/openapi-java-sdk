@@ -29,6 +29,19 @@ public class AccumulateFilter implements Serializable {
     /** SortDir 排序方向，默认不排序。仅仅 filterValType = Rank 此参数生效！ */
     private int sortDir;
 
+    public AccumulateFilter(Integer fieldName, Double filterMin, Double filterMax, boolean isNoFilter, Integer period, int filterValType, int sortDir) {
+        this.fieldName = fieldName;
+        this.filterMin = filterMin;
+        this.filterMax = filterMax;
+        this.isNoFilter = isNoFilter;
+        this.period = period;
+        this.filterValType = filterValType;
+        this.sortDir = sortDir;
+    }
+
+    public AccumulateFilter() {
+    }
+
     /**
      * 验证参数是否传递ok
      */
@@ -123,5 +136,68 @@ public class AccumulateFilter implements Serializable {
 
     public void setSortDir(int sortDir) {
         this.sortDir = sortDir;
+    }
+
+
+    public static AccumulateFilter.AccumulateFilterBuilder builder() {
+        return new AccumulateFilter.AccumulateFilterBuilder();
+    }
+
+
+    public static class AccumulateFilterBuilder {
+        private Integer fieldName;
+        private Double filterMin;
+        private Double filterMax;
+        private boolean isNoFilter;
+        private Integer period;
+        private int filterValType;
+        private int sortDir;
+
+        AccumulateFilterBuilder() {
+        }
+
+        public AccumulateFilter.AccumulateFilterBuilder fieldName(Integer fieldName) {
+            this.fieldName = fieldName;
+            return this;
+        }
+
+        public AccumulateFilter.AccumulateFilterBuilder filterMin(Double filterMin) {
+            this.filterMin = filterMin;
+            return this;
+        }
+
+        public AccumulateFilter.AccumulateFilterBuilder filterMax(Double filterMax) {
+            this.filterMax = filterMax;
+            return this;
+        }
+
+        public AccumulateFilter.AccumulateFilterBuilder isNoFilter(boolean isNoFilter) {
+            this.isNoFilter = isNoFilter;
+            return this;
+        }
+
+        public AccumulateFilter.AccumulateFilterBuilder period(Integer period) {
+            this.period = period;
+            return this;
+        }
+
+        public AccumulateFilter.AccumulateFilterBuilder filterValType(int filterValType) {
+            this.filterValType = filterValType;
+            return this;
+        }
+
+        public AccumulateFilter.AccumulateFilterBuilder sortDir(int sortDir) {
+            this.sortDir = sortDir;
+            return this;
+        }
+
+        public AccumulateFilter build() {
+            return new AccumulateFilter(this.fieldName, this.filterMin, this.filterMax, this.isNoFilter, this.period, this.filterValType, this.sortDir);
+        }
+
+        @Override
+        public String toString() {
+            return "AccumulateFilter.AccumulateFilterBuilder(fieldName=" + this.fieldName + ", filterMin=" + this.filterMin + ", filterMax=" + this.filterMax + ", isNoFilter=" + this.isNoFilter + ", period=" + this.period + ", filterValType=" + this.filterValType + ", sortDir=" + this.sortDir + ")";
+        }
     }
 }
