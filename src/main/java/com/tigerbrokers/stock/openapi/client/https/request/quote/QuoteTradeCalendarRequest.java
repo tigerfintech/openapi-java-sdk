@@ -1,11 +1,13 @@
 package com.tigerbrokers.stock.openapi.client.https.request.quote;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.TradeCalendarModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteTradeCalendarResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
+import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 
 /**
  * Description:
@@ -15,7 +17,7 @@ public class QuoteTradeCalendarRequest extends TigerCommonRequest implements Tig
 
   public QuoteTradeCalendarRequest() {
     setApiVersion(V2_0);
-    setApiMethodName(ApiServiceType.TRADING_CALENDAR);
+    setApiMethodName(MethodName.TRADING_CALENDAR);
   }
 
   /**
@@ -41,6 +43,30 @@ public class QuoteTradeCalendarRequest extends TigerCommonRequest implements Tig
     model.setMarket(market);
     model.setBeginDate(beginDate);
     model.setEndDate(endDate);
+    request.setApiModel(model);
+
+    return request;
+  }
+
+  /**
+   * Construct request parameters
+   *
+   * @param market US, HK, CN
+   * @param beginDate
+   * @param endDate
+   * @return
+   */
+  public static QuoteTradeCalendarRequest newRequest(Market market, long beginDate, long endDate) {
+    QuoteTradeCalendarRequest request = new QuoteTradeCalendarRequest();
+    TradeCalendarModel model = new TradeCalendarModel();
+    model.setMarket(market);
+    TimeZoneId zoneId = TimeZoneId.getTimeZoneIdByMarket(market);
+    if (beginDate > 0) {
+      model.setBeginDate(DateUtils.printDate(beginDate, zoneId));
+    }
+    if (endDate > 0) {
+      model.setEndDate(DateUtils.printDate(endDate, zoneId));
+    }
     request.setApiModel(model);
 
     return request;

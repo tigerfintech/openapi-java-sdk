@@ -23,7 +23,9 @@ public class StompMessageUtil {
   public static StompFrame buildConnectMessage(String login, String passcode, String version) {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.CONNECT);
     stompFrame.headers()
-        .set(StompHeaderBuilder.instance().version(version).sdkVersion().host().login(login).passcode(passcode).build());
+        .set(StompHeaderBuilder.instance().version(version).sdkVersion()
+            .id(increment.addAndGet(1))
+            .host().login(login).passcode(passcode).build());
     return stompFrame;
   }
 
@@ -45,6 +47,7 @@ public class StompMessageUtil {
         .set(StompHeaderBuilder.instance()
             .version(version)
             .sdkVersion()
+            .id(increment.addAndGet(1))
             .host()
             .login(login)
             .passcode(passcode)

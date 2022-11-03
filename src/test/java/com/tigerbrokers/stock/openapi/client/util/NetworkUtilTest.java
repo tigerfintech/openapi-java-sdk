@@ -1,10 +1,13 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
+import com.tigerbrokers.stock.openapi.client.struct.enums.BizType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
+import com.tigerbrokers.stock.openapi.client.struct.enums.License;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
 
 import io.netty.handler.ssl.SslProvider;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,7 +21,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 /**
  * @author liutongping
  * @version 1.0
- * @date 2022/3/9 下午5:15
+ * @date 2022/3/9
  */
 @RunWith(MockitoJUnitRunner.class)
 public class NetworkUtilTest {
@@ -42,7 +45,7 @@ public class NetworkUtilTest {
       // theMock.when(HttpUtils::get).thenReturn(cgplayJson);
       ClientConfig config = ClientConfig.DEFAULT_CONFIG;
 
-      // 测试生产环境
+      // prod
       config.setEnv(Env.PROD);
       config.setSubscribeProtocol(Protocol.STOMP_WEBSOCKET);
       System.out.println("\r\nenv:" + config.getEnv()
@@ -55,7 +58,7 @@ public class NetworkUtilTest {
       System.out.println(NetworkUtil.getServerAddress(null));
       Assert.assertEquals("wss://openapi.tigerfintech.com:9883", NetworkUtil.getServerAddress(null));
 
-      // SANDBOX环境
+      // SANDBOX
       config.setEnv(Env.SANDBOX);
       config.setSubscribeProtocol(Protocol.STOMP_WEBSOCKET);
       System.out.println("\r\nenv:" + config.getEnv()
@@ -68,6 +71,109 @@ public class NetworkUtilTest {
       System.out.println(NetworkUtil.getServerAddress(null));
       Assert.assertEquals("wss://openapi-sandbox.tigerfintech.com:9885", NetworkUtil.getServerAddress(null));
 
+    }
+  }
+
+  @Test
+  public void testGetServerAddress02() {
+
+    String domainConfigJson02 = "{\"ret\":0,\"serverTime\":1646652924198,\"items\":["
+        + "{\"openapi\":{\"socket_port\":9883,\"port\":9887,"
+        + "\"COMMON\":\"https://openapi.tigerfintech.com\","
+        + "\"TBSG\":\"https://openapi.tigerfintech.com/hkg\","
+        + "\"TBNZ\":\"https://openapi.tigerfintech.com/hkg\","
+        + "\"TBSG-QUOTE\":\"https://openapi.tigerfintech.com/hkg-quote\","
+        + "\"TBNZ-QUOTE\":\"https://openapi.tigerfintech.com/hkg-quote\","
+        + "\"TBSG-PAPER\":\"https://openapi-sandbox.tigerfintech.com/hkg\","
+        + "\"TBNZ-PAPER\":\"https://openapi-sandbox.tigerfintech.com/hkg\"}"
+        + ","
+        + "\"openapi-sandbox\":{\"port\":9889,\"socket_port\":9885,"
+        + "\"COMMON\":\"https://openapi-sandbox.tigerfintech.com\"}"
+        + "}]}";
+
+    try (MockedStatic<HttpUtils> theMock = Mockito.mockStatic(HttpUtils.class)) {
+      theMock.when(() -> HttpUtils.get(anyString())).thenReturn(domainConfigJson02);
+      // theMock.when(HttpUtils::get).thenReturn(cgplayJson);
+      ClientConfig config = ClientConfig.DEFAULT_CONFIG;
+
+      // prod
+      config.setEnv(Env.PROD);
+      config.setSubscribeProtocol(Protocol.STOMP_WEBSOCKET);
+      System.out.println("\r\nenv:" + config.getEnv()
+          + ", subscribeProtocal:" + config.getSubscribeProtocol());
+      System.out.println(NetworkUtil.getHttpServerAddress(null));
+      Assert.assertEquals("https://openapi.tigerfintech.com/gateway", NetworkUtil.getHttpServerAddress(null));
+      System.out.println(NetworkUtil.getServerAddress(null));
+      Assert.assertEquals("wss://openapi.tigerfintech.com:9887/stomp", NetworkUtil.getServerAddress(null));
+      config.setSubscribeProtocol(Protocol.STOMP);
+      System.out.println(NetworkUtil.getServerAddress(null));
+      Assert.assertEquals("wss://openapi.tigerfintech.com:9883", NetworkUtil.getServerAddress(null));
+
+      System.out.println("===========");
+      config.license = License.TBNZ;
+      // assert url
+      Map<BizType, String> urlMap = NetworkUtil.getHttpServerAddress(config.license, null);
+      System.out.println(urlMap.get(BizType.COMMON));
+      Assert.assertEquals("https://openapi.tigerfintech.com/gateway",
+          urlMap.get(BizType.COMMON));
+
+      System.out.println(urlMap.get(BizType.TRADE));
+      Assert.assertEquals("https://openapi.tigerfintech.com/hkg/gateway",
+          urlMap.get(BizType.TRADE));
+      System.out.println(urlMap.get(BizType.QUOTE));
+      Assert.assertEquals("https://openapi.tigerfintech.com/hkg-quote/gateway",
+          urlMap.get(BizType.QUOTE));
+      System.out.println(urlMap.get(BizType.PAPER));
+      Assert.assertEquals("https://openapi-sandbox.tigerfintech.com/hkg/gateway",
+          urlMap.get(BizType.PAPER));
+    }
+  }
+  @Test
+  public void testGetServerAddress03() {
+
+    String domainConfigJson03 = "{\"ret\":0,\"serverTime\":1646652924198,\"items\":["
+        + "{\"openapi\":{\"socket_port\":9883,\"port\":9887,"
+        + "\"COMMON\":\"https://openapi.tigerfintech.com\","
+        + "\"TBNZ\":\"https://openapi.tigerfintech.com/hkg\","
+        + "\"TBNZ-QUOTE\":\"https://openapi.tigerfintech.com/hkg-quote\","
+        + "\"TBNZ-PAPER\":\"https://openapi-sandbox.tigerfintech.com/hkg\"}"
+        + ","
+        + "\"openapi-sandbox\":{\"port\":9889,\"socket_port\":9885,"
+        + "\"COMMON\":\"https://openapi-sandbox.tigerfintech.com\"}"
+        + "}]}";
+
+    try (MockedStatic<HttpUtils> theMock = Mockito.mockStatic(HttpUtils.class)) {
+      theMock.when(() -> HttpUtils.get(anyString())).thenReturn(domainConfigJson03);
+      // theMock.when(HttpUtils::get).thenReturn(cgplayJson);
+      ClientConfig config = ClientConfig.DEFAULT_CONFIG;
+
+      // prod
+      config.setEnv(Env.PROD);
+      config.setSubscribeProtocol(Protocol.STOMP_WEBSOCKET);
+      System.out.println("\r\nenv:" + config.getEnv()
+          + ", subscribeProtocal:" + config.getSubscribeProtocol());
+      System.out.println(NetworkUtil.getHttpServerAddress(null));
+      Assert.assertEquals("https://openapi.tigerfintech.com/gateway", NetworkUtil.getHttpServerAddress(null));
+      System.out.println(NetworkUtil.getServerAddress(null));
+      Assert.assertEquals("wss://openapi.tigerfintech.com:9887/stomp", NetworkUtil.getServerAddress(null));
+      config.setSubscribeProtocol(Protocol.STOMP);
+      System.out.println(NetworkUtil.getServerAddress(null));
+      Assert.assertEquals("wss://openapi.tigerfintech.com:9883", NetworkUtil.getServerAddress(null));
+
+      System.out.println("===========");
+      config.license = License.TBSG;
+      // assert url
+      Map<BizType, String> urlMap = NetworkUtil.getHttpServerAddress(config.license, null);
+      System.out.println(urlMap.get(BizType.COMMON));
+      Assert.assertEquals("https://openapi.tigerfintech.com/gateway",
+          urlMap.get(BizType.COMMON));
+
+      System.out.println(urlMap.get(BizType.TRADE));
+      Assert.assertNull(urlMap.get(BizType.TRADE));
+      System.out.println(urlMap.get(BizType.QUOTE));
+      Assert.assertNull(urlMap.get(BizType.QUOTE));
+      System.out.println(urlMap.get(BizType.PAPER));
+      Assert.assertNull(urlMap.get(BizType.PAPER));
     }
   }
 

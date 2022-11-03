@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.https.request;
 
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 import java.time.LocalDateTime;
@@ -16,7 +17,7 @@ public class TigerCommonRequest {
 
   protected String apiVersion = TigerApiConstants.DEFAULT_VERSION;
   protected String tigerId;
-  protected String apiMethodName;
+  protected MethodName apiMethodName;
   protected String bizContent;
   protected String timestamp;
   protected ApiModel apiModel;
@@ -46,11 +47,11 @@ public class TigerCommonRequest {
     this.tigerId = tigerId;
   }
 
-  public String getApiMethodName() {
+  public MethodName getApiMethodName() {
     return apiMethodName;
   }
 
-  public void setApiMethodName(String apiMethodName) {
+  public void setApiMethodName(MethodName apiMethodName) {
     this.apiMethodName = apiMethodName;
   }
 

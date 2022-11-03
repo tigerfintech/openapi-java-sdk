@@ -32,6 +32,10 @@
 使用maven地址时，可以查看maven仓库中依赖的上传时间，尽量使用最新版本来替换掉上面依赖中的 {latestVersion} 变量。
 
 
+#### API官网
+
+https://developer.itigerup.com/
+
 #### 文档地址
 
-https://openapi.itiger.com/docs
+https://quant.itigerup.com/openapi/zh/java/overview/introduction.html

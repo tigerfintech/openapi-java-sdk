@@ -7,7 +7,8 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
 public enum TimeZoneId {
 
   Shanghai("Asia/Shanghai"),
-  NewYork("America/New_York");
+  NewYork("America/New_York"),
+  Singapore("Asia/Singapore");
 
   private String zoneId;
 
@@ -17,5 +18,19 @@ public enum TimeZoneId {
 
   public String getZoneId() {
     return zoneId;
+  }
+
+  public static TimeZoneId getTimeZoneIdByMarket(Market market) {
+    if (market == null) {
+      return Shanghai;
+    }
+    switch (market) {
+      case US:
+        return NewYork;
+      case HK:
+        return Shanghai;
+      default:
+        return Shanghai;
+    }
   }
 }

@@ -1,7 +1,10 @@
 package com.tigerbrokers.stock.openapi.client.config;
 
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
+import com.tigerbrokers.stock.openapi.client.struct.enums.License;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.builder.StompHeaderBuilder;
 import io.netty.handler.ssl.SslProvider;
@@ -27,16 +30,20 @@ public class ClientConfig {
 
   private SslProvider sslProvider = DEFAULT_SSLPROVIDER;
 
+  public License license;
+
   public String stompVersion = StompHeaderBuilder.DEFAULT_STOMP_VERSION;
 
   /**
    * http interface server url
    */
+  @Deprecated
   public String serverUrl;
 
   /**
    * socket server url
    */
+  @Deprecated
   public String socketServerUrl;
 
   /**
@@ -55,16 +62,34 @@ public class ClientConfig {
   public String privateKey = null;
 
   /**
-   * 是否初始化实例完成时，自动抢占行情权限
+   * whether to automatically grab quote permission when the initialization instance is completed
    */
   public boolean isAutoGrabPermission = true;
 
   /**
-   * institutional trader private key 机构交易员专有密钥
+   * default time zone
+   */
+  public TimeZoneId timeZone = TimeZoneId.Shanghai;
+
+  /**
+   * default language
+   */
+  public Language language = Language.en_US;
+
+  /**
+   * institutional trader private key
    */
   public String secretKey = null;
 
   private ClientConfig() {
+  }
+
+  public TimeZoneId getDefaultTimeZone() {
+    return timeZone == null ? TimeZoneId.Shanghai : timeZone;
+  }
+
+  public Language getDefaultLanguage() {
+    return language == null ? Language.en_US : language;
   }
 
   public Protocol getSubscribeProtocol() {

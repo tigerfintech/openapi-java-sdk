@@ -1,11 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.https.request.quote;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteContractModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteContractResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class QuoteContractRequest extends TigerCommonRequest implements TigerReq
 
   public QuoteContractRequest() {
     setApiVersion(V2_0);
-    setApiMethodName(ApiServiceType.QUOTE_CONTRACT);
+    setApiMethodName(MethodName.QUOTE_CONTRACT);
   }
 
   public static QuoteContractRequest newRequest(List<String> symbols) {
@@ -25,7 +26,7 @@ public class QuoteContractRequest extends TigerCommonRequest implements TigerReq
   }
 
   public static QuoteContractRequest newRequest(List<String> symbols, SecType secType) {
-    return newRequest(symbols, secType, Language.en_US);
+    return newRequest(symbols, secType, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
   }
 
   public static QuoteContractRequest newRequest(List<String> symbols, SecType secType, Language lang) {

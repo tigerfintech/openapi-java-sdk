@@ -4,13 +4,13 @@
  */
 package com.tigerbrokers.stock.openapi.client.https.request.option;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionChainFilterModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionChainModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionChainV3Model;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.option.OptionChainResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +18,7 @@ public class OptionChainQueryV3Request extends TigerCommonRequest implements Tig
 
   public OptionChainQueryV3Request() {
     setApiVersion(V3_0);
-    setApiMethodName(ApiServiceType.OPTION_CHAIN);
+    setApiMethodName(MethodName.OPTION_CHAIN);
   }
 
   public static OptionChainQueryV3Request of(OptionChainModel item, OptionChainFilterModel filter) {

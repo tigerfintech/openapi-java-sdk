@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.domain;
 
+import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import java.io.Serializable;
 
 /**
@@ -9,4 +10,18 @@ import java.io.Serializable;
 public abstract class ApiModel implements Serializable {
 
   private static final long serialVersionUID = 1L;
+
+  protected Language lang;
+
+  public Language getLang() {
+    return lang;
+  }
+
+  public void setLang(Language lang) {
+    this.lang = lang;
+  }
+
+  public String getAccount() {
+    return null;
+  }
 }

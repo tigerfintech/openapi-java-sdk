@@ -1,10 +1,10 @@
 package com.tigerbrokers.stock.openapi.client.https.request.quote;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteSymbolModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteDelayResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import java.util.List;
 
 /**
@@ -15,7 +15,7 @@ public class QuoteDelayRequest extends TigerCommonRequest implements TigerReques
 
   public QuoteDelayRequest() {
     setApiVersion(V2_0);
-    setApiMethodName(ApiServiceType.QUOTE_DELAY);
+    setApiMethodName(MethodName.QUOTE_DELAY);
   }
 
   public static QuoteDelayRequest newRequest(List<String> symbols) {

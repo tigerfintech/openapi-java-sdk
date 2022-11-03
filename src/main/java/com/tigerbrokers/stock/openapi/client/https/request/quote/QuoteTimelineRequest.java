@@ -1,12 +1,16 @@
 package com.tigerbrokers.stock.openapi.client.https.request.quote;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteTimelineModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteTimelineResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeLineType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
+import com.tigerbrokers.stock.openapi.client.util.DateUtils;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,7 +21,7 @@ public class QuoteTimelineRequest extends TigerCommonRequest implements TigerReq
 
   public QuoteTimelineRequest() {
     setApiVersion(V2_0);
-    setApiMethodName(ApiServiceType.TIMELINE);
+    setApiMethodName(MethodName.TIMELINE);
   }
 
   public static QuoteTimelineRequest newRequest(List<String> symbols) {
@@ -29,7 +33,8 @@ public class QuoteTimelineRequest extends TigerCommonRequest implements TigerReq
   }
 
   public static QuoteTimelineRequest newRequest(List<String> symbols, Long beginTime, boolean includeHourTrading) {
-    return newRequest(symbols, beginTime, includeHourTrading, TimeLineType.day, Language.en_US);
+    return newRequest(symbols, beginTime, includeHourTrading, TimeLineType.day,
+        ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
   }
 
   public static QuoteTimelineRequest newRequest(List<String> symbols, Long beginTime, boolean includeHourTrading,
@@ -43,13 +48,40 @@ public class QuoteTimelineRequest extends TigerCommonRequest implements TigerReq
 
   public static QuoteTimelineRequest newRequest(List<String> symbols, Long beginTime, boolean includeHourTrading,
       TimeLineType timeLineType) {
-    return newRequest(symbols, beginTime, includeHourTrading, timeLineType, Language.en_US);
+    return newRequest(symbols, beginTime, includeHourTrading, timeLineType,
+        ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
   }
 
   public static QuoteTimelineRequest newRequest(List<String> symbols, Long beginTime, boolean includeHourTrading,
       TimeLineType timeLineType, Language lang) {
     QuoteTimelineRequest request = new QuoteTimelineRequest();
     QuoteTimelineModel model = new QuoteTimelineModel(symbols, beginTime, includeHourTrading, timeLineType, lang);
+    request.setApiModel(model);
+    return request;
+  }
+
+  public static QuoteTimelineRequest newRequest(List<String> symbols, String beginTime,
+      TimeLineType timeLineType) {
+    return newRequest(symbols, beginTime, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone(),
+        false, timeLineType, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
+  }
+
+  public static QuoteTimelineRequest newRequest(List<String> symbols,
+      String beginTime, boolean includeHourTrading, TimeLineType timeLineType) {
+    return newRequest(symbols, beginTime, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone(),
+        includeHourTrading, timeLineType, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
+  }
+
+  public static QuoteTimelineRequest newRequest(List<String> symbols,
+      String beginTime, TimeZoneId zoneId, boolean includeHourTrading,
+      TimeLineType timeLineType, Language lang) {
+    QuoteTimelineRequest request = new QuoteTimelineRequest();
+    if (zoneId == null) {
+      zoneId = ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone();
+    }
+    Date beginDate = DateUtils.getZoneDate(beginTime, zoneId);
+    QuoteTimelineModel model = new QuoteTimelineModel(symbols, beginDate == null ? null : beginDate.getTime(),
+        includeHourTrading, timeLineType, lang);
     request.setApiModel(model);
     return request;
   }

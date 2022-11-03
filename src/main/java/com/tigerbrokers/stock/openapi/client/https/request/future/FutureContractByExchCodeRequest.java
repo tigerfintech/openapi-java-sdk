@@ -1,12 +1,13 @@
 package com.tigerbrokers.stock.openapi.client.https.request.future;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureContractByExchCodeModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.future.FutureBatchContractResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 
 /**
  * Description:
@@ -17,11 +18,11 @@ public class FutureContractByExchCodeRequest extends TigerCommonRequest
 
   public FutureContractByExchCodeRequest() {
     setApiVersion(TigerApiConstants.DEFAULT_VERSION);
-    setApiMethodName(ApiServiceType.FUTURE_CONTRACT_BY_EXCHANGE_CODE);
+    setApiMethodName(MethodName.FUTURE_CONTRACT_BY_EXCHANGE_CODE);
   }
 
   public static FutureContractByExchCodeRequest newRequest(String exchangeCode) {
-    return newRequest(exchangeCode, Language.en_US);
+    return newRequest(exchangeCode, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
   }
 
   public static FutureContractByExchCodeRequest newRequest(String exchangeCode, Language lang) {

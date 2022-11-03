@@ -1,12 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.https.request.option;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionExpirationModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.option.OptionExpirationResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import java.util.List;
 
 /**
@@ -20,7 +20,7 @@ public class OptionExpirationQueryRequest extends TigerCommonRequest implements 
 
   public OptionExpirationQueryRequest() {
     setApiVersion(TigerApiConstants.DEFAULT_VERSION);
-    setApiMethodName(ApiServiceType.OPTION_EXPIRATION);
+    setApiMethodName(MethodName.OPTION_EXPIRATION);
     setApiModel(optionExpirationModel);
   }
 

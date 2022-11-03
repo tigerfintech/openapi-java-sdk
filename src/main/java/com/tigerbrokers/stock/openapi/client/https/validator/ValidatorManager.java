@@ -29,6 +29,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteStock
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteTimelineModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteTradeTickModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.TradeCalendarModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.PrimeAnalyticsAssetModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
 import java.util.HashMap;
 import java.util.Map;
@@ -79,6 +80,8 @@ public class ValidatorManager {
     KlineRequestValidator klineRequestValidator = new KlineRequestValidator();
     validatorMap.put(QuoteKlineModel.class, klineRequestValidator);
     validatorMap.put(FutureKlineModel.class, klineRequestValidator);
+
+    validatorMap.put(PrimeAnalyticsAssetModel.class, new PrimeAnalyticsAssetRequestValidator());
 
     validatorMap.put(CorporateActionModel.class, new CorporateActionRequestValidator());
     validatorMap.put(FinancialDailyModel.class, new FinancialDailyRequestValidator());

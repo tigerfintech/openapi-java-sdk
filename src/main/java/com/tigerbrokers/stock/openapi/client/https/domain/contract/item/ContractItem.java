@@ -60,6 +60,7 @@ public class ContractItem extends ApiModel {
   /** future contract fields */
   private String type;
   private String ibCode;
+  private List<TickSizeItem> tickSizes;
 
   public Integer getContractId() {
     return contractId;
@@ -350,6 +351,15 @@ public class ContractItem extends ApiModel {
 
   public void setIbCode(String ibCode) {
     this.ibCode = ibCode;
+  }
+
+  public List<TickSizeItem> getTickSizes() {
+    return tickSizes;
+  }
+
+  public void setTickSizes(
+      List<TickSizeItem> tickSizes) {
+    this.tickSizes = tickSizes;
   }
 
   @Override
