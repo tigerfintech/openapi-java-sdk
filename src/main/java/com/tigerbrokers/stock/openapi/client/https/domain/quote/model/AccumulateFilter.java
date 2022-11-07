@@ -23,45 +23,17 @@ public class AccumulateFilter implements Serializable {
     /** 该字段是否不需要筛选，True：不筛选，False：筛选。不传默认筛选 */
     private boolean isNoFilter = false;
     /** 时间周期 AccumulatePeriod 非必传项 */
-    private Integer period;
-    /** filterMin \ filterMax 对应单位，默认为数值型  该字段为过滤字段类型，参考 FilterValType类型 */
-    private int filterValType = 0;
-    /** SortDir 排序方向，默认不排序。仅仅 filterValType = Rank 此参数生效！ */
-    private int sortDir;
+    private AccumulatePeriod period;
 
-    public AccumulateFilter(Integer fieldName, Double filterMin, Double filterMax, boolean isNoFilter, Integer period, int filterValType, int sortDir) {
+    public AccumulateFilter(Integer fieldName, Double filterMin, Double filterMax, boolean isNoFilter, AccumulatePeriod period) {
         this.fieldName = fieldName;
         this.filterMin = filterMin;
         this.filterMax = filterMax;
         this.isNoFilter = isNoFilter;
         this.period = period;
-        this.filterValType = filterValType;
-        this.sortDir = sortDir;
     }
 
     public AccumulateFilter() {
-    }
-
-    /**
-     * 验证参数是否传递ok
-     */
-    public Boolean checkParamsIsOk() {
-        // note 不进行筛选
-        if (isNoFilter) {
-            return true;
-        }
-        if (null == fieldName) {
-            return false;
-        }
-        if (FilterValType.Rank.getValue().equals(filterValType)) {
-            if (null == this.getFilterMax()
-                    || null == this.getFilterMin()
-                    || this.getFilterMin() < 0
-                    || this.getFilterMax() < 0) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -74,7 +46,7 @@ public class AccumulateFilter implements Serializable {
         if (null != this.getPeriod()) {
             retFieldName =
                     new StringBuilder().append(AccumulateField.getValueByIndex(this.getFieldName()))
-                            .append(AccumulatePeriod.getSuffixByIndex(this.getPeriod()))
+                            .append(AccumulatePeriod.getSuffixByIndex(this.getPeriod().getValue()))
                             .toString();
         } else {
             retFieldName = AccumulateField.getValueByIndex(this.getFieldName());
@@ -114,30 +86,13 @@ public class AccumulateFilter implements Serializable {
         isNoFilter = noFilter;
     }
 
-    public Integer getPeriod() {
+    public AccumulatePeriod getPeriod() {
         return period;
     }
 
-    public void setPeriod(Integer period) {
+    public void setPeriod(AccumulatePeriod period) {
         this.period = period;
     }
-
-    public int getFilterValType() {
-        return filterValType;
-    }
-
-    public void setFilterValType(int filterValType) {
-        this.filterValType = filterValType;
-    }
-
-    public int getSortDir() {
-        return sortDir;
-    }
-
-    public void setSortDir(int sortDir) {
-        this.sortDir = sortDir;
-    }
-
 
     public static AccumulateFilter.AccumulateFilterBuilder builder() {
         return new AccumulateFilter.AccumulateFilterBuilder();
@@ -149,9 +104,7 @@ public class AccumulateFilter implements Serializable {
         private Double filterMin;
         private Double filterMax;
         private boolean isNoFilter;
-        private Integer period;
-        private int filterValType;
-        private int sortDir;
+        private AccumulatePeriod period;
 
         AccumulateFilterBuilder() {
         }
@@ -176,28 +129,18 @@ public class AccumulateFilter implements Serializable {
             return this;
         }
 
-        public AccumulateFilter.AccumulateFilterBuilder period(Integer period) {
+        public AccumulateFilter.AccumulateFilterBuilder period(AccumulatePeriod period) {
             this.period = period;
             return this;
         }
 
-        public AccumulateFilter.AccumulateFilterBuilder filterValType(int filterValType) {
-            this.filterValType = filterValType;
-            return this;
-        }
-
-        public AccumulateFilter.AccumulateFilterBuilder sortDir(int sortDir) {
-            this.sortDir = sortDir;
-            return this;
-        }
-
         public AccumulateFilter build() {
-            return new AccumulateFilter(this.fieldName, this.filterMin, this.filterMax, this.isNoFilter, this.period, this.filterValType, this.sortDir);
+            return new AccumulateFilter(this.fieldName, this.filterMin, this.filterMax, this.isNoFilter, this.period);
         }
 
         @Override
         public String toString() {
-            return "AccumulateFilter.AccumulateFilterBuilder(fieldName=" + this.fieldName + ", filterMin=" + this.filterMin + ", filterMax=" + this.filterMax + ", isNoFilter=" + this.isNoFilter + ", period=" + this.period + ", filterValType=" + this.filterValType + ", sortDir=" + this.sortDir + ")";
+            return "AccumulateFilter.AccumulateFilterBuilder(fieldName=" + this.fieldName + ", filterMin=" + this.filterMin + ", filterMax=" + this.filterMax + ", isNoFilter=" + this.isNoFilter + ", period=" + this.period + ")";
         }
     }
 }
