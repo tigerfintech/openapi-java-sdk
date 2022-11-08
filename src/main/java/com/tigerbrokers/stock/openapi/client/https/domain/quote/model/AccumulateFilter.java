@@ -15,7 +15,7 @@ import java.io.Serializable;
 public class AccumulateFilter implements Serializable {
 
     /** AccumulateField 累积属性 */
-    private Integer fieldName;
+    private AccumulateField fieldName;
     /** 区间下限（闭区间），不传代表下限为 -∞ 如果为百分位数，不需要加%，例如10%，数值为10即可 */
     private Double filterMin;
     /** 区间上限（闭区间），不传代表上限为 +∞ */
@@ -25,7 +25,7 @@ public class AccumulateFilter implements Serializable {
     /** 时间周期 AccumulatePeriod 非必传项 */
     private AccumulatePeriod period;
 
-    public AccumulateFilter(Integer fieldName, Double filterMin, Double filterMax, boolean isNoFilter, AccumulatePeriod period) {
+    public AccumulateFilter(AccumulateField fieldName, Double filterMin, Double filterMax, boolean isNoFilter, AccumulatePeriod period) {
         this.fieldName = fieldName;
         this.filterMin = filterMin;
         this.filterMax = filterMax;
@@ -36,29 +36,11 @@ public class AccumulateFilter implements Serializable {
     public AccumulateFilter() {
     }
 
-    /**
-     * 获取累计属性 对应的时间周期字段，需要进行拼接 时间周期
-     * 例如：changeRate_20_days
-     * @return
-     */
-    public String getQueryFieldName() {
-        String retFieldName;
-        if (null != this.getPeriod()) {
-            retFieldName =
-                    new StringBuilder().append(AccumulateField.getValueByIndex(this.getFieldName()))
-                            .append(AccumulatePeriod.getSuffixByIndex(this.getPeriod().getValue()))
-                            .toString();
-        } else {
-            retFieldName = AccumulateField.getValueByIndex(this.getFieldName());
-        }
-        return retFieldName;
-    }
-
-    public Integer getFieldName() {
+    public AccumulateField getFieldName() {
         return fieldName;
     }
 
-    public void setFieldName(Integer fieldName) {
+    public void setFieldName(AccumulateField fieldName) {
         this.fieldName = fieldName;
     }
 
@@ -100,7 +82,7 @@ public class AccumulateFilter implements Serializable {
 
 
     public static class AccumulateFilterBuilder {
-        private Integer fieldName;
+        private AccumulateField fieldName;
         private Double filterMin;
         private Double filterMax;
         private boolean isNoFilter;
@@ -109,7 +91,7 @@ public class AccumulateFilter implements Serializable {
         AccumulateFilterBuilder() {
         }
 
-        public AccumulateFilter.AccumulateFilterBuilder fieldName(Integer fieldName) {
+        public AccumulateFilter.AccumulateFilterBuilder fieldName(AccumulateField fieldName) {
             this.fieldName = fieldName;
             return this;
         }

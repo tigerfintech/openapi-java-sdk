@@ -1,6 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.quote.model;
 
-import com.tigerbrokers.stock.openapi.client.struct.enums.FilterValType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.FinancialField;
 import com.tigerbrokers.stock.openapi.client.struct.enums.FinancialPeriod;
 
 import java.io.Serializable;
@@ -14,7 +14,7 @@ import java.io.Serializable;
 public class FinancialFilter implements Serializable {
 
     /** FinancialField 财务属性 */
-    private Integer fieldName;
+    private FinancialField fieldName;
     /** 区间下限（闭区间），不传代表下限为 -∞ 如果为百分位数，不需要加%，例如10%，数值为10即可 */
     private Double filterMin;
     /** 区间上限（闭区间），不传代表上限为 +∞ */
@@ -24,7 +24,7 @@ public class FinancialFilter implements Serializable {
     /** FinancialQuarter 财报累积时间 */
     private FinancialPeriod quarter;
 
-    public FinancialFilter(Integer fieldName, Double filterMin, Double filterMax, boolean isNoFilter, FinancialPeriod quarter) {
+    public FinancialFilter(FinancialField fieldName, Double filterMin, Double filterMax, boolean isNoFilter, FinancialPeriod quarter) {
         this.fieldName = fieldName;
         this.filterMin = filterMin;
         this.filterMax = filterMax;
@@ -35,11 +35,11 @@ public class FinancialFilter implements Serializable {
     public FinancialFilter() {
     }
 
-    public Integer getFieldName() {
+    public FinancialField getFieldName() {
         return fieldName;
     }
 
-    public void setFieldName(Integer fieldName) {
+    public void setFieldName(FinancialField fieldName) {
         this.fieldName = fieldName;
     }
 
@@ -80,7 +80,7 @@ public class FinancialFilter implements Serializable {
     }
 
     public static class FinancialFilterBuilder {
-        private Integer fieldName;
+        private FinancialField fieldName;
         private Double filterMin;
         private Double filterMax;
         private boolean isNoFilter;
@@ -89,7 +89,7 @@ public class FinancialFilter implements Serializable {
         FinancialFilterBuilder() {
         }
 
-        public FinancialFilter.FinancialFilterBuilder fieldName(Integer fieldName) {
+        public FinancialFilter.FinancialFilterBuilder fieldName(FinancialField fieldName) {
             this.fieldName = fieldName;
             return this;
         }

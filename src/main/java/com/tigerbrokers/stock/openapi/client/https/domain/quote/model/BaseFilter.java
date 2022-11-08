@@ -1,5 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.quote.model;
 
+import com.tigerbrokers.stock.openapi.client.struct.enums.StockField;
+
 import java.io.Serializable;
 
 /**
@@ -12,7 +14,7 @@ import java.io.Serializable;
 public class BaseFilter implements Serializable {
 
     /** StockField 简单属性 */
-    private Integer fieldName;
+    private StockField fieldName;
     /** 区间下限（闭区间），不传代表下限为 -∞ */
     private Double filterMin;
     /** 区间上限（闭区间），不传代表上限为 +∞ */
@@ -24,7 +26,7 @@ public class BaseFilter implements Serializable {
         return new BaseFilter.BaseFilterBuilder();
     }
 
-    public Integer getFieldName() {
+    public StockField getFieldName() {
         return this.fieldName;
     }
 
@@ -40,7 +42,7 @@ public class BaseFilter implements Serializable {
         return this.isNoFilter;
     }
 
-    public void setFieldName(Integer fieldName) {
+    public void setFieldName(StockField fieldName) {
         this.fieldName = fieldName;
     }
 
@@ -61,7 +63,7 @@ public class BaseFilter implements Serializable {
         return "BaseFilter(fieldName=" + this.getFieldName() + ", filterMin=" + this.getFilterMin() + ", filterMax=" + this.getFilterMax() + ", isNoFilter=" + this.isNoFilter() + ")";
     }
 
-    public BaseFilter(Integer fieldName, Double filterMin, Double filterMax, boolean isNoFilter) {
+    public BaseFilter(StockField fieldName, Double filterMin, Double filterMax, boolean isNoFilter) {
         this.fieldName = fieldName;
         this.filterMin = filterMin;
         this.filterMax = filterMax;
@@ -72,7 +74,7 @@ public class BaseFilter implements Serializable {
     }
 
     public static class BaseFilterBuilder {
-        private Integer fieldName;
+        private StockField fieldName;
         private Double filterMin;
         private Double filterMax;
         private boolean isNoFilter;
@@ -80,7 +82,7 @@ public class BaseFilter implements Serializable {
         BaseFilterBuilder() {
         }
 
-        public BaseFilter.BaseFilterBuilder fieldName(Integer fieldName) {
+        public BaseFilter.BaseFilterBuilder fieldName(StockField fieldName) {
             this.fieldName = fieldName;
             return this;
         }

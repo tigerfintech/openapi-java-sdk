@@ -1,5 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.quote.model;
 
+import com.tigerbrokers.stock.openapi.client.struct.enums.MultiTagField;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -11,14 +13,14 @@ import java.util.List;
  */
 public class MultiTagsRelationFilter implements Serializable {
 
-    /** 属性id 针对 XXXMultiTagField 获取数值 */
-    private Integer fieldName;
+    /** MultiTagField 获取标签枚举值 */
+    private MultiTagField fieldName;
     /** 多个tag列表 */
     private List<String> tagList;
     /** 该字段是否不需要筛选，True：不筛选，False：筛选。不传默认筛选 */
     private boolean isNoFilter = false;
 
-    public MultiTagsRelationFilter(Integer fieldName, List<String> tagList, boolean isNoFilter) {
+    public MultiTagsRelationFilter(MultiTagField fieldName, List<String> tagList, boolean isNoFilter) {
         this.fieldName = fieldName;
         this.tagList = tagList;
         this.isNoFilter = isNoFilter;
@@ -41,11 +43,11 @@ public class MultiTagsRelationFilter implements Serializable {
         return true;
     }
 
-    public Integer getFieldName() {
+    public MultiTagField getFieldName() {
         return fieldName;
     }
 
-    public void setFieldName(Integer fieldName) {
+    public void setFieldName(MultiTagField fieldName) {
         this.fieldName = fieldName;
     }
 
@@ -70,14 +72,14 @@ public class MultiTagsRelationFilter implements Serializable {
     }
 
     public static class MultiTagsRelationFilterBuilder {
-        private Integer fieldName;
+        private MultiTagField fieldName;
         private List<String> tagList;
         private boolean isNoFilter;
 
         MultiTagsRelationFilterBuilder() {
         }
 
-        public MultiTagsRelationFilter.MultiTagsRelationFilterBuilder fieldName(Integer fieldName) {
+        public MultiTagsRelationFilter.MultiTagsRelationFilterBuilder fieldName(MultiTagField fieldName) {
             this.fieldName = fieldName;
             return this;
         }
