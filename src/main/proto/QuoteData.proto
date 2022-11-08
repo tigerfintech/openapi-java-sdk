@@ -1,0 +1,49 @@
+syntax = "proto3";
+package com.tigerbrokers.stock.openapi.client.socket.data.pb;
+
+option java_package = "com.tigerbrokers.stock.openapi.client.socket.data.pb";
+option java_multiple_files = true;
+
+message QuoteData {
+  enum QuoteType {
+    Trade = 0;
+    AskBid = 1;
+  }
+  string symbol = 1;
+  // Trade/AskBid
+  QuoteType type = 2;
+  uint64 timestamp = 3;
+  uint64 serverTimestamp = 4;
+  optional double avgPrice = 5;
+  // required when type is 'Trade'
+  optional double latestPrice = 6;
+  // required when type is 'Trade'
+  optional string latestTime = 7;
+  optional double preClose = 8;
+  optional uint32 volume = 9;
+  optional double amount = 10;
+
+  // 盘前 or 盘后
+  optional string hourTradingTag = 11;
+
+  // required when symbol in HK market
+  optional double open = 12;
+  // optional double close = 13;
+  optional double high = 14;
+  optional double low = 15;
+
+  optional string marketStatus = 16;
+
+  // required when type is 'AskBid'
+  optional double askPrice = 17;
+  optional uint32 askSize = 18;
+  optional double bidPrice = 19;
+  optional uint32 bidSize = 20;
+
+  // minute data: price, average price, time, volume
+  optional double p = 21;
+  optional double a = 22;
+  optional uint64 t = 23;
+  optional uint32 v = 24;
+
+}

@@ -1,0 +1,54 @@
+syntax = "proto3";
+import public "Request.proto";
+import public "QuoteData.proto";
+import public "QuoteDepthData.proto";
+
+package com.tigerbrokers.stock.openapi.client.socket.data.pb;
+
+option java_package = "com.tigerbrokers.stock.openapi.client.socket.data.pb";
+// option java_outer_classname = "ApiMsg";
+option java_multiple_files = true;
+
+message ApiMsg {
+
+  enum Command {
+    CONNECT = 0;
+    CONNECTED = 1;
+    SEND = 2;
+    SUBSCRIBE = 3;
+    UNSUBSCRIBE = 4;
+    DISCONNECT = 5;
+    MESSAGE = 6;
+    RECEIPT = 7;
+    ERROR = 8;
+    UNKNOWN = 9;
+  }
+
+  enum Type {
+    Quote = 0;
+    Option = 1;
+    Future = 2;
+    QuoteDepth = 3;
+    TradeTick = 4;
+    Asset = 5;
+    Position = 6;
+    OrderStatus = 7;
+    Request = 8;
+  }
+
+  Command command = 1;
+  optional uint32 code = 2;
+  optional string message = 3;
+  optional uint32 id = 4;
+  optional string session = 5;
+  optional uint32 retType = 6;
+  optional Type dataType = 7;
+
+  oneof body {
+    string content = 8;
+    Request request = 9;
+    QuoteData quoteData = 10;
+    QuoteDepthData quoteDepthData = 11;
+  }
+
+}

@@ -23,7 +23,8 @@ public class StompHeaderBuilder {
   public static final String STOMP_VERSION_10 = "1.0";
   public static final String STOMP_VERSION_11 = "1.1";
   public static final String STOMP_VERSION_12 = "1.2";
-  public static final String DEFAULT_STOMP_VERSION = STOMP_VERSION_10;
+  public static final String PROTOBUF_VERSION_3 = "3";
+  public static final String DEFAULT_STOMP_VERSION = PROTOBUF_VERSION_3;
   public static final String HOST = "localhost";
   public static final String ACCOUNT = "account";
   public static final String SYMBOLS = "symbols";

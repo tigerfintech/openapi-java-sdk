@@ -32,7 +32,7 @@ public class ClientConfig {
 
   public License license;
 
-  public String stompVersion = StompHeaderBuilder.DEFAULT_STOMP_VERSION;
+  public String version = StompHeaderBuilder.DEFAULT_STOMP_VERSION;
 
   /**
    * http interface server url

@@ -1,5 +1,11 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
+import com.google.protobuf.util.JsonFormat;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.ApiMsg;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import com.tigerbrokers.stock.openapi.client.util.builder.StompHeaderBuilder;
@@ -14,19 +20,44 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Description:
- * Created by lijiawen on 2018/05/23.
+ * Created by bean on 2022/11/07.
  */
-public class StompMessageUtil {
+public class ProtoMessageUtil {
 
   private static AtomicInteger increment = new AtomicInteger(0);
 
-  public static StompFrame buildConnectMessage(String login, String passcode, String version) {
-    StompFrame stompFrame = new DefaultStompFrame(StompCommand.CONNECT);
-    stompFrame.headers()
-        .set(StompHeaderBuilder.instance().version(version).sdkVersion()
-            .id(increment.addAndGet(1))
-            .host().login(login).passcode(passcode).build());
-    return stompFrame;
+  public static String toJson(Message message) {
+    if (null == message) {
+      return null;
+    }
+    try {
+      return JsonFormat.printer().omittingInsignificantWhitespace().print(message);
+    } catch (InvalidProtocolBufferException e) {
+      //
+    }
+    return null;
+  }
+
+  /**
+   * @param login login
+   * @param passcode passcode
+   * @param version version
+   * @return StompFrame
+   */
+  public static ApiMsg buildConnectMessage(String login, String passcode, String version) {
+    ApiMsg.Builder builder = ApiMsg.newBuilder();
+    builder.setCommand(ApiMsg.Command.CONNECT);
+    builder.setDataType(ApiMsg.Type.Request);
+
+    Request.Builder reqBuild = Request.newBuilder();
+    reqBuild.setAcceptVersion(version)
+        .setSdkVersion(SdkVersionUtils.getSdkVersion())
+        .setId(increment.addAndGet(1))
+        .setLogin(login)
+        .setPasscode(passcode);
+
+    builder.setRequest(reqBuild.build());
+    return builder.build();
   }
 
   /**
@@ -37,23 +68,25 @@ public class StompMessageUtil {
    * @param receiveInterval client希望收到server心跳的间隔，0代表client不希望收到server的心跳
    * @return StompFrame
    */
-  public static StompFrame buildConnectMessage(String login, String passcode, String version, int sendInterval,
+  public static ApiMsg buildConnectMessage(String login, String passcode, String version, int sendInterval,
       int receiveInterval) {
     if (sendInterval < 0 || receiveInterval < 0) {
       throw new RuntimeException("sendInterval < 0 or receiveInterval < 0");
     }
-    StompFrame stompFrame = new DefaultStompFrame(StompCommand.CONNECT);
-    stompFrame.headers()
-        .set(StompHeaderBuilder.instance()
-            .version(version)
-            .sdkVersion()
-            .id(increment.addAndGet(1))
-            .host()
-            .login(login)
-            .passcode(passcode)
-            .heartBeat(sendInterval, receiveInterval)
-            .build());
-    return stompFrame;
+    ApiMsg.Builder builder = ApiMsg.newBuilder();
+    builder.setCommand(ApiMsg.Command.CONNECT);
+    builder.setDataType(ApiMsg.Type.Request);
+
+    Request.Builder reqBuild = Request.newBuilder();
+    reqBuild.setAcceptVersion(version)
+        .setSdkVersion(SdkVersionUtils.getSdkVersion())
+        .setId(increment.addAndGet(1))
+        .setLogin(login)
+        .setPasscode(passcode)
+        .setHeartBeat(String.format("%d,%d", sendInterval, receiveInterval));
+
+    builder.setRequest(reqBuild.build());
+    return builder.build();
   }
 
   public static StompFrame buildSendMessage(int reqType, String message) {
@@ -173,5 +206,39 @@ public class StompMessageUtil {
     StompHeaders headers = StompHeaderBuilder.instance().login(login).host().build();
     stompFrame.headers().set(headers);
     return stompFrame;
+  }
+
+  public static void main(String[] args) {
+    // TODO delete
+    QuoteData.Builder build = QuoteData.newBuilder();
+     build.setSymbol("00700");
+    //build.setSymbol(null);不能设置为null
+    // build.setAskSize(Int32Value.of(1));
+    build.setAskSize(1);
+    build.setBidSize(68);
+    QuoteData data = build.build();
+
+    test(data);
+
+    byte[] bytes = data.toByteArray();
+
+    try {
+      QuoteData data2 = QuoteData.parseFrom(bytes);
+      test(data2);
+    } catch (InvalidProtocolBufferException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public static void test(QuoteData data) {
+    System.out.println("==================");
+    System.out.println(data.getSymbol());
+    System.out.println(data.hasVolume() + "--" + data.getVolume());
+    System.out.println(data.hasAskSize() + "--" + data.getAskSize());
+    System.out.println(data.hasBidSize() + "--" + data.getBidSize());
+    System.out.println(data.hasLatestPrice() + "--" + data.getLatestPrice());
+    System.out.println(toJson(data));
+
+    //System.out.println(JsonFormat.printToString(data));
   }
 }

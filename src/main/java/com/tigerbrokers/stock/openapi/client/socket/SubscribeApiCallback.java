@@ -1,6 +1,8 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteDepthData;
 import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
 
 /**
@@ -15,7 +17,7 @@ public interface SubscribeApiCallback {
 
   void assetChange(JSONObject jsonObject);
 
-  void quoteChange(JSONObject jsonObject);
+  void quoteChange(QuoteData data);
 
   void tradeTickChange(JSONObject jsonObject);
 
@@ -23,7 +25,7 @@ public interface SubscribeApiCallback {
 
   void futureChange(JSONObject jsonObject);
 
-  void depthQuoteChange(JSONObject jsonObject);
+  void depthQuoteChange(QuoteDepthData data);
 
   void subscribeEnd(String id, String subject, JSONObject jsonObject);
 

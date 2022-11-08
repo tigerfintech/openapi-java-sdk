@@ -1,0 +1,21 @@
+syntax = "proto3";
+package com.tigerbrokers.stock.openapi.client.socket.data.pb;
+
+option java_package = "com.tigerbrokers.stock.openapi.client.socket.data.pb";
+option java_multiple_files = true;
+
+message Request {
+
+  string acceptVersion = 1;
+  string sdkVersion = 2;
+  string host = 3;
+  string login = 4;
+  string passcode = 5;
+  uint32 id = 6;
+  string subject = 7;
+  string focusKeys = 8;
+  string account = 9;
+  string heartBeat = 10;
+  string symbols = 11;
+
+}

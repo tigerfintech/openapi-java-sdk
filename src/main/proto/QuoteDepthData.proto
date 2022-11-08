@@ -1,0 +1,20 @@
+syntax = "proto3";
+package com.tigerbrokers.stock.openapi.client.socket.data.pb;
+
+option java_package = "com.tigerbrokers.stock.openapi.client.socket.data.pb";
+option java_multiple_files = true;
+
+message QuoteDepthData {
+  message OrderBook {
+    repeated double price = 1;
+    repeated uint32 volume = 2;
+    // required when symbol in HK market
+    repeated uint32 orderCount = 3;
+  }
+  string symbol = 1;
+  uint64 timestamp = 2;
+
+  OrderBook ask = 3;
+  OrderBook bid = 4;
+
+}

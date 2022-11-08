@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.socket;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.ApiMsg;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteKeyType;
@@ -12,6 +13,7 @@ import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
+import com.tigerbrokers.stock.openapi.client.util.builder.StompHeaderBuilder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -23,6 +25,10 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.protobuf.ProtobufDecoder;
+import io.netty.handler.codec.protobuf.ProtobufEncoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 import io.netty.handler.codec.stomp.StompFrame;
 import io.netty.handler.codec.stomp.StompHeaders;
 import io.netty.handler.codec.stomp.StompSubframeAggregator;
@@ -56,8 +62,8 @@ import javax.net.ssl.SSLException;
  */
 public class WebSocketClient implements SubscribeAsyncApi {
 
-  public final static String STOMP_ENCODER = "stompEncoder";
-  public final static String STOMP_DECODER = "stompDecoder";
+  public final static String SOCKET_ENCODER = "socketEncoder";
+  public final static String SOCKET_DECODER = "socketDecoder";
   private static final String[] PROTOCOLS = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"};
 
   private ClientConfig clientConfig;
@@ -132,8 +138,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
     if (this.authentication == null) {
       ApiAuthentication authentication = ApiAuthentication.build(clientConfig.tigerId, clientConfig.privateKey);
-      if (!StringUtils.isEmpty(clientConfig.stompVersion)) {
-        authentication.setVersion(clientConfig.stompVersion);
+      if (!StringUtils.isEmpty(clientConfig.version)) {
+        authentication.setVersion(clientConfig.version);
       }
       this.authentication = authentication;
     }
@@ -223,12 +229,22 @@ public class WebSocketClient implements SubscribeAsyncApi {
               p.addLast(TigerApiConstants.SSL_HANDLER_NAME,
                   sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
             }
-            final WebSocketHandler handler =
-                new WebSocketHandler(authentication, apiComposeCallback, clientSendInterval, clientReceiveInterval);
-            p.addLast(STOMP_ENCODER, new StompSubframeEncoder());
-            p.addLast(STOMP_DECODER, new StompSubframeDecoder());
-            p.addLast("aggregator", new StompSubframeAggregator(65535));
-            p.addLast("webSocketHandler", handler);
+            if (authentication.getVersion() == StompHeaderBuilder.PROTOBUF_VERSION_3) {
+              final ProtoSocketHandler handler =
+                  new ProtoSocketHandler(authentication, apiComposeCallback, clientSendInterval, clientReceiveInterval);
+              p.addLast(SOCKET_DECODER, new ProtobufVarint32FrameDecoder());
+              p.addLast(new ProtobufDecoder(ApiMsg.getDefaultInstance()));
+              p.addLast(new ProtobufVarint32LengthFieldPrepender());
+              p.addLast(SOCKET_ENCODER, new ProtobufEncoder());
+              p.addLast("webSocketHandler", handler);
+            } else {
+              final WebSocketHandler handler =
+                  new WebSocketHandler(authentication, apiComposeCallback, clientSendInterval, clientReceiveInterval);
+              p.addLast(SOCKET_ENCODER, new StompSubframeEncoder());
+              p.addLast(SOCKET_DECODER, new StompSubframeDecoder());
+              p.addLast("aggregator", new StompSubframeAggregator(65535));
+              p.addLast("webSocketHandler", handler);
+            }
           }
         });
 
