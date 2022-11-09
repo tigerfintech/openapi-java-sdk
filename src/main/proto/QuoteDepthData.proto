@@ -6,7 +6,7 @@ option java_multiple_files = true;
 
 message QuoteDepthData {
   message OrderBook {
-    repeated float price = 1;
+    repeated double price = 1;
     repeated sint64 volume = 2;
     // required when symbol in HK market
     repeated uint32 orderCount = 3;
