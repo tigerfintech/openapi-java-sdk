@@ -20,7 +20,7 @@ public class MarketScannerBatchItem extends ApiModel {
     /** 每页条数 */
     private int pageSize;
     /** 返回的股票数据列表 */
-    private List<MarketScannerItem> data;
+    private List<MarketScannerItem> items;
 
     public int getPage() {
         return page;
@@ -54,11 +54,11 @@ public class MarketScannerBatchItem extends ApiModel {
         this.pageSize = pageSize;
     }
 
-    public List<MarketScannerItem> getData() {
-        return data;
+    public List<MarketScannerItem> getItems() {
+        return items;
     }
 
-    public void setData(List<MarketScannerItem> data) {
-        this.data = data;
+    public void setItems(List<MarketScannerItem> items) {
+        this.items = items;
     }
 }
