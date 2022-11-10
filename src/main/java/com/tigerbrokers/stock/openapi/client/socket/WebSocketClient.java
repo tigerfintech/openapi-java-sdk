@@ -128,7 +128,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   public WebSocketClient clientConfig(ClientConfig clientConfig) {
     this.clientConfig = clientConfig;
-    if (StringUtils.isEmpty(clientConfig.socketServerUrl) || Env.PROD == clientConfig.getEnv()) {
+    if (StringUtils.isEmpty(clientConfig.socketServerUrl) || Env.PROD == clientConfig.getEnv()
+        /** TODO temp add test port 9007 */
+        && (clientConfig.socketServerUrl != null && !clientConfig.socketServerUrl.contains("9007"))
+    ) {
       this.url = NetworkUtil.getServerAddress(null);
     } else {
       this.url = clientConfig.socketServerUrl;
@@ -327,7 +330,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   private InetSocketAddress getNewServerAddress() {
     if (clientConfig != null && (StringUtils.isEmpty(clientConfig.socketServerUrl)
-        || Env.PROD == clientConfig.getEnv())) {
+        || Env.PROD == clientConfig.getEnv())
+        /** TODO temp add test port 9007 */
+        && (clientConfig.socketServerUrl != null && !clientConfig.socketServerUrl.contains("9007"))
+    ) {
       String newUrl = NetworkUtil.getServerAddress(this.url);
       if (!this.url.equals(newUrl)) {
         InetSocketAddress address = getSocketAddress(newUrl);
