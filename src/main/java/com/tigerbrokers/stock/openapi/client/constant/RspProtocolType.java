@@ -1,5 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.constant;
 
+import io.netty.handler.codec.stomp.StompHeaders;
+
 /**
  * Description:
  * Created by lijiawen on 2018/05/23.
@@ -7,7 +9,6 @@ package com.tigerbrokers.stock.openapi.client.constant;
 public interface RspProtocolType {
 
   String RET_HEADER = "ret-type";
-  String SUBSCRIPTION_HEADER = "subscription";
   String ID_HEADER = "id";
 
   int CONNECTION_END = -1;

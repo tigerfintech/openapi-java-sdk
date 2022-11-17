@@ -11,11 +11,10 @@ message Request {
   string host = 3;
   string login = 4;
   string passcode = 5;
-  uint32 id = 6;
-  string subject = 7;
-  string focusKeys = 8;
-  string account = 9;
-  string heartBeat = 10;
-  string symbols = 11;
+  string subject = 6;
+  string focusKeys = 7;
+  string account = 8;
+  string heartBeat = 9;
+  string symbols = 10;
 
 }

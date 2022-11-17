@@ -1,8 +1,14 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.AssetData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.OrderStatusData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.PositionData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteDepthData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteFutureData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteOptionData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.TradeTickData;
 import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
 
 /**
@@ -11,19 +17,19 @@ import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
  */
 public interface SubscribeApiCallback {
 
-  void orderStatusChange(JSONObject jsonObject);
+  void orderStatusChange(OrderStatusData data);
 
-  void positionChange(JSONObject jsonObject);
+  void positionChange(PositionData data);
 
-  void assetChange(JSONObject jsonObject);
+  void assetChange(AssetData data);
 
   void quoteChange(QuoteData data);
 
-  void tradeTickChange(JSONObject jsonObject);
+  void tradeTickChange(TradeTickData data);
 
-  void optionChange(JSONObject jsonObject);
+  void optionChange(QuoteOptionData data);
 
-  void futureChange(JSONObject jsonObject);
+  void futureChange(QuoteFutureData data);
 
   void depthQuoteChange(QuoteDepthData data);
 

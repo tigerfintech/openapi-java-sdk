@@ -2,7 +2,7 @@ package com.tigerbrokers.stock.openapi.client.util;
 
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
-import com.tigerbrokers.stock.openapi.client.util.builder.StompHeaderBuilder;
+import com.tigerbrokers.stock.openapi.client.util.builder.HeaderBuilder;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.handler.codec.stomp.DefaultStompFrame;
 import io.netty.handler.codec.stomp.StompCommand;
@@ -23,7 +23,7 @@ public class StompMessageUtil {
   public static StompFrame buildConnectMessage(String login, String passcode, String version) {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.CONNECT);
     stompFrame.headers()
-        .set(StompHeaderBuilder.instance().version(version).sdkVersion()
+        .set(HeaderBuilder.instance().version(version).sdkVersion()
             .id(increment.addAndGet(1))
             .host().login(login).passcode(passcode).build());
     return stompFrame;
@@ -44,7 +44,7 @@ public class StompMessageUtil {
     }
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.CONNECT);
     stompFrame.headers()
-        .set(StompHeaderBuilder.instance()
+        .set(HeaderBuilder.instance()
             .version(version)
             .sdkVersion()
             .id(increment.addAndGet(1))
@@ -69,7 +69,7 @@ public class StompMessageUtil {
     } else {
       stompFrame = new DefaultStompFrame(StompCommand.SEND);
     }
-    StompHeaders headers = StompHeaderBuilder.instance().id(id).host().reqType(reqType).build();
+    StompHeaders headers = HeaderBuilder.instance().id(id).host().reqType(reqType).build();
     stompFrame.headers().set(headers);
 
     return stompFrame;
@@ -85,7 +85,7 @@ public class StompMessageUtil {
     } else {
       stompFrame = new DefaultStompFrame(StompCommand.SEND);
     }
-    StompHeaders headers = StompHeaderBuilder.instance().id(id).host().build();
+    StompHeaders headers = HeaderBuilder.instance().id(id).host().build();
     stompFrame.headers().set(headers);
 
     return stompFrame;
@@ -94,7 +94,7 @@ public class StompMessageUtil {
   public static StompFrame buildSubscribeMessage(Subject subject) {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
     int id = increment.addAndGet(1);
-    StompHeaders headers = StompHeaderBuilder.instance().id(id).host().subject(subject).build();
+    StompHeaders headers = HeaderBuilder.instance().id(id).host().subject(subject).build();
     stompFrame.headers().set(headers);
     return stompFrame;
   }
@@ -102,7 +102,7 @@ public class StompMessageUtil {
   public static StompFrame buildSubscribeMessage(String account, Subject subject, Set<String> focusKeys) {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
     int id = increment.addAndGet(1);
-    StompHeaders headers = StompHeaderBuilder.instance()
+    StompHeaders headers = HeaderBuilder.instance()
         .id(id)
         .account(account)
         .host()
@@ -117,7 +117,7 @@ public class StompMessageUtil {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
     int id = increment.addAndGet(1);
     StompHeaders headers =
-        StompHeaderBuilder.instance()
+        HeaderBuilder.instance()
             .id(id)
             .host()
             .subject(subject.name())
@@ -131,7 +131,7 @@ public class StompMessageUtil {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
     int id = increment.addAndGet(1);
     StompHeaders headers =
-        StompHeaderBuilder.instance()
+        HeaderBuilder.instance()
             .id(id)
             .host()
             .subject(subject.name())
@@ -146,7 +146,7 @@ public class StompMessageUtil {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
     int id = increment.addAndGet(1);
     StompHeaders headers =
-        StompHeaderBuilder.instance().id(id).host().subject(subject).focusKeys(focusKeys).build();
+        HeaderBuilder.instance().id(id).host().subject(subject).focusKeys(focusKeys).build();
     stompFrame.headers().set(headers);
     return stompFrame;
   }
@@ -154,7 +154,7 @@ public class StompMessageUtil {
   public static StompFrame buildUnSubscribeMessage(Subject subject) {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.UNSUBSCRIBE);
     int id = increment.addAndGet(1);
-    StompHeaders headers = StompHeaderBuilder.instance().id(id).host().subject(subject).build();
+    StompHeaders headers = HeaderBuilder.instance().id(id).host().subject(subject).build();
     stompFrame.headers().set(headers);
     return stompFrame;
   }
@@ -163,14 +163,14 @@ public class StompMessageUtil {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.UNSUBSCRIBE);
     int id = increment.addAndGet(1);
     StompHeaders headers =
-        StompHeaderBuilder.instance().id(id).host().subject(subject.name()).symbols(symbols).build();
+        HeaderBuilder.instance().id(id).host().subject(subject.name()).symbols(symbols).build();
     stompFrame.headers().set(headers);
     return stompFrame;
   }
 
   public static StompFrame buildDisconnectMessage(String login) {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.DISCONNECT);
-    StompHeaders headers = StompHeaderBuilder.instance().login(login).host().build();
+    StompHeaders headers = HeaderBuilder.instance().login(login).host().build();
     stompFrame.headers().set(headers);
     return stompFrame;
   }

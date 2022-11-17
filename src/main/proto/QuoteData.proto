@@ -6,39 +6,34 @@ option java_multiple_files = true;
 
 message QuoteData {
   enum QuoteType {
-    Trade = 0;
-    AskBid = 1;
+    UNKNOWN = 0;
+    QUOTE = 1;
+    BBO = 2; // best bid and offer
   }
   string symbol = 1;
-  // Trade/AskBid
-  QuoteType type = 2;
+  QuoteType type = 2; // QUOTE/BBO
   uint64 timestamp = 3;
   uint64 serverTimestamp = 4;
   optional double avgPrice = 5;
-  // required when type is 'Trade'
-  optional double latestPrice = 6;
-  // required when type is 'Trade'
-  optional string latestTime = 7;
-  optional double preClose = 8;
-  optional sint64 volume = 9;
-  optional double amount = 10;
+  optional double latestPrice = 6; // required when type is 'QUOTE'
+  optional string latestTime = 7; // required when type is 'QUOTE'
+  optional double preClose = 8; // required when type is 'QUOTE'
+  optional sint64 volume = 9; // required when type is 'QUOTE'
+  optional double amount = 10; // required when type is 'QUOTE'
 
-  // 盘前 or 盘后
-  optional string hourTradingTag = 11;
+  optional string hourTradingTag = 11; // Pre/Post-Mkt
 
-  // required when symbol in HK market
-  optional double open = 12;
+  optional double open = 12; // required when symbol in HK market
   // optional double close = 13;
-  optional double high = 14;
-  optional double low = 15;
+  optional double high = 14; // required when symbol in HK market
+  optional double low = 15; // required when symbol in HK market
 
   optional string marketStatus = 16;
 
-  // required when type is 'AskBid'
-  optional double askPrice = 17;
-  optional sint64 askSize = 18;
-  optional double bidPrice = 19;
-  optional sint64 bidSize = 20;
+  optional double askPrice = 17; // required when type is 'BBO'
+  optional sint64 askSize = 18; // required when type is 'BBO'
+  optional double bidPrice = 19; // required when type is 'BBO'
+  optional sint64 bidSize = 20; // required when type is 'BBO'
 
   // minute data: price, average price, time, volume
   optional double p = 21;

@@ -3,12 +3,13 @@ package com.tigerbrokers.stock.openapi.client.util;
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.socket.ApiCallbackDecoder;
+import com.tigerbrokers.stock.openapi.client.socket.ApiCallbackDecoder4Stomp;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.ApiMsg;
 import com.tigerbrokers.stock.openapi.client.socket.IdleTriggerHandler;
 import com.tigerbrokers.stock.openapi.client.socket.WebSocketClient;
 import com.tigerbrokers.stock.openapi.client.socket.WebSocketHandler;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
-import com.tigerbrokers.stock.openapi.client.util.builder.StompHeaderBuilder;
+import com.tigerbrokers.stock.openapi.client.util.builder.HeaderBuilder;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.stomp.StompFrame;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -16,7 +17,6 @@ import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.VERSION;
-import static io.netty.handler.codec.http.HttpConstants.DEFAULT_CHARSET;
 import static io.netty.handler.codec.stomp.StompHeaders.HEART_BEAT;
 
 /**
@@ -29,7 +29,7 @@ public class ApiCallbackDecoderUtils {
   public final static String IDLE_STATE_HANDLER = "idleStateHandler";
   public final static String IDLE_TRIGGER_HANDLER = "idleTriggerHandler";
 
-  public static void executor(ChannelHandlerContext ctx, StompFrame frame, ApiCallbackDecoder decoder)
+  public static void executor(ChannelHandlerContext ctx, StompFrame frame, ApiCallbackDecoder4Stomp decoder)
       throws Exception {
     if (null == decoder || null == ctx) {
       return;
@@ -41,34 +41,30 @@ public class ApiCallbackDecoderUtils {
         WebSocketClient.getInstance().connectCountDown();
         if (decoder.getCallback() != null) {
           // set stomp version
-          StompHeaderBuilder.setUseStompVersion(frame.headers().getAsString(VERSION));
+          HeaderBuilder.setUseVersion(frame.headers().getAsString(VERSION));
+          String value = frame.headers().getAsString(HEART_BEAT);
           // set hearbeat time
-          if (frame.headers().contains(HEART_BEAT)) {
-            String value = frame.headers().getAsString(HEART_BEAT);
-            if (!StringUtils.isEmpty(value)) {
-              String[] arrayValue = value.split(",");
-              if (null != arrayValue && arrayValue.length >= 2) {
-                int serverSendInterval = StringUtils.isEmpty(arrayValue[0]) ? 0 : Integer.valueOf(arrayValue[0]);
-                int serverReceiveInterval = StringUtils.isEmpty(arrayValue[1]) ? 0 : Integer.valueOf(arrayValue[1]);
-                if (serverSendInterval > 0 || serverReceiveInterval > 0) {
-                  if (null == ctx.channel().pipeline().get(IDLE_STATE_HANDLER)) {
-                    serverSendInterval =
-                        serverSendInterval == 0 ? 0 : serverSendInterval + WebSocketHandler.HEART_BEAT_SPAN;
-                    serverReceiveInterval =
-                        serverReceiveInterval == 0 ? 0 : serverReceiveInterval - WebSocketHandler.HEART_BEAT_SPAN;
+          if (!StringUtils.isEmpty(value)) {
+            String[] arrayValue = value.split(",");
+            if (null != arrayValue && arrayValue.length >= 2) {
+              int serverSendInterval = StringUtils.isEmpty(arrayValue[0]) ? 0 : Integer.valueOf(arrayValue[0]);
+              int serverReceiveInterval = StringUtils.isEmpty(arrayValue[1]) ? 0 : Integer.valueOf(arrayValue[1]);
+              if (serverSendInterval > 0 || serverReceiveInterval > 0) {
+                if (null == ctx.channel().pipeline().get(IDLE_STATE_HANDLER)) {
+                  serverSendInterval =
+                      serverSendInterval == 0 ? 0 : serverSendInterval + WebSocketHandler.HEART_BEAT_SPAN;
+                  serverReceiveInterval =
+                      serverReceiveInterval == 0 ? 0 : serverReceiveInterval - WebSocketHandler.HEART_BEAT_SPAN;
 
-                    ctx.channel().pipeline().addBefore(WebSocketClient.SOCKET_ENCODER, IDLE_STATE_HANDLER,
-                        new IdleStateHandler(serverSendInterval, serverReceiveInterval, 0, TimeUnit.MILLISECONDS));
+                  ctx.channel().pipeline().addBefore(WebSocketClient.SOCKET_ENCODER, IDLE_STATE_HANDLER,
+                      new IdleStateHandler(serverSendInterval, serverReceiveInterval, 0, TimeUnit.MILLISECONDS));
 
-                    ctx.channel()
-                        .pipeline()
-                        .addAfter(IDLE_STATE_HANDLER, IDLE_TRIGGER_HANDLER, new IdleTriggerHandler(decoder));
-                  }
+                  ctx.channel()
+                      .pipeline()
+                      .addAfter(IDLE_STATE_HANDLER, IDLE_TRIGGER_HANDLER, new IdleTriggerHandler(decoder));
                 }
-                decoder.getCallback().connectionAck(serverSendInterval, serverReceiveInterval);
-              } else {
-                decoder.getCallback().connectionAck();
               }
+              decoder.getCallback().connectionAck(serverSendInterval, serverReceiveInterval);
             } else {
               decoder.getCallback().connectionAck();
             }
@@ -78,8 +74,7 @@ public class ApiCallbackDecoderUtils {
         }
         break;
       case MESSAGE:
-        // decoder.handle(frame);
-        ApiLogger.info("message:" + frame.content().toString(DEFAULT_CHARSET));
+        decoder.handle(frame);
         break;
       case RECEIPT:
         break;
@@ -133,38 +128,33 @@ public class ApiCallbackDecoderUtils {
       case CONNECTED:
         ApiLogger.info("connect token validation success:{}", ProtoMessageUtil.toJson(msg));
         WebSocketClient.getInstance().connectCountDown();
-        if (decoder.getCallback() != null) {
-          String content = msg.getContent();
-          //// set stomp version
-          //StompHeaderBuilder.setUseStompVersion(frame.headers().getAsString(VERSION));
+        if (decoder.getCallback() != null && !StringUtils.isEmpty(msg.getContent())) {
+          JSONObject jsonObject = JSONObject.parseObject(msg.getContent());
+          // set version
+          HeaderBuilder.setUseVersion(jsonObject.getString(VERSION));
           // set hearbeat time
-          if (!StringUtils.isEmpty(content) && content.contains(TigerApiConstants.HEART_BEAT)) {
-            JSONObject jsonObject = JSONObject.parseObject(content);
-            String value = jsonObject.getString(TigerApiConstants.HEART_BEAT);
-            if (!StringUtils.isEmpty(value)) {
-              String[] arrayValue = value.split(",");
-              if (null != arrayValue && arrayValue.length >= 2) {
-                int serverSendInterval = StringUtils.isEmpty(arrayValue[0]) ? 0 : Integer.valueOf(arrayValue[0]);
-                int serverReceiveInterval = StringUtils.isEmpty(arrayValue[1]) ? 0 : Integer.valueOf(arrayValue[1]);
-                if (serverSendInterval > 0 || serverReceiveInterval > 0) {
-                  if (null == ctx.channel().pipeline().get(IDLE_STATE_HANDLER)) {
-                    serverSendInterval =
-                        serverSendInterval == 0 ? 0 : serverSendInterval + WebSocketHandler.HEART_BEAT_SPAN;
-                    serverReceiveInterval =
-                        serverReceiveInterval == 0 ? 0 : serverReceiveInterval - WebSocketHandler.HEART_BEAT_SPAN;
+          String value = jsonObject.getString(TigerApiConstants.HEART_BEAT);
+          if (!StringUtils.isEmpty(value)) {
+            String[] arrayValue = value.split(",");
+            if (null != arrayValue && arrayValue.length >= 2) {
+              int serverSendInterval = StringUtils.isEmpty(arrayValue[0]) ? 0 : Integer.valueOf(arrayValue[0]);
+              int serverReceiveInterval = StringUtils.isEmpty(arrayValue[1]) ? 0 : Integer.valueOf(arrayValue[1]);
+              if (serverSendInterval > 0 || serverReceiveInterval > 0) {
+                if (null == ctx.channel().pipeline().get(IDLE_STATE_HANDLER)) {
+                  serverSendInterval =
+                      serverSendInterval == 0 ? 0 : serverSendInterval + WebSocketHandler.HEART_BEAT_SPAN;
+                  serverReceiveInterval =
+                      serverReceiveInterval == 0 ? 0 : serverReceiveInterval - WebSocketHandler.HEART_BEAT_SPAN;
 
-                    ctx.channel().pipeline().addBefore(WebSocketClient.SOCKET_ENCODER, IDLE_STATE_HANDLER,
-                        new IdleStateHandler(serverSendInterval, serverReceiveInterval, 0, TimeUnit.MILLISECONDS));
+                  ctx.channel().pipeline().addBefore(WebSocketClient.SOCKET_ENCODER, IDLE_STATE_HANDLER,
+                      new IdleStateHandler(serverSendInterval, serverReceiveInterval, 0, TimeUnit.MILLISECONDS));
 
-                    ctx.channel()
-                        .pipeline()
-                        .addAfter(IDLE_STATE_HANDLER, IDLE_TRIGGER_HANDLER, new IdleTriggerHandler(decoder));
-                  }
+                  ctx.channel()
+                      .pipeline()
+                      .addAfter(IDLE_STATE_HANDLER, IDLE_TRIGGER_HANDLER, new IdleTriggerHandler(decoder));
                 }
-                decoder.getCallback().connectionAck(serverSendInterval, serverReceiveInterval);
-              } else {
-                decoder.getCallback().connectionAck();
               }
+              decoder.getCallback().connectionAck(serverSendInterval, serverReceiveInterval);
             } else {
               decoder.getCallback().connectionAck();
             }

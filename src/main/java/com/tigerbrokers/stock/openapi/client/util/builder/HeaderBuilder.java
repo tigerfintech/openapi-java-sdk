@@ -4,19 +4,21 @@ import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import com.tigerbrokers.stock.openapi.client.util.SdkVersionUtils;
+import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import io.netty.handler.codec.stomp.DefaultStompHeaders;
 import io.netty.handler.codec.stomp.StompHeaders;
 import io.netty.util.AsciiString;
 import java.util.Collection;
 import java.util.Set;
 
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SEPARATOR;
 import static io.netty.handler.codec.stomp.StompHeaders.HEART_BEAT;
 
 /**
  * Description:
  * Created by lijiawen on 2018/05/23.
  */
-public class StompHeaderBuilder {
+public class HeaderBuilder {
 
   public static final String REQ_TYPE = ReqProtocolType.REQ_HEADER;
   public static final String FOCUS_KEYS = "keys";
@@ -24,99 +26,117 @@ public class StompHeaderBuilder {
   public static final String STOMP_VERSION_11 = "1.1";
   public static final String STOMP_VERSION_12 = "1.2";
   public static final String PROTOBUF_VERSION_3 = "3";
-  public static final String DEFAULT_STOMP_VERSION = PROTOBUF_VERSION_3;
+  public static final String DEFAULT_VERSION = PROTOBUF_VERSION_3;
   public static final String HOST = "localhost";
   public static final String ACCOUNT = "account";
   public static final String SYMBOLS = "symbols";
   private static AsciiString SDK_VERSION_HEADER = AsciiString.cached(TigerApiConstants.SDK_VERSION);
 
-  private static String USE_STOMP_VERSION = STOMP_VERSION_10;
+  private static String USE_VERSION = PROTOBUF_VERSION_3;
   private StompHeaders stompHeaders;
 
-  private StompHeaderBuilder() {
+  private HeaderBuilder() {
     stompHeaders = new DefaultStompHeaders();
   }
 
-  public static StompHeaderBuilder instance() {
-    return new StompHeaderBuilder();
+  public static HeaderBuilder instance() {
+    return new HeaderBuilder();
   }
 
-  public static String getUseStompVersion() {
-    return USE_STOMP_VERSION;
+  public static String getUseVersion() {
+    return USE_VERSION;
   }
 
-  public static void setUseStompVersion(String stompVersion) {
-    if (STOMP_VERSION_12.equals(stompVersion)
-        || STOMP_VERSION_11.equals(stompVersion)
-        || STOMP_VERSION_10.equals(stompVersion)) {
-      USE_STOMP_VERSION = stompVersion;
+  public static void setUseVersion(String version) {
+    if (PROTOBUF_VERSION_3.equals(version)
+        || STOMP_VERSION_12.equals(version)
+        || STOMP_VERSION_11.equals(version)
+        || STOMP_VERSION_10.equals(version)) {
+      USE_VERSION = version;
     }
   }
 
-  public StompHeaderBuilder version(String version) {
+  public static boolean isUseProtobuf() {
+    return isUseProtobuf(USE_VERSION);
+  }
+
+  public static boolean isUseProtobuf(String acceptVersion) {
+    if (StringUtils.isEmpty(acceptVersion)) {
+      return PROTOBUF_VERSION_3.equals(DEFAULT_VERSION);
+    }
+    String[] versions = acceptVersion.split(SEPARATOR);
+    for (String item : versions) {
+      if (PROTOBUF_VERSION_3.equals(item)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public HeaderBuilder version(String version) {
     this.stompHeaders.set(StompHeaders.ACCEPT_VERSION, version);
     return this;
   }
 
-  public StompHeaderBuilder sdkVersion() {
+  public HeaderBuilder sdkVersion() {
     this.stompHeaders.set(SDK_VERSION_HEADER, SdkVersionUtils.getSdkVersion());
     return this;
   }
 
-  public StompHeaderBuilder host() {
+  public HeaderBuilder host() {
     this.stompHeaders.set(StompHeaders.HOST, HOST);
     return this;
   }
 
-  public StompHeaderBuilder login(String login) {
+  public HeaderBuilder login(String login) {
     this.stompHeaders.set(StompHeaders.LOGIN, login);
     return this;
   }
 
-  public StompHeaderBuilder passcode(String passcode) {
+  public HeaderBuilder passcode(String passcode) {
     this.stompHeaders.set(StompHeaders.PASSCODE, passcode);
     return this;
   }
 
-  public StompHeaderBuilder id(int id) {
+  public HeaderBuilder id(int id) {
     this.stompHeaders.set(StompHeaders.ID, String.valueOf(id));
     return this;
   }
 
-  public StompHeaderBuilder reqType(int reqType) {
+  public HeaderBuilder reqType(int reqType) {
     this.stompHeaders.set(REQ_TYPE, String.valueOf(reqType));
     return this;
   }
 
-  public StompHeaderBuilder subject(Subject subject) {
+  public HeaderBuilder subject(Subject subject) {
     this.stompHeaders.set(StompHeaders.SUBSCRIPTION, subject.name());
     return this;
   }
 
-  public StompHeaderBuilder subject(String subject) {
+  public HeaderBuilder subject(String subject) {
     this.stompHeaders.set(StompHeaders.SUBSCRIPTION, subject);
     return this;
   }
 
-  public StompHeaderBuilder focusKeys(Set<String> focusKeys) {
+  public HeaderBuilder focusKeys(Set<String> focusKeys) {
     if (focusKeys != null) {
       this.stompHeaders.set(FOCUS_KEYS, join(focusKeys));
     }
     return this;
   }
 
-  public StompHeaderBuilder account(String account) {
+  public HeaderBuilder account(String account) {
     this.stompHeaders.set(ACCOUNT, account);
     return this;
   }
 
-  public StompHeaderBuilder heartBeat(int cx, int cy) {
+  public HeaderBuilder heartBeat(int cx, int cy) {
     String value = String.format("%d,%d", cx, cy);
     this.stompHeaders.set(HEART_BEAT, value);
     return this;
   }
 
-  public String join(Collection<String> collection) {
+  public static String join(Collection<String> collection) {
     StringBuilder builder = new StringBuilder();
     boolean isFirst = true;
     for (String symbol : collection) {
@@ -131,7 +151,7 @@ public class StompHeaderBuilder {
     return builder.toString();
   }
 
-  public StompHeaderBuilder symbols(Set<String> symbols) {
+  public HeaderBuilder symbols(Set<String> symbols) {
     this.stompHeaders.set(SYMBOLS, join(symbols));
     return this;
   }

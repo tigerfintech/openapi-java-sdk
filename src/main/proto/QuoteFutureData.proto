@@ -1,0 +1,9 @@
+syntax = "proto3";
+package com.tigerbrokers.stock.openapi.client.socket.data.pb;
+
+option java_package = "com.tigerbrokers.stock.openapi.client.socket.data.pb";
+option java_multiple_files = true;
+
+message QuoteFutureData {
+  string symbol = 1;
+}

@@ -6,14 +6,16 @@ import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.ApiMsg;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteKeyType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
+import com.tigerbrokers.stock.openapi.client.util.ProtoMessageUtil;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
-import com.tigerbrokers.stock.openapi.client.util.builder.StompHeaderBuilder;
+import com.tigerbrokers.stock.openapi.client.util.builder.HeaderBuilder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -151,20 +153,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
     return this;
   }
 
-  /** please use clientConfig() method */
-  @Deprecated
-  public WebSocketClient url(String url) {
-    this.url = url;
-    return this;
-  }
-
-  /** please use clientConfig() method */
-  @Deprecated
-  public WebSocketClient authentication(final ApiAuthentication authentication) {
-    this.authentication = authentication;
-    return this;
-  }
-
   public WebSocketClient apiComposeCallback(final ApiComposeCallback apiComposeCallback) {
     this.apiComposeCallback = apiComposeCallback;
     return this;
@@ -195,6 +183,13 @@ public class WebSocketClient implements SubscribeAsyncApi {
     if (this.apiComposeCallback == null) {
       throw new IllegalArgumentException("apiComposeCallback is missing.");
     }
+    boolean protobuf = HeaderBuilder.isUseProtobuf(authentication.getVersion());
+    boolean isStompCallbackInstance = apiComposeCallback instanceof ApiComposeCallback4Stomp;
+    if (protobuf && isStompCallbackInstance) {
+      throw new IllegalArgumentException("please use ApiComposeCallback's instance.");
+    } else if (!protobuf && !isStompCallbackInstance) {
+      throw new IllegalArgumentException("please use ApiComposeCallback4Stomp's instance.");
+    }
     if (connectCountDown.getCount() == 0) {
       connectCountDown = new CountDownLatch(1);
     }
@@ -206,7 +201,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
     group = new NioEventLoopGroup(1);
     bootstrap = new Bootstrap();
-    if (!isStompBaseWebSocket()) {
+    if (!Protocol.isWebSocketUrl(url)) {
       SslProvider provider = this.sslProvider == null ? SslProvider.OPENSSL : this.sslProvider;
       final String[] protocols = NetworkUtil.getSupportedProtocolsSet(PROTOCOLS, provider);
       if (protocols == null || protocols.length == 0) {
@@ -230,11 +225,11 @@ public class WebSocketClient implements SubscribeAsyncApi {
             if (address == null) {
               throw new RuntimeException("get connect address error.");
             }
-            if (!isStompBaseWebSocket()) {
+            if (!Protocol.isWebSocketUrl(url)) {
               p.addLast(TigerApiConstants.SSL_HANDLER_NAME,
                   sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
             }
-            if (authentication.getVersion() == StompHeaderBuilder.PROTOBUF_VERSION_3) {
+            if (HeaderBuilder.isUseProtobuf(authentication.getVersion())) {
               final ProtoSocketHandler handler =
                   new ProtoSocketHandler(authentication, apiComposeCallback, clientSendInterval, clientReceiveInterval);
               p.addLast(SOCKET_DECODER, new ProtobufVarint32FrameDecoder());
@@ -254,10 +249,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
         });
 
     isInitial = true;
-  }
-
-  private boolean isStompBaseWebSocket() {
-    return this.url.contains("/stomp");
   }
 
   public void connectCountDown() {
@@ -396,7 +387,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   public void closeConnect(boolean sendDisconnectCommand) {
     destroyConnectCommand();
     if (sendDisconnectCommand) {
-      sendDisconnectFrame();
+      sendDisconnectData();
     }
     try {
       if (channel != null) {
@@ -416,18 +407,23 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
   }
 
-  private synchronized void sendDisconnectFrame() {
+  private synchronized void sendDisconnectData() {
     if (!isConnected()) {
       notConnect();
       return;
     }
-    StompFrame disconnectFrame = StompMessageUtil.buildDisconnectMessage(authentication.getTigerId());
-    ChannelFuture channelFuture = channel.writeAndFlush(disconnectFrame);
+    Object disconnectData;
+    if (HeaderBuilder.isUseProtobuf()) {
+      disconnectData = ProtoMessageUtil.buildDisconnectMessage(authentication.getTigerId());
+    } else {
+      disconnectData = StompMessageUtil.buildDisconnectMessage(authentication.getTigerId());
+    }
+    ChannelFuture channelFuture = channel.writeAndFlush(disconnectData);
     try {
       channelFuture.sync();
-      ApiLogger.info("sendDisconnectFrame finished, tiger id:{}", authentication.getTigerId());
+      ApiLogger.info("sendDisconnect finished, tiger id:{}", authentication.getTigerId());
     } catch (InterruptedException e) {
-      ApiLogger.error("sendDisconnectFrame error, tiger id:{}", authentication.getTigerId(), e);
+      ApiLogger.error("sendDisconnect error, tiger id:{}", authentication.getTigerId(), e);
     }
   }
 

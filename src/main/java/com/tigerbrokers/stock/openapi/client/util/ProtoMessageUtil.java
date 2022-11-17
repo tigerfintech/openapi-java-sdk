@@ -1,20 +1,16 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
+import com.google.common.collect.Sets;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
+import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.ApiMsg;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
-import com.tigerbrokers.stock.openapi.client.util.builder.StompHeaderBuilder;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.handler.codec.stomp.DefaultStompFrame;
-import io.netty.handler.codec.stomp.StompCommand;
-import io.netty.handler.codec.stomp.StompFrame;
-import io.netty.handler.codec.stomp.StompHeaders;
-import java.nio.charset.Charset;
+import com.tigerbrokers.stock.openapi.client.util.builder.HeaderBuilder;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -46,13 +42,12 @@ public class ProtoMessageUtil {
    */
   public static ApiMsg buildConnectMessage(String login, String passcode, String version) {
     ApiMsg.Builder builder = ApiMsg.newBuilder();
-    builder.setCommand(ApiMsg.Command.CONNECT);
+    builder.setCommand(ApiMsg.Command.CONNECT).setId(increment.addAndGet(1));
     builder.setDataType(ApiMsg.Type.Request);
 
     Request.Builder reqBuild = Request.newBuilder();
     reqBuild.setAcceptVersion(version)
         .setSdkVersion(SdkVersionUtils.getSdkVersion())
-        .setId(increment.addAndGet(1))
         .setLogin(login)
         .setPasscode(passcode);
 
@@ -68,19 +63,18 @@ public class ProtoMessageUtil {
    * @param receiveInterval client希望收到server心跳的间隔，0代表client不希望收到server的心跳
    * @return StompFrame
    */
-  public static ApiMsg buildConnectMessage(String login, String passcode, String version, int sendInterval,
-      int receiveInterval) {
+  public static ApiMsg buildConnectMessage(String login, String passcode, String version,
+      int sendInterval, int receiveInterval) {
     if (sendInterval < 0 || receiveInterval < 0) {
       throw new RuntimeException("sendInterval < 0 or receiveInterval < 0");
     }
     ApiMsg.Builder builder = ApiMsg.newBuilder();
-    builder.setCommand(ApiMsg.Command.CONNECT);
+    builder.setCommand(ApiMsg.Command.CONNECT).setId(increment.addAndGet(1));
     builder.setDataType(ApiMsg.Type.Request);
 
     Request.Builder reqBuild = Request.newBuilder();
     reqBuild.setAcceptVersion(version)
         .setSdkVersion(SdkVersionUtils.getSdkVersion())
-        .setId(increment.addAndGet(1))
         .setLogin(login)
         .setPasscode(passcode)
         .setHeartBeat(String.format("%d,%d", sendInterval, receiveInterval));
@@ -89,126 +83,193 @@ public class ProtoMessageUtil {
     return builder.build();
   }
 
-  public static StompFrame buildSendMessage(int reqType, String message) {
+  public static ApiMsg buildSendMessage(int reqType, String message) {
     if (reqType <= 0) {
       throw new RuntimeException("reqType不能为空");
     }
-    StompFrame stompFrame;
-    int id = increment.addAndGet(1);
+    ApiMsg.Builder builder = ApiMsg.newBuilder();
+    builder.setCommand(ApiMsg.Command.SEND)
+        .setId(increment.addAndGet(1))
+        .setRetType(reqType);
     if (message != null) {
-      stompFrame =
-          new DefaultStompFrame(StompCommand.SEND, ByteBufAllocator.DEFAULT.buffer().writeBytes(
-              message.getBytes(Charset.defaultCharset())));
-    } else {
-      stompFrame = new DefaultStompFrame(StompCommand.SEND);
+      builder.setMessage(message);
     }
-    StompHeaders headers = StompHeaderBuilder.instance().id(id).host().reqType(reqType).build();
-    stompFrame.headers().set(headers);
 
-    return stompFrame;
+    return builder.build();
   }
 
-  public static StompFrame buildCommonSendMessage(String message) {
-    StompFrame stompFrame;
-    int id = increment.addAndGet(1);
+  public static ApiMsg buildCommonSendMessage(String message) {
+    ApiMsg.Builder builder = ApiMsg.newBuilder();
+    builder.setCommand(ApiMsg.Command.SEND)
+        .setId(increment.addAndGet(1));
     if (message != null) {
-      stompFrame =
-          new DefaultStompFrame(StompCommand.SEND, ByteBufAllocator.DEFAULT.buffer().writeBytes(
-              message.getBytes(Charset.defaultCharset())));
-    } else {
-      stompFrame = new DefaultStompFrame(StompCommand.SEND);
+      builder.setMessage(message);
     }
-    StompHeaders headers = StompHeaderBuilder.instance().id(id).host().build();
-    stompFrame.headers().set(headers);
 
-    return stompFrame;
+    return builder.build();
   }
 
-  public static StompFrame buildSubscribeMessage(Subject subject) {
-    StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
-    int id = increment.addAndGet(1);
-    StompHeaders headers = StompHeaderBuilder.instance().id(id).host().subject(subject).build();
-    stompFrame.headers().set(headers);
-    return stompFrame;
+  public static ApiMsg buildSubscribeMessage(Subject subject) {
+    ApiMsg.Builder builder = ApiMsg.newBuilder();
+    builder.setCommand(ApiMsg.Command.SUBSCRIBE)
+        .setId(increment.addAndGet(1))
+        .setDataType(ApiMsg.Type.Request);
+
+    Request.Builder reqBuild = Request.newBuilder();
+    reqBuild.setSubject(subject.name());
+
+    builder.setRequest(reqBuild.build());
+    return builder.build();
   }
 
-  public static StompFrame buildSubscribeMessage(String account, Subject subject, Set<String> focusKeys) {
-    StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
-    int id = increment.addAndGet(1);
-    StompHeaders headers = StompHeaderBuilder.instance()
-        .id(id)
-        .account(account)
-        .host()
-        .subject(subject)
-        .focusKeys(focusKeys)
-        .build();
-    stompFrame.headers().set(headers);
-    return stompFrame;
+  public static ApiMsg buildSubscribeMessage(String account, Subject subject, Set<String> focusKeys) {
+    ApiMsg.Builder builder = ApiMsg.newBuilder();
+    builder.setCommand(ApiMsg.Command.SUBSCRIBE)
+        .setId(increment.addAndGet(1))
+        .setDataType(ApiMsg.Type.Request);
+
+    Request.Builder reqBuild = Request.newBuilder();
+    reqBuild.setSubject(subject.name());
+    if (account != null) {
+      reqBuild.setAccount(account);
+    }
+    if (focusKeys != null && !focusKeys.isEmpty()) {
+      reqBuild.setFocusKeys(HeaderBuilder.join(focusKeys));
+    }
+
+    builder.setRequest(reqBuild.build());
+    return builder.build();
   }
 
-  public static StompFrame buildSubscribeMessage(Set<String> symbols, QuoteSubject subject) {
-    StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
-    int id = increment.addAndGet(1);
-    StompHeaders headers =
-        StompHeaderBuilder.instance()
-            .id(id)
-            .host()
-            .subject(subject.name())
-            .symbols(symbols)
-            .build();
-    stompFrame.headers().set(headers);
-    return stompFrame;
+  public static ApiMsg buildSubscribeMessage(Set<String> symbols, QuoteSubject subject) {
+    ApiMsg.Builder builder = ApiMsg.newBuilder();
+    builder.setCommand(ApiMsg.Command.SUBSCRIBE)
+        .setId(increment.addAndGet(1))
+        .setDataType(ApiMsg.Type.Request);
+
+    Request.Builder reqBuild = Request.newBuilder();
+    reqBuild.setSubject(subject.name())
+        .setSymbols(HeaderBuilder.join(symbols));
+
+    builder.setRequest(reqBuild.build());
+    return builder.build();
   }
 
-  public static StompFrame buildSubscribeMessage(Set<String> symbols, QuoteSubject subject, Set<String> focusKeys) {
-    StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
-    int id = increment.addAndGet(1);
-    StompHeaders headers =
-        StompHeaderBuilder.instance()
-            .id(id)
-            .host()
-            .subject(subject.name())
-            .symbols(symbols)
-            .focusKeys(focusKeys)
-            .build();
-    stompFrame.headers().set(headers);
-    return stompFrame;
+  public static ApiMsg buildSubscribeMessage(Set<String> symbols, QuoteSubject subject, Set<String> focusKeys) {
+    ApiMsg.Builder builder = ApiMsg.newBuilder();
+    builder.setCommand(ApiMsg.Command.SUBSCRIBE)
+        .setId(increment.addAndGet(1))
+        .setDataType(ApiMsg.Type.Request);
+
+    Request.Builder reqBuild = Request.newBuilder();
+    reqBuild.setSubject(subject.name())
+        .setSymbols(HeaderBuilder.join(symbols));
+    if (focusKeys != null && !focusKeys.isEmpty()) {
+      reqBuild.setFocusKeys(HeaderBuilder.join(focusKeys));
+    }
+
+    builder.setRequest(reqBuild.build());
+    return builder.build();
   }
 
-  public static StompFrame buildSubscribeMessage(Subject subject, Set<String> focusKeys) {
-    StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
-    int id = increment.addAndGet(1);
-    StompHeaders headers =
-        StompHeaderBuilder.instance().id(id).host().subject(subject).focusKeys(focusKeys).build();
-    stompFrame.headers().set(headers);
-    return stompFrame;
+  public static ApiMsg buildSubscribeMessage(Subject subject, Set<String> focusKeys) {
+    ApiMsg.Builder builder = ApiMsg.newBuilder();
+    builder.setCommand(ApiMsg.Command.SUBSCRIBE)
+        .setId(increment.addAndGet(1))
+        .setDataType(ApiMsg.Type.Request);
+
+    Request.Builder reqBuild = Request.newBuilder();
+    reqBuild.setSubject(subject.name());
+    if (focusKeys != null && !focusKeys.isEmpty()) {
+      reqBuild.setFocusKeys(HeaderBuilder.join(focusKeys));
+    }
+
+    builder.setRequest(reqBuild.build());
+    return builder.build();
   }
 
-  public static StompFrame buildUnSubscribeMessage(Subject subject) {
-    StompFrame stompFrame = new DefaultStompFrame(StompCommand.UNSUBSCRIBE);
-    int id = increment.addAndGet(1);
-    StompHeaders headers = StompHeaderBuilder.instance().id(id).host().subject(subject).build();
-    stompFrame.headers().set(headers);
-    return stompFrame;
+  public static ApiMsg buildUnSubscribeMessage(Subject subject) {
+    ApiMsg.Builder builder = ApiMsg.newBuilder();
+    builder.setCommand(ApiMsg.Command.UNSUBSCRIBE)
+        .setId(increment.addAndGet(1))
+        .setDataType(ApiMsg.Type.Request);
+
+    Request.Builder reqBuild = Request.newBuilder();
+    reqBuild.setSubject(subject.name());
+
+    builder.setRequest(reqBuild.build());
+    return builder.build();
   }
 
-  public static StompFrame buildUnSubscribeMessage(Set<String> symbols, QuoteSubject subject) {
-    StompFrame stompFrame = new DefaultStompFrame(StompCommand.UNSUBSCRIBE);
-    int id = increment.addAndGet(1);
-    StompHeaders headers =
-        StompHeaderBuilder.instance().id(id).host().subject(subject.name()).symbols(symbols).build();
-    stompFrame.headers().set(headers);
-    return stompFrame;
+  public static ApiMsg buildUnSubscribeMessage(Set<String> symbols, QuoteSubject subject) {
+    ApiMsg.Builder builder = ApiMsg.newBuilder();
+    builder.setCommand(ApiMsg.Command.UNSUBSCRIBE)
+        .setId(increment.addAndGet(1))
+        .setDataType(ApiMsg.Type.Request);
+
+    Request.Builder reqBuild = Request.newBuilder();
+    reqBuild.setSubject(subject.name())
+        .setSymbols(HeaderBuilder.join(symbols));
+
+    builder.setRequest(reqBuild.build());
+    return builder.build();
   }
 
-  public static StompFrame buildDisconnectMessage(String login) {
-    StompFrame stompFrame = new DefaultStompFrame(StompCommand.DISCONNECT);
-    StompHeaders headers = StompHeaderBuilder.instance().login(login).host().build();
-    stompFrame.headers().set(headers);
-    return stompFrame;
+  public static ApiMsg buildDisconnectMessage(String login) {
+    ApiMsg.Builder builder = ApiMsg.newBuilder();
+    builder.setCommand(ApiMsg.Command.DISCONNECT).setId(increment.addAndGet(1));
+    builder.setDataType(ApiMsg.Type.Request);
+
+    Request.Builder reqBuild = Request.newBuilder();
+    reqBuild.setLogin(login);
+
+    builder.setRequest(reqBuild.build());
+    return builder.build();
   }
 
+  ///==============TODO delete
   public static void main(String[] args) {
+    //testBuildDisconnectMessage();
+    //testDataParse();
+
+    testSendMsg();
+    testSubscribeAccountMessage();
+    testUnSubscribeAccountMessage();
+    testSubscribeQuoteMessage();
+    testUnSubscribeQuoteMessage();
+
+  }
+
+  public static void testUnSubscribeQuoteMessage() {
+    System.out.println("======UnSubscribeQuoteMessage");
+    Set<String> symbols = Sets.newHashSet("00700");
+    System.out.println(toJson(buildUnSubscribeMessage(symbols, QuoteSubject.Quote)));
+  }
+
+  public static void testSubscribeQuoteMessage() {
+    System.out.println("======SubscribeQuoteMessage");
+    Set<String> symbols = Sets.newHashSet("00700");
+    System.out.println(toJson(buildSubscribeMessage(symbols, QuoteSubject.Quote, null)));
+  }
+
+  public static void testUnSubscribeAccountMessage() {
+    System.out.println("======UnSubscribeAccountMessage");
+    System.out.println(toJson(buildUnSubscribeMessage(Subject.Position)));
+  }
+  public static void testSubscribeAccountMessage() {
+    System.out.println("======SubscribeAccountMessage");
+    System.out.println(toJson(buildSubscribeMessage("13810712", Subject.Position, null)));
+  }
+  public static void testSendMsg() {
+    System.out.println("======SEND REQ_SUB_SYMBOLS");
+    System.out.println(toJson(buildSendMessage(ReqProtocolType.REQ_SUB_SYMBOLS, null)));
+  }
+
+  public static void testBuildDisconnectMessage() {
+    System.out.println(toJson(buildDisconnectMessage("20151141")));
+  }
+
+  public static void testDataParse() {
     // TODO delete
     QuoteData.Builder build = QuoteData.newBuilder();
      build.setSymbol("00700");

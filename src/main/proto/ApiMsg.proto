@@ -1,7 +1,13 @@
 syntax = "proto3";
 import public "Request.proto";
+import public "OrderStatusData.proto";
+import public "PositionData.proto";
+import public "AssetData.proto";
 import public "QuoteData.proto";
 import public "QuoteDepthData.proto";
+import public "TradeTickData.proto";
+import public "QuoteOptionData.proto";
+import public "QuoteFutureData.proto";
 
 package com.tigerbrokers.stock.openapi.client.socket.data.pb;
 
@@ -12,28 +18,29 @@ option java_multiple_files = true;
 message ApiMsg {
 
   enum Command {
-    CONNECT = 0;
-    CONNECTED = 1;
-    SEND = 2;
-    SUBSCRIBE = 3;
-    UNSUBSCRIBE = 4;
-    DISCONNECT = 5;
-    MESSAGE = 6;
-    RECEIPT = 7;
-    ERROR = 8;
-    UNKNOWN = 9;
+    UNKNOWN = 0;
+    CONNECT = 1;
+    CONNECTED = 2;
+    SEND = 3;
+    SUBSCRIBE = 4;
+    UNSUBSCRIBE = 5;
+    DISCONNECT = 6;
+    MESSAGE = 7;
+    RECEIPT = 8;
+    ERROR = 9;
   }
 
   enum Type {
-    Quote = 0;
-    Option = 1;
-    Future = 2;
-    QuoteDepth = 3;
-    TradeTick = 4;
-    Asset = 5;
-    Position = 6;
-    OrderStatus = 7;
-    Request = 8;
+    Unknown = 0;
+    Quote = 1;
+    Option = 2;
+    Future = 3;
+    QuoteDepth = 4;
+    TradeTick = 5;
+    Asset = 6;
+    Position = 7;
+    OrderStatus = 8;
+    Request = 9;
   }
 
   Command command = 1;
@@ -49,6 +56,12 @@ message ApiMsg {
     Request request = 9;
     QuoteData quoteData = 10;
     QuoteDepthData quoteDepthData = 11;
+    QuoteOptionData quoteOptionData = 12;
+    QuoteFutureData quoteFutureData = 13;
+    TradeTickData tradeTickData = 14;
+    PositionData positionData = 15;
+    AssetData assetData = 16;
+    OrderStatusData orderStatusData =17;
   }
 
 }

@@ -44,7 +44,7 @@ public class ProtoSocketHandler extends SimpleChannelInboundHandler<ApiMsg> {
           this.clientReceiveInterval == 0 ? 0 : this.clientReceiveInterval - HEART_BEAT_SPAN);
     }
     ApiLogger.info("netty channel active. channel:{}, preparing to send connect token:{}",
-        ctx.channel().id().asShortText(), connectMsg.getContent());
+        ctx.channel().id().asShortText(), ProtoMessageUtil.toJson(connectMsg.getRequest()));
     ctx.writeAndFlush(connectMsg).addListener(new ChannelFutureListener() {
       @Override
       public void operationComplete(ChannelFuture future) {
@@ -68,7 +68,7 @@ public class ProtoSocketHandler extends SimpleChannelInboundHandler<ApiMsg> {
 
   @Override
   public void channelRead0(ChannelHandlerContext ctx, ApiMsg msg) throws Exception {
-    ApiLogger.debug("received msg from server: {}", msg);
+    ApiLogger.debug("received msg from server: {}", ProtoMessageUtil.toJson(msg));
 
     try {
       ApiCallbackDecoderUtils.executor(ctx, msg, decoder);

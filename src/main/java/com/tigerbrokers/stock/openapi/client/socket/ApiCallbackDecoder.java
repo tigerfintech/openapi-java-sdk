@@ -1,15 +1,8 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.ApiMsg;
-import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
-import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
-import com.tigerbrokers.stock.openapi.client.util.TradeTickUtil;
-import io.netty.handler.codec.stomp.StompFrame;
-import java.nio.charset.Charset;
 
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.ERROR_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_CANCEL_SUBSCRIBE_END;
@@ -17,12 +10,9 @@ import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUBSCRIBE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUB_SYMBOLS_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_TRADING_TICK_END;
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.ID_HEADER;
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.RET_HEADER;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ASSET;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ORDER_STATUS;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_POSITION;
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIPTION_HEADER;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.HEART_BEAT;
 
 /**
@@ -32,7 +22,6 @@ import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.H
 public class ApiCallbackDecoder {
 
   private ApiComposeCallback callback;
-  private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
   public ApiCallbackDecoder(ApiComposeCallback callback) {
     this.callback = callback;
@@ -85,18 +74,15 @@ public class ApiCallbackDecoder {
   }
 
   private void processPosition(ApiMsg msg) {
-    //String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    //callback.positionChange(JSON.parseObject(content));
+    callback.positionChange(msg.getPositionData());
   }
 
   private void processAsset(ApiMsg msg) {
-    //String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    //callback.assetChange(JSONObject.parseObject(content));
+    callback.assetChange(msg.getAssetData());
   }
 
   private void processOrderStatus(ApiMsg msg) {
-    //String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    //callback.orderStatusChange(JSONObject.parseObject(content));
+    callback.orderStatusChange(msg.getOrderStatusData());
   }
 
   private void processSubscribeQuoteChange(ApiMsg msg) {
@@ -109,25 +95,27 @@ public class ApiCallbackDecoder {
         callback.quoteChange(msg.getQuoteData());
         break;
       case Option:
-        // callback.optionChange(jsonObject);
+        callback.optionChange(msg.getQuoteOptionData());
         break;
       case TradeTick:
         // callback.tradeTickChange(TradeTickUtil.decodeData(jsonObject));
+        // TODO
+        callback.tradeTickChange(msg.getTradeTickData());
         break;
       case Future:
-        // callback.futureChange(jsonObject);
+        callback.futureChange(msg.getQuoteFutureData());
         break;
       case QuoteDepth:
         callback.depthQuoteChange(msg.getQuoteDepthData());
         break;
       case Asset:
-        // callback.assetChange(msg.getQuoteDepthData());
+        callback.assetChange(msg.getAssetData());
         break;
       case Position:
-        // callback.positionChange(msg.getQuoteDepthData());
+        callback.positionChange(msg.getPositionData());
         break;
       case OrderStatus:
-        // callback.orderStatusChange(msg.getQuoteDepthData());
+        callback.orderStatusChange(msg.getOrderStatusData());
         break;
       default:
         callback.quoteChange(msg.getQuoteData());
@@ -140,26 +128,25 @@ public class ApiCallbackDecoder {
   }
 
   private void processSubscribeEnd(ApiMsg msg) {
-    //String subject = stompFrame.headers().getAsString(SUBSCRIPTION_HEADER);
+    //String subject = stompFrame.headers().getAsString(StompHeaders.SUBSCRIPTION);
     //String content = stompFrame.content().toString(DEFAULT_CHARSET);
     //callback.subscribeEnd(id, subject, JSONObject.parseObject(content));
   }
 
   private void processCancelSubscribeEnd(ApiMsg msg) {
-    //String subject = stompFrame.headers().getAsString(SUBSCRIPTION_HEADER);
+    //String subject = stompFrame.headers().getAsString(StompHeaders.SUBSCRIPTION);
     //String content = stompFrame.content().toString(DEFAULT_CHARSET);
     //callback.cancelSubscribeEnd(id, subject, JSONObject.parseObject(content));
   }
 
   private void processErrorEnd(ApiMsg msg) {
-    //if (stompFrame != null && stompFrame.content() != null) {
-    //  String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    //  callback.error(content);
-    //} else if (stompFrame != null) {
-    //  callback.error(JSONObject.toJSONString(stompFrame));
-    //} else {
-    //  callback.error("unknown error");
-    //}
+    if (!StringUtils.isEmpty(msg.getContent())) {
+      callback.error(msg.getContent());
+    } else if (!StringUtils.isEmpty(msg.getMessage())) {
+      callback.error(msg.getMessage());
+    } else {
+      callback.error("unknown error");
+    }
   }
 
   private void processDefault(ApiMsg msg) {

@@ -1,8 +1,8 @@
 package com.tigerbrokers.stock.openapi.client.websocket;
 
 import com.tigerbrokers.stock.openapi.client.socket.ApiAuthentication;
-import com.tigerbrokers.stock.openapi.client.socket.ApiCallbackDecoder;
-import com.tigerbrokers.stock.openapi.client.socket.ApiComposeCallback;
+import com.tigerbrokers.stock.openapi.client.socket.ApiCallbackDecoder4Stomp;
+import com.tigerbrokers.stock.openapi.client.socket.ApiComposeCallback4Stomp;
 import com.tigerbrokers.stock.openapi.client.socket.WebSocketHandler;
 import com.tigerbrokers.stock.openapi.client.util.ApiCallbackDecoderUtils;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
@@ -26,22 +26,22 @@ import io.netty.util.CharsetUtil;
 public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Object> {
 
   private ApiAuthentication authentication;
-  private ApiCallbackDecoder decoder;
+  private ApiCallbackDecoder4Stomp decoder;
 
   private WebSocketClientHandshaker handshaker;
 
   private int clientSendInterval = 0;
   private int clientReceiveInterval = 0;
 
-  public WebSocketHandshakerHandler(ApiAuthentication authentication, ApiComposeCallback callback) {
+  public WebSocketHandshakerHandler(ApiAuthentication authentication, ApiComposeCallback4Stomp callback) {
     this.authentication = authentication;
-    this.decoder = new ApiCallbackDecoder(callback);
+    this.decoder = new ApiCallbackDecoder4Stomp(callback);
   }
 
-  public WebSocketHandshakerHandler(ApiAuthentication authentication, ApiComposeCallback callback, int sendInterval,
+  public WebSocketHandshakerHandler(ApiAuthentication authentication, ApiComposeCallback4Stomp callback, int sendInterval,
       int receiveInterval) {
     this.authentication = authentication;
-    this.decoder = new ApiCallbackDecoder(callback);
+    this.decoder = new ApiCallbackDecoder4Stomp(callback);
     this.clientSendInterval = sendInterval;
     this.clientReceiveInterval = receiveInterval;
   }
