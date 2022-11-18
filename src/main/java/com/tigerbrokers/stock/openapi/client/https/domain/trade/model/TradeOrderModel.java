@@ -63,6 +63,12 @@ public class TradeOrderModel extends ApiModel {
   @JSONField(name = "time_in_force")
   private TimeInForce timeInForce;
   /**
+   * GTD order's expire time
+   */
+  @JSONField(name = "expire_time")
+  private Long expireTime;
+
+  /**
    * order type
    */
   @JSONField(name = "order_type")
@@ -270,6 +276,14 @@ public class TradeOrderModel extends ApiModel {
 
   public void setTimeInForce(TimeInForce timeInForce) {
     this.timeInForce = timeInForce;
+  }
+
+  public Long getExpireTime() {
+    return expireTime;
+  }
+
+  public void setExpireTime(Long expireTime) {
+    this.expireTime = expireTime;
   }
 
   public OrderType getOrderType() {

@@ -11,6 +11,8 @@ public interface SubscribeApiCallback {
 
   void orderStatusChange(JSONObject jsonObject);
 
+  void orderTransactionChange(JSONObject jsonObject);
+
   void positionChange(JSONObject jsonObject);
 
   void assetChange(JSONObject jsonObject);
