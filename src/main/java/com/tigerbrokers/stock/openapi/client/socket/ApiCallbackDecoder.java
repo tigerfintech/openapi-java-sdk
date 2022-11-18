@@ -12,6 +12,7 @@ import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_TRADING_TICK_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ASSET;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ORDER_STATUS;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ORDER_TRANSACTION;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_POSITION;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.HEART_BEAT;
 
@@ -44,6 +45,9 @@ public class ApiCallbackDecoder {
         break;
       case SUBSCRIBE_ORDER_STATUS:
         processOrderStatus(msg);
+        break;
+      case SUBSCRIBE_ORDER_TRANSACTION:
+        processOrderTransaction(msg);
         break;
       case GET_QUOTE_CHANGE_END:
         processSubscribeQuoteChange(msg);
@@ -85,6 +89,10 @@ public class ApiCallbackDecoder {
     callback.orderStatusChange(msg.getOrderStatusData());
   }
 
+  private void processOrderTransaction(ApiMsg msg) {
+    callback.orderTransactionChange(msg.getOrderTransactionData());
+  }
+
   private void processSubscribeQuoteChange(ApiMsg msg) {
     ApiMsg.Type dataType = msg.getDataType();
     if (dataType == null) {
@@ -116,6 +124,9 @@ public class ApiCallbackDecoder {
         break;
       case OrderStatus:
         callback.orderStatusChange(msg.getOrderStatusData());
+        break;
+      case OrderTransaction:
+        callback.orderTransactionChange(msg.getOrderTransactionData());
         break;
       default:
         callback.quoteChange(msg.getQuoteData());

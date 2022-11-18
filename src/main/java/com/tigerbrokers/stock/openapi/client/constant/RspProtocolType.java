@@ -27,6 +27,7 @@ public interface RspProtocolType {
   int SUBSCRIBE_ORDER_STATUS = 9;
   int SUBSCRIBE_POSITION = 10;
   int SUBSCRIBE_ASSET = 11;
+  int SUBSCRIBE_ORDER_TRANSACTION = 12;
 
   /**
    * 行情

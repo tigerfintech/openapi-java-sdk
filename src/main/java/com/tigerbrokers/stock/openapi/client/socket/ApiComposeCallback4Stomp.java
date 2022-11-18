@@ -18,6 +18,8 @@ public abstract class ApiComposeCallback4Stomp implements ApiComposeCallback {
 
   public abstract void orderStatusChange(JSONObject jsonObject);
 
+  public abstract void orderTransactionChange(JSONObject jsonObject);
+
   public abstract void positionChange(JSONObject jsonObject);
 
   public abstract void assetChange(JSONObject jsonObject);

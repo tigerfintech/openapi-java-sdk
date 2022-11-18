@@ -8,6 +8,7 @@ import public "QuoteDepthData.proto";
 import public "TradeTickData.proto";
 import public "QuoteOptionData.proto";
 import public "QuoteFutureData.proto";
+import public "OrderTransactionData.proto";
 
 package com.tigerbrokers.stock.openapi.client.socket.data.pb;
 
@@ -40,7 +41,8 @@ message ApiMsg {
     Asset = 6;
     Position = 7;
     OrderStatus = 8;
-    Request = 9;
+    OrderTransaction = 9;
+    Request = 10;
   }
 
   Command command = 1;
@@ -61,7 +63,8 @@ message ApiMsg {
     TradeTickData tradeTickData = 14;
     PositionData positionData = 15;
     AssetData assetData = 16;
-    OrderStatusData orderStatusData =17;
+    OrderStatusData orderStatusData = 17;
+    OrderTransactionData orderTransactionData = 18;
   }
 
 }

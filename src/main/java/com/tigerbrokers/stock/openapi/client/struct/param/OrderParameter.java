@@ -69,6 +69,13 @@ public class OrderParameter implements Serializable {
    */
   @JSONField(name = "time_in_force")
   private TimeInForce timeInForce;
+
+  /**
+   * GTD order's expire time
+   */
+  @JSONField(name = "expire_time")
+  private Long expireTime;
+
   /**
    * 订单类型
    */
@@ -252,6 +259,14 @@ public class OrderParameter implements Serializable {
 
   public void setTimeInForce(TimeInForce timeInForce) {
     this.timeInForce = timeInForce;
+  }
+
+  public Long getExpireTime() {
+    return expireTime;
+  }
+
+  public void setExpireTime(Long expireTime) {
+    this.expireTime = expireTime;
   }
 
   public Double getLimitPrice() {
