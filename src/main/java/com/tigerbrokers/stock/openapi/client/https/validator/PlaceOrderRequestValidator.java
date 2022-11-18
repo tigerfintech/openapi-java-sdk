@@ -46,7 +46,7 @@ public class PlaceOrderRequestValidator implements RequestValidator<TradeOrderMo
     }
 
     if (model.getTimeInForce() == TimeInForce.GTD && model.getExpireTime() == null) {
-      throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "expire_time");
+      throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_ERROR, "GTD order 'expire_time' is requried");
     }
 
     if (model.getOrderType() == OrderType.STP || model.getOrderType() == OrderType.STP_LMT) {
