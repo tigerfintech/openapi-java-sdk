@@ -133,6 +133,13 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder expireTime(Long expireTime) {
+    if (expireTime != null) {
+      this.orderParameter.setExpireTime(expireTime);
+    }
+    return this;
+  }
+
   public TradeParamBuilder account(String account) {
     if (account != null) {
       this.orderParameter.setAccount(account);

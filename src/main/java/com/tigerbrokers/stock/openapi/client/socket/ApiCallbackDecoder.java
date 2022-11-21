@@ -20,6 +20,7 @@ import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.ID_
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.RET_HEADER;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ASSET;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ORDER_STATUS;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ORDER_TRANSACTION;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_POSITION;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIPTION_HEADER;
 
@@ -57,6 +58,9 @@ public class ApiCallbackDecoder {
         break;
       case SUBSCRIBE_ORDER_STATUS:
         processOrderStatus();
+        break;
+      case SUBSCRIBE_ORDER_TRANSACTION:
+        processOrderTransaction();
         break;
       case GET_QUOTE_CHANGE_END:
         processSubscribeQuoteChange();
@@ -105,6 +109,11 @@ public class ApiCallbackDecoder {
   private void processOrderStatus() {
     String content = stompFrame.content().toString(DEFAULT_CHARSET);
     callback.orderStatusChange(JSONObject.parseObject(content));
+  }
+
+  private void processOrderTransaction() {
+    String content = stompFrame.content().toString(DEFAULT_CHARSET);
+    callback.orderTransactionChange(JSONObject.parseObject(content));
   }
 
   private void processSubscribeQuoteChange() {
