@@ -36,9 +36,9 @@ message QuoteData {
   optional sint64 bidSize = 20; // required when type is 'BBO'
 
   // minute data: price, average price, time, volume
-  optional double p = 21;
-  optional double a = 22;
-  optional uint64 t = 23;
-  optional sint64 v = 24;
+  optional double p = 21; // last price of the minute bar
+  optional double a = 22; // average price of the minute bar
+  optional uint64 t = 23; // timestamp of the minute bar
+  optional sint64 v = 24; // trading volume of the minute bar
 
 }
