@@ -119,14 +119,16 @@ public class HeaderBuilder {
   }
 
   public HeaderBuilder focusKeys(Set<String> focusKeys) {
-    if (focusKeys != null) {
+    if (focusKeys != null && !focusKeys.isEmpty()) {
       this.stompHeaders.set(FOCUS_KEYS, join(focusKeys));
     }
     return this;
   }
 
   public HeaderBuilder account(String account) {
-    this.stompHeaders.set(ACCOUNT, account);
+    if (null != account) {
+      this.stompHeaders.set(ACCOUNT, account);
+    }
     return this;
   }
 
@@ -152,7 +154,9 @@ public class HeaderBuilder {
   }
 
   public HeaderBuilder symbols(Set<String> symbols) {
-    this.stompHeaders.set(SYMBOLS, join(symbols));
+    if (symbols != null && !symbols.isEmpty()) {
+      this.stompHeaders.set(SYMBOLS, join(symbols));
+    }
     return this;
   }
 

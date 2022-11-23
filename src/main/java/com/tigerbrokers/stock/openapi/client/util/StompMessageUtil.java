@@ -142,15 +142,6 @@ public class StompMessageUtil {
     return stompFrame;
   }
 
-  public static StompFrame buildSubscribeMessage(Subject subject, Set<String> focusKeys) {
-    StompFrame stompFrame = new DefaultStompFrame(StompCommand.SUBSCRIBE);
-    int id = increment.addAndGet(1);
-    StompHeaders headers =
-        HeaderBuilder.instance().id(id).host().subject(subject).focusKeys(focusKeys).build();
-    stompFrame.headers().set(headers);
-    return stompFrame;
-  }
-
   public static StompFrame buildUnSubscribeMessage(Subject subject) {
     StompFrame stompFrame = new DefaultStompFrame(StompCommand.UNSUBSCRIBE);
     int id = increment.addAndGet(1);

@@ -5,5 +5,22 @@ option java_package = "com.tigerbrokers.stock.openapi.client.socket.data.pb";
 option java_multiple_files = true;
 
 message PositionData {
-  string symbol = 1;
+  string account = 1; // user account
+  string symbol = 2;
+  string identifier = 3;
+  uint32 multiplier = 4; // multiplier for futures, options, warrants and CBBC
+  string market = 5; // market. US, HK, etc.
+  string currency = 6; // currency. USD, HKD, etc.
+  string segment = 7; // Securities Category C: (Commodities Futures), S: (Securities Stocks)
+  string secType = 8; // STK Stocks, OPT Options, WAR Warrants, IOPT CBBC, CASH FOREX, FUT Futures, FOP Future Options
+
+  sint64 position = 9; // total position
+  sint32 positionScale = 10; // total position scale
+  double averageCost = 11; // average holding cost
+  double latestPrice = 12; // last price of the asset
+  double marketValue = 13; // market value of the asset
+  double unrealizedPnl = 14; // unrealized profit and loss
+  string name = 15; // symbol name
+  uint64 timestamp = 16;
+
 }

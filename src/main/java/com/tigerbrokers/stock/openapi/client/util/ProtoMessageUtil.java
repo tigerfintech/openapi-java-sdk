@@ -162,8 +162,10 @@ public class ProtoMessageUtil {
         .setDataType(ApiMsg.Type.Request);
 
     Request.Builder reqBuild = Request.newBuilder();
-    reqBuild.setSubject(subject.name())
-        .setSymbols(HeaderBuilder.join(symbols));
+    reqBuild.setSubject(subject.name());
+    if (symbols != null && !symbols.isEmpty()) {
+      reqBuild.setSymbols(HeaderBuilder.join(symbols));
+    }
     if (focusKeys != null && !focusKeys.isEmpty()) {
       reqBuild.setFocusKeys(HeaderBuilder.join(focusKeys));
     }

@@ -2,7 +2,6 @@ package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.tigerbrokers.stock.openapi.client.util.ProtoMessageUtil;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
-import com.tigerbrokers.stock.openapi.client.util.builder.HeaderBuilder;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
@@ -32,7 +31,7 @@ public class IdleTriggerHandler extends ChannelInboundHandlerAdapter {
     if (evt instanceof IdleStateEvent) {
       IdleState state = ((IdleStateEvent) evt).state();
       if (IdleState.WRITER_IDLE == state) {
-        if (HeaderBuilder.isUseProtobuf()) {
+        if (WebSocketClient.getInstance().isUseProtobuf()) {
           ctx.channel().writeAndFlush(ProtoMessageUtil.buildCommonSendMessage(HEART_BEAT));
         } else {
           ctx.channel().writeAndFlush(StompMessageUtil.buildCommonSendMessage(HEART_BEAT));

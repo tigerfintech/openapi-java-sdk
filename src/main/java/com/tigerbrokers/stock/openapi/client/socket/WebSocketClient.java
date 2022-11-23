@@ -15,7 +15,6 @@ import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
 import com.tigerbrokers.stock.openapi.client.util.ProtoMessageUtil;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
-import com.tigerbrokers.stock.openapi.client.util.builder.HeaderBuilder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -71,6 +70,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private ClientConfig clientConfig;
   private SslProvider sslProvider = null;
   private String url;
+
+  private boolean isProtobuf = true;
   private ApiAuthentication authentication;
   private ApiComposeCallback apiComposeCallback;
   private final Set<Subject> subscribeList = new CopyOnWriteArraySet<>();
@@ -183,12 +184,12 @@ public class WebSocketClient implements SubscribeAsyncApi {
     if (this.apiComposeCallback == null) {
       throw new IllegalArgumentException("apiComposeCallback is missing.");
     }
-    boolean protobuf = HeaderBuilder.isUseProtobuf(authentication.getVersion());
-    boolean isStompCallbackInstance = apiComposeCallback instanceof ApiComposeCallback4Stomp;
-    if (protobuf && isStompCallbackInstance) {
+    if (apiComposeCallback instanceof ApiComposeCallback) {
+      this.isProtobuf = true;
+    } else if (apiComposeCallback instanceof ApiComposeCallback4Stomp) {
+      this.isProtobuf = false;
+    } else {
       throw new IllegalArgumentException("please use ApiComposeCallback's instance.");
-    } else if (!protobuf && !isStompCallbackInstance) {
-      throw new IllegalArgumentException("please use ApiComposeCallback4Stomp's instance.");
     }
     if (connectCountDown.getCount() == 0) {
       connectCountDown = new CountDownLatch(1);
@@ -229,7 +230,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
               p.addLast(TigerApiConstants.SSL_HANDLER_NAME,
                   sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
             }
-            if (HeaderBuilder.isUseProtobuf(authentication.getVersion())) {
+            if (isProtobuf) {
               final ProtoSocketHandler handler =
                   new ProtoSocketHandler(authentication, apiComposeCallback, clientSendInterval, clientReceiveInterval);
               p.addLast(SOCKET_DECODER, new ProtobufVarint32FrameDecoder());
@@ -371,6 +372,9 @@ public class WebSocketClient implements SubscribeAsyncApi {
   public String getUrl() {
     return this.url;
   }
+  public boolean isUseProtobuf() {
+    return this.isProtobuf;
+  }
 
   /**
    * destroy the reconnect thread, then send disconnect command and close the connection
@@ -412,12 +416,9 @@ public class WebSocketClient implements SubscribeAsyncApi {
       notConnect();
       return;
     }
-    Object disconnectData;
-    if (HeaderBuilder.isUseProtobuf()) {
-      disconnectData = ProtoMessageUtil.buildDisconnectMessage(authentication.getTigerId());
-    } else {
-      disconnectData = StompMessageUtil.buildDisconnectMessage(authentication.getTigerId());
-    }
+    Object disconnectData = this.isProtobuf
+        ? ProtoMessageUtil.buildDisconnectMessage(authentication.getTigerId())
+        : StompMessageUtil.buildDisconnectMessage(authentication.getTigerId());
     ChannelFuture channelFuture = channel.writeAndFlush(disconnectData);
     try {
       channelFuture.sync();
@@ -498,42 +499,18 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   @Override
-  public String subscribe(Subject subject, List<String> focusKeys) {
-    if (!isConnected()) {
-      notConnect();
-      return null;
-    }
-    StompFrame frame = StompMessageUtil.buildSubscribeMessage(subject, new HashSet<>(focusKeys));
-    channel.writeAndFlush(frame);
-    subscribeList.add(subject);
-
-    return frame.headers().getAsString(StompHeaders.ID);
+  public String subscribe(Subject subject) {
+    return subscribe(subject, null);
   }
 
   @Override
-  public String subscribe(Subject subject) {
-    if (!isConnected()) {
-      notConnect();
-      return null;
-    }
-    StompFrame frame = StompMessageUtil.buildSubscribeMessage(subject);
-    channel.writeAndFlush(frame);
-    subscribeList.add(subject);
-
-    return frame.headers().getAsString(StompHeaders.ID);
+  public String subscribe(Subject subject, List<String> focusKeys) {
+    return subscribe(null, subject, focusKeys);
   }
 
   @Override
   public String subscribe(String account, Subject subject) {
-    if (!isConnected()) {
-      notConnect();
-      return null;
-    }
-    StompFrame frame = StompMessageUtil.buildSubscribeMessage(account, subject, null);
-    channel.writeAndFlush(frame);
-    subscribeList.add(subject);
-
-    return frame.headers().getAsString(StompHeaders.ID);
+    return subscribe(account, subject, null);
   }
 
   @Override
@@ -542,11 +519,19 @@ public class WebSocketClient implements SubscribeAsyncApi {
       notConnect();
       return null;
     }
-    StompFrame frame = StompMessageUtil.buildSubscribeMessage(account, subject, new HashSet<>(focusKeys));
-    channel.writeAndFlush(frame);
+    String returnStr;
+    Object subscribeData;
+    if (this.isProtobuf) {
+      subscribeData = ProtoMessageUtil.buildSubscribeMessage(account, subject, focusKeys == null ? null : new HashSet<>(focusKeys));
+      returnStr = String.valueOf(((ApiMsg)subscribeData).getId());
+    } else {
+      subscribeData = StompMessageUtil.buildSubscribeMessage(account, subject, focusKeys == null ? null : new HashSet<>(focusKeys));
+      returnStr = ((StompFrame)subscribeData).headers().getAsString(StompHeaders.ID);
+    }
+    channel.writeAndFlush(subscribeData);
     subscribeList.add(subject);
 
-    return frame.headers().getAsString(StompHeaders.ID);
+    return returnStr;
   }
 
   @Override
@@ -555,11 +540,19 @@ public class WebSocketClient implements SubscribeAsyncApi {
       notConnect();
       return null;
     }
-    StompFrame frame = StompMessageUtil.buildUnSubscribeMessage(subject);
-    channel.writeAndFlush(frame);
+    String returnStr;
+    Object unsubscribeData;
+    if (this.isProtobuf) {
+      unsubscribeData = ProtoMessageUtil.buildUnSubscribeMessage(subject);
+      returnStr = String.valueOf(((ApiMsg)unsubscribeData).getId());
+    } else {
+      unsubscribeData = StompMessageUtil.buildUnSubscribeMessage(subject);
+      returnStr = ((StompFrame)unsubscribeData).headers().getAsString(StompHeaders.ID);
+    }
+    channel.writeAndFlush(unsubscribeData);
     subscribeList.remove(subject);
 
-    return frame.headers().getAsString(StompHeaders.ID);
+    return returnStr;
   }
 
   @Override
@@ -632,17 +625,20 @@ public class WebSocketClient implements SubscribeAsyncApi {
       notConnect();
       return null;
     }
-    StompFrame frame;
-    if (focusKeys == null) {
-      frame = StompMessageUtil.buildSubscribeMessage(symbols, subject);
+    String returnStr;
+    Object subscribeData;
+    if (this.isProtobuf) {
+      subscribeData = ProtoMessageUtil.buildSubscribeMessage(symbols, subject, focusKeys == null ? null : new HashSet<>(focusKeys));
+      returnStr = String.valueOf(((ApiMsg)subscribeData).getId());
     } else {
-      frame = StompMessageUtil.buildSubscribeMessage(symbols, subject, new HashSet<>(focusKeys));
+      subscribeData = StompMessageUtil.buildSubscribeMessage(symbols, subject, focusKeys == null ? null : new HashSet<>(focusKeys));
+      returnStr = ((StompFrame)subscribeData).headers().getAsString(StompHeaders.ID);
     }
-    channel.writeAndFlush(frame);
+    channel.writeAndFlush(subscribeData);
     subscribeSymbols.addAll(symbols);
     ApiLogger.info("send subscribe [{}] message, symbols:{},focusKeys:{}", subject, symbols, focusKeys);
 
-    return frame.headers().getAsString(StompHeaders.ID);
+    return returnStr;
   }
 
   private String cancelSubscribeQuote(Set<String> symbols, QuoteSubject subject) {
@@ -650,12 +646,20 @@ public class WebSocketClient implements SubscribeAsyncApi {
       notConnect();
       return null;
     }
-    StompFrame frame = StompMessageUtil.buildUnSubscribeMessage(symbols, subject);
-    channel.writeAndFlush(frame);
+    String returnStr;
+    Object unsubscribeData;
+    if (this.isProtobuf) {
+      unsubscribeData = ProtoMessageUtil.buildUnSubscribeMessage(symbols, subject);
+      returnStr = String.valueOf(((ApiMsg)unsubscribeData).getId());
+    } else {
+      unsubscribeData = StompMessageUtil.buildUnSubscribeMessage(symbols, subject);
+      returnStr = ((StompFrame)unsubscribeData).headers().getAsString(StompHeaders.ID);
+    }
+    channel.writeAndFlush(unsubscribeData);
     subscribeSymbols.removeAll(symbols);
     ApiLogger.info("send cancel subscribe [{}] message, symbols:{}.", subject, symbols);
 
-    return frame.headers().getAsString(StompHeaders.ID);
+    return returnStr;
   }
 
   @Override
@@ -669,10 +673,18 @@ public class WebSocketClient implements SubscribeAsyncApi {
       return null;
     }
     ApiLogger.info("reqType:{},send message:{}", reqType, message);
-    StompFrame frame = StompMessageUtil.buildSendMessage(reqType, message);
-    channel.writeAndFlush(frame);
+    String returnStr;
+    Object msgData;
+    if (this.isProtobuf) {
+      msgData = ProtoMessageUtil.buildSendMessage(reqType, message);
+      returnStr = String.valueOf(((ApiMsg)msgData).getId());
+    } else {
+      msgData = StompMessageUtil.buildSendMessage(reqType, message);
+      returnStr = ((StompFrame)msgData).headers().getAsString(StompHeaders.ID);
+    }
+    channel.writeAndFlush(msgData);
 
-    return frame.headers().getAsString(StompHeaders.ID);
+    return returnStr;
   }
 
   private void notConnect() {
