@@ -1,6 +1,8 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
+import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.ApiMsg;
+import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 
@@ -106,8 +108,6 @@ public class ApiCallbackDecoder {
         callback.optionChange(msg.getQuoteOptionData());
         break;
       case TradeTick:
-        // callback.tradeTickChange(TradeTickUtil.decodeData(jsonObject));
-        // TODO
         callback.tradeTickChange(msg.getTradeTickData());
         break;
       case Future:
@@ -134,20 +134,34 @@ public class ApiCallbackDecoder {
   }
 
   private void processGetSubscribedSymbols(ApiMsg msg) {
-    //String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    //callback.getSubscribedSymbolEnd(JSONObject.parseObject(content, SubscribedSymbol.class));
+    String subscribedSymbol = StringUtils.isEmpty(msg.getContent()) ? msg.getMessage() : msg.getContent();
+    callback.getSubscribedSymbolEnd(JSONObject.parseObject(subscribedSymbol, SubscribedSymbol.class));
   }
 
   private void processSubscribeEnd(ApiMsg msg) {
-    //String subject = stompFrame.headers().getAsString(StompHeaders.SUBSCRIPTION);
-    //String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    //callback.subscribeEnd(id, subject, JSONObject.parseObject(content));
+    String subject = msg.getRequest() == null ? null : msg.getRequest().getSubject();
+    JSONObject jsonObject;
+    if (StringUtils.isEmpty(msg.getContent())) {
+      jsonObject = new JSONObject();
+      jsonObject.put("code", msg.getCode());
+      jsonObject.put("message", msg.getMessage());
+    } else {
+      jsonObject = JSONObject.parseObject(msg.getContent());
+    }
+    callback.subscribeEnd(String.valueOf(msg.getId()), subject, jsonObject);
   }
 
   private void processCancelSubscribeEnd(ApiMsg msg) {
-    //String subject = stompFrame.headers().getAsString(StompHeaders.SUBSCRIPTION);
-    //String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    //callback.cancelSubscribeEnd(id, subject, JSONObject.parseObject(content));
+    String subject = msg.getRequest() == null ? null : msg.getRequest().getSubject();
+    JSONObject jsonObject;
+    if (StringUtils.isEmpty(msg.getContent())) {
+      jsonObject = new JSONObject();
+      jsonObject.put("code", msg.getCode());
+      jsonObject.put("message", msg.getMessage());
+    } else {
+      jsonObject = JSONObject.parseObject(msg.getContent());
+    }
+    callback.cancelSubscribeEnd(String.valueOf(msg.getId()), subject, jsonObject);
   }
 
   private void processErrorEnd(ApiMsg msg) {

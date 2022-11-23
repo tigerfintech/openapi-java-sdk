@@ -98,12 +98,12 @@ public class ProtoMessageUtil {
     return builder.build();
   }
 
-  public static ApiMsg buildCommonSendMessage(String message) {
+  public static ApiMsg buildCommonSendMessage(String content) {
     ApiMsg.Builder builder = ApiMsg.newBuilder();
     builder.setCommand(ApiMsg.Command.SEND)
         .setId(increment.addAndGet(1));
-    if (message != null) {
-      builder.setMessage(message);
+    if (content != null) {
+      builder.setContent(content);
     }
 
     return builder.build();
