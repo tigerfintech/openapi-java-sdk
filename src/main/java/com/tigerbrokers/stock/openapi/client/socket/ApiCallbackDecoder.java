@@ -5,6 +5,7 @@ import com.tigerbrokers.stock.openapi.client.socket.data.pb.ApiMsg;
 import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
+import com.tigerbrokers.stock.openapi.client.util.TradeTickUtil;
 
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.ERROR_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_CANCEL_SUBSCRIBE_END;
@@ -108,7 +109,7 @@ public class ApiCallbackDecoder {
         callback.optionChange(msg.getQuoteOptionData());
         break;
       case TradeTick:
-        callback.tradeTickChange(msg.getTradeTickData());
+        callback.tradeTickChange(TradeTickUtil.convert(msg.getTradeTickData()));
         break;
       case Future:
         callback.futureChange(msg.getQuoteFutureData());
