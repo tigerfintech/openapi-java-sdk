@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.https.validator;
 
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteCapitalFlowModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteCapitalModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteContractModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteDepthModel;
@@ -80,6 +81,11 @@ public class QuoteRequestValidator implements RequestValidator<ApiModel> {
       QuoteCapitalModel quoteCapitalModel = (QuoteCapitalModel) model;
       if (StringUtils.isEmpty(quoteCapitalModel.getSymbol())) {
         throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "symbol");
+      }
+      if (model instanceof QuoteCapitalFlowModel) {
+        if (StringUtils.isEmpty(((QuoteCapitalFlowModel)quoteCapitalModel).getPeriod())) {
+          throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "period");
+        }
       }
       if (StringUtils.isEmpty(quoteCapitalModel.getMarket())) {
         throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "market");
