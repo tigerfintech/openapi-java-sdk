@@ -295,7 +295,7 @@ public class TradeTickUtil {
     List<TradeTick.Tick> ticks = new ArrayList<>(source.getTimeCount());
     tradeTick.setTicks(ticks);
     if (timeList != null && timeList.size() > 0) {
-      long previousTime = 0;
+      long currentTime = 0;
       long priceBase = source.getPriceBase();
       double denominator = Math.pow(10, source.getPriceOffset());
       for (int i = 0; i < timeList.size(); i++) {
@@ -303,8 +303,8 @@ public class TradeTickUtil {
         ticks.add(tickData);
 
         // recover time: time[i] = time[i] + time[i-1]
-        previousTime += timeList.get(i);
-        tickData.setTime(previousTime);
+        currentTime += timeList.get(i);
+        tickData.setTime(currentTime);
         // recover price: price[i] = (priceBase + price[i]) / 10^priceOffset
         tickData.setPrice((priceBase + pricesList.get(i).doubleValue()) / denominator);
 
@@ -347,14 +347,13 @@ public class TradeTickUtil {
     List<TradeTick.Tick> ticks = new ArrayList<>(totalCount);
     tradeTick.setTicks(ticks);
     if (timeList != null && timeList.size() > 0) {
-      long previousTime = 0;
+      long currentTime = 0;
       long priceBase = source.getPriceBase();
       double denominator = Math.pow(10, source.getPriceOffset());
       for (int i = 0; i < timeList.size(); i++) {
 
         // recover time: time[i] = time[i] + time[i-1]
-        previousTime += timeList.get(i);
-        timeList.set(i, previousTime);
+        currentTime += timeList.get(i);
         // recover price: price[i] = (priceBase + price[i]) / 10^priceOffset
         double curPrices = (priceBase + pricesList.get(i).doubleValue()) / denominator;
 
@@ -365,7 +364,7 @@ public class TradeTickUtil {
           ticks.add(tickData);
           tickData.setSn(startSn * 10 + j);
           tickData.setVolume(volsList.get(j));
-          tickData.setTime(timeList.get(i));
+          tickData.setTime(currentTime);
           tickData.setPrice(curPrices);
         }
         startSn++;

@@ -5,5 +5,28 @@ option java_package = "com.tigerbrokers.stock.openapi.client.socket.data.pb";
 option java_multiple_files = true;
 
 message QuoteOptionData {
+  enum QuoteType {
+    UNKNOWN = 0;
+    QUOTE = 1;
+    BBO = 2; // best bid and offer
+  }
   string symbol = 1;
+  QuoteType type = 2; // QUOTE/BBO
+  string identifier = 3;
+  uint64 timestamp = 4;
+  optional double latestPrice = 5; // required when type is 'QUOTE'
+  optional uint64 latestTimestamp = 6; // required when type is 'QUOTE'
+  optional double preClose = 7; // required when type is 'QUOTE'
+  optional sint64 volume = 8; // required when type is 'QUOTE'
+  optional sint64 openInt = 9; // required when type is 'QUOTE'
+
+  optional double open = 10; // required when type is 'QUOTE'
+  optional double high = 11; // required when type is 'QUOTE'
+  optional double low = 12; // required when type is 'QUOTE'
+
+  optional double askPrice = 13; // required when type is 'BBO'
+  optional sint64 askSize = 14; // required when type is 'BBO'
+  optional double bidPrice = 15; // required when type is 'BBO'
+  optional sint64 bidSize = 16; // required when type is 'BBO'
+
 }
