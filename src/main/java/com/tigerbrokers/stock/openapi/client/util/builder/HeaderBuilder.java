@@ -4,14 +4,12 @@ import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import com.tigerbrokers.stock.openapi.client.util.SdkVersionUtils;
-import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import io.netty.handler.codec.stomp.DefaultStompHeaders;
 import io.netty.handler.codec.stomp.StompHeaders;
 import io.netty.util.AsciiString;
 import java.util.Collection;
 import java.util.Set;
 
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SEPARATOR;
 import static io.netty.handler.codec.stomp.StompHeaders.HEART_BEAT;
 
 /**
@@ -54,23 +52,6 @@ public class HeaderBuilder {
         || STOMP_VERSION_10.equals(version)) {
       USE_VERSION = version;
     }
-  }
-
-  public static boolean isUseProtobuf() {
-    return isUseProtobuf(USE_VERSION);
-  }
-
-  public static boolean isUseProtobuf(String acceptVersion) {
-    if (StringUtils.isEmpty(acceptVersion)) {
-      return PROTOBUF_VERSION_3.equals(DEFAULT_VERSION);
-    }
-    String[] versions = acceptVersion.split(SEPARATOR);
-    for (String item : versions) {
-      if (PROTOBUF_VERSION_3.equals(item)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   public HeaderBuilder version(String version) {
