@@ -20,7 +20,7 @@ public class CapitalFlowItem extends ApiModel {
    */
   private String period;
 
-  private List<CapitalFlowPoint> points;
+  private List<CapitalFlowPoint> items;
 
 
   public String getSymbol() {
@@ -39,12 +39,12 @@ public class CapitalFlowItem extends ApiModel {
     this.period = period;
   }
 
-  public List<CapitalFlowPoint> getPoints() {
-    return points;
+  public List<CapitalFlowPoint> getItems() {
+    return items;
   }
 
-  public void setPoints(List<CapitalFlowPoint> points) {
-    this.points = points;
+  public void setItems(List<CapitalFlowPoint> items) {
+    this.items = items;
   }
 
   @Override
@@ -52,7 +52,7 @@ public class CapitalFlowItem extends ApiModel {
     return "CapitalFlowItem{" +
         "symbol='" + symbol + '\'' +
         "period=" + period +
-        ", points=" + points == null ? null : Arrays.toString(points.toArray()) +
+        ", items=" + items == null ? null : Arrays.toString(items.toArray()) +
         '}';
   }
 }
