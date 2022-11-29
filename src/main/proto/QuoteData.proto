@@ -7,19 +7,19 @@ option java_multiple_files = true;
 message QuoteData {
   enum QuoteType {
     UNKNOWN = 0;
-    QUOTE = 1;
+    BASIC = 1;
     BBO = 2; // best bid and offer
   }
   string symbol = 1;
-  QuoteType type = 2; // QUOTE/BBO
+  QuoteType type = 2; // BASIC/BBO
   uint64 timestamp = 3;
   uint64 serverTimestamp = 4;
   optional double avgPrice = 5;
-  optional double latestPrice = 6; // required when type is 'QUOTE'
-  optional string latestTime = 7; // required when type is 'QUOTE'
-  optional double preClose = 8; // required when type is 'QUOTE'
-  optional sint64 volume = 9; // required when type is 'QUOTE'
-  optional double amount = 10; // required when type is 'QUOTE'
+  optional double latestPrice = 6; // required when type is 'BASIC'
+  optional string latestTime = 7; // required when type is 'BASIC'
+  optional double preClose = 8; // required when type is 'BASIC'
+  optional sint64 volume = 9; // required when type is 'BASIC'
+  optional double amount = 10; // required when type is 'BASIC'
 
   optional string hourTradingTag = 11; // Pre/Post-Mkt
 

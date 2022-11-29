@@ -26,14 +26,16 @@ message OrderStatusData {
   double limitPrice = 18; // limit price（required when orderType is 'LMT'）
   double realizedPnl = 19; // realized profit and loss
   string status = 20; // order status
+  string replaceStatus = 21; // order replace status
+  string cancelStatus = 22; // order cancel status
 
-  bool outsideRth = 21; // if trade outside regular trading hours (only applicable to U.S. market)
-  bool canModify = 22;
-  bool canCancel = 23;
-  string name = 24; // symbol name
-  string source = 25; // order source(from 'OpenApi', or not)
-  string errorMsg = 26; // error message
-  float commissionAndFee = 27; // commission and fee
-  uint64 openTime = 28; // timestamp when the order is placed
-  uint64 timestamp = 29;
+  bool outsideRth = 23; // if trade outside regular trading hours (only applicable to U.S. market)
+  bool canModify = 24;
+  bool canCancel = 25;
+  string name = 26; // symbol name
+  string source = 27; // order source(from 'OpenApi', or not)
+  string errorMsg = 28; // error message
+  float commissionAndFee = 29; // commission and fee
+  uint64 openTime = 30; // timestamp when the order is placed
+  uint64 timestamp = 31;
 }
