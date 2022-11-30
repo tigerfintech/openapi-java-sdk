@@ -153,6 +153,8 @@ public class OrderParameter implements Serializable {
   private List<TagValue> algoParams;
 
   private String source;
+  @JSONField(name = "user_mark")
+  private String userMark;
 
   /**
    * 附加订单类型：
@@ -413,6 +415,14 @@ public class OrderParameter implements Serializable {
     this.source = source;
   }
 
+  public String getUserMark() {
+    return userMark;
+  }
+
+  public void setUserMark(String userMark) {
+    this.userMark = userMark;
+  }
+
   public void setAttachType(AttachType attachType) {
     this.attachType = attachType;
   }
@@ -514,6 +524,7 @@ public class OrderParameter implements Serializable {
         ", currency=" + currency +
         ", totalQuantity=" + totalQuantity +
         ", timeInForce=" + timeInForce +
+        ", expireTime=" + expireTime +
         ", orderType=" + orderType +
         ", limitPrice=" + limitPrice +
         ", auxPrice=" + auxPrice +
@@ -532,6 +543,7 @@ public class OrderParameter implements Serializable {
         ", algoStrategy='" + algoStrategy + '\'' +
         ", algoParams=" + algoParams +
         ", source='" + source + '\'' +
+        ", userMark=" + userMark +
         ", attachType=" + attachType +
         ", profitTakerOrderId=" + profitTakerOrderId +
         ", profitTakerPrice=" + profitTakerPrice +
