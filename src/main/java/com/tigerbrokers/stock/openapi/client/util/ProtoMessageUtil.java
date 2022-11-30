@@ -4,10 +4,9 @@ import com.google.common.collect.Sets;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
-import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
-import com.tigerbrokers.stock.openapi.client.socket.data.pb.ApiMsg;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.SocketCommon;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import com.tigerbrokers.stock.openapi.client.util.builder.HeaderBuilder;
@@ -29,203 +28,124 @@ public class ProtoMessageUtil {
     try {
       return JsonFormat.printer().omittingInsignificantWhitespace().print(message);
     } catch (InvalidProtocolBufferException e) {
-      //
+      // ingore
     }
     return null;
   }
 
   /**
-   * @param login login
-   * @param passcode passcode
+   * @param tigerId tigerId
+   * @param sign sign
    * @param version version
+   * @param sendInterval client能保证发送心跳的最小间隔，0代表采用服务端配置
+   * @param receiveInterval client希望收到server心跳的间隔，0代表采用服务端配置
    * @return StompFrame
    */
-  public static ApiMsg buildConnectMessage(String login, String passcode, String version) {
-    ApiMsg.Builder builder = ApiMsg.newBuilder();
-    builder.setCommand(ApiMsg.Command.CONNECT).setId(increment.addAndGet(1));
-    builder.setDataType(ApiMsg.Type.Request);
-
-    Request.Builder reqBuild = Request.newBuilder();
-    reqBuild.setAcceptVersion(version)
-        .setSdkVersion(SdkVersionUtils.getSdkVersion())
-        .setLogin(login)
-        .setPasscode(passcode);
-
-    builder.setRequest(reqBuild.build());
-    return builder.build();
-  }
-
-  /**
-   * @param login login
-   * @param passcode passcode
-   * @param version version
-   * @param sendInterval client能保证发送心跳的最小间隔，0代表client不发送心跳
-   * @param receiveInterval client希望收到server心跳的间隔，0代表client不希望收到server的心跳
-   * @return StompFrame
-   */
-  public static ApiMsg buildConnectMessage(String login, String passcode, String version,
+  public static Request buildConnectMessage(String tigerId, String sign, String version,
       int sendInterval, int receiveInterval) {
     if (sendInterval < 0 || receiveInterval < 0) {
       throw new RuntimeException("sendInterval < 0 or receiveInterval < 0");
     }
-    ApiMsg.Builder builder = ApiMsg.newBuilder();
-    builder.setCommand(ApiMsg.Command.CONNECT).setId(increment.addAndGet(1));
-    builder.setDataType(ApiMsg.Type.Request);
+    Request.Builder builder = Request.newBuilder();
+    builder.setCommand(SocketCommon.Command.CONNECT).setId(increment.addAndGet(1));
 
-    Request.Builder reqBuild = Request.newBuilder();
-    reqBuild.setAcceptVersion(version)
+    Request.Connect.Builder conBuild = Request.Connect.newBuilder();
+    conBuild.setAcceptVersion(version)
         .setSdkVersion(SdkVersionUtils.getSdkVersion())
-        .setLogin(login)
-        .setPasscode(passcode)
-        .setHeartBeat(String.format("%d,%d", sendInterval, receiveInterval));
+        .setTigerId(tigerId)
+        .setSign(sign)
+        .setSendInterval(sendInterval).setReceiveInterval(receiveInterval);
 
-    builder.setRequest(reqBuild.build());
+    builder.setConnect(conBuild.build());
     return builder.build();
   }
 
-  public static ApiMsg buildSendMessage(int reqType, String message) {
-    if (reqType <= 0) {
-      throw new RuntimeException("reqType不能为空");
-    }
-    ApiMsg.Builder builder = ApiMsg.newBuilder();
-    builder.setCommand(ApiMsg.Command.SEND)
-        .setId(increment.addAndGet(1))
-        .setRetType(reqType);
-    if (message != null) {
-      builder.setMessage(message);
-    }
-
-    return builder.build();
-  }
-
-  public static ApiMsg buildCommonSendMessage(String content) {
-    ApiMsg.Builder builder = ApiMsg.newBuilder();
-    builder.setCommand(ApiMsg.Command.SEND)
+  public static Request buildSendMessage() {
+    Request.Builder builder = Request.newBuilder();
+    builder.setCommand(SocketCommon.Command.SEND)
         .setId(increment.addAndGet(1));
-    if (content != null) {
-      builder.setContent(content);
-    }
 
     return builder.build();
   }
 
-  public static ApiMsg buildSubscribeMessage(Subject subject) {
-    ApiMsg.Builder builder = ApiMsg.newBuilder();
-    builder.setCommand(ApiMsg.Command.SUBSCRIBE)
-        .setId(increment.addAndGet(1))
-        .setDataType(ApiMsg.Type.Request);
+  public static Request buildHeartBeatMessage() {
+    Request.Builder builder = Request.newBuilder();
+    builder.setCommand(SocketCommon.Command.HEARTBEAT)
+        .setId(increment.addAndGet(1));
 
-    Request.Builder reqBuild = Request.newBuilder();
-    reqBuild.setSubject(subject.name());
-
-    builder.setRequest(reqBuild.build());
     return builder.build();
   }
 
-  public static ApiMsg buildSubscribeMessage(String account, Subject subject, Set<String> focusKeys) {
-    ApiMsg.Builder builder = ApiMsg.newBuilder();
-    builder.setCommand(ApiMsg.Command.SUBSCRIBE)
-        .setId(increment.addAndGet(1))
-        .setDataType(ApiMsg.Type.Request);
+  public static Request buildSubscribeMessage(Subject subject) {
+    Request.Builder builder = Request.newBuilder();
+    builder.setCommand(SocketCommon.Command.SUBSCRIBE)
+        .setId(increment.addAndGet(1));
 
-    Request.Builder reqBuild = Request.newBuilder();
-    reqBuild.setSubject(subject.name());
+    Request.Subscribe.Builder subBuild = Request.Subscribe.newBuilder();
+    subBuild.setDataType(SocketCommon.DataType.valueOf(subject.name()));
+
+    builder.setSubscribe(subBuild.build());
+    return builder.build();
+  }
+
+  public static Request buildSubscribeMessage(String account, Subject subject) {
+    Request.Builder builder = Request.newBuilder();
+    builder.setCommand(SocketCommon.Command.SUBSCRIBE)
+        .setId(increment.addAndGet(1));
+
+    Request.Subscribe.Builder subBuild = Request.Subscribe.newBuilder();
+    subBuild.setDataType(SocketCommon.DataType.valueOf(subject.name()));
     if (account != null) {
-      reqBuild.setAccount(account);
-    }
-    if (focusKeys != null && !focusKeys.isEmpty()) {
-      reqBuild.setFocusKeys(HeaderBuilder.join(focusKeys));
+      subBuild.setAccount(account);
     }
 
-    builder.setRequest(reqBuild.build());
+    builder.setSubscribe(subBuild.build());
     return builder.build();
   }
 
-  public static ApiMsg buildSubscribeMessage(Set<String> symbols, QuoteSubject subject) {
-    ApiMsg.Builder builder = ApiMsg.newBuilder();
-    builder.setCommand(ApiMsg.Command.SUBSCRIBE)
-        .setId(increment.addAndGet(1))
-        .setDataType(ApiMsg.Type.Request);
+  public static Request buildSubscribeMessage(Set<String> symbols, QuoteSubject subject) {
+    Request.Builder builder = Request.newBuilder();
+    builder.setCommand(SocketCommon.Command.SUBSCRIBE)
+        .setId(increment.addAndGet(1));
 
-    Request.Builder reqBuild = Request.newBuilder();
-    reqBuild.setSubject(subject.name())
-        .setSymbols(HeaderBuilder.join(symbols));
+    Request.Subscribe.Builder subBuild = Request.Subscribe.newBuilder();
+    subBuild.setDataType(SocketCommon.DataType.valueOf(subject.name()));
+    subBuild.setSymbols(HeaderBuilder.join(symbols));
 
-    builder.setRequest(reqBuild.build());
+    builder.setSubscribe(subBuild.build());
     return builder.build();
   }
 
-  public static ApiMsg buildSubscribeMessage(Set<String> symbols, QuoteSubject subject, Set<String> focusKeys) {
-    ApiMsg.Builder builder = ApiMsg.newBuilder();
-    builder.setCommand(ApiMsg.Command.SUBSCRIBE)
-        .setId(increment.addAndGet(1))
-        .setDataType(ApiMsg.Type.Request);
+  public static Request buildUnSubscribeMessage(Subject subject) {
+    Request.Builder builder = Request.newBuilder();
+    builder.setCommand(SocketCommon.Command.UNSUBSCRIBE)
+        .setId(increment.addAndGet(1));
 
-    Request.Builder reqBuild = Request.newBuilder();
-    reqBuild.setSubject(subject.name());
-    if (symbols != null && !symbols.isEmpty()) {
-      reqBuild.setSymbols(HeaderBuilder.join(symbols));
-    }
-    if (focusKeys != null && !focusKeys.isEmpty()) {
-      reqBuild.setFocusKeys(HeaderBuilder.join(focusKeys));
-    }
+    Request.Subscribe.Builder subBuild = Request.Subscribe.newBuilder();
+    subBuild.setDataType(SocketCommon.DataType.valueOf(subject.name()));
 
-    builder.setRequest(reqBuild.build());
+    builder.setSubscribe(subBuild.build());
     return builder.build();
   }
 
-  public static ApiMsg buildSubscribeMessage(Subject subject, Set<String> focusKeys) {
-    ApiMsg.Builder builder = ApiMsg.newBuilder();
-    builder.setCommand(ApiMsg.Command.SUBSCRIBE)
-        .setId(increment.addAndGet(1))
-        .setDataType(ApiMsg.Type.Request);
+  public static Request buildUnSubscribeMessage(Set<String> symbols, QuoteSubject subject) {
+    Request.Builder builder = Request.newBuilder();
+    builder.setCommand(SocketCommon.Command.UNSUBSCRIBE)
+        .setId(increment.addAndGet(1));
 
-    Request.Builder reqBuild = Request.newBuilder();
-    reqBuild.setSubject(subject.name());
-    if (focusKeys != null && !focusKeys.isEmpty()) {
-      reqBuild.setFocusKeys(HeaderBuilder.join(focusKeys));
-    }
+    Request.Subscribe.Builder subBuild = Request.Subscribe.newBuilder();
+    subBuild.setDataType(SocketCommon.DataType.valueOf(subject.name()));
+    subBuild.setSymbols(HeaderBuilder.join(symbols));
 
-    builder.setRequest(reqBuild.build());
+    builder.setSubscribe(subBuild.build());
     return builder.build();
   }
 
-  public static ApiMsg buildUnSubscribeMessage(Subject subject) {
-    ApiMsg.Builder builder = ApiMsg.newBuilder();
-    builder.setCommand(ApiMsg.Command.UNSUBSCRIBE)
-        .setId(increment.addAndGet(1))
-        .setDataType(ApiMsg.Type.Request);
+  public static Request buildDisconnectMessage() {
+    Request.Builder builder = Request.newBuilder();
+    builder.setCommand(SocketCommon.Command.DISCONNECT)
+        .setId(increment.addAndGet(1));
 
-    Request.Builder reqBuild = Request.newBuilder();
-    reqBuild.setSubject(subject.name());
-
-    builder.setRequest(reqBuild.build());
-    return builder.build();
-  }
-
-  public static ApiMsg buildUnSubscribeMessage(Set<String> symbols, QuoteSubject subject) {
-    ApiMsg.Builder builder = ApiMsg.newBuilder();
-    builder.setCommand(ApiMsg.Command.UNSUBSCRIBE)
-        .setId(increment.addAndGet(1))
-        .setDataType(ApiMsg.Type.Request);
-
-    Request.Builder reqBuild = Request.newBuilder();
-    reqBuild.setSubject(subject.name())
-        .setSymbols(HeaderBuilder.join(symbols));
-
-    builder.setRequest(reqBuild.build());
-    return builder.build();
-  }
-
-  public static ApiMsg buildDisconnectMessage(String login) {
-    ApiMsg.Builder builder = ApiMsg.newBuilder();
-    builder.setCommand(ApiMsg.Command.DISCONNECT).setId(increment.addAndGet(1));
-    builder.setDataType(ApiMsg.Type.Request);
-
-    Request.Builder reqBuild = Request.newBuilder();
-    reqBuild.setLogin(login);
-
-    builder.setRequest(reqBuild.build());
     return builder.build();
   }
 
@@ -251,7 +171,7 @@ public class ProtoMessageUtil {
   public static void testSubscribeQuoteMessage() {
     System.out.println("======SubscribeQuoteMessage");
     Set<String> symbols = Sets.newHashSet("00700");
-    System.out.println(toJson(buildSubscribeMessage(symbols, QuoteSubject.Quote, null)));
+    System.out.println(toJson(buildSubscribeMessage(symbols, QuoteSubject.Quote)));
   }
 
   public static void testUnSubscribeAccountMessage() {
@@ -260,15 +180,15 @@ public class ProtoMessageUtil {
   }
   public static void testSubscribeAccountMessage() {
     System.out.println("======SubscribeAccountMessage");
-    System.out.println(toJson(buildSubscribeMessage("13810712", Subject.Position, null)));
+    System.out.println(toJson(buildSubscribeMessage("13810712", Subject.Position)));
   }
   public static void testSendMsg() {
     System.out.println("======SEND REQ_SUB_SYMBOLS");
-    System.out.println(toJson(buildSendMessage(ReqProtocolType.REQ_SUB_SYMBOLS, null)));
+    System.out.println(toJson(buildSendMessage()));
   }
 
   public static void testBuildDisconnectMessage() {
-    System.out.println(toJson(buildDisconnectMessage("20151141")));
+    System.out.println(toJson(buildDisconnectMessage()));
   }
 
   public static void testDataParse() {

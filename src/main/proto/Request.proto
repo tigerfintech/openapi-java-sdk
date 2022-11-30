@@ -1,20 +1,29 @@
 syntax = "proto3";
+import public "SocketCommon.proto";
+
 package com.tigerbrokers.stock.openapi.client.socket.data.pb;
 
 option java_package = "com.tigerbrokers.stock.openapi.client.socket.data.pb";
 option java_multiple_files = true;
 
 message Request {
+  SocketCommon.Command command = 1;
+  uint32 id = 2;
+  optional Subscribe subscribe = 3;
+  optional Connect connect = 4;
 
-  string acceptVersion = 1;
-  string sdkVersion = 2;
-  string host = 3;
-  string login = 4;
-  string passcode = 5;
-  string subject = 6;
-  string focusKeys = 7;
-  string account = 8;
-  string heartBeat = 9;
-  string symbols = 10;
+  message Connect {
+    string tigerId = 1;
+    string sign = 2;
+    string sdkVersion = 3;
+    optional string acceptVersion = 4;
+    optional uint32 sendInterval = 5;
+    optional uint32 receiveInterval = 6;
+  }
 
+  message Subscribe {
+    SocketCommon.DataType dataType = 1;
+    optional string symbols = 2;
+    optional string account = 3;
+  }
 }

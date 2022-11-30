@@ -4,10 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.socket.ApiCallbackDecoder;
 import com.tigerbrokers.stock.openapi.client.socket.ApiCallbackDecoder4Stomp;
-import com.tigerbrokers.stock.openapi.client.socket.data.pb.ApiMsg;
 import com.tigerbrokers.stock.openapi.client.socket.IdleTriggerHandler;
 import com.tigerbrokers.stock.openapi.client.socket.WebSocketClient;
 import com.tigerbrokers.stock.openapi.client.socket.WebSocketHandler;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.util.builder.HeaderBuilder;
 import io.netty.channel.ChannelHandlerContext;
@@ -119,17 +119,17 @@ public class ApiCallbackDecoderUtils {
     }
   }
 
-  public static void executor(ChannelHandlerContext ctx, ApiMsg msg, ApiCallbackDecoder decoder) {
-    if (null == decoder || null == ctx || null == msg || null == msg.getCommand()) {
+  public static void executor(ChannelHandlerContext ctx, Response response, ApiCallbackDecoder decoder) {
+    if (null == decoder || null == ctx || null == response || null == response.getCommand()) {
       return;
     }
 
-    switch (msg.getCommand()) {
+    switch (response.getCommand()) {
       case CONNECTED:
-        ApiLogger.info("connect token validation success:{}", ProtoMessageUtil.toJson(msg));
+        ApiLogger.info("connect token validation success:{}", ProtoMessageUtil.toJson(response));
         WebSocketClient.getInstance().connectCountDown();
-        if (decoder.getCallback() != null && !StringUtils.isEmpty(msg.getContent())) {
-          JSONObject jsonObject = JSONObject.parseObject(msg.getContent());
+        if (decoder.getCallback() != null && !StringUtils.isEmpty(response.getMsg())) {
+          JSONObject jsonObject = JSONObject.parseObject(response.getMsg());
           // set version
           HeaderBuilder.setUseVersion(jsonObject.getString(VERSION));
           // set hearbeat time
@@ -164,32 +164,28 @@ public class ApiCallbackDecoderUtils {
         }
         break;
       case MESSAGE:
-        decoder.handle(msg);
-        break;
-      case RECEIPT:
+        decoder.handle(response);
         break;
       case ERROR:
         if (decoder.getCallback() != null) {
-          if (msg.getCode() > 0) {
+          if (response.getCode() > 0) {
             try {
-              if (msg.getCode() == TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode()) {
-                String errMessage = msg.getMessage() == null
-                    ? TigerApiCode.CONNECTION_KICK_OFF_ERROR.getMessage() : msg.getMessage();
+              if (response.getCode() == TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode()) {
+                String errMessage = response.getMsg() == null
+                    ? TigerApiCode.CONNECTION_KICK_OFF_ERROR.getMessage() : response.getMsg();
                 ApiLogger.info(errMessage);
                 // close the connection(Do not send disconnect command)
                 WebSocketClient.getInstance().closeConnect(false);
                 // callback
-                decoder.getCallback().connectionKickoff(msg.getCode(), errMessage);
+                decoder.getCallback().connectionKickoff(response.getCode(), errMessage);
                 return;
               }
             } catch (Throwable th) {
               // ignore...
             }
-            decoder.getCallback().error(msg.getId(), msg.getCode(), msg.getMessage());
-          } else if (msg.getMessage() != null) {
-            decoder.getCallback().error(msg.getMessage());
-          } else if (msg.getContent() != null) {
-            decoder.getCallback().error(msg.getContent());
+            decoder.getCallback().error(response.getId(), response.getCode(), response.getMsg());
+          } else if (response.getMsg() != null) {
+            decoder.getCallback().error(response.getMsg());
           } else {
             decoder.getCallback().error("unknown error");
           }

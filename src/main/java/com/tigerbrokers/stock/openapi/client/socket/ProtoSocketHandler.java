@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
-import com.tigerbrokers.stock.openapi.client.socket.data.pb.ApiMsg;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
 import com.tigerbrokers.stock.openapi.client.util.ApiCallbackDecoderUtils;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.ProtoMessageUtil;
@@ -11,7 +12,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 @ChannelHandler.Sharable
-public class ProtoSocketHandler extends SimpleChannelInboundHandler<ApiMsg> {
+public class ProtoSocketHandler extends SimpleChannelInboundHandler<Response> {
 
   private ApiAuthentication authentication;
   private ApiCallbackDecoder decoder;
@@ -34,18 +35,12 @@ public class ProtoSocketHandler extends SimpleChannelInboundHandler<ApiMsg> {
 
   @Override
   public void channelActive(ChannelHandlerContext ctx) throws Exception {
-    ApiMsg connectMsg;
-    if (0 == this.clientSendInterval && 0 == this.clientReceiveInterval) {
-      connectMsg = ProtoMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
-          authentication.getVersion());
-    } else {
-      connectMsg = ProtoMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
-          authentication.getVersion(), this.clientSendInterval == 0 ? 0 : this.clientSendInterval + HEART_BEAT_SPAN,
-          this.clientReceiveInterval == 0 ? 0 : this.clientReceiveInterval - HEART_BEAT_SPAN);
-    }
+    Request connect = ProtoMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
+        authentication.getVersion(), this.clientSendInterval == 0 ? 0 : this.clientSendInterval + HEART_BEAT_SPAN,
+        this.clientReceiveInterval == 0 ? 0 : this.clientReceiveInterval - HEART_BEAT_SPAN);
     ApiLogger.info("netty channel active. channel:{}, preparing to send connect token:{}",
-        ctx.channel().id().asShortText(), ProtoMessageUtil.toJson(connectMsg.getRequest()));
-    ctx.writeAndFlush(connectMsg).addListener(new ChannelFutureListener() {
+        ctx.channel().id().asShortText(), ProtoMessageUtil.toJson(connect.getConnect()));
+    ctx.writeAndFlush(connect).addListener(new ChannelFutureListener() {
       @Override
       public void operationComplete(ChannelFuture future) {
         if (future.isSuccess()) {
@@ -67,13 +62,13 @@ public class ProtoSocketHandler extends SimpleChannelInboundHandler<ApiMsg> {
   }
 
   @Override
-  public void channelRead0(ChannelHandlerContext ctx, ApiMsg msg) throws Exception {
+  public void channelRead0(ChannelHandlerContext ctx, Response msg) throws Exception {
     ApiLogger.debug("received msg from server: {}", ProtoMessageUtil.toJson(msg));
 
     try {
       ApiCallbackDecoderUtils.executor(ctx, msg, decoder);
     } catch (Throwable th) {
-      ApiLogger.error("api callback fail. frame:{}", msg, th);
+      ApiLogger.error("api callback fail. response:{}", ProtoMessageUtil.toJson(msg), th);
     }
   }
 

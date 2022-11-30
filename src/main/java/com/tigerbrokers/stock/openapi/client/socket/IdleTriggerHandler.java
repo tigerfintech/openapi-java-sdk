@@ -32,7 +32,7 @@ public class IdleTriggerHandler extends ChannelInboundHandlerAdapter {
       IdleState state = ((IdleStateEvent) evt).state();
       if (IdleState.WRITER_IDLE == state) {
         if (WebSocketClient.getInstance().isUseProtobuf()) {
-          ctx.channel().writeAndFlush(ProtoMessageUtil.buildCommonSendMessage(HEART_BEAT));
+          ctx.channel().writeAndFlush(ProtoMessageUtil.buildHeartBeatMessage());
         } else {
           ctx.channel().writeAndFlush(StompMessageUtil.buildCommonSendMessage(HEART_BEAT));
         }

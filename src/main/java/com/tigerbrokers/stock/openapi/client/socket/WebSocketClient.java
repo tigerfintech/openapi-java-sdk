@@ -3,11 +3,11 @@ package com.tigerbrokers.stock.openapi.client.socket;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
-import com.tigerbrokers.stock.openapi.client.socket.data.pb.ApiMsg;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
-import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteKeyType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
@@ -43,8 +43,6 @@ import io.netty.util.internal.ConcurrentSet;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
@@ -234,7 +232,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
               final ProtoSocketHandler handler =
                   new ProtoSocketHandler(authentication, apiComposeCallback, clientSendInterval, clientReceiveInterval);
               p.addLast(SOCKET_DECODER, new ProtobufVarint32FrameDecoder());
-              p.addLast(new ProtobufDecoder(ApiMsg.getDefaultInstance()));
+              p.addLast(new ProtobufDecoder(Response.getDefaultInstance()));
               p.addLast(new ProtobufVarint32LengthFieldPrepender());
               p.addLast(SOCKET_ENCODER, new ProtobufEncoder());
               p.addLast("webSocketHandler", handler);
@@ -417,7 +415,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
       return;
     }
     Object disconnectData = this.isProtobuf
-        ? ProtoMessageUtil.buildDisconnectMessage(authentication.getTigerId())
+        ? ProtoMessageUtil.buildDisconnectMessage()
         : StompMessageUtil.buildDisconnectMessage(authentication.getTigerId());
     ChannelFuture channelFuture = channel.writeAndFlush(disconnectData);
     try {
@@ -500,21 +498,11 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   @Override
   public String subscribe(Subject subject) {
-    return subscribe(subject, null);
-  }
-
-  @Override
-  public String subscribe(Subject subject, List<String> focusKeys) {
-    return subscribe(null, subject, focusKeys);
+    return subscribe(null, subject);
   }
 
   @Override
   public String subscribe(String account, Subject subject) {
-    return subscribe(account, subject, null);
-  }
-
-  @Override
-  public String subscribe(String account, Subject subject, List<String> focusKeys) {
     if (!isConnected()) {
       notConnect();
       return null;
@@ -522,10 +510,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
     String returnStr;
     Object subscribeData;
     if (this.isProtobuf) {
-      subscribeData = ProtoMessageUtil.buildSubscribeMessage(account, subject, focusKeys == null ? null : new HashSet<>(focusKeys));
-      returnStr = String.valueOf(((ApiMsg)subscribeData).getId());
+      subscribeData = ProtoMessageUtil.buildSubscribeMessage(account, subject);
+      returnStr = String.valueOf(((Request)subscribeData).getId());
     } else {
-      subscribeData = StompMessageUtil.buildSubscribeMessage(account, subject, focusKeys == null ? null : new HashSet<>(focusKeys));
+      subscribeData = StompMessageUtil.buildSubscribeMessage(account, subject, null);
       returnStr = ((StompFrame)subscribeData).headers().getAsString(StompHeaders.ID);
     }
     channel.writeAndFlush(subscribeData);
@@ -544,7 +532,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     Object unsubscribeData;
     if (this.isProtobuf) {
       unsubscribeData = ProtoMessageUtil.buildUnSubscribeMessage(subject);
-      returnStr = String.valueOf(((ApiMsg)unsubscribeData).getId());
+      returnStr = String.valueOf(((Request)unsubscribeData).getId());
     } else {
       unsubscribeData = StompMessageUtil.buildUnSubscribeMessage(subject);
       returnStr = ((StompFrame)unsubscribeData).headers().getAsString(StompHeaders.ID);
@@ -558,17 +546,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
   @Override
   public String subscribeQuote(Set<String> symbols) {
     return subscribeQuote(symbols, QuoteSubject.Quote);
-  }
-
-  @Override
-  public String subscribeQuote(Set<String> symbols, QuoteKeyType quoteKeyType) {
-    List<String> focusKeys = (quoteKeyType == null ? null : quoteKeyType.getFocusKeys());
-    return subscribeQuote(symbols, QuoteSubject.Quote, focusKeys);
-  }
-
-  @Override
-  public String subscribeQuote(Set<String> symbols, List<String> focusKeys) {
-    return subscribeQuote(symbols, QuoteSubject.Quote, focusKeys);
   }
 
   @Override
@@ -617,10 +594,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   private String subscribeQuote(Set<String> symbols, QuoteSubject subject) {
-    return subscribeQuote(symbols, subject, null);
-  }
-
-  private String subscribeQuote(Set<String> symbols, QuoteSubject subject, List<String> focusKeys) {
     if (!isConnected()) {
       notConnect();
       return null;
@@ -628,15 +601,15 @@ public class WebSocketClient implements SubscribeAsyncApi {
     String returnStr;
     Object subscribeData;
     if (this.isProtobuf) {
-      subscribeData = ProtoMessageUtil.buildSubscribeMessage(symbols, subject, focusKeys == null ? null : new HashSet<>(focusKeys));
-      returnStr = String.valueOf(((ApiMsg)subscribeData).getId());
+      subscribeData = ProtoMessageUtil.buildSubscribeMessage(symbols, subject);
+      returnStr = String.valueOf(((Request)subscribeData).getId());
     } else {
-      subscribeData = StompMessageUtil.buildSubscribeMessage(symbols, subject, focusKeys == null ? null : new HashSet<>(focusKeys));
+      subscribeData = StompMessageUtil.buildSubscribeMessage(symbols, subject, null);
       returnStr = ((StompFrame)subscribeData).headers().getAsString(StompHeaders.ID);
     }
     channel.writeAndFlush(subscribeData);
     subscribeSymbols.addAll(symbols);
-    ApiLogger.info("send subscribe [{}] message, symbols:{},focusKeys:{}", subject, symbols, focusKeys);
+    ApiLogger.info("send subscribe [{}] message, symbols:{}", subject, symbols);
 
     return returnStr;
   }
@@ -650,7 +623,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     Object unsubscribeData;
     if (this.isProtobuf) {
       unsubscribeData = ProtoMessageUtil.buildUnSubscribeMessage(symbols, subject);
-      returnStr = String.valueOf(((ApiMsg)unsubscribeData).getId());
+      returnStr = String.valueOf(((Request)unsubscribeData).getId());
     } else {
       unsubscribeData = StompMessageUtil.buildUnSubscribeMessage(symbols, subject);
       returnStr = ((StompFrame)unsubscribeData).headers().getAsString(StompHeaders.ID);
@@ -676,8 +649,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
     String returnStr;
     Object msgData;
     if (this.isProtobuf) {
-      msgData = ProtoMessageUtil.buildSendMessage(reqType, message);
-      returnStr = String.valueOf(((ApiMsg)msgData).getId());
+      msgData = ProtoMessageUtil.buildSendMessage();
+      returnStr = String.valueOf(((Request)msgData).getId());
     } else {
       msgData = StompMessageUtil.buildSendMessage(reqType, message);
       returnStr = ((StompFrame)msgData).headers().getAsString(StompHeaders.ID);

@@ -8,8 +8,6 @@ import com.tigerbrokers.stock.openapi.client.socket.data.pb.OrderTransactionData
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.PositionData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteDepthData;
-import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteFutureData;
-import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteOptionData;
 
 /**
  * Description:
@@ -66,12 +64,12 @@ public abstract class ApiComposeCallback4Stomp implements ApiComposeCallback {
   }
 
   @Override
-  public void optionChange(QuoteOptionData data) {
+  public void optionChange(QuoteData data) {
     // do nothing for protobuf data
   }
 
   @Override
-  public void futureChange(QuoteFutureData data) {
+  public void futureChange(QuoteData data) {
     // do nothing for protobuf data
   }
 
