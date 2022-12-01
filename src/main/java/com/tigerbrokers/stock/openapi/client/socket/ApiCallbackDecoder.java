@@ -134,7 +134,7 @@ public class ApiCallbackDecoder {
   }
 
   private void processDefault(Response msg) {
-    ApiLogger.info("retType:{} cannot be processed.", msg.getRetType());
+    ApiLogger.info("receive MESSAGE's code:{} cannot be processed.", msg.getCode());
   }
 
   public void processHeartBeat(final String content) {

@@ -23,7 +23,8 @@ public class ProtoMessageUtilTest {
   }
 
   public static void main(String[] args) {
-    //testBuildDisconnectMessage();
+    testBuildDisconnectMessage();
+    testBuildHeartBeatMessage();
     //testDataParse();
 
     testSendMsg();
@@ -57,6 +58,9 @@ public class ProtoMessageUtilTest {
   public static void testSendMsg() {
     System.out.println("======SEND REQ_SUB_SYMBOLS");
     System.out.println(ProtoMessageUtil.toJson(ProtoMessageUtil.buildSendMessage()));
+  }
+  public static void testBuildHeartBeatMessage() {
+    System.out.println(ProtoMessageUtil.toJson(ProtoMessageUtil.buildHeartBeatMessage()));
   }
 
   public static void testBuildDisconnectMessage() {

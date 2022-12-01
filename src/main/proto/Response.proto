@@ -10,10 +10,9 @@ option java_multiple_files = true;
 message Response {
 
   SocketCommon.Command command = 1;
-  int32 retType = 2;
-  optional uint32 id = 3; // from request's id
-  optional int32 code = 4;
-  optional string msg = 5;
-  optional PushData body = 6;
+  optional uint32 id = 2; // from request's id
+  optional int32 code = 3;
+  optional string msg = 4;
+  optional PushData body = 5;
 
 }

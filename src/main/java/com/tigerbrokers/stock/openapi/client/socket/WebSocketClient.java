@@ -182,10 +182,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
     if (this.apiComposeCallback == null) {
       throw new IllegalArgumentException("apiComposeCallback is missing.");
     }
-    if (apiComposeCallback instanceof ApiComposeCallback) {
-      this.isProtobuf = true;
-    } else if (apiComposeCallback instanceof ApiComposeCallback4Stomp) {
+    if (apiComposeCallback instanceof ApiComposeCallback4Stomp) {
       this.isProtobuf = false;
+    } else if (apiComposeCallback instanceof ApiComposeCallback) {
+      this.isProtobuf = true;
     } else {
       throw new IllegalArgumentException("please use ApiComposeCallback's instance.");
     }
@@ -637,22 +637,18 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   @Override
   public String getSubscribedSymbols() {
-    return sendMessage(ReqProtocolType.REQ_SUB_SYMBOLS, null);
-  }
-
-  private String sendMessage(int reqType, String message) {
     if (!isConnected()) {
       notConnect();
       return null;
     }
-    ApiLogger.info("reqType:{},send message:{}", reqType, message);
+    ApiLogger.info("send getSubscribedSymbols message");
     String returnStr;
     Object msgData;
     if (this.isProtobuf) {
       msgData = ProtoMessageUtil.buildSendMessage();
       returnStr = String.valueOf(((Request)msgData).getId());
     } else {
-      msgData = StompMessageUtil.buildSendMessage(reqType, message);
+      msgData = StompMessageUtil.buildSendMessage(ReqProtocolType.REQ_SUB_SYMBOLS, null);
       returnStr = ((StompFrame)msgData).headers().getAsString(StompHeaders.ID);
     }
     channel.writeAndFlush(msgData);
