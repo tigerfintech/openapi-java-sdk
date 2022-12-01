@@ -162,13 +162,13 @@ public class ApiCallbackDecoder4Stomp extends ApiCallbackDecoder {
   private void processSubscribeEnd() {
     String subject = stompFrame.headers().getAsString(StompHeaders.SUBSCRIPTION);
     String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    callback.subscribeEnd(id, subject, JSONObject.parseObject(content));
+    callback.subscribeEnd(StringUtils.toInt(id, 0), subject, content);
   }
 
   private void processCancelSubscribeEnd() {
     String subject = stompFrame.headers().getAsString(StompHeaders.SUBSCRIPTION);
     String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    callback.cancelSubscribeEnd(id, subject, JSONObject.parseObject(content));
+    callback.cancelSubscribeEnd(StringUtils.toInt(id, 0), subject, content);
   }
 
   private void processErrorEnd() {
@@ -186,7 +186,7 @@ public class ApiCallbackDecoder4Stomp extends ApiCallbackDecoder {
     ApiLogger.info("ret-type:{} cannot be processed.", retType);
   }
 
-  private void processHeartBeat(final String content) {
+  public void processHeartBeat(final String content) {
     callback.hearBeat(content);
   }
 

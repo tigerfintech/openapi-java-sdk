@@ -1,7 +1,5 @@
 package com.tigerbrokers.stock.openapi.client.constant;
 
-import io.netty.handler.codec.stomp.StompHeaders;
-
 /**
  * Description:
  * Created by lijiawen on 2018/05/23.
@@ -12,6 +10,7 @@ public interface RspProtocolType {
   String ID_HEADER = "id";
 
   int CONNECTION_END = -1;
+  int DEFAULT_PUSH_DATA_END = 0;
 
   /**
    * 交易

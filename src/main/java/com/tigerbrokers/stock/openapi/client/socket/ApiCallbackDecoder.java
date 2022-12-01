@@ -10,6 +10,7 @@ import com.tigerbrokers.stock.openapi.client.util.ProtoMessageUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import com.tigerbrokers.stock.openapi.client.util.TradeTickUtil;
 
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.DEFAULT_PUSH_DATA_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.ERROR_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_CANCEL_SUBSCRIBE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_QUOTE_CHANGE_END;
@@ -20,7 +21,6 @@ import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUB
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ORDER_STATUS;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ORDER_TRANSACTION;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_POSITION;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.HEART_BEAT;
 
 /**
  * Description:
@@ -35,20 +35,17 @@ public class ApiCallbackDecoder {
   }
 
   public synchronized void handle(Response msg) {
-    if (SocketCommon.Command.HEARTBEAT == msg.getCommand()) {
-      processHeartBeat(HEART_BEAT);
-      return;
-    }
-    int retType = msg.getRetType();
+    int code = msg.getCode();
 
-    switch (retType) {
+    switch (code) {
+      case DEFAULT_PUSH_DATA_END:
       case SUBSCRIBE_POSITION:
       case SUBSCRIBE_ASSET:
       case SUBSCRIBE_ORDER_STATUS:
       case SUBSCRIBE_ORDER_TRANSACTION:
       case GET_QUOTE_CHANGE_END:
       case GET_TRADING_TICK_END:
-        processSubscribeQuoteChange(msg);
+        processSubscribeDataChange(msg);
         break;
       case GET_SUB_SYMBOLS_END:
         processGetSubscribedSymbols(msg);
@@ -72,23 +69,7 @@ public class ApiCallbackDecoder {
     return callback;
   }
 
-  private void processPosition(Response msg) {
-    callback.positionChange(msg.getBody().getPositionData());
-  }
-
-  private void processAsset(Response msg) {
-    callback.assetChange(msg.getBody().getAssetData());
-  }
-
-  private void processOrderStatus(Response msg) {
-    callback.orderStatusChange(msg.getBody().getOrderStatusData());
-  }
-
-  private void processOrderTransaction(Response msg) {
-    callback.orderTransactionChange(msg.getBody().getOrderTransactionData());
-  }
-
-  private void processSubscribeQuoteChange(Response msg) {
+  private void processSubscribeDataChange(Response msg) {
     PushData pushData = msg.getBody();
     if (pushData == null || pushData.getDataType() == null) {
       return;
@@ -134,20 +115,14 @@ public class ApiCallbackDecoder {
 
   private void processSubscribeEnd(Response msg) {
     SocketCommon.DataType dataType = msg.getBody() == null ? null : msg.getBody().getDataType();
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("code", msg.getCode());
-    jsonObject.put("message", msg.getMsg());
-    callback.subscribeEnd(String.valueOf(msg.getId()),
-        dataType == null ? null : dataType.name(), jsonObject);
+    callback.subscribeEnd(msg.getId(),
+        dataType == null ? null : dataType.name(), msg.getMsg());
   }
 
   private void processCancelSubscribeEnd(Response msg) {
     SocketCommon.DataType dataType = msg.getBody() == null ? null : msg.getBody().getDataType();
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("code", msg.getCode());
-    jsonObject.put("message", msg.getMsg());
-    callback.cancelSubscribeEnd(String.valueOf(msg.getId()),
-        dataType == null ? null : dataType.name(), jsonObject);
+    callback.cancelSubscribeEnd(msg.getId(),
+        dataType == null ? null : dataType.name(), msg.getMsg());
   }
 
   private void processErrorEnd(Response msg) {
@@ -162,7 +137,7 @@ public class ApiCallbackDecoder {
     ApiLogger.info("retType:{} cannot be processed.", msg.getRetType());
   }
 
-  private void processHeartBeat(final String content) {
+  public void processHeartBeat(final String content) {
     callback.hearBeat(content);
   }
 

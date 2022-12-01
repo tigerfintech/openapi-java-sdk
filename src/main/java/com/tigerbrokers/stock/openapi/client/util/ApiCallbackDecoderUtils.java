@@ -163,6 +163,9 @@ public class ApiCallbackDecoderUtils {
           }
         }
         break;
+      case HEARTBEAT:
+        decoder.processHeartBeat(TigerApiConstants.HEART_BEAT);
+        break;
       case MESSAGE:
         decoder.handle(response);
         break;

@@ -34,9 +34,9 @@ public interface SubscribeApiCallback {
 
   void depthQuoteChange(QuoteDepthData data);
 
-  void subscribeEnd(String id, String subject, JSONObject jsonObject);
+  void subscribeEnd(int id, String subject, String result);
 
-  void cancelSubscribeEnd(String id, String subject, JSONObject jsonObject);
+  void cancelSubscribeEnd(int id, String subject, String result);
 
   void getSubscribedSymbolEnd(SubscribedSymbol subscribedSymbol);
 }
