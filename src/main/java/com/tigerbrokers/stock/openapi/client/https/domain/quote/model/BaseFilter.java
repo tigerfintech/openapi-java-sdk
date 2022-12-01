@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.quote.model;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.struct.enums.StockField;
 
 import java.io.Serializable;
@@ -14,12 +15,16 @@ import java.io.Serializable;
 public class BaseFilter implements Serializable {
 
     /** StockField 简单属性 */
+    @JSONField(name = "field_name")
     private StockField fieldName;
     /** 区间下限（闭区间），不传代表下限为 -∞ */
+    @JSONField(name = "filter_min")
     private Double filterMin;
     /** 区间上限（闭区间），不传代表上限为 +∞ */
+    @JSONField(name = "filter_max")
     private Double filterMax;
     /** 该字段是否不需要筛选，True：不筛选，False：筛选。不传默认筛选 */
+    @JSONField(name = "is_no_filter")
     private boolean isNoFilter = false;
 
     public static BaseFilter.BaseFilterBuilder builder() {

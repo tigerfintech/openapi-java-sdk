@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.quote.model;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MultiTagField;
 
 import java.io.Serializable;
@@ -14,10 +15,13 @@ import java.util.List;
 public class MultiTagsRelationFilter implements Serializable {
 
     /** MultiTagField 获取标签枚举值 */
+    @JSONField(name = "field_name")
     private MultiTagField fieldName;
     /** 多个tag列表 */
+    @JSONField(name = "tag_list")
     private List<String> tagList;
     /** 该字段是否不需要筛选，True：不筛选，False：筛选。不传默认筛选 */
+    @JSONField(name = "is_no_filter")
     private boolean isNoFilter = false;
 
     public MultiTagsRelationFilter(MultiTagField fieldName, List<String> tagList, boolean isNoFilter) {

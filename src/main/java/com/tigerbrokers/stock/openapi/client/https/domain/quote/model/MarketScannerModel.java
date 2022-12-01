@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.quote.model;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 
@@ -13,12 +14,18 @@ import java.util.List;
  */
 public class MarketScannerModel extends ApiModel {
     private Market market;
+    @JSONField(name = "base_filter_list")
     private List<BaseFilter> baseFilterList;
+    @JSONField(name = "accumulate_filter_list")
     private List<AccumulateFilter> accumulateFilterList;
+    @JSONField(name = "financial_filter_list")
     private List<FinancialFilter> financialFilterList;
+    @JSONField(name = "multi_tags_filter_list")
     private List<MultiTagsRelationFilter> multiTagsFilterList;
+    @JSONField(name = "sort_field_data")
     private SortFieldData sortFieldData;
     private int page;
+    @JSONField(name = "page_size")
     private int pageSize;
 
     public MarketScannerModel() {

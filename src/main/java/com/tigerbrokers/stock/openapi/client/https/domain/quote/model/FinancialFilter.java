@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.quote.model;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.struct.enums.FinancialField;
 import com.tigerbrokers.stock.openapi.client.struct.enums.FinancialPeriod;
 
@@ -14,12 +15,16 @@ import java.io.Serializable;
 public class FinancialFilter implements Serializable {
 
     /** FinancialField 财务属性 */
+    @JSONField(name = "field_name")
     private FinancialField fieldName;
     /** 区间下限（闭区间），不传代表下限为 -∞ 如果为百分位数，不需要加%，例如10%，数值为10即可 */
+    @JSONField(name = "filter_min")
     private Double filterMin;
     /** 区间上限（闭区间），不传代表上限为 +∞ */
+    @JSONField(name = "filter_max")
     private Double filterMax;
     /** 该字段是否不需要筛选，True：不筛选，False：筛选。不传默认筛选 */
+    @JSONField(name = "is_no_filter")
     private boolean isNoFilter = false;
     /** FinancialQuarter 财报累积时间 */
     private FinancialPeriod quarter;
