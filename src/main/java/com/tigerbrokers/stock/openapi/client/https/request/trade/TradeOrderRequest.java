@@ -214,8 +214,23 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
   }
 
   public TradeOrderRequest withUserMark(String userMark) {
+    return setUserMark(userMark);
+  }
+  public TradeOrderRequest setUserMark(String userMark) {
     TradeOrderModel model = (TradeOrderModel) getApiModel();
     model.setUserMark(userMark);
+    return this;
+  }
+
+  public TradeOrderRequest setTimeInForce(TimeInForce timeInForce) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setTimeInForce(timeInForce);
+    return this;
+  }
+
+  public TradeOrderRequest setExpireTime(Long expireTime) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setExpireTime(expireTime);
     return this;
   }
 
