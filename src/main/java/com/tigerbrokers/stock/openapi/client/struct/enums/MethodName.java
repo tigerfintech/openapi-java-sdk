@@ -57,6 +57,7 @@ public enum MethodName {
   QUOTE_DELAY("quote_delay", MethodType.QUOTE),
   /** trading calendar */
   TRADING_CALENDAR("trading_calendar", MethodType.QUOTE),
+  MARKET_SCANNER("market_scanner", MethodType.QUOTE),
 
   /**
    * option quote
