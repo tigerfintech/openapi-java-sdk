@@ -2,10 +2,13 @@ package com.tigerbrokers.stock.openapi.client.https.validator;
 
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteCapitalFlowModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteCapitalModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteContractModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteDepthModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteHistoryTimelineModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteMarketModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteStockBrokerModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteStockTradeModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteSymbolModel;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
@@ -68,6 +71,30 @@ public class QuoteRequestValidator implements RequestValidator<ApiModel> {
         if (StringUtils.isEmpty(((QuoteHistoryTimelineModel)model).getDate())) {
           throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "date");
         }
+      }
+    } else if (model instanceof QuoteStockBrokerModel) {
+      QuoteStockBrokerModel quoteStockBrokerModel = (QuoteStockBrokerModel) model;
+      if (StringUtils.isEmpty(quoteStockBrokerModel.getSymbol())) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "symbol");
+      }
+    } else if (model instanceof QuoteCapitalModel) {
+      QuoteCapitalModel quoteCapitalModel = (QuoteCapitalModel) model;
+      if (StringUtils.isEmpty(quoteCapitalModel.getSymbol())) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "symbol");
+      }
+      if (model instanceof QuoteCapitalFlowModel) {
+        if (StringUtils.isEmpty(((QuoteCapitalFlowModel)quoteCapitalModel).getPeriod())) {
+          throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "period");
+        }
+      }
+      if (StringUtils.isEmpty(quoteCapitalModel.getMarket())) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "market");
+      }
+      try {
+        Market market = Market.valueOf(quoteCapitalModel.getMarket().toUpperCase());
+        quoteCapitalModel.setMarket(market.name());
+      } catch (Exception e) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "market");
       }
     }
   }
