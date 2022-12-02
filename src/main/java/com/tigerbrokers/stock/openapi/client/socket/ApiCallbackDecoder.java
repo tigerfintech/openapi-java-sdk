@@ -7,6 +7,7 @@ import com.tigerbrokers.stock.openapi.client.socket.data.pb.SocketCommon;
 import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.ProtoMessageUtil;
+import com.tigerbrokers.stock.openapi.client.util.QuoteDataUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import com.tigerbrokers.stock.openapi.client.util.TradeTickUtil;
 
@@ -77,13 +78,22 @@ public class ApiCallbackDecoder {
     SocketCommon.DataType dataType = pushData.getDataType();
     switch (dataType) {
       case Quote:
-        callback.quoteChange(pushData.getQuoteData());
+        QuoteDataUtil.convertToBasicData(pushData.getQuoteData()).ifPresent(
+            x -> callback.quoteChange(x));
+        QuoteDataUtil.convertToAskBidData(pushData.getQuoteData()).ifPresent(
+            x -> callback.quoteAskBidChange(x));
         break;
       case Option:
-        callback.optionChange(pushData.getQuoteData());
+        QuoteDataUtil.convertToBasicData(pushData.getQuoteData()).ifPresent(
+            x -> callback.optionChange(x));
+        QuoteDataUtil.convertToAskBidData(pushData.getQuoteData()).ifPresent(
+            x -> callback.optionAskBidChange(x));
         break;
       case Future:
-        callback.futureChange(pushData.getQuoteData());
+        QuoteDataUtil.convertToBasicData(pushData.getQuoteData()).ifPresent(
+            x -> callback.futureChange(x));
+        QuoteDataUtil.convertToAskBidData(pushData.getQuoteData()).ifPresent(
+            x -> callback.futureAskBidChange(x));
         break;
       case TradeTick:
         callback.tradeTickChange(TradeTickUtil.convert(pushData.getTradeTickData()));

@@ -6,7 +6,8 @@ import com.tigerbrokers.stock.openapi.client.socket.data.pb.AssetData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.OrderStatusData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.OrderTransactionData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.PositionData;
-import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteBBOData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteBasicData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteDepthData;
 
 /**
@@ -54,22 +55,34 @@ public abstract class ApiComposeCallback4Stomp implements ApiComposeCallback {
   }
 
   @Override
-  public void quoteChange(QuoteData data) {
-    // do nothing for protobuf data
-  }
-
-  @Override
   public void tradeTickChange(TradeTick data) {
     // do nothing for protobuf data
   }
 
   @Override
-  public void optionChange(QuoteData data) {
+  public void quoteChange(QuoteBasicData data) {
+    // do nothing for protobuf data
+  }
+  @Override
+  public void quoteAskBidChange(QuoteBBOData data) {
     // do nothing for protobuf data
   }
 
   @Override
-  public void futureChange(QuoteData data) {
+  public void optionChange(QuoteBasicData data) {
+    // do nothing for protobuf data
+  }
+  @Override
+  public void optionAskBidChange(QuoteBBOData data) {
+    // do nothing for protobuf data
+  }
+
+  @Override
+  public void futureChange(QuoteBasicData data) {
+    // do nothing for protobuf data
+  }
+  @Override
+  public void futureAskBidChange(QuoteBBOData data) {
     // do nothing for protobuf data
   }
 

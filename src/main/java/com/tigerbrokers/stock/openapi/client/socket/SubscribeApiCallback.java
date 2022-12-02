@@ -6,7 +6,8 @@ import com.tigerbrokers.stock.openapi.client.socket.data.pb.AssetData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.OrderStatusData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.OrderTransactionData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.PositionData;
-import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteBBOData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteBasicData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteDepthData;
 import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
 
@@ -24,13 +25,16 @@ public interface SubscribeApiCallback {
 
   void assetChange(AssetData data);
 
-  void quoteChange(QuoteData data);
-
   void tradeTickChange(TradeTick data);
 
-  void optionChange(QuoteData data);
+  void quoteChange(QuoteBasicData data);
+  void quoteAskBidChange(QuoteBBOData data);
 
-  void futureChange(QuoteData data);
+  void optionChange(QuoteBasicData data);
+  void optionAskBidChange(QuoteBBOData data);
+
+  void futureChange(QuoteBasicData data);
+  void futureAskBidChange(QuoteBBOData data);
 
   void depthQuoteChange(QuoteDepthData data);
 
