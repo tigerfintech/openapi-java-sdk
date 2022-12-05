@@ -128,40 +128,7 @@ public class ApiCallbackDecoderUtils {
       case CONNECTED:
         ApiLogger.info("connect token validation success:{}", ProtoMessageUtil.toJson(response));
         WebSocketClient.getInstance().connectCountDown();
-        if (decoder.getCallback() != null && !StringUtils.isEmpty(response.getMsg())) {
-          JSONObject jsonObject = JSONObject.parseObject(response.getMsg());
-          // set version
-          HeaderBuilder.setUseVersion(jsonObject.getString(VERSION));
-          // set hearbeat time
-          String value = jsonObject.getString(TigerApiConstants.HEART_BEAT);
-          if (!StringUtils.isEmpty(value)) {
-            String[] arrayValue = value.split(",");
-            if (null != arrayValue && arrayValue.length >= 2) {
-              int serverSendInterval = StringUtils.isEmpty(arrayValue[0]) ? 0 : Integer.valueOf(arrayValue[0]);
-              int serverReceiveInterval = StringUtils.isEmpty(arrayValue[1]) ? 0 : Integer.valueOf(arrayValue[1]);
-              if (serverSendInterval > 0 || serverReceiveInterval > 0) {
-                if (null == ctx.channel().pipeline().get(IDLE_STATE_HANDLER)) {
-                  serverSendInterval =
-                      serverSendInterval == 0 ? 0 : serverSendInterval + WebSocketHandler.HEART_BEAT_SPAN;
-                  serverReceiveInterval =
-                      serverReceiveInterval == 0 ? 0 : serverReceiveInterval - WebSocketHandler.HEART_BEAT_SPAN;
-
-                  ctx.channel().pipeline().addBefore(WebSocketClient.SOCKET_ENCODER, IDLE_STATE_HANDLER,
-                      new IdleStateHandler(serverSendInterval, serverReceiveInterval, 0, TimeUnit.MILLISECONDS));
-
-                  ctx.channel()
-                      .pipeline()
-                      .addAfter(IDLE_STATE_HANDLER, IDLE_TRIGGER_HANDLER, new IdleTriggerHandler(decoder));
-                }
-              }
-              decoder.getCallback().connectionAck(serverSendInterval, serverReceiveInterval);
-            } else {
-              decoder.getCallback().connectionAck();
-            }
-          } else {
-            decoder.getCallback().connectionAck();
-          }
-        }
+        receiveConnected(ctx, decoder, response.getMsg());
         break;
       case HEARTBEAT:
         decoder.processHeartBeat(TigerApiConstants.HEART_BEAT);
@@ -170,29 +137,7 @@ public class ApiCallbackDecoderUtils {
         decoder.handle(response);
         break;
       case ERROR:
-        if (decoder.getCallback() != null) {
-          if (response.getCode() > 0) {
-            try {
-              if (response.getCode() == TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode()) {
-                String errMessage = response.getMsg() == null
-                    ? TigerApiCode.CONNECTION_KICK_OFF_ERROR.getMessage() : response.getMsg();
-                ApiLogger.info(errMessage);
-                // close the connection(Do not send disconnect command)
-                WebSocketClient.getInstance().closeConnect(false);
-                // callback
-                decoder.getCallback().connectionKickoff(response.getCode(), errMessage);
-                return;
-              }
-            } catch (Throwable th) {
-              // ignore...
-            }
-            decoder.getCallback().error(response.getId(), response.getCode(), response.getMsg());
-          } else if (response.getMsg() != null) {
-            decoder.getCallback().error(response.getMsg());
-          } else {
-            decoder.getCallback().error("unknown error");
-          }
-        }
+        processError(decoder, response);
         break;
       case DISCONNECT:
         if (decoder.getCallback() != null) {
@@ -205,6 +150,69 @@ public class ApiCallbackDecoderUtils {
         break;
       default:
         break;
+    }
+  }
+
+  public static void receiveConnected(ChannelHandlerContext ctx, ApiCallbackDecoder decoder, String msg) {
+    if (decoder.getCallback() != null && !StringUtils.isEmpty(msg)) {
+      JSONObject jsonObject = JSONObject.parseObject(msg);
+      // set version
+      HeaderBuilder.setUseVersion(jsonObject.getString(VERSION));
+      // set hearbeat time
+      String value = jsonObject.getString(TigerApiConstants.HEART_BEAT);
+      if (!StringUtils.isEmpty(value)) {
+        String[] arrayValue = value.split(",");
+        if (null != arrayValue && arrayValue.length >= 2) {
+          int serverSendInterval = StringUtils.isEmpty(arrayValue[0]) ? 0 : Integer.valueOf(arrayValue[0]);
+          int serverReceiveInterval = StringUtils.isEmpty(arrayValue[1]) ? 0 : Integer.valueOf(arrayValue[1]);
+          if (serverSendInterval > 0 || serverReceiveInterval > 0) {
+            if (null == ctx.channel().pipeline().get(IDLE_STATE_HANDLER)) {
+              serverSendInterval =
+                  serverSendInterval == 0 ? 0 : serverSendInterval + WebSocketHandler.HEART_BEAT_SPAN;
+              serverReceiveInterval =
+                  serverReceiveInterval == 0 ? 0 : serverReceiveInterval - WebSocketHandler.HEART_BEAT_SPAN;
+
+              ctx.channel().pipeline().addBefore(WebSocketClient.SOCKET_ENCODER, IDLE_STATE_HANDLER,
+                  new IdleStateHandler(serverSendInterval, serverReceiveInterval, 0, TimeUnit.MILLISECONDS));
+
+              ctx.channel()
+                  .pipeline()
+                  .addAfter(IDLE_STATE_HANDLER, IDLE_TRIGGER_HANDLER, new IdleTriggerHandler(decoder));
+            }
+          }
+          decoder.getCallback().connectionAck(serverSendInterval, serverReceiveInterval);
+        } else {
+          decoder.getCallback().connectionAck();
+        }
+      } else {
+        decoder.getCallback().connectionAck();
+      }
+    }
+  }
+
+  public static void processError(ApiCallbackDecoder decoder, Response response) {
+    if (decoder.getCallback() != null) {
+      if (response.getCode() > 0) {
+        try {
+          if (response.getCode() == TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode()) {
+            String errMessage = response.getMsg() == null
+                ? TigerApiCode.CONNECTION_KICK_OFF_ERROR.getMessage() : response.getMsg();
+            ApiLogger.info(errMessage);
+            // close the connection(Do not send disconnect command)
+            WebSocketClient.getInstance().closeConnect(false);
+            // callback
+            decoder.getCallback().connectionKickoff(response.getCode(), errMessage);
+            return;
+          }
+        } catch (Throwable th) {
+          // ignore...
+        }
+        decoder.getCallback().error(response.getId(), response.getCode(), response.getMsg());
+      } else if (response.getMsg() != null) {
+        decoder.getCallback().error(response.getMsg());
+      } else {
+        decoder.getCallback().error("unknown error");
+      }
     }
   }
 }

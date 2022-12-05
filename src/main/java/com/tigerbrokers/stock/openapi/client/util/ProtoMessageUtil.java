@@ -1,10 +1,8 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
-import com.google.common.collect.Sets;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
-import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.SocketCommon;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
