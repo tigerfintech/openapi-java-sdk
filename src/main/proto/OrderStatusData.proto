@@ -13,7 +13,7 @@ message OrderStatusData {
   string action = 6; // BUY or SELL
   string market = 7; // market. US, HK, etc.
   string currency = 8; // currency. USD, HKD, etc.
-  string segment = 9; // Securities Category C: (Commodities Futures), S: (Securities Stocks)
+  string segType = 9; // Securities Category C: (Commodities Futures), S: (Securities Stocks)
   string secType = 10; // STK Stocks, OPT Options, WAR Warrants, IOPT CBBC, CASH FOREX, FUT Futures, FOP Future Options
 
   string orderType = 11; // order type

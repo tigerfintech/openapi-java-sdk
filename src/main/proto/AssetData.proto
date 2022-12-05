@@ -7,7 +7,7 @@ option java_multiple_files = true;
 message AssetData {
   string account = 1; // user account
   string currency = 2; // currency. USD, HKD, etc.
-  string segment = 3; // Securities Category C: (Commodities Futures), S: (Securities Stocks)
+  string segType = 3; // Securities Category C: (Commodities Futures), S: (Securities Stocks)
 
   double availableFunds = 4; // available funds, overnight liquidity
   double excessLiquidity = 5; // excess liquidity, used to represent intraday risk value.

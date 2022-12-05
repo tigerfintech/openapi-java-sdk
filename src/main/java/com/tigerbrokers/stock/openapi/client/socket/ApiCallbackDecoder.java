@@ -2,6 +2,8 @@ package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.PushData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteBBOData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteBasicData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.SocketCommon;
 import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
@@ -75,25 +77,39 @@ public class ApiCallbackDecoder {
     if (pushData == null || pushData.getDataType() == null) {
       return;
     }
+    QuoteBasicData basicData = null;
+    QuoteBBOData bboData = null;
     SocketCommon.DataType dataType = pushData.getDataType();
     switch (dataType) {
       case Quote:
-        QuoteDataUtil.convertToBasicData(pushData.getQuoteData()).ifPresent(
-            x -> callback.quoteChange(x));
-        QuoteDataUtil.convertToAskBidData(pushData.getQuoteData()).ifPresent(
-            x -> callback.quoteAskBidChange(x));
+        basicData = QuoteDataUtil.convertToBasicData(pushData.getQuoteData());
+        if (null != basicData) {
+          callback.quoteChange(basicData);
+        }
+        bboData = QuoteDataUtil.convertToAskBidData(pushData.getQuoteData());
+        if (null != bboData) {
+          callback.quoteAskBidChange(bboData);
+        }
         break;
       case Option:
-        QuoteDataUtil.convertToBasicData(pushData.getQuoteData()).ifPresent(
-            x -> callback.optionChange(x));
-        QuoteDataUtil.convertToAskBidData(pushData.getQuoteData()).ifPresent(
-            x -> callback.optionAskBidChange(x));
+        basicData = QuoteDataUtil.convertToBasicData(pushData.getQuoteData());
+        if (null != basicData) {
+          callback.optionChange(basicData);
+        }
+        bboData = QuoteDataUtil.convertToAskBidData(pushData.getQuoteData());
+        if (null != bboData) {
+          callback.optionAskBidChange(bboData);
+        }
         break;
       case Future:
-        QuoteDataUtil.convertToBasicData(pushData.getQuoteData()).ifPresent(
-            x -> callback.futureChange(x));
-        QuoteDataUtil.convertToAskBidData(pushData.getQuoteData()).ifPresent(
-            x -> callback.futureAskBidChange(x));
+        basicData = QuoteDataUtil.convertToBasicData(pushData.getQuoteData());
+        if (null != basicData) {
+          callback.futureChange(basicData);
+        }
+        bboData = QuoteDataUtil.convertToAskBidData(pushData.getQuoteData());
+        if (null != bboData) {
+          callback.futureAskBidChange(bboData);
+        }
         break;
       case TradeTick:
         callback.tradeTickChange(TradeTickUtil.convert(pushData.getTradeTickData()));

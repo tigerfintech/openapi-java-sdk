@@ -14,7 +14,7 @@ message OrderTransactionData {
   string action = 7; // BUY or SELL
   string market = 8; // market. US, HK, etc.
   string currency = 9; // currency. USD, HKD, etc.
-  string segment = 10; // Securities Category C: (Commodities Futures), S: (Securities Stocks)
+  string segType = 10; // Securities Category C: (Commodities Futures), S: (Securities Stocks)
   string secType = 11; // STK Stocks, OPT Options, WAR Warrants, IOPT CBBC, CASH FOREX, FUT Futures, FOP Future Options
   double filledPrice = 12; // filled price
   sint64 filledQuantity = 13; // filled quantity

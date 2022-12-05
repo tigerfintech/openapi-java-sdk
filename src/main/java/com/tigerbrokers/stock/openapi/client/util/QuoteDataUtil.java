@@ -1,6 +1,5 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
-import java.util.Optional;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteBBOData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteBasicData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteData;
@@ -12,13 +11,13 @@ import com.tigerbrokers.stock.openapi.client.socket.data.pb.SocketCommon;
  */
 public class QuoteDataUtil {
 
-  public static Optional<QuoteBBOData> convertToAskBidData(QuoteData quoteData) {
+  public static QuoteBBOData convertToAskBidData(QuoteData quoteData) {
     if (quoteData == null || quoteData.getType() == null) {
-      return Optional.empty();
+      return null;
     }
     SocketCommon.QuoteType type = quoteData.getType();
     if (SocketCommon.QuoteType.ALL != type && SocketCommon.QuoteType.BBO != type) {
-      return Optional.empty();
+      return null;
     }
     QuoteBBOData.Builder builder = QuoteBBOData.newBuilder();
     builder.setSymbol(quoteData.getSymbol());
@@ -35,16 +34,16 @@ public class QuoteDataUtil {
       builder.setBidTimestamp(quoteData.getBidTimestamp());
     }
 
-    return Optional.ofNullable(builder.build());
+    return builder.build();
   }
 
-  public static Optional<QuoteBasicData> convertToBasicData(QuoteData quoteData) {
+  public static QuoteBasicData convertToBasicData(QuoteData quoteData) {
     if (quoteData == null || quoteData.getType() == null) {
-      return Optional.empty();
+      return null;
     }
     SocketCommon.QuoteType type = quoteData.getType();
     if (SocketCommon.QuoteType.ALL != type && SocketCommon.QuoteType.BASIC != type) {
-      return Optional.empty();
+      return null;
     }
     QuoteBasicData.Builder builder = QuoteBasicData.newBuilder();
     builder.setSymbol(quoteData.getSymbol());
@@ -109,6 +108,6 @@ public class QuoteDataUtil {
       builder.setMi(quoteData.getMi());
     }
 
-    return Optional.ofNullable(builder.build());
+    return builder.build();
   }
 }
