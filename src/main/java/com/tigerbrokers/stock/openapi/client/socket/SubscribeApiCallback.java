@@ -17,26 +17,26 @@ import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
  */
 public interface SubscribeApiCallback {
 
-  void orderStatusChange(OrderStatusData data);
+  void orderStatusChange(int id, OrderStatusData data);
 
-  void orderTransactionChange(OrderTransactionData data);
+  void orderTransactionChange(int id, OrderTransactionData data);
 
-  void positionChange(PositionData data);
+  void positionChange(int id, PositionData data);
 
-  void assetChange(AssetData data);
+  void assetChange(int id, AssetData data);
 
-  void tradeTickChange(TradeTick data);
+  void tradeTickChange(int id, TradeTick data);
 
-  void quoteChange(QuoteBasicData data);
-  void quoteAskBidChange(QuoteBBOData data);
+  void quoteChange(int id, QuoteBasicData data);
+  void quoteAskBidChange(int id, QuoteBBOData data);
 
-  void optionChange(QuoteBasicData data);
-  void optionAskBidChange(QuoteBBOData data);
+  void optionChange(int id, QuoteBasicData data);
+  void optionAskBidChange(int id, QuoteBBOData data);
 
-  void futureChange(QuoteBasicData data);
-  void futureAskBidChange(QuoteBBOData data);
+  void futureChange(int id, QuoteBasicData data);
+  void futureAskBidChange(int id, QuoteBBOData data);
 
-  void depthQuoteChange(QuoteDepthData data);
+  void depthQuoteChange(int id, QuoteDepthData data);
 
   void subscribeEnd(int id, String subject, String result);
 
