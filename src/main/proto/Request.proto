@@ -25,5 +25,6 @@ message Request {
     SocketCommon.DataType dataType = 1;
     optional string symbols = 2;
     optional string account = 3;
+    optional string market = 4;
   }
 }

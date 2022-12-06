@@ -1,5 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
+import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
+import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import java.util.Set;
 
@@ -113,6 +115,22 @@ public interface SubscribeAsyncApi {
    * @return string id
    */
   String cancelSubscribeDepthQuote(Set<String> symbols);
+
+  /**
+   * subscribe quote-data of the specified market
+   * @param market Market
+   * @param subject QuoteSubject
+   * @return
+   */
+  public String subscribeMarketQuote(Market market, QuoteSubject subject);
+
+  /**
+   * cancel subscribe quote-data of the specified market
+   * @param market Market
+   * @param subject QuoteSubject
+   * @return
+   */
+  public String cancelSubscribeMarketQuote(Market market, QuoteSubject subject);
 
   /**
    * query subscribed symbol list

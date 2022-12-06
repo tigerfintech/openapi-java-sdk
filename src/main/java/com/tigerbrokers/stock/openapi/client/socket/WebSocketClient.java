@@ -7,6 +7,7 @@ import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
@@ -633,6 +634,36 @@ public class WebSocketClient implements SubscribeAsyncApi {
     ApiLogger.info("send cancel subscribe [{}] message, symbols:{}.", subject, symbols);
 
     return returnStr;
+  }
+
+  @Override
+  public String subscribeMarketQuote(Market market, QuoteSubject subject) {
+    if (!isConnected()) {
+      notConnect();
+      return null;
+    }
+    if (this.isProtobuf) {
+      Request subscribeData = ProtoMessageUtil.buildSubscribeMessage(market, subject);
+      channel.writeAndFlush(subscribeData);
+      ApiLogger.info("send subscribe [{}] message, market:{}", subject, market);
+      return String.valueOf(subscribeData.getId());
+    }
+    return null;
+  }
+
+  @Override
+  public String cancelSubscribeMarketQuote(Market market, QuoteSubject subject) {
+    if (!isConnected()) {
+      notConnect();
+      return null;
+    }
+    if (this.isProtobuf) {
+      Request subscribeData = ProtoMessageUtil.buildUnSubscribeMessage(market, subject);
+      channel.writeAndFlush(subscribeData);
+      ApiLogger.info("send cancel subscribe [{}] message, market:{}", subject, market);
+      return String.valueOf(subscribeData.getId());
+    }
+    return null;
   }
 
   @Override
