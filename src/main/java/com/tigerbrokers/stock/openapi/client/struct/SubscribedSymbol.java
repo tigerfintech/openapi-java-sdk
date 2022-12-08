@@ -8,9 +8,6 @@ import java.util.Set;
  */
 public class SubscribedSymbol {
 
-  public static final int MAX_SYMBOLS = 100;
-  public static final int MAX_ASK_BID_SYMBOLS = 100;
-
   /**
    * subscribed quote symbol limit
    */

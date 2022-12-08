@@ -35,59 +35,59 @@ public abstract class ApiComposeCallback4Stomp implements ApiComposeCallback {
   public abstract void depthQuoteChange(JSONObject jsonObject);
 
   @Override
-  public void orderStatusChange(int id, OrderStatusData data) {
+  public void orderStatusChange(OrderStatusData data) {
     // do nothing for protobuf data
   }
 
   @Override
-  public void orderTransactionChange(int id, OrderTransactionData data) {
+  public void orderTransactionChange(OrderTransactionData data) {
     // do nothing for protobuf data
   }
 
   @Override
-  public void positionChange(int id, PositionData data) {
+  public void positionChange(PositionData data) {
     // do nothing for protobuf data
   }
 
   @Override
-  public void assetChange(int id, AssetData data) {
+  public void assetChange(AssetData data) {
     // do nothing for protobuf data
   }
 
   @Override
-  public void tradeTickChange(int id, TradeTick data) {
+  public void tradeTickChange(TradeTick data) {
     // do nothing for protobuf data
   }
 
   @Override
-  public void quoteChange(int id, QuoteBasicData data) {
+  public void quoteChange(QuoteBasicData data) {
     // do nothing for protobuf data
   }
   @Override
-  public void quoteAskBidChange(int id, QuoteBBOData data) {
-    // do nothing for protobuf data
-  }
-
-  @Override
-  public void optionChange(int id, QuoteBasicData data) {
-    // do nothing for protobuf data
-  }
-  @Override
-  public void optionAskBidChange(int id, QuoteBBOData data) {
+  public void quoteAskBidChange(QuoteBBOData data) {
     // do nothing for protobuf data
   }
 
   @Override
-  public void futureChange(int id, QuoteBasicData data) {
+  public void optionChange(QuoteBasicData data) {
     // do nothing for protobuf data
   }
   @Override
-  public void futureAskBidChange(int id, QuoteBBOData data) {
+  public void optionAskBidChange(QuoteBBOData data) {
     // do nothing for protobuf data
   }
 
   @Override
-  public void depthQuoteChange(int id, QuoteDepthData data) {
+  public void futureChange(QuoteBasicData data) {
+    // do nothing for protobuf data
+  }
+  @Override
+  public void futureAskBidChange(QuoteBBOData data) {
+    // do nothing for protobuf data
+  }
+
+  @Override
+  public void depthQuoteChange(QuoteDepthData data) {
     // do nothing for protobuf data
   }
 }

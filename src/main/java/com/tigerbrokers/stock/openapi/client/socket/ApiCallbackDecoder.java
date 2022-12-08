@@ -84,50 +84,50 @@ public class ApiCallbackDecoder {
       case Quote:
         basicData = QuoteDataUtil.convertToBasicData(pushData.getQuoteData());
         if (null != basicData) {
-          callback.quoteChange(msg.getId(), basicData);
+          callback.quoteChange(basicData);
         }
         bboData = QuoteDataUtil.convertToAskBidData(pushData.getQuoteData());
         if (null != bboData) {
-          callback.quoteAskBidChange(msg.getId(), bboData);
+          callback.quoteAskBidChange(bboData);
         }
         break;
       case Option:
         basicData = QuoteDataUtil.convertToBasicData(pushData.getQuoteData());
         if (null != basicData) {
-          callback.optionChange(msg.getId(), basicData);
+          callback.optionChange(basicData);
         }
         bboData = QuoteDataUtil.convertToAskBidData(pushData.getQuoteData());
         if (null != bboData) {
-          callback.optionAskBidChange(msg.getId(), bboData);
+          callback.optionAskBidChange(bboData);
         }
         break;
       case Future:
         basicData = QuoteDataUtil.convertToBasicData(pushData.getQuoteData());
         if (null != basicData) {
-          callback.futureChange(msg.getId(), basicData);
+          callback.futureChange(basicData);
         }
         bboData = QuoteDataUtil.convertToAskBidData(pushData.getQuoteData());
         if (null != bboData) {
-          callback.futureAskBidChange(msg.getId(), bboData);
+          callback.futureAskBidChange(bboData);
         }
         break;
       case TradeTick:
-        callback.tradeTickChange(msg.getId(), TradeTickUtil.convert(pushData.getTradeTickData()));
+        callback.tradeTickChange(TradeTickUtil.convert(pushData.getTradeTickData()));
         break;
       case QuoteDepth:
-        callback.depthQuoteChange(msg.getId(), pushData.getQuoteDepthData());
+        callback.depthQuoteChange(pushData.getQuoteDepthData());
         break;
       case Asset:
-        callback.assetChange(msg.getId(), pushData.getAssetData());
+        callback.assetChange(pushData.getAssetData());
         break;
       case Position:
-        callback.positionChange(msg.getId(), pushData.getPositionData());
+        callback.positionChange(pushData.getPositionData());
         break;
       case OrderStatus:
-        callback.orderStatusChange(msg.getId(), pushData.getOrderStatusData());
+        callback.orderStatusChange(pushData.getOrderStatusData());
         break;
       case OrderTransaction:
-        callback.orderTransactionChange(msg.getId(), pushData.getOrderTransactionData());
+        callback.orderTransactionChange(pushData.getOrderTransactionData());
         break;
       default:
         ApiLogger.info("push data cannot be processed.", ProtoMessageUtil.toJson(msg));
