@@ -20,11 +20,14 @@ import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureTra
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionChainModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionChainV3Model;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionExpirationModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteCapitalFlowModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteCapitalModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteContractModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteDepthModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteHistoryTimelineModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteKlineModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteMarketModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteStockBrokerModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteStockTradeModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteTimelineModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteTradeTickModel;
@@ -56,6 +59,9 @@ public class ValidatorManager {
     validatorMap.put(QuoteTimelineModel.class, quoteRequestValidator);
     validatorMap.put(QuoteHistoryTimelineModel.class, quoteRequestValidator);
     validatorMap.put(QuoteTradeTickModel.class, quoteRequestValidator);
+    validatorMap.put(QuoteStockBrokerModel.class, quoteRequestValidator);
+    validatorMap.put(QuoteCapitalModel.class, quoteRequestValidator);
+    validatorMap.put(QuoteCapitalFlowModel.class, quoteRequestValidator);
     validatorMap.put(TradeCalendarModel.class, new TradeCalendarRequestValidator());
 
     FutureContractRequestValidator futureContractRequestValidator = new FutureContractRequestValidator();

@@ -239,6 +239,13 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder userMark(String userMark) {
+    if (userMark != null) {
+      this.orderParameter.setUserMark(userMark);
+    }
+    return this;
+  }
+
   public TradeParamBuilder contract(ContractItem contract) {
     symbol(contract.getSymbol())
         .right(contract.getRight())
