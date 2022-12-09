@@ -8,6 +8,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrder
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.TradeOrderResponse;
+import com.tigerbrokers.stock.openapi.client.struct.TagValue;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AttachType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
@@ -18,6 +19,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
 import com.tigerbrokers.stock.openapi.client.util.AccountUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
+import java.util.List;
 
 public class TradeOrderRequest extends TigerCommonRequest implements TigerRequest<TradeOrderResponse> {
 
@@ -211,6 +213,228 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     model.setStopLossPrice(stopLossPrice);
     model.setStopLossLimitPrice(stopLossLimitPrice);
     model.setStopLossTif(stopLossTif);
+  }
+
+  public TradeOrderRequest setOrderId(Integer orderId) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setOrderId(orderId);
+    return this;
+  }
+
+  public TradeOrderRequest setAccount(String account) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setAccount(account);
+    return this;
+  }
+
+  public TradeOrderRequest setSecretKey(String secretKey) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setSecretKey(secretKey);
+    return this;
+  }
+
+  public TradeOrderRequest setSymbol(String symbol) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setSymbol(symbol);
+    return this;
+  }
+
+  public TradeOrderRequest setSecType(SecType secType) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setSecType(secType);
+    return this;
+  }
+
+  public TradeOrderRequest setAction(ActionType action) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setAction(action);
+    return this;
+  }
+
+  public TradeOrderRequest setCurrency(Currency currency) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setCurrency(currency);
+    return this;
+  }
+
+  public TradeOrderRequest setTotalQuantity(Integer totalQuantity) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setTotalQuantity(totalQuantity);
+    return this;
+  }
+
+  public TradeOrderRequest setOrderType(OrderType orderType) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setOrderType(orderType);
+    return this;
+  }
+
+  public TradeOrderRequest setLimitPrice(Double limitPrice) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setLimitPrice(limitPrice);
+    return this;
+  }
+
+  public TradeOrderRequest setAdjustLimit(Double adjustLimit) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setAdjustLimit(adjustLimit);
+    return this;
+  }
+
+  public TradeOrderRequest setAuxPrice(Double auxPrice) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setAuxPrice(auxPrice);
+    return this;
+  }
+
+  public TradeOrderRequest setTrailingPercent(Double trailingPercent) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setTrailingPercent(trailingPercent);
+    return this;
+  }
+
+  public TradeOrderRequest setOutsideRth(Boolean outsideRth) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setOutsideRth(outsideRth);
+    return this;
+  }
+
+  public TradeOrderRequest setMarket(String market) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setMarket(market);
+    return this;
+  }
+
+  public TradeOrderRequest setExchange(String exchange) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setExchange(exchange);
+    return this;
+  }
+
+  public TradeOrderRequest setExpiry(String expiry) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setExpiry(expiry);
+    return this;
+  }
+
+  public TradeOrderRequest setStrike(String strike) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setStrike(strike);
+    return this;
+  }
+
+  public TradeOrderRequest setRight(String right) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setRight(right);
+    return this;
+  }
+
+  public TradeOrderRequest setMultiplier(Float multiplier) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setMultiplier(multiplier);
+    return this;
+  }
+
+  public TradeOrderRequest setLocalSymbol(String localSymbol) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setLocalSymbol(localSymbol);
+    return this;
+  }
+
+  public TradeOrderRequest setAllocAccounts(List<String> allocAccounts) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setAllocAccounts(allocAccounts);
+    return this;
+  }
+
+  public TradeOrderRequest setAllocShares(List<Double> allocShares) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setAllocShares(allocShares);
+    return this;
+  }
+
+  public TradeOrderRequest setAlgoStrategy(String algoStrategy) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setAlgoStrategy(algoStrategy);
+    return this;
+  }
+
+  public TradeOrderRequest setAlgoParams(List<TagValue> algoParams) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setAlgoParams(algoParams);
+    return this;
+  }
+
+  public TradeOrderRequest setAttachType(AttachType attachType) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setAttachType(attachType);
+    return this;
+  }
+
+  public TradeOrderRequest setProfitTakerOrderId(Integer profitTakerOrderId) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setProfitTakerOrderId(profitTakerOrderId);
+    return this;
+  }
+
+  public TradeOrderRequest setProfitTakerPrice(Double profitTakerPrice) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setProfitTakerPrice(profitTakerPrice);
+    return this;
+  }
+
+  public TradeOrderRequest setProfitTakerTif(TimeInForce profitTakerTif) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setProfitTakerTif(profitTakerTif);
+    return this;
+  }
+
+  public TradeOrderRequest setProfitTakerRth(Boolean profitTakerRth) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setProfitTakerRth(profitTakerRth);
+    return this;
+  }
+
+  public TradeOrderRequest setStopLossOrderType(OrderType stopLossOrderType) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setStopLossOrderType(stopLossOrderType);
+    return this;
+  }
+
+  public TradeOrderRequest setStopLossOrderId(Integer stopLossOrderId) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setStopLossOrderId(stopLossOrderId);
+    return this;
+  }
+
+  public TradeOrderRequest setStopLossPrice(Double stopLossPrice) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setStopLossPrice(stopLossPrice);
+    return this;
+  }
+
+  public TradeOrderRequest setStopLossLimitPrice(Double stopLossLimitPrice) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setStopLossLimitPrice(stopLossLimitPrice);
+    return this;
+  }
+
+  public TradeOrderRequest setStopLossTif(TimeInForce stopLossTif) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setStopLossTif(stopLossTif);
+    return this;
+  }
+
+  public TradeOrderRequest setStopLossTrailingPercent(Double stopLossTrailingPercent) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setStopLossTrailingPercent(stopLossTrailingPercent);
+    return this;
+  }
+
+  public TradeOrderRequest setStopLossTrailingAmount(Double stopLossTrailingAmount) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setStopLossTrailingAmount(stopLossTrailingAmount);
+    return this;
   }
 
   public TradeOrderRequest withUserMark(String userMark) {

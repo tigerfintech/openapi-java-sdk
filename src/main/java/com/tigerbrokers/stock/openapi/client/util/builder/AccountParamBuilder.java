@@ -243,6 +243,13 @@ public class AccountParamBuilder {
     return this;
   }
 
+  public AccountParamBuilder pageToken(String pageToken) {
+    if (pageToken != null) {
+      paramMap.put("page_token", pageToken);
+    }
+    return this;
+  }
+
   public AccountParamBuilder sortBy(OrderSortBy orderSortBy) {
     if (orderSortBy != null) {
       paramMap.put("sort_by", orderSortBy.name());

@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.util.builder;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.struct.TagValue;
@@ -310,6 +311,13 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder setStopLossOrderType(OrderType stopLossOrderType) {
+    if (stopLossOrderType != null) {
+      this.orderParameter.setStopLossOrderType(stopLossOrderType);
+    }
+    return this;
+  }
+
   public TradeParamBuilder stopLossOrderId(Integer stopLossOrderId) {
     if (stopLossOrderId != null) {
       this.orderParameter.setStopLossOrderId(stopLossOrderId);
@@ -324,9 +332,30 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder setStopLossLimitPrice(Double stopLossLimitPrice) {
+    if (stopLossLimitPrice != null) {
+      this.orderParameter.setStopLossLimitPrice(stopLossLimitPrice);
+    }
+    return this;
+  }
+
   public TradeParamBuilder stopLossTif(TimeInForce stopLossTif) {
     if (stopLossTif != null) {
       this.orderParameter.setStopLossTif(stopLossTif);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder setStopLossTrailingPercent(Double stopLossTrailingPercent) {
+    if (stopLossTrailingPercent != null) {
+      this.orderParameter.setStopLossTrailingPercent(stopLossTrailingPercent);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder setStopLossTrailingAmount(Double stopLossTrailingAmount) {
+    if (stopLossTrailingAmount != null) {
+      this.orderParameter.setStopLossTrailingAmount(stopLossTrailingAmount);
     }
     return this;
   }
