@@ -1,0 +1,18 @@
+syntax = "proto3";
+import public "SocketCommon.proto";
+import public "PushData.proto";
+
+package com.tigerbrokers.stock.openapi.client.socket.data.pb;
+
+option java_package = "com.tigerbrokers.stock.openapi.client.socket.data.pb";
+option java_multiple_files = true;
+
+message Response {
+
+  SocketCommon.Command command = 1;
+  optional uint32 id = 2; // from request's id
+  optional int32 code = 3;
+  optional string msg = 4;
+  optional PushData body = 5;
+
+}

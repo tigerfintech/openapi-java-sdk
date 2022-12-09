@@ -6,7 +6,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
-import com.tigerbrokers.stock.openapi.client.util.builder.StompHeaderBuilder;
+import com.tigerbrokers.stock.openapi.client.util.builder.HeaderBuilder;
 import io.netty.handler.ssl.SslProvider;
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,7 +18,7 @@ import java.io.IOException;
 public class ClientConfig {
   private static final String PPRVATE_KEY_BEGIN = "-----BEGIN PRIVATE KEY-----";
   private static final String PRIVATE_KEY_END = "-----END PRIVATE KEY-----";
-  private static final Protocol DEFAULT_PROTOCOL = Protocol.STOMP;
+  private static final Protocol DEFAULT_PROTOCOL = Protocol.SECURE_SOCKET;
   private static final Env DEFAULT_ENV = Env.PROD;
   private static final SslProvider DEFAULT_SSLPROVIDER = SslProvider.OPENSSL;
   /** default client config */
@@ -32,7 +32,7 @@ public class ClientConfig {
 
   public License license;
 
-  public String stompVersion = StompHeaderBuilder.DEFAULT_STOMP_VERSION;
+  public String version = HeaderBuilder.DEFAULT_VERSION;
 
   /**
    * http interface server url

@@ -8,7 +8,10 @@ public enum TimeZoneId {
 
   Shanghai("Asia/Shanghai"),
   NewYork("America/New_York"),
-  Singapore("Asia/Singapore");
+  Singapore("Asia/Singapore"),
+  Sydney("Australia/Sydney"),
+  Auckland("Pacific/Auckland"),
+  London("Europe/London");
 
   private String zoneId;
 
@@ -27,6 +30,15 @@ public enum TimeZoneId {
     switch (market) {
       case US:
         return NewYork;
+      case AU:
+        return Sydney;
+      case NZ:
+        return Auckland;
+      case UK:
+        return London;
+      case SG:
+        return Singapore;
+      case CN:
       case HK:
         return Shanghai;
       default:

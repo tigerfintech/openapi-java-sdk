@@ -1,28 +1,29 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.PushData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteBBOData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteBasicData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.SocketCommon;
 import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
-import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
+import com.tigerbrokers.stock.openapi.client.util.ProtoMessageUtil;
+import com.tigerbrokers.stock.openapi.client.util.QuoteDataUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import com.tigerbrokers.stock.openapi.client.util.TradeTickUtil;
-import io.netty.handler.codec.stomp.StompFrame;
-import java.nio.charset.Charset;
 
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.DEFAULT_PUSH_DATA_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.ERROR_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_CANCEL_SUBSCRIBE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_QUOTE_CHANGE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUBSCRIBE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUB_SYMBOLS_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_TRADING_TICK_END;
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.ID_HEADER;
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.RET_HEADER;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ASSET;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ORDER_STATUS;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ORDER_TRANSACTION;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_POSITION;
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIPTION_HEADER;
 
 /**
  * Description:
@@ -31,162 +32,138 @@ import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUB
 public class ApiCallbackDecoder {
 
   private ApiComposeCallback callback;
-  private StompFrame stompFrame;
-  private int retType;
-  private String id;
-  private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
-  private static final String HEART_BEAT = "heart-beat";
 
   public ApiCallbackDecoder(ApiComposeCallback callback) {
     this.callback = callback;
   }
 
-  public synchronized void handle(StompFrame stompFrame) {
-    String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    if (!StringUtils.isEmpty(content) && HEART_BEAT.equals(content)) {
-      processHeartBeat(content);
-      return;
-    }
-    init(stompFrame);
+  public synchronized void handle(Response msg) {
+    int code = msg.getCode();
 
-    switch (retType) {
+    switch (code) {
+      case DEFAULT_PUSH_DATA_END:
       case SUBSCRIBE_POSITION:
-        processPosition();
-        break;
       case SUBSCRIBE_ASSET:
-        processAsset();
-        break;
       case SUBSCRIBE_ORDER_STATUS:
-        processOrderStatus();
-        break;
       case SUBSCRIBE_ORDER_TRANSACTION:
-        processOrderTransaction();
-        break;
       case GET_QUOTE_CHANGE_END:
-        processSubscribeQuoteChange();
-        break;
       case GET_TRADING_TICK_END:
-        processSubscribeQuoteChange();
+        processSubscribeDataChange(msg);
         break;
       case GET_SUB_SYMBOLS_END:
-        processGetSubscribedSymbols();
+        processGetSubscribedSymbols(msg);
         break;
       case GET_SUBSCRIBE_END:
-        processSubscribeEnd();
+        processSubscribeEnd(msg);
         break;
       case GET_CANCEL_SUBSCRIBE_END:
-        processCancelSubscribeEnd();
+        processCancelSubscribeEnd(msg);
         break;
       case ERROR_END:
-        processErrorEnd();
+        processErrorEnd(msg);
         break;
       default:
-        processDefault();
+        processDefault(msg);
         break;
     }
-  }
-
-  private void init(StompFrame stompFrame) {
-    this.stompFrame = stompFrame;
-    this.retType = stompFrame.headers().getInt(RET_HEADER);
-    this.id = stompFrame.headers().getAsString(ID_HEADER);
   }
 
   public ApiComposeCallback getCallback() {
     return callback;
   }
 
-  private void processPosition() {
-    String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    callback.positionChange(JSON.parseObject(content));
-  }
-
-  private void processAsset() {
-    String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    callback.assetChange(JSONObject.parseObject(content));
-  }
-
-  private void processOrderStatus() {
-    String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    callback.orderStatusChange(JSONObject.parseObject(content));
-  }
-
-  private void processOrderTransaction() {
-    String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    callback.orderTransactionChange(JSONObject.parseObject(content));
-  }
-
-  private void processSubscribeQuoteChange() {
-    String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    if (content == null) {
+  private void processSubscribeDataChange(Response msg) {
+    PushData pushData = msg.getBody();
+    if (pushData == null || pushData.getDataType() == null) {
       return;
     }
-    JSONObject jsonObject = JSONObject.parseObject(content);
-    if (jsonObject == null) {
-      return;
-    }
-    String type = jsonObject.getString("type");
-    if (type == null) {
-      return;
-    }
-    QuoteSubject subject = QuoteSubject.valueOf(type);
-    if (type == null) {
-      return;
-    }
-    switch (subject) {
+    QuoteBasicData basicData = null;
+    QuoteBBOData bboData = null;
+    SocketCommon.DataType dataType = pushData.getDataType();
+    switch (dataType) {
       case Quote:
-        callback.quoteChange(jsonObject);
+        basicData = QuoteDataUtil.convertToBasicData(pushData.getQuoteData());
+        if (null != basicData) {
+          callback.quoteChange(basicData);
+        }
+        bboData = QuoteDataUtil.convertToAskBidData(pushData.getQuoteData());
+        if (null != bboData) {
+          callback.quoteAskBidChange(bboData);
+        }
         break;
       case Option:
-        callback.optionChange(jsonObject);
-        break;
-      case TradeTick:
-        callback.tradeTickChange(TradeTickUtil.decodeData(jsonObject));
+        basicData = QuoteDataUtil.convertToBasicData(pushData.getQuoteData());
+        if (null != basicData) {
+          callback.optionChange(basicData);
+        }
+        bboData = QuoteDataUtil.convertToAskBidData(pushData.getQuoteData());
+        if (null != bboData) {
+          callback.optionAskBidChange(bboData);
+        }
         break;
       case Future:
-        callback.futureChange(jsonObject);
+        basicData = QuoteDataUtil.convertToBasicData(pushData.getQuoteData());
+        if (null != basicData) {
+          callback.futureChange(basicData);
+        }
+        bboData = QuoteDataUtil.convertToAskBidData(pushData.getQuoteData());
+        if (null != bboData) {
+          callback.futureAskBidChange(bboData);
+        }
+        break;
+      case TradeTick:
+        callback.tradeTickChange(TradeTickUtil.convert(pushData.getTradeTickData()));
         break;
       case QuoteDepth:
-        callback.depthQuoteChange(jsonObject);
+        callback.depthQuoteChange(pushData.getQuoteDepthData());
+        break;
+      case Asset:
+        callback.assetChange(pushData.getAssetData());
+        break;
+      case Position:
+        callback.positionChange(pushData.getPositionData());
+        break;
+      case OrderStatus:
+        callback.orderStatusChange(pushData.getOrderStatusData());
+        break;
+      case OrderTransaction:
+        callback.orderTransactionChange(pushData.getOrderTransactionData());
         break;
       default:
-        callback.quoteChange(jsonObject);
+        ApiLogger.info("push data cannot be processed.", ProtoMessageUtil.toJson(msg));
     }
   }
 
-  private void processGetSubscribedSymbols() {
-    String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    callback.getSubscribedSymbolEnd(JSONObject.parseObject(content, SubscribedSymbol.class));
+  private void processGetSubscribedSymbols(Response msg) {
+    String subscribedSymbol = msg.getMsg();
+    callback.getSubscribedSymbolEnd(JSONObject.parseObject(subscribedSymbol, SubscribedSymbol.class));
   }
 
-  private void processSubscribeEnd() {
-    String subject = stompFrame.headers().getAsString(SUBSCRIPTION_HEADER);
-    String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    callback.subscribeEnd(id, subject, JSONObject.parseObject(content));
+  private void processSubscribeEnd(Response msg) {
+    SocketCommon.DataType dataType = msg.getBody() == null ? null : msg.getBody().getDataType();
+    callback.subscribeEnd(msg.getId(),
+        dataType == null ? null : dataType.name(), msg.getMsg());
   }
 
-  private void processCancelSubscribeEnd() {
-    String subject = stompFrame.headers().getAsString(SUBSCRIPTION_HEADER);
-    String content = stompFrame.content().toString(DEFAULT_CHARSET);
-    callback.cancelSubscribeEnd(id, subject, JSONObject.parseObject(content));
+  private void processCancelSubscribeEnd(Response msg) {
+    SocketCommon.DataType dataType = msg.getBody() == null ? null : msg.getBody().getDataType();
+    callback.cancelSubscribeEnd(msg.getId(),
+        dataType == null ? null : dataType.name(), msg.getMsg());
   }
 
-  private void processErrorEnd() {
-    if (stompFrame != null && stompFrame.content() != null) {
-      String content = stompFrame.content().toString(DEFAULT_CHARSET);
-      callback.error(content);
-    } else if (stompFrame != null) {
-      callback.error(JSONObject.toJSONString(stompFrame));
+  private void processErrorEnd(Response msg) {
+    if (!StringUtils.isEmpty(msg.getMsg())) {
+      callback.error(msg.getMsg());
     } else {
       callback.error("unknown error");
     }
   }
 
-  private void processDefault() {
-    ApiLogger.info("ret-type:{} cannot be processed.", retType);
+  private void processDefault(Response msg) {
+    ApiLogger.info("receive MESSAGE's code:{} cannot be processed.", msg.getCode());
   }
 
-  private void processHeartBeat(final String content) {
+  public void processHeartBeat(final String content) {
     callback.hearBeat(content);
   }
 

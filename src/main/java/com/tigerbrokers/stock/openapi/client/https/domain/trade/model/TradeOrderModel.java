@@ -573,6 +573,7 @@ public class TradeOrderModel extends ApiModel {
         ", stopLossOrderType=" + stopLossOrderType +
         ", stopLossOrderId=" + stopLossOrderId +
         ", stopLossPrice=" + stopLossPrice +
+        ", stopLossLimitPrice=" + stopLossLimitPrice +
         ", stopLossTif=" + stopLossTif +
         ", stopLossTrailingPercent=" + stopLossTrailingPercent +
         ", stopLossTrailingAmount=" + stopLossTrailingAmount +

@@ -179,12 +179,26 @@ public class OrderParameter implements Serializable {
   /**
    * 止损订单
    */
+  @JSONField(name = "stop_loss_order_type")
+  private OrderType stopLossOrderType;
   @JSONField(name = "stop_loss_orderId")
   private Integer stopLossOrderId;
   @JSONField(name = "stop_loss_price")
   private Double stopLossPrice;
+  @JSONField(name = "stop_loss_limit_price")
+  private Double stopLossLimitPrice;
   @JSONField(name = "stop_loss_tif")
   private TimeInForce stopLossTif;
+  /**
+   * attached trailing stop loss order's trailing percent
+   */
+  @JSONField(name = "stop_loss_trailing_percent")
+  private Double stopLossTrailingPercent;
+  /**
+   * attached trailing stop loss order's trailing amount
+   */
+  @JSONField(name = "stop_loss_trailing_amount")
+  private Double stopLossTrailingAmount;
 
   @JSONField(name = "oca_orders")
   private List<OrderParameter> ocaOrders;
@@ -487,6 +501,38 @@ public class OrderParameter implements Serializable {
     return stopLossTif;
   }
 
+  public OrderType getStopLossOrderType() {
+    return stopLossOrderType;
+  }
+
+  public void setStopLossOrderType(OrderType stopLossOrderType) {
+    this.stopLossOrderType = stopLossOrderType;
+  }
+
+  public Double getStopLossLimitPrice() {
+    return stopLossLimitPrice;
+  }
+
+  public void setStopLossLimitPrice(Double stopLossLimitPrice) {
+    this.stopLossLimitPrice = stopLossLimitPrice;
+  }
+
+  public Double getStopLossTrailingPercent() {
+    return stopLossTrailingPercent;
+  }
+
+  public void setStopLossTrailingPercent(Double stopLossTrailingPercent) {
+    this.stopLossTrailingPercent = stopLossTrailingPercent;
+  }
+
+  public Double getStopLossTrailingAmount() {
+    return stopLossTrailingAmount;
+  }
+
+  public void setStopLossTrailingAmount(Double stopLossTrailingAmount) {
+    this.stopLossTrailingAmount = stopLossTrailingAmount;
+  }
+
   public String getSecretKey() {
     return secretKey;
   }
@@ -549,9 +595,13 @@ public class OrderParameter implements Serializable {
         ", profitTakerPrice=" + profitTakerPrice +
         ", profitTakerTif=" + profitTakerTif +
         ", profitTakerRth=" + profitTakerRth +
+        ", stopLossOrderType=" + stopLossOrderType +
         ", stopLossOrderId=" + stopLossOrderId +
         ", stopLossPrice=" + stopLossPrice +
+        ", stopLossLimitPrice=" + stopLossLimitPrice +
         ", stopLossTif=" + stopLossTif +
+        ", stopLossTrailingPercent=" + stopLossTrailingPercent +
+        ", stopLossTrailingAmount=" + stopLossTrailingAmount +
         '}';
   }
 }

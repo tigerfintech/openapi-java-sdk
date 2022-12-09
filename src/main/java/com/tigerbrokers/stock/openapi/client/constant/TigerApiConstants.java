@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.constant;
 
 public class TigerApiConstants {
+  public static final String SEPARATOR = ",";
 
   public static final String DEFAULT_VERSION = "1.0";
 
@@ -25,6 +26,8 @@ public class TigerApiConstants {
   public static final String VERSION = "version";
 
   public static final String SDK_VERSION = "sdk-version";
+
+  public static final String HEART_BEAT = "heart-beat";
 
   public static final String SIGN = "sign";
 

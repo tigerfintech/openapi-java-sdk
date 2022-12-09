@@ -1,6 +1,5 @@
 package com.tigerbrokers.stock.openapi.client.struct;
 
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -8,9 +7,6 @@ import java.util.Set;
  * Created by lijiawen on 2018/08/29.
  */
 public class SubscribedSymbol {
-
-  public static final int MAX_SYMBOLS = 100;
-  public static final int MAX_ASK_BID_SYMBOLS = 100;
 
   /**
    * subscribed quote symbol limit
@@ -45,10 +41,7 @@ public class SubscribedSymbol {
    */
   Set<String> subscribedTradeTickSymbols;
 
-  /**
-   * stock quote focus keys
-   */
-  Map<String, Set<String>> symbolFocusKeys;
+  Set<String> subscribedMarketQuote;
 
   public int getLimit() {
     return limit;
@@ -98,12 +91,12 @@ public class SubscribedSymbol {
     this.subscribedSymbols = subscribedSymbols;
   }
 
-  public Map<String, Set<String>> getSymbolFocusKeys() {
-    return symbolFocusKeys;
+  public Set<String> getSubscribedMarketQuote() {
+    return subscribedMarketQuote;
   }
 
-  public void setSymbolFocusKeys(Map<String, Set<String>> symbolFocusKeys) {
-    this.symbolFocusKeys = symbolFocusKeys;
+  public void setSubscribedMarketQuote(Set<String> subscribedMarketQuote) {
+    this.subscribedMarketQuote = subscribedMarketQuote;
   }
 
   public int getTradeTickLimit() {

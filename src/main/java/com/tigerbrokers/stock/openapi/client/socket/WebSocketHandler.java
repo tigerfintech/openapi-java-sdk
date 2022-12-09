@@ -14,20 +14,20 @@ import io.netty.handler.codec.stomp.StompFrame;
 public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
 
   private ApiAuthentication authentication;
-  private ApiCallbackDecoder decoder;
+  private ApiCallbackDecoder4Stomp decoder;
   private int clientSendInterval = 0;
   private int clientReceiveInterval = 0;
   public final static int HEART_BEAT_SPAN = 1000;
 
   public WebSocketHandler(ApiAuthentication authentication, ApiComposeCallback callback) {
     this.authentication = authentication;
-    this.decoder = new ApiCallbackDecoder(callback);
+    this.decoder = new ApiCallbackDecoder4Stomp((ApiComposeCallback4Stomp) callback);
   }
 
   public WebSocketHandler(ApiAuthentication authentication, ApiComposeCallback callback, int sendInterval,
       int receiveInterval) {
     this.authentication = authentication;
-    this.decoder = new ApiCallbackDecoder(callback);
+    this.decoder = new ApiCallbackDecoder4Stomp((ApiComposeCallback4Stomp) callback);
     this.clientSendInterval = sendInterval;
     this.clientReceiveInterval = receiveInterval;
   }

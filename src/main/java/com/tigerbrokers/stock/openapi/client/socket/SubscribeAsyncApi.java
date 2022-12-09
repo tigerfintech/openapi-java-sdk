@@ -1,9 +1,8 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
-import com.tigerbrokers.stock.openapi.client.struct.enums.MarketDataProvider;
-import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteKeyType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
+import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -23,30 +22,11 @@ public interface SubscribeAsyncApi {
   /**
    * subscribe trade data , include order / position / asset
    *
-   * @param subject trade subject
-   * @param focusKeys focus keys
-   * @return string id
-   */
-  String subscribe(Subject subject, List<String> focusKeys);
-
-  /**
-   * subscribe trade data , include order / position / asset
-   *
    * @param account subscribe account
    * @param subject trade subject
    * @return string id
    */
   String subscribe(String account, Subject subject);
-
-  /**
-   * subscribe trade data , include order / position / asset
-   *
-   * @param account account
-   * @param subject subject
-   * @param focusKeys focus keys
-   * @return string id
-   */
-  String subscribe(String account, Subject subject, List<String> focusKeys);
 
   /**
    * cancel subscribe trade data , include order / position / asset
@@ -63,24 +43,6 @@ public interface SubscribeAsyncApi {
    * @return string id
    */
   String subscribeQuote(Set<String> symbols);
-
-  /**
-   * subscribe quote data
-   *
-   * @param symbols symbol list
-   * @param quoteKeyType quote key type
-   * @return string id
-   */
-  String subscribeQuote(Set<String> symbols, QuoteKeyType quoteKeyType);
-
-  /**
-   * subscribe quote data
-   *
-   * @param symbols symbol list
-   * @param focusKeys focus keys
-   * @return string id
-   */
-  String subscribeQuote(Set<String> symbols, List<String> focusKeys);
 
   /**
    * cancel subscribe quote data,include stock / option / futures
@@ -153,6 +115,22 @@ public interface SubscribeAsyncApi {
    * @return string id
    */
   String cancelSubscribeDepthQuote(Set<String> symbols);
+
+  /**
+   * subscribe quote-data of the specified market
+   * @param market Market
+   * @param subject QuoteSubject
+   * @return
+   */
+  public String subscribeMarketQuote(Market market, QuoteSubject subject);
+
+  /**
+   * cancel subscribe quote-data of the specified market
+   * @param market Market
+   * @param subject QuoteSubject
+   * @return
+   */
+  public String cancelSubscribeMarketQuote(Market market, QuoteSubject subject);
 
   /**
    * query subscribed symbol list

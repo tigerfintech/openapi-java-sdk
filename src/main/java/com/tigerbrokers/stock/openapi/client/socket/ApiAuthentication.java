@@ -3,7 +3,7 @@ package com.tigerbrokers.stock.openapi.client.socket;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.TigerSignature;
-import com.tigerbrokers.stock.openapi.client.util.builder.StompHeaderBuilder;
+import com.tigerbrokers.stock.openapi.client.util.builder.HeaderBuilder;
 
 /**
  * Description:
@@ -13,7 +13,7 @@ public class ApiAuthentication {
 
   private String tigerId;
   private String sign;
-  private String version = StompHeaderBuilder.DEFAULT_STOMP_VERSION;
+  private String version = HeaderBuilder.DEFAULT_VERSION;
 
   public ApiAuthentication(String tigerId) {
     this.tigerId = tigerId;
@@ -40,7 +40,7 @@ public class ApiAuthentication {
   }
 
   public static ApiAuthentication build(String tigerId, String privateKey) {
-    return build(tigerId, privateKey, StompHeaderBuilder.DEFAULT_STOMP_VERSION);
+    return build(tigerId, privateKey, HeaderBuilder.DEFAULT_VERSION);
   }
 
   public static ApiAuthentication build(String tigerId, String privateKey, String version) {
