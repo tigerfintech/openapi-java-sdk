@@ -62,7 +62,7 @@ public class ContractItem extends ApiModel {
   private String ibCode;
   private List<TickSizeItem> tickSizes;
   private Boolean isEtf;
-  private Integer eftLeverage;
+  private Integer etfLeverage;
 
   public Integer getContractId() {
     return contractId;
@@ -372,12 +372,12 @@ public class ContractItem extends ApiModel {
     isEtf = etf;
   }
 
-  public Integer getEftLeverage() {
-    return eftLeverage;
+  public Integer getEtfLeverage() {
+    return etfLeverage;
   }
 
-  public void setEftLeverage(Integer eftLeverage) {
-    this.eftLeverage = eftLeverage;
+  public void setEtfLeverage(Integer etfLeverage) {
+    this.etfLeverage = etfLeverage;
   }
 
   @Override
@@ -421,7 +421,7 @@ public class ContractItem extends ApiModel {
             ", ibCode='" + ibCode + '\'' +
             ", tickSizes=" + tickSizes +
             ", isEtf=" + isEtf +
-            ", eftLeverage=" + eftLeverage +
+            ", etfLeverage=" + etfLeverage +
             '}';
   }
 
