@@ -61,6 +61,8 @@ public class ContractItem extends ApiModel {
   private String type;
   private String ibCode;
   private List<TickSizeItem> tickSizes;
+  private Boolean isEtf;
+  private Integer etfLeverage;
 
   public Integer getContractId() {
     return contractId;
@@ -362,42 +364,65 @@ public class ContractItem extends ApiModel {
     this.tickSizes = tickSizes;
   }
 
+  public Boolean getEtf() {
+    return isEtf;
+  }
+
+  public void setEtf(Boolean etf) {
+    isEtf = etf;
+  }
+
+  public Integer getEtfLeverage() {
+    return etfLeverage;
+  }
+
+  public void setEtfLeverage(Integer etfLeverage) {
+    this.etfLeverage = etfLeverage;
+  }
+
   @Override
   public String toString() {
     return "ContractItem{" +
-        "contractId=" + contractId +
-        ", identifier='" + identifier + '\'' +
-        ", symbol='" + symbol + '\'' +
-        ", secType='" + secType + '\'' +
-        ", expiry='" + expiry + '\'' +
-        ", contractMonth='" + contractMonth + '\'' +
-        ", strike=" + strike +
-        ", right='" + right + '\'' +
-        ", multiplier=" + multiplier +
-        ", exchange='" + exchange + '\'' +
-        ", market='" + market + '\'' +
-        ", primaryExchange='" + primaryExchange + '\'' +
-        ", currency='" + currency + '\'' +
-        ", localSymbol='" + localSymbol + '\'' +
-        ", tradingClass='" + tradingClass + '\'' +
-        ", name='" + name + '\'' +
-        ", tradeable=" + tradeable +
-        ", minTick=" + minTick +
-        ", marginable=" + marginable +
-        ", shortableCount=" + shortableCount +
-        ", shortInitialMargin=" + shortInitialMargin +
-        ", shortMaintenanceMargin=" + shortMaintenanceMargin +
-        ", shortFeeRate=" + shortFeeRate +
-        ", longInitialMargin=" + longInitialMargin +
-        ", longMaintenanceMargin=" + longMaintenanceMargin +
-        ", lastTradingDate='" + lastTradingDate + '\'' +
-        ", firstNoticeDate='" + firstNoticeDate + '\'' +
-        ", lastBiddingCloseTime=" + lastBiddingCloseTime +
-        ", ibCode=" + ibCode +
-        ", type=" + type +
-        ", trade=" + trade +
-        ", continuous=" + continuous +
-        '}';
+            "contractId=" + contractId +
+            ", identifier='" + identifier + '\'' +
+            ", symbol='" + symbol + '\'' +
+            ", secType='" + secType + '\'' +
+            ", expiry='" + expiry + '\'' +
+            ", contractMonth='" + contractMonth + '\'' +
+            ", strike=" + strike +
+            ", right='" + right + '\'' +
+            ", multiplier=" + multiplier +
+            ", exchange='" + exchange + '\'' +
+            ", market='" + market + '\'' +
+            ", primaryExchange='" + primaryExchange + '\'' +
+            ", currency='" + currency + '\'' +
+            ", localSymbol='" + localSymbol + '\'' +
+            ", tradingClass='" + tradingClass + '\'' +
+            ", name='" + name + '\'' +
+            ", status=" + status +
+            ", tradeable=" + tradeable +
+            ", closeOnly=" + closeOnly +
+            ", minTick=" + minTick +
+            ", marginable=" + marginable +
+            ", shortMargin=" + shortMargin +
+            ", shortInitialMargin=" + shortInitialMargin +
+            ", shortMaintenanceMargin=" + shortMaintenanceMargin +
+            ", shortFeeRate=" + shortFeeRate +
+            ", shortable=" + shortable +
+            ", shortableCount=" + shortableCount +
+            ", longInitialMargin=" + longInitialMargin +
+            ", longMaintenanceMargin=" + longMaintenanceMargin +
+            ", lastTradingDate='" + lastTradingDate + '\'' +
+            ", firstNoticeDate='" + firstNoticeDate + '\'' +
+            ", lastBiddingCloseTime=" + lastBiddingCloseTime +
+            ", trade=" + trade +
+            ", continuous=" + continuous +
+            ", type='" + type + '\'' +
+            ", ibCode='" + ibCode + '\'' +
+            ", tickSizes=" + tickSizes +
+            ", isEtf=" + isEtf +
+            ", etfLeverage=" + etfLeverage +
+            '}';
   }
 
   public static ContractItem convert(FutureContractItem futureContractItem) {
