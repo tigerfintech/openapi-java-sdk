@@ -48,12 +48,12 @@ public class ContractItem extends ApiModel {
   private String firstNoticeDate;
   private Long lastBiddingCloseTime;
   private Boolean continuous;
-  private Boolean isEtf;
-  private Integer etfLeverage;
   /** future contract fields */
   private String type;
   private String ibCode;
   private List<TickSizeItem> tickSizes;
+  private Boolean isEtf;
+  private Integer etfLeverage;
 
   public Integer getContractId() {
     return contractId;
@@ -303,18 +303,6 @@ public class ContractItem extends ApiModel {
     this.continuous = continuous;
   }
 
-  public Boolean isEtf() {
-    return isEtf;
-  }
-
-  public Integer getEtfLeverage() {
-    return etfLeverage;
-  }
-
-  public void setEtfLeverage(Integer etfLeverage) {
-    this.etfLeverage = etfLeverage;
-  }
-
   public String getType() {
     return type;
   }
@@ -340,43 +328,66 @@ public class ContractItem extends ApiModel {
     this.tickSizes = tickSizes;
   }
 
+  public Boolean isEtf() {
+    return isEtf;
+  }
+
+  public Boolean getEtf() {
+    return isEtf;
+  }
+
+  public void setEtf(Boolean etf) {
+    isEtf = etf;
+  }
+
+  public Integer getEtfLeverage() {
+    return etfLeverage;
+  }
+
+  public void setEtfLeverage(Integer etfLeverage) {
+    this.etfLeverage = etfLeverage;
+  }
+
   @Override
   public String toString() {
     return "ContractItem{" +
-        "contractId=" + contractId +
-        ", identifier='" + identifier + '\'' +
-        ", symbol='" + symbol + '\'' +
-        ", secType='" + secType + '\'' +
-        ", expiry='" + expiry + '\'' +
-        ", contractMonth='" + contractMonth + '\'' +
-        ", strike=" + strike +
-        ", right='" + right + '\'' +
-        ", multiplier=" + multiplier +
-        ", exchange='" + exchange + '\'' +
-        ", market='" + market + '\'' +
-        ", primaryExchange='" + primaryExchange + '\'' +
-        ", currency='" + currency + '\'' +
-        ", localSymbol='" + localSymbol + '\'' +
-        ", tradingClass='" + tradingClass + '\'' +
-        ", name='" + name + '\'' +
-        ", tradeable=" + tradeable +
-        ", minTick=" + minTick +
-        ", marginable=" + marginable +
-        ", shortableCount=" + shortableCount +
-        ", shortInitialMargin=" + shortInitialMargin +
-        ", shortMaintenanceMargin=" + shortMaintenanceMargin +
-        ", shortFeeRate=" + shortFeeRate +
-        ", longInitialMargin=" + longInitialMargin +
-        ", longMaintenanceMargin=" + longMaintenanceMargin +
-        ", lastTradingDate='" + lastTradingDate + '\'' +
-        ", firstNoticeDate='" + firstNoticeDate + '\'' +
-        ", lastBiddingCloseTime=" + lastBiddingCloseTime +
-        ", ibCode=" + ibCode +
-        ", type=" + type +
-        ", isEtf=" + isEtf +
-        ", etfLeverage=" + etfLeverage +
-        ", continuous=" + continuous +
-        '}';
+            "contractId=" + contractId +
+            ", identifier='" + identifier + '\'' +
+            ", symbol='" + symbol + '\'' +
+            ", secType='" + secType + '\'' +
+            ", expiry='" + expiry + '\'' +
+            ", contractMonth='" + contractMonth + '\'' +
+            ", strike=" + strike +
+            ", right='" + right + '\'' +
+            ", multiplier=" + multiplier +
+            ", exchange='" + exchange + '\'' +
+            ", market='" + market + '\'' +
+            ", primaryExchange='" + primaryExchange + '\'' +
+            ", currency='" + currency + '\'' +
+            ", localSymbol='" + localSymbol + '\'' +
+            ", tradingClass='" + tradingClass + '\'' +
+            ", name='" + name + '\'' +
+            ", tradeable=" + tradeable +
+            ", closeOnly=" + closeOnly +
+            ", minTick=" + minTick +
+            ", marginable=" + marginable +
+            ", shortInitialMargin=" + shortInitialMargin +
+            ", shortMaintenanceMargin=" + shortMaintenanceMargin +
+            ", shortFeeRate=" + shortFeeRate +
+            ", shortable=" + shortable +
+            ", shortableCount=" + shortableCount +
+            ", longInitialMargin=" + longInitialMargin +
+            ", longMaintenanceMargin=" + longMaintenanceMargin +
+            ", lastTradingDate='" + lastTradingDate + '\'' +
+            ", firstNoticeDate='" + firstNoticeDate + '\'' +
+            ", lastBiddingCloseTime=" + lastBiddingCloseTime +
+            ", continuous=" + continuous +
+            ", type='" + type + '\'' +
+            ", ibCode='" + ibCode + '\'' +
+            ", tickSizes=" + tickSizes +
+            ", isEtf=" + isEtf +
+            ", etfLeverage=" + etfLeverage +
+            '}';
   }
 
   public static ContractItem convert(FutureContractItem futureContractItem) {
