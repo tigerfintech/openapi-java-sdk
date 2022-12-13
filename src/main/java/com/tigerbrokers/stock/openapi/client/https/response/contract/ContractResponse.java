@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.https.response.contract;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,22 +12,9 @@ import java.util.List;
  * 时间：2019/05/29
  */
 public class ContractResponse extends TigerResponse {
-  @JSONField(serialize = false)
-  private String data;
 
+  @JSONField(name = "data")
   private ContractItem item;
-
-  /** 兼容V2.0接口查询Warrant和CBBC的返回 */
-  @JSONField(serialize = false)
-  private List<ContractItem> items;
-
-  public String getData() {
-    return data;
-  }
-
-  public void setData(String data) {
-    this.data = data;
-  }
 
   public ContractItem getItem() {
     return item;
@@ -36,11 +24,12 @@ public class ContractResponse extends TigerResponse {
     this.item = item;
   }
 
+  @Deprecated
   public List<ContractItem> getItems() {
-    return items;
-  }
-
-  public void setItems(List<ContractItem> items) {
-    this.items = items;
+    List<ContractItem> list = new ArrayList<>();
+    if (item != null) {
+      list.add(item);
+    }
+    return list;
   }
 }

@@ -16,7 +16,7 @@ public class ContractRequest extends TigerCommonRequest implements TigerRequest<
 
   public ContractRequest() {
     setApiMethodName(MethodName.CONTRACT);
-    setApiVersion(V2_0);
+    setApiVersion(V3_0);
   }
 
   public static ContractRequest newRequest(ContractModel contractModel) {

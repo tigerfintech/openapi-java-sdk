@@ -32,16 +32,10 @@ public class ContractItem extends ApiModel {
   private String localSymbol;
   private String tradingClass;
   private String name;
-  /** please use 'tradeable' */
-  @Deprecated
-  private Integer status;
   private Boolean tradeable;
   private Boolean closeOnly;
   private Double minTick;
   private Boolean marginable;
-  /** please use 'shortInitialMargin' and 'shortMaintenanceMargin' */
-  @Deprecated
-  private Double shortMargin;
   private Double shortInitialMargin;
   private Double shortMaintenanceMargin;
   private Double shortFeeRate;
@@ -53,9 +47,6 @@ public class ContractItem extends ApiModel {
   private String lastTradingDate;
   private String firstNoticeDate;
   private Long lastBiddingCloseTime;
-  /** please use 'tradeable' */
-  @Deprecated
-  private Boolean trade;
   private Boolean continuous;
   /** future contract fields */
   private String type;
@@ -192,16 +183,6 @@ public class ContractItem extends ApiModel {
     this.name = name;
   }
 
-  @Deprecated
-  public Integer getStatus() {
-    return status;
-  }
-
-  @Deprecated
-  public void setStatus(Integer status) {
-    this.status = status;
-  }
-
   public Boolean isTradeable() {
     return tradeable;
   }
@@ -232,14 +213,6 @@ public class ContractItem extends ApiModel {
 
   public void setMarginable(Boolean marginable) {
     this.marginable = marginable;
-  }
-
-  public Double getShortMargin() {
-    return shortMargin;
-  }
-
-  public void setShortMargin(Double shortMargin) {
-    this.shortMargin = shortMargin;
   }
 
   public Double getShortInitialMargin() {
@@ -322,15 +295,6 @@ public class ContractItem extends ApiModel {
     this.lastBiddingCloseTime = lastBiddingCloseTime;
   }
 
-  @Deprecated
-  public Boolean isTrade() {
-    return trade;
-  }
-
-  public void setTrade(Boolean trade) {
-    this.trade = trade;
-  }
-
   public Boolean isContinuous() {
     return continuous;
   }
@@ -362,6 +326,10 @@ public class ContractItem extends ApiModel {
   public void setTickSizes(
       List<TickSizeItem> tickSizes) {
     this.tickSizes = tickSizes;
+  }
+
+  public Boolean isEtf() {
+    return isEtf;
   }
 
   public Boolean getEtf() {
@@ -399,12 +367,10 @@ public class ContractItem extends ApiModel {
             ", localSymbol='" + localSymbol + '\'' +
             ", tradingClass='" + tradingClass + '\'' +
             ", name='" + name + '\'' +
-            ", status=" + status +
             ", tradeable=" + tradeable +
             ", closeOnly=" + closeOnly +
             ", minTick=" + minTick +
             ", marginable=" + marginable +
-            ", shortMargin=" + shortMargin +
             ", shortInitialMargin=" + shortInitialMargin +
             ", shortMaintenanceMargin=" + shortMaintenanceMargin +
             ", shortFeeRate=" + shortFeeRate +
@@ -415,7 +381,6 @@ public class ContractItem extends ApiModel {
             ", lastTradingDate='" + lastTradingDate + '\'' +
             ", firstNoticeDate='" + firstNoticeDate + '\'' +
             ", lastBiddingCloseTime=" + lastBiddingCloseTime +
-            ", trade=" + trade +
             ", continuous=" + continuous +
             ", type='" + type + '\'' +
             ", ibCode='" + ibCode + '\'' +
@@ -441,7 +406,7 @@ public class ContractItem extends ApiModel {
     contractItem.setFirstNoticeDate(futureContractItem.getFirstNoticeDate());
     contractItem.setLastBiddingCloseTime(futureContractItem.getLastBiddingCloseTime());
     contractItem.setCurrency(futureContractItem.getCurrency());
-    contractItem.setTrade(futureContractItem.isTrade());
+    contractItem.setTradeable(futureContractItem.isTrade());
     contractItem.setContinuous(futureContractItem.isContinuous());
     return contractItem;
   }
