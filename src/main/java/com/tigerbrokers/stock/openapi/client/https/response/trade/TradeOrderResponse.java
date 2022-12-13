@@ -8,22 +8,14 @@ import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 public class TradeOrderResponse extends TigerResponse {
 
   @JSONField(name = "data")
-  private String data;
-
   private TradeOrderItem item;
 
+  @Deprecated
   public String getData() {
-    return data;
-  }
-
-  public void setData(String data) {
-    this.data = data;
+    return item == null ? null : JSON.toJSONString(item);
   }
 
   public TradeOrderItem getItem() {
-    if (item == null && data != null) {
-      item = JSON.parseObject(data, TradeOrderItem.class);
-    }
     return item;
   }
 
@@ -34,8 +26,7 @@ public class TradeOrderResponse extends TigerResponse {
   @Override
   public String toString() {
     return "TradeOrderResponse{" +
-        "data='" + data + '\'' +
-        ", item=" + item +
+        "item='" + JSON.toJSONString(item) + '\'' +
         '}';
   }
 }
