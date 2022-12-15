@@ -251,6 +251,7 @@ public class TigerHttpClient implements TigerClient {
 
       data = HttpUtils.post(getServerUrl(request), param);
 
+      ApiLogger.debug("reponse result:{}", data);
       if (StringUtils.isEmpty(data)) {
         throw new TigerApiException(TigerApiCode.EMPTY_DATA_ERROR);
       }
