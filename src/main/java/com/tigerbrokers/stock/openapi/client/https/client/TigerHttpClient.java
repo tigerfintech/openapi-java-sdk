@@ -251,7 +251,7 @@ public class TigerHttpClient implements TigerClient {
 
       data = HttpUtils.post(getServerUrl(request), param);
 
-      ApiLogger.debug("reponse result:{}", data);
+      ApiLogger.debug("response result:{}", data);
       if (StringUtils.isEmpty(data)) {
         throw new TigerApiException(TigerApiCode.EMPTY_DATA_ERROR);
       }
@@ -267,21 +267,22 @@ public class TigerHttpClient implements TigerClient {
       }
       return response;
     } catch (RuntimeException e) {
-      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), param, data, e);
+      ApiLogger.error("request fail. tigerId:{}, method:{}, param:{}, response:{}",
+          tigerId, request == null ? null : request.getApiMethodName(), param, data, e);
       return errorResponse(tigerId, request, e);
     } catch (TigerApiException e) {
-      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), param, data, e);
+      ApiLogger.error("request fail. tigerId:{}, method:{}, param:{}, response:{}",
+          tigerId, request == null ? null : request.getApiMethodName(), param, data, e);
       return errorResponse(tigerId, request, e);
     } catch (Exception e) {
-      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), param, data, e);
+      ApiLogger.error("request fail. tigerId:{}, method:{}, param:{}, response:{}",
+          tigerId, request == null ? null : request.getApiMethodName(), param, data, e);
       return errorResponse(tigerId, request, e);
     }
   }
 
   private <T extends TigerResponse> T errorResponse(String tigerId, TigerRequest<T> request, TigerApiException e) {
     try {
-      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), e);
-
       T response = request.getResponseClass().newInstance();
       response.setCode(e.getErrCode());
       response.setMessage(e.getErrMsg());
@@ -294,8 +295,6 @@ public class TigerHttpClient implements TigerClient {
 
   private <T extends TigerResponse> T errorResponse(String tigerId, TigerRequest<T> request, Exception e) {
     try {
-      ApiLogger.error(tigerId, request.getApiMethodName(), request.getApiVersion(), e);
-
       T response = request.getResponseClass().newInstance();
       response.setCode(TigerApiCode.CLIENT_API_ERROR.getCode());
       response.setMessage(TigerApiCode.CLIENT_API_ERROR.getMessage() + "(" + e.getMessage() + ")");
