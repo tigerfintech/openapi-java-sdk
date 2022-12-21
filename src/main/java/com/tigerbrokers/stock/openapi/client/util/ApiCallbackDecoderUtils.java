@@ -84,14 +84,14 @@ public class ApiCallbackDecoderUtils {
             String content = frame.content().toString(Charset.defaultCharset());
             try {
               JSONObject jsonObject = JSONObject.parseObject(content);
-              if (jsonObject.getIntValue("code") == TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode()) {
+              if (jsonObject.getIntValue("code") == TigerApiCode.CONNECTION_KICK_OUT_ERROR.getCode()) {
                 ApiLogger.info(content);
                 // close the connection(Do not send disconnect command)
                 WebSocketClient.getInstance().closeConnect(false);
                 String errMessage = jsonObject.getString("message");
                 // callback
-                decoder.getCallback().connectionKickoff(TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode(),
-                    errMessage == null ? TigerApiCode.CONNECTION_KICK_OFF_ERROR.getMessage() : errMessage);
+                decoder.getCallback().connectionKickoff(TigerApiCode.CONNECTION_KICK_OUT_ERROR.getCode(),
+                    errMessage == null ? TigerApiCode.CONNECTION_KICK_OUT_ERROR.getMessage() : errMessage);
                 return;
               }
             } catch (Throwable th) {
@@ -194,9 +194,9 @@ public class ApiCallbackDecoderUtils {
     if (decoder.getCallback() != null) {
       if (response.getCode() > 0) {
         try {
-          if (response.getCode() == TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode()) {
+          if (response.getCode() == TigerApiCode.CONNECTION_KICK_OUT_ERROR.getCode()) {
             String errMessage = response.getMsg() == null
-                ? TigerApiCode.CONNECTION_KICK_OFF_ERROR.getMessage() : response.getMsg();
+                ? TigerApiCode.CONNECTION_KICK_OUT_ERROR.getMessage() : response.getMsg();
             ApiLogger.info(errMessage);
             // close the connection(Do not send disconnect command)
             WebSocketClient.getInstance().closeConnect(false);
