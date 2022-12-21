@@ -34,7 +34,7 @@ public class TigerSignature {
    * @return 签名字符串
    */
   public static String getSignContent(Map<String, Object> request) {
-    StringBuffer content = new StringBuffer();
+    StringBuilder content = new StringBuilder();
     List<String> keys = new ArrayList<>(request.keySet());
     Collections.sort(keys);
     int index = 0;
@@ -45,7 +45,7 @@ public class TigerSignature {
       if (value instanceof String) {
         strValue = (String) value;
       } else {
-        strValue = value.toString();
+        strValue = value == null ? null : value.toString();
       }
       if (StringUtils.areNotEmpty(key, strValue)) {
         content.append((index == 0 ? "" : "&")).append(key).append("=").append(value);

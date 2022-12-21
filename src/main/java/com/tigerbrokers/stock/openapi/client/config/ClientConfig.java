@@ -16,8 +16,8 @@ import java.io.IOException;
  * description: Created by liutongping on 2021/11/5
  */
 public class ClientConfig {
-  private static final String PPRVATE_KEY_BEGIN = "-----BEGIN PRIVATE KEY-----";
-  private static final String PRIVATE_KEY_END = "-----END PRIVATE KEY-----";
+  private static final String PPRVATE_KEY_PREFIX = "KEY-----";
+  private static final String PRIVATE_KEY_SUFFIX = "-----END";
   private static final Protocol DEFAULT_PROTOCOL = Protocol.SECURE_SOCKET;
   private static final Env DEFAULT_ENV = Env.PROD;
   private static final SslProvider DEFAULT_SSLPROVIDER = SslProvider.OPENSSL;
@@ -137,14 +137,12 @@ public class ClientConfig {
       in.read(buffer);
       content = new String(buffer, "UTF-8");
       int start = 0;
-      if (content.startsWith(PPRVATE_KEY_BEGIN)) {
-        start = PPRVATE_KEY_BEGIN.length();
-        while (content.charAt(start) == 10 || content.charAt(start) == 13) {
-          start++;
-        }
+      int startIdx = content.indexOf(PPRVATE_KEY_PREFIX);
+      if (startIdx > 0) {
+        start = startIdx + PPRVATE_KEY_PREFIX.length();
       }
       int end = content.length();
-      int endIndex = content.indexOf(PRIVATE_KEY_END);
+      int endIndex = content.indexOf(PRIVATE_KEY_SUFFIX);
       if (endIndex > 0) {
         end = endIndex;
       }

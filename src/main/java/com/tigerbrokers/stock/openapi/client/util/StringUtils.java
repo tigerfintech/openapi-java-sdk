@@ -27,7 +27,9 @@ public abstract class StringUtils {
       result = false;
     } else {
       for (String value : values) {
-        result &= !isEmpty(value);
+        if (isEmpty(value)) {
+          return false;
+        }
       }
     }
     return result;
