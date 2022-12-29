@@ -15,6 +15,7 @@ public class FutureContractItem extends ApiModel {
   private String contractCode;
   private String contractMonth;
   private String exchangeCode;
+  private String exchange;
   private BigDecimal multiplier;
   private BigDecimal minTick;
   private String lastTradingDate;
