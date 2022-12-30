@@ -31,14 +31,14 @@ public class QuoteContractRequest extends TigerCommonRequest implements TigerReq
 
   public static QuoteContractRequest newRequest(List<String> symbols, SecType secType, Language lang) {
     QuoteContractRequest request = new QuoteContractRequest();
-    QuoteContractModel model = new QuoteContractModel(symbols, secType, lang);
+    QuoteContractModel model = new QuoteContractModel(symbols.get(0), secType, lang);
     request.setApiModel(model);
     return request;
   }
 
   public static QuoteContractRequest newRequest(List<String> symbols, SecType secType, String expiry) {
     QuoteContractRequest request = new QuoteContractRequest();
-    QuoteContractModel model = new QuoteContractModel(symbols, secType, expiry);
+    QuoteContractModel model = new QuoteContractModel(symbols.get(0), secType, expiry);
     request.setApiModel(model);
     return request;
   }
