@@ -1,15 +1,17 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.quote.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
-import java.util.List;
 
 /**
  * Description:
  * Created by lijiawen on 2018/12/25.
  */
-public class QuoteContractModel extends QuoteSymbolModel {
+public class QuoteContractModel extends ApiModel {
+
+  private String symbol;
 
   @JSONField(name = "sec_type")
   private SecType secType;
@@ -19,6 +21,14 @@ public class QuoteContractModel extends QuoteSymbolModel {
   private String strike;
 
   private String expiry;
+
+  public String getSymbol() {
+    return symbol;
+  }
+
+  public void setSymbol(String symbol) {
+    this.symbol = symbol;
+  }
 
   public String getExpiry() {
     return expiry;
@@ -47,32 +57,32 @@ public class QuoteContractModel extends QuoteSymbolModel {
   public QuoteContractModel() {
   }
 
-  public QuoteContractModel(List<String> symbols) {
-    super(symbols);
+  public QuoteContractModel(String symbol) {
+    this.symbol = symbol;
   }
 
-  public QuoteContractModel(List<String> symbols, SecType secType) {
-    super(symbols);
+  public QuoteContractModel(String symbol, SecType secType) {
+    this.symbol = symbol;
     this.secType = secType;
   }
 
-  public QuoteContractModel(List<String> symbols, SecType secType, Language lang) {
-    super(symbols, lang);
+  public QuoteContractModel(String symbol, SecType secType, Language lang) {
+    this.symbol = symbol;
     this.secType = secType;
   }
 
-  public QuoteContractModel(List<String> symbols, SecType secType, String expiry) {
-    this(symbols,secType);
+  public QuoteContractModel(String symbol, SecType secType, String expiry) {
+    this(symbol, secType);
     this.expiry = expiry;
   }
 
-  public QuoteContractModel(List<String> symbols, SecType secType, String expiry, Language lang) {
-    this(symbols,secType,expiry);
+  public QuoteContractModel(String symbol, SecType secType, String expiry, Language lang) {
+    this(symbol, secType, expiry);
     this.setLang(lang);
   }
 
-  public QuoteContractModel(List<String> symbols, SecType secType, String expiry, String right, String strike) {
-    this(symbols,secType,expiry);
+  public QuoteContractModel(String symbol, SecType secType, String expiry, String right, String strike) {
+    this(symbol, secType, expiry);
     this.setRight(right);
     this.setStrike(strike);
   }
