@@ -90,44 +90,46 @@ public class TradeOrderModel extends ApiModel {
   @JSONField(name = "adjust_limit")
   private Double adjustLimit;
   /**
-   * 股票止损价。当 order_type 为STP,STP_LMT时该参数必需，当 order_type 为 TRAIL时,aux_price为跟踪额
+   * stop loss price. This parameter is required when order_type is STP and STP_LMT,
+   * when order_type is TRAIL, aux_price is the stop loss trailing amount
    */
   @JSONField(name = "aux_price")
   private Double auxPrice;
 
   /**
-   * 跟踪止损单 - 百分比。当 order_type 为 TRAIL时,aux_price和trailing_percent两者互斥
+   * Trailing Stop Order - trailing percentage. When order_type is TRAIL,
+   * trailing_percent is preferred when both aux_price and trailing_percent have values
    */
   @JSONField(name = "trailing_percent")
   private Double trailingPercent;
 
   /**
-   * true 允许盘前盘后交易(美股专属)
+   * Allow pre-market and after-hours trading. default is true
    */
   @JSONField(name = "outside_rth")
-  private Boolean outsideRth;
+  private Boolean outsideRth = Boolean.TRUE;
   /**
-   * 市场
+   * market
    */
   private String market;
   /**
-   * 交易所
+   * exchange
    */
   private String exchange;
   /**
-   * 期权、涡轮、牛熊证字段
+   * expiry(for options, warran, cbbc)
    */
   private String expiry;
   /**
-   * 底层价格(期权、涡轮、牛熊证专属)
+   * strike price (for options, warran, cbbc)
    */
   private String strike;
   /**
-   * 期权方向 PUT/CALL(期权、涡轮、牛熊证专属)
+   * PUT/CALL (for options, warran, cbbc)
    */
   private String right;
   /**
-   * 1手单位(期权、涡轮、牛熊证专属)
+   * lot size(for futures, options, warran, cbbc)
    */
   private Float multiplier;
 
@@ -146,21 +148,19 @@ public class TradeOrderModel extends ApiModel {
 
   private String source;
   /**
-   * 用户备注信息
+   * user remark info
    */
   @JSONField(name = "user_mark")
   private String userMark;
 
   /**
-   * 附加订单类型：
-   * PROFIT
-   * LOSS
+   * attached order type：PROFIT/LOSS
    */
   @JSONField(name = "attach_type")
   private AttachType attachType;
 
   /**
-   * 止盈订单
+   * attached profit taker order
    */
   @JSONField(name = "profit_taker_orderId")
   private Integer profitTakerOrderId;
