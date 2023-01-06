@@ -41,6 +41,7 @@ public class HttpUtils {
         .post(body)
         .build();
     int requstCount = 0;
+    String result = null;
     do {
       requstCount++;
       try {
@@ -53,19 +54,20 @@ public class HttpUtils {
           ApiLogger.error("HttpUtils response body is null");
           throw new RuntimeException("http response body is null");
         }
-        String result = response.body().string();
-        if (requstCount > retryCount || result.indexOf("internal_error:A system error occurred, please try again later") < 0) {
-          return result;
-        }
-        requestWaitInterval(requstCount);
+        result = response.body().string();
       } catch (Exception e) {
         ApiLogger.info("HttpUtils execute[{}] fail:{}", requstCount, e.getMessage());
         if (requstCount > retryCount) {
           throw e;
         }
+      } finally {
+        if (requstCount > retryCount || (result != null && result.indexOf("internal_error:A system error occurred, please try again later") < 0)) {
+          return result;
+        }
+        requestWaitInterval(requstCount);
       }
     } while(requstCount <= retryCount);
-    return null;
+    return result;
   }
 
   private static void requestWaitInterval(int requstCount) {
