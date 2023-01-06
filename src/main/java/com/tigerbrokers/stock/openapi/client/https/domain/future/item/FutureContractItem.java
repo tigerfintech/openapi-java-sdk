@@ -72,6 +72,14 @@ public class FutureContractItem extends ApiModel {
     this.exchangeCode = exchangeCode;
   }
 
+  public String getExchange() {
+    return exchange;
+  }
+
+  public void setExchange(String exchange) {
+    this.exchange = exchange;
+  }
+
   public BigDecimal getMultiplier() {
     return multiplier;
   }
@@ -145,6 +153,7 @@ public class FutureContractItem extends ApiModel {
         ", contractCode='" + contractCode + '\'' +
         ", contractMonth='" + contractMonth + '\'' +
         ", exchangeCode='" + exchangeCode + '\'' +
+        ", exchange='" + exchange + '\'' +
         ", multiplier=" + (multiplier == null ? multiplier : multiplier.stripTrailingZeros().toPlainString()) +
         ", minTick=" + minTick +
         ", lastTradingDate='" + lastTradingDate + '\'' +
