@@ -68,6 +68,7 @@ public class TigerHttpClient implements TigerClient {
   private String tradeToken;
   private String accountType;
   private String deviceId;
+  private int failRetryCounts = TigerApiConstants.DEFAULT_FAIL_RETRY_COUNT;
 
   private static final String ONLINE_PUBLIC_KEY =
       "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDNF3G8SoEcCZh2rshUbayDgLLrj6rKgzNMxDL2HSnKcB0+GPOsndqSv+a4IBu9+I3fyBp5hkyMMG2+AXugd9pMpy6VxJxlNjhX1MYbNTZJUT4nudki4uh+LMOkIBHOceGNXjgB+cXqmlUnjlqha/HgboeHSnSgpM3dKSJQlIOsDwIDAQAB";
@@ -102,6 +103,9 @@ public class TigerHttpClient implements TigerClient {
 
   public TigerHttpClient clientConfig(ClientConfig clientConfig) {
     init(clientConfig.serverUrl, clientConfig.tigerId, clientConfig.privateKey);
+    if (clientConfig.failRetryCounts <= TigerApiConstants.MAX_FAIL_RETRY_COUNT) {
+      this.failRetryCounts = Math.max(clientConfig.failRetryCounts, 0);
+    }
     initDomainRefreshTask();
     if (clientConfig.isAutoGrabPermission) {
       TigerHttpRequest request = new TigerHttpRequest(MethodName.GRAB_QUOTE_PERMISSION);
@@ -254,7 +258,8 @@ public class TigerHttpClient implements TigerClient {
       param = JSONObject.toJSONString(buildParams(request));
       ApiLogger.debug("request param:{}", param);
 
-      data = HttpUtils.post(getServerUrl(request), param);
+      data = HttpUtils.post(getServerUrl(request), param,
+          MethodName.PLACE_ORDER == request.getApiMethodName() ? 0 : failRetryCounts);
 
       ApiLogger.debug("response result:{}", data);
       if (StringUtils.isEmpty(data)) {

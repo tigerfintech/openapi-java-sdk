@@ -29,33 +29,42 @@ public class HttpUtils {
       .build();
 
   public static String post(String url, String json) throws Exception {
+    return post(url, json, 0);
+  }
+  public static String post(String url, String json, int retryCount) throws Exception {
     if (url == null || json == null) {
       throw new RuntimeException("request url or json param cannot be null");
     }
-    try {
-      RequestBody body = RequestBody.create(JSON, json);
-      okhttp3.Request request = new okhttp3.Request.Builder()
-          .url(url)
-          .post(body)
-          .build();
-
-      Response response = client.newCall(request).execute();
-      if (response == null) {
-        ApiLogger.error("HttpUtils response is null");
-        throw new RuntimeException("http response is null");
+    RequestBody body = RequestBody.create(JSON, json);
+    okhttp3.Request request = new okhttp3.Request.Builder()
+        .url(url)
+        .post(body)
+        .build();
+    int requstCount = 0;
+    do {
+      requstCount++;
+      try {
+        Response response = client.newCall(request).execute();
+        if (response == null) {
+          ApiLogger.error("HttpUtils response is null");
+          throw new RuntimeException("http response is null");
+        }
+        if (response.body() == null) {
+          ApiLogger.error("HttpUtils response body is null");
+          throw new RuntimeException("http response body is null");
+        }
+        String result = response.body().string();
+        if (requstCount > retryCount || result.indexOf("internal_error:A system error occurred, please try again later") < 0) {
+          return result;
+        }
+      } catch (Exception e) {
+        ApiLogger.info("HttpUtils execute[{}] fail:{}", requstCount, e.getMessage());
+        if (requstCount > retryCount) {
+          throw e;
+        }
       }
-      if(response.body() == null) {
-        ApiLogger.error("HttpUtils response body is null");
-        throw new RuntimeException("http response body is null");
-      }
-      return response.body().string();
-    } catch (IOException e) {
-      ApiLogger.error("HttpUtils execute io exception:{}", e.getMessage(), e);
-      throw e;
-    } catch (Exception e) {
-      ApiLogger.error("HttpUtils execute exception:{}", e.getMessage(), e);
-      throw e;
-    }
+    } while(requstCount <= retryCount);
+    return null;
   }
 
   public static String get(String url) throws Exception {

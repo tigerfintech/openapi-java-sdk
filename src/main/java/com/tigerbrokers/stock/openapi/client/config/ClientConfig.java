@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.config;
 
+import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.License;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
@@ -80,6 +81,11 @@ public class ClientConfig {
    * institutional trader private key
    */
   public String secretKey = null;
+
+  /**
+   * request fail retry counts, range:[0, 5], if less than 1 will no retry; if bigger than 5 will set default value
+   */
+  public int failRetryCounts = TigerApiConstants.DEFAULT_FAIL_RETRY_COUNT;
 
   private ClientConfig() {
   }
