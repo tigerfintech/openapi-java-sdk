@@ -66,5 +66,7 @@ public class TigerApiConstants {
   public static final String DEFAULT_PROD_SOCKET_SSL_PORT = "9883";
   public static final String DEFAULT_SANDBOX_SOCKET_PORT = "9889";
   public static final String DEFAULT_SANDBOX_SOCKET_SSL_PORT = "9885";
+  public static final int DEFAULT_FAIL_RETRY_COUNT = 2;
+  public static final int MAX_FAIL_RETRY_COUNT = 5;
 
 }
