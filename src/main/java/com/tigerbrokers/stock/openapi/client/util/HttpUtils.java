@@ -57,6 +57,7 @@ public class HttpUtils {
         if (requstCount > retryCount || result.indexOf("internal_error:A system error occurred, please try again later") < 0) {
           return result;
         }
+        requestWaitInterval(requstCount);
       } catch (Exception e) {
         ApiLogger.info("HttpUtils execute[{}] fail:{}", requstCount, e.getMessage());
         if (requstCount > retryCount) {
@@ -65,6 +66,15 @@ public class HttpUtils {
       }
     } while(requstCount <= retryCount);
     return null;
+  }
+
+  private static void requestWaitInterval(int requstCount) {
+    try {
+      // 200ms, 400ms, 800ms
+      TimeUnit.MILLISECONDS.sleep((int)Math.pow(2, requstCount) * 100);
+    } catch(InterruptedException ie) {
+      // ignore
+    }
   }
 
   public static String get(String url) throws Exception {
