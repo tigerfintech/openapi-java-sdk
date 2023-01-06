@@ -61,10 +61,11 @@ public class HttpUtils {
           throw e;
         }
       } finally {
-        if (requstCount > retryCount || (result != null && result.indexOf("internal_error:A system error occurred, please try again later") < 0)) {
+        if (result != null && result.indexOf("internal_error:A system error occurred, please try again later") < 0) {
           return result;
+        } else if (requstCount <= retryCount) {
+          requestWaitInterval(requstCount);
         }
-        requestWaitInterval(requstCount);
       }
     } while(requstCount <= retryCount);
     return result;
