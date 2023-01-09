@@ -49,6 +49,7 @@ public class HttpUtils {
         .build();
     int requstCount = 0;
     String result = null;
+    boolean needRetry = retryCount > 0;
     do {
       requstCount++;
       try {
@@ -64,18 +65,21 @@ public class HttpUtils {
         result = response.body().string();
       } catch (Exception e) {
         ApiLogger.info("HttpUtils execute[{}] fail:{}", requstCount, e.getMessage());
-        if (requstCount > retryCount
-            || !retryExceptionSet.contains(e.getClass())) {
+        if (requstCount > retryCount || !retryExceptionSet.contains(e.getClass())) {
+          needRetry = false;
           throw e;
         }
       } finally {
         if (result != null && result.indexOf("internal_error:A system error occurred, please try again later") < 0) {
           return result;
-        } else if (requstCount <= retryCount) {
-          requestWaitInterval(requstCount);
+        } else {
+          needRetry &= requstCount <= retryCount;
+          if (needRetry) {
+            requestWaitInterval(requstCount);
+          }
         }
       }
-    } while(requstCount <= retryCount);
+    } while(needRetry);
     return result;
   }
 
