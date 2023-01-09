@@ -4,10 +4,12 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.core.FileAppender;
-import java.io.File;
-import java.io.IOException;
+import ch.qos.logback.core.rolling.RollingFileAppender;
+import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -39,25 +41,16 @@ public class ApiLogger {
 
   private static void initConfig(String logPath) {
     try {
-      String filename = "tiger_openapi_" + DateUtils.printSystemDate() + ".log";
-      File logFilePath;
-      if (logPath == null) {
-        logFilePath = new File("log/");
-      } else {
-        logFilePath = new File(logPath);
+      String filename = "tiger_openapi.log";
+      String filenamePattern = "tiger_openapi.%d{yyyy-MM-dd}.log";
+      Path logFilePath = Paths.get(logPath == null ? "log" : logPath, filename);
+      Path parentPath = logFilePath.toAbsolutePath().getParent();
+      if (Files.notExists(parentPath)) {
+        Files.createDirectories(parentPath);
       }
-      if (!logFilePath.exists()) {
-        logFilePath.mkdir();
-      }
-      String filePath = (logPath == null ? "log/" : logPath) + filename;
-      File logFile = new File(filePath);
-      if (!logFilePath.exists()) {
-        try {
-          logFile.createNewFile();
-        } catch (IOException e) {
-          throw new RuntimeException("create log error:" + e.getMessage());
-        }
-      }
+      String fullFilename = logFilePath.toAbsolutePath().toString();
+      String fullFilenamePattern = Paths.get(parentPath.toAbsolutePath().toString(), filenamePattern).toAbsolutePath().toString();
+
       LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
       PatternLayoutEncoder encoder = new PatternLayoutEncoder();
@@ -66,15 +59,22 @@ public class ApiLogger {
       encoder.setPattern("%d %level - %msg%n");
       encoder.start();
 
-      FileAppender fileAppender = new FileAppender();
-      fileAppender.setName("TigerOpenApi");
-      fileAppender.setContext(loggerContext);
-      fileAppender.setFile(filePath);
-      fileAppender.setEncoder(encoder);
-      fileAppender.start();
+      RollingFileAppender rollingFileAppender = new RollingFileAppender();
+      TimeBasedRollingPolicy timeBasedRollingPolicy = new TimeBasedRollingPolicy<>();
+      timeBasedRollingPolicy.setParent(rollingFileAppender);
+      timeBasedRollingPolicy.setContext(loggerContext);
+      timeBasedRollingPolicy.setFileNamePattern(fullFilenamePattern);
+      timeBasedRollingPolicy.setMaxHistory(30);
+      timeBasedRollingPolicy.start();
+      rollingFileAppender.setName("TigerOpenApi");
+      rollingFileAppender.setContext(loggerContext);
+      rollingFileAppender.setFile(fullFilename);
+      rollingFileAppender.setRollingPolicy(timeBasedRollingPolicy);
+      rollingFileAppender.setEncoder(encoder);
+      rollingFileAppender.start();
 
       logger = loggerContext.getLogger("com.tigerbrokers.openapi.client");
-      logger.addAppender(fileAppender);
+      logger.addAppender(rollingFileAppender);
       logger.setLevel(Level.INFO);
     } catch (Throwable e) {
       throw new RuntimeException("an error occurred while init log config, error message:{}" + e.getMessage());
