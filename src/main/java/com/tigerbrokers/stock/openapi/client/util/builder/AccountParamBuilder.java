@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.util.builder;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
@@ -270,7 +271,7 @@ public class AccountParamBuilder {
       paramMap.put("lang", ClientConfig.DEFAULT_CONFIG.getDefaultLanguage().name());
     }
     jsonObject.putAll(paramMap);
-    return jsonObject.toJSONString();
+    return jsonObject.toJSONString(SerializerFeature.WriteEnumUsingToString);
   }
 
   /**
@@ -283,6 +284,6 @@ public class AccountParamBuilder {
       paramMap.put("lang", ClientConfig.DEFAULT_CONFIG.getDefaultLanguage().name());
     }
     jsonObject.putAll(paramMap);
-    return jsonObject.toJSONString();
+    return jsonObject.toJSONString(SerializerFeature.WriteEnumUsingToString);
   }
 }

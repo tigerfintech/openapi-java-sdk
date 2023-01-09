@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.https.client;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
@@ -166,7 +167,7 @@ public class TigerHttpClient implements TigerClient {
         UserLicenseRequest request = UserLicenseRequest.newRequest();
         UserLicenseResponse response = execute(request);
         if (response.isSuccess() && response.getLicenseItem() != null) {
-          ApiLogger.debug("license:{}", JSON.toJSONString(response.getLicenseItem()));
+          ApiLogger.debug("license:{}", JSON.toJSONString(response.getLicenseItem(), SerializerFeature.WriteEnumUsingToString));
           ClientConfig.DEFAULT_CONFIG.license = License.valueOf(response.getLicenseItem().getLicense());
         }
       } catch (Exception e) {
@@ -250,7 +251,7 @@ public class TigerHttpClient implements TigerClient {
     try {
       validate(request);
       // after successful verification（string enumeration values may be reset）, generate JSON data
-      param = JSONObject.toJSONString(buildParams(request));
+      param = JSONObject.toJSONString(buildParams(request), SerializerFeature.WriteEnumUsingToString);
       ApiLogger.debug("request param:{}", param);
 
       data = HttpUtils.post(getServerUrl(request), param,
@@ -320,11 +321,11 @@ public class TigerHttpClient implements TigerClient {
     } else {
       ApiModel apiModel = request.getApiModel();
       if (apiModel instanceof BatchApiModel) {
-        params.put(BIZ_CONTENT, JSONObject.toJSONString(((BatchApiModel) apiModel).getItems()));
+        params.put(BIZ_CONTENT, JSONObject.toJSONString(((BatchApiModel) apiModel).getItems(), SerializerFeature.WriteEnumUsingToString));
       } else if (apiModel instanceof TradeOrderModel) {
-        params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel, FastJsonPropertyFilter.getPropertyFilter()));
+        params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel, FastJsonPropertyFilter.getPropertyFilter(), SerializerFeature.WriteEnumUsingToString));
       } else {
-        params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel));
+        params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel, SerializerFeature.WriteEnumUsingToString));
       }
     }
     params.put(TIMESTAMP, request.getTimestamp());

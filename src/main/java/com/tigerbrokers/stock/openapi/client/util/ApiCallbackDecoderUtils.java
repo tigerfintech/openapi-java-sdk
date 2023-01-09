@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.socket.ApiCallbackDecoder;
 import com.tigerbrokers.stock.openapi.client.socket.ApiCallbackDecoder4Stomp;
@@ -99,7 +100,7 @@ public class ApiCallbackDecoderUtils {
             }
             decoder.getCallback().error(content);
           } else if (frame != null) {
-            decoder.getCallback().error(JSONObject.toJSONString(frame));
+            decoder.getCallback().error(JSONObject.toJSONString(frame, SerializerFeature.WriteEnumUsingToString));
           } else {
             decoder.getCallback().error("unknown error");
           }
