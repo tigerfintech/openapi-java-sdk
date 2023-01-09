@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
+import java.net.ConnectException;
 import java.util.HashSet;
 import java.util.Set;
 import okhttp3.ConnectionPool;
@@ -26,6 +27,7 @@ public class HttpUtils {
   private static Set<Class<? extends Exception>> retryExceptionSet =
       new HashSet<Class<? extends Exception>>() {{
         add(IOException.class);
+        add(ConnectException.class);
   }};
 
   public static OkHttpClient client = new OkHttpClient.Builder()
