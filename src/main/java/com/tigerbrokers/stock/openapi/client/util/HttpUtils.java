@@ -1,5 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
+import java.util.HashSet;
+import java.util.Set;
 import okhttp3.ConnectionPool;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -20,6 +22,11 @@ public class HttpUtils {
   public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
   private static ConnectionPool connectionPool = new ConnectionPool(5, 60, TimeUnit.SECONDS);
+
+  private static Set<Class<? extends Exception>> retryExceptionSet =
+      new HashSet<Class<? extends Exception>>() {{
+        add(IOException.class);
+  }};
 
   public static OkHttpClient client = new OkHttpClient.Builder()
       .connectTimeout(CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
@@ -57,7 +64,8 @@ public class HttpUtils {
         result = response.body().string();
       } catch (Exception e) {
         ApiLogger.info("HttpUtils execute[{}] fail:{}", requstCount, e.getMessage());
-        if (requstCount > retryCount) {
+        if (requstCount > retryCount
+            || !retryExceptionSet.contains(e.getClass())) {
           throw e;
         }
       } finally {

@@ -25,6 +25,8 @@ public class ApiLogger {
   private static boolean infoEnabled = true;
   private static boolean errorEnabled = true;
   private static final String SPLITTER = "###";
+  private static final String LOG_FILE_NAME = "tiger_openapi.log";
+  private static final String LOG_FILE_PATTERN = "tiger_openapi.%d{yyyy-MM-dd}.log";
 
   public static void setEnabled(boolean isEnabled) {
     setEnabled(isEnabled, null);
@@ -41,15 +43,13 @@ public class ApiLogger {
 
   private static void initConfig(String logPath) {
     try {
-      String filename = "tiger_openapi.log";
-      String filenamePattern = "tiger_openapi.%d{yyyy-MM-dd}.log";
-      Path logFilePath = Paths.get(logPath == null ? "log" : logPath, filename);
+      Path logFilePath = Paths.get(logPath == null ? "log" : logPath, LOG_FILE_NAME);
       Path parentPath = logFilePath.toAbsolutePath().getParent();
       if (Files.notExists(parentPath)) {
         Files.createDirectories(parentPath);
       }
       String fullFilename = logFilePath.toAbsolutePath().toString();
-      String fullFilenamePattern = Paths.get(parentPath.toAbsolutePath().toString(), filenamePattern).toAbsolutePath().toString();
+      String fullFilenamePattern = Paths.get(parentPath.toAbsolutePath().toString(), LOG_FILE_PATTERN).toAbsolutePath().toString();
 
       LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
