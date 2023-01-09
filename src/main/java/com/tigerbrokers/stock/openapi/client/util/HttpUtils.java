@@ -66,7 +66,7 @@ public class HttpUtils {
         }
         result = response.body().string();
       } catch (Exception e) {
-        ApiLogger.info("HttpUtils execute[{}] fail:{}", requstCount, e.getMessage());
+        ApiLogger.info("HttpUtils execute[{}] times, fail:{}", requstCount, e.getMessage());
         if (requstCount > retryCount || !retryExceptionSet.contains(e.getClass())) {
           needRetry = false;
           throw e;
