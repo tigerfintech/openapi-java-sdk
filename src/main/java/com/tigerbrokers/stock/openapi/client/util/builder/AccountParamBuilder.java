@@ -263,15 +263,13 @@ public class AccountParamBuilder {
    * @return
    */
   public String buildJson() {
-    JSONObject jsonObject = new JSONObject();
     if (paramMap.get("account") == null) {
       paramMap.put("account", ClientConfig.DEFAULT_CONFIG.defaultAccount);
     }
     if (paramMap.get("lang") == null) {
       paramMap.put("lang", ClientConfig.DEFAULT_CONFIG.getDefaultLanguage().name());
     }
-    jsonObject.putAll(paramMap);
-    return jsonObject.toJSONString(SerializerFeature.WriteEnumUsingToString);
+    return JSONObject.toJSONString(paramMap, SerializerFeature.WriteEnumUsingToString);
   }
 
   /**
@@ -279,11 +277,9 @@ public class AccountParamBuilder {
    * @return
    */
   public String buildJsonWithoutDefaultAccount() {
-    JSONObject jsonObject = new JSONObject();
     if (paramMap.get("lang") == null) {
       paramMap.put("lang", ClientConfig.DEFAULT_CONFIG.getDefaultLanguage().name());
     }
-    jsonObject.putAll(paramMap);
-    return jsonObject.toJSONString(SerializerFeature.WriteEnumUsingToString);
+    return JSONObject.toJSONString(paramMap, SerializerFeature.WriteEnumUsingToString);
   }
 }
