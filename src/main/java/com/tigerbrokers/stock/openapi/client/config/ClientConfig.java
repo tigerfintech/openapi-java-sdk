@@ -4,7 +4,6 @@ import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.License;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
-import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.builder.HeaderBuilder;
@@ -19,13 +18,10 @@ import java.io.IOException;
 public class ClientConfig {
   private static final String PPRVATE_KEY_PREFIX = "KEY-----";
   private static final String PRIVATE_KEY_SUFFIX = "-----END";
-  private static final Protocol DEFAULT_PROTOCOL = Protocol.SECURE_SOCKET;
   private static final Env DEFAULT_ENV = Env.PROD;
   private static final SslProvider DEFAULT_SSLPROVIDER = SslProvider.OPENSSL;
   /** default client config */
   public static final ClientConfig DEFAULT_CONFIG = new ClientConfig();
-
-  private Protocol subscribeProtocol = DEFAULT_PROTOCOL;
 
   private Env env = DEFAULT_ENV;
 
@@ -34,6 +30,8 @@ public class ClientConfig {
   public License license;
 
   public String version = HeaderBuilder.DEFAULT_VERSION;
+
+  public boolean isSslSocket = true;
 
   /**
    * http interface server url
@@ -96,17 +94,6 @@ public class ClientConfig {
 
   public Language getDefaultLanguage() {
     return language == null ? Language.en_US : language;
-  }
-
-  public Protocol getSubscribeProtocol() {
-    return subscribeProtocol;
-  }
-
-  public void setSubscribeProtocol(Protocol subscribeProtocol) {
-    if (subscribeProtocol == null || subscribeProtocol == Protocol.HTTP) {
-      return;
-    }
-    this.subscribeProtocol = subscribeProtocol;
   }
 
   public Env getEnv() {

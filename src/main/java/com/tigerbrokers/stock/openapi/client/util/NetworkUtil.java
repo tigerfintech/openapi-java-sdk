@@ -246,7 +246,7 @@ public class NetworkUtil {
   }
 
   public static String getServerAddress(String originalAddress) {
-    return refreshAndGetServerAddress(ClientConfig.DEFAULT_CONFIG.getSubscribeProtocol(),
+    return refreshAndGetServerAddress(ClientConfig.DEFAULT_CONFIG.isSslSocket ? Protocol.SECURE_SOCKET : Protocol.WEB_SOCKET,
         null, originalAddress).get(BizType.SOCKET);
   }
 

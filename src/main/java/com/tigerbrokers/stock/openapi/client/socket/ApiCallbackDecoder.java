@@ -130,7 +130,7 @@ public class ApiCallbackDecoder {
         callback.orderTransactionChange(pushData.getOrderTransactionData());
         break;
       default:
-        ApiLogger.info("push data cannot be processed.", ProtoMessageUtil.toJson(msg));
+        ApiLogger.info("push data cannot be processed. {}", ProtoMessageUtil.toJson(msg));
     }
   }
 
@@ -160,7 +160,7 @@ public class ApiCallbackDecoder {
   }
 
   private void processDefault(Response msg) {
-    ApiLogger.info("receive MESSAGE's code:{} cannot be processed.", msg.getCode());
+    ApiLogger.info("receive message's code:{} cannot be processed.", msg.getCode());
   }
 
   public void processHeartBeat(final String content) {
