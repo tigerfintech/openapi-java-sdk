@@ -23,6 +23,7 @@ public class ApiLogger {
   private static boolean enabled = false;
   private static boolean debugEnabled = false;
   private static boolean infoEnabled = true;
+  private static boolean warnEnabled = true;
   private static boolean errorEnabled = true;
   private static final String SPLITTER = "###";
   private static final String LOG_FILE_NAME = "tiger_openapi.log";
@@ -87,6 +88,10 @@ public class ApiLogger {
 
   public static void setInfoEnabled(boolean infoEnabled) {
     ApiLogger.infoEnabled = infoEnabled;
+  }
+
+  public static void setWarnEnabled(boolean warnEnabled) {
+    ApiLogger.warnEnabled = warnEnabled;
   }
 
   public static void setErrorEnabled(boolean errorEnabled) {
@@ -173,6 +178,13 @@ public class ApiLogger {
       return;
     }
     logger.info(message, value1, value2, value3);
+  }
+
+  public static void warn(String message, Object... args) {
+    if (!enabled || !warnEnabled) {
+      return;
+    }
+    logger.info(message, args);
   }
 
   public static void debug(String message, Object value) {

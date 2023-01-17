@@ -6,6 +6,7 @@ import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.socket.ApiCallbackDecoder;
 import com.tigerbrokers.stock.openapi.client.socket.ApiCallbackDecoder4Stomp;
 import com.tigerbrokers.stock.openapi.client.socket.IdleTriggerHandler;
+import com.tigerbrokers.stock.openapi.client.socket.ProtoSocketHandler;
 import com.tigerbrokers.stock.openapi.client.socket.WebSocketClient;
 import com.tigerbrokers.stock.openapi.client.socket.WebSocketHandler;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
@@ -169,9 +170,9 @@ public class ApiCallbackDecoderUtils {
           if (serverSendInterval > 0 || serverReceiveInterval > 0) {
             if (null == ctx.channel().pipeline().get(IDLE_STATE_HANDLER)) {
               serverSendInterval =
-                  serverSendInterval == 0 ? 0 : serverSendInterval + WebSocketHandler.HEART_BEAT_SPAN;
+                  serverSendInterval == 0 ? 0 : serverSendInterval + ProtoSocketHandler.HEART_BEAT_SPAN;
               serverReceiveInterval =
-                  serverReceiveInterval == 0 ? 0 : serverReceiveInterval - WebSocketHandler.HEART_BEAT_SPAN;
+                  serverReceiveInterval == 0 ? 0 : serverReceiveInterval - ProtoSocketHandler.HEART_BEAT_SPAN;
 
               ctx.channel().pipeline().addBefore(WebSocketClient.SOCKET_ENCODER, IDLE_STATE_HANDLER,
                   new IdleStateHandler(serverSendInterval, serverReceiveInterval, 0, TimeUnit.MILLISECONDS));
