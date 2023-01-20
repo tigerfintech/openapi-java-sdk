@@ -260,7 +260,7 @@ public class NetworkUtil {
         domainConfigList = (List<Map<String, Object>>)domainConfigMap.get("items");
       }
     } catch (Throwable th) {
-      ApiLogger.error("domain config response error, response:{}", response);
+      ApiLogger.warn("domain garden return:{}, error:{}", response, th.getMessage());
     }
     // if get domain config data failed and original address is not emtpy, return original address
     if (domainConfigList.isEmpty() && !StringUtils.isEmpty(originalAddress)) {

@@ -30,5 +30,5 @@ public interface ApiComposeCallback extends SubscribeApiCallback {
 
   void hearBeat(String heartBeatContent);
 
-  void serverHeartBeatTimeOut(String channelIdAsLongText);
+  void serverHeartBeatTimeOut(String channelId);
 }
