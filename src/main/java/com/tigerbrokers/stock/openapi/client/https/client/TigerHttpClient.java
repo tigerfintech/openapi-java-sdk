@@ -100,7 +100,7 @@ public class TigerHttpClient implements TigerClient {
   }
 
   public TigerHttpClient clientConfig(ClientConfig clientConfig) {
-    init(clientConfig.serverUrl, clientConfig.tigerId, clientConfig.privateKey);
+    init(clientConfig.tigerId, clientConfig.privateKey);
     if (clientConfig.failRetryCounts <= TigerApiConstants.MAX_FAIL_RETRY_COUNT) {
       this.failRetryCounts = Math.max(clientConfig.failRetryCounts, 0);
     }
@@ -115,13 +115,7 @@ public class TigerHttpClient implements TigerClient {
     return this;
   }
 
-  /** please use TigerHttpClient.getInstance().clientConfig(ClientConfig.DEFAULT_CONFIG) */
-  @Deprecated
-  public TigerHttpClient(String serverUrl, String tigerId, String privateKey) {
-    init(serverUrl, tigerId, privateKey);
-  }
-
-  private void init(String serverUrl, String tigerId, String privateKey) {
+  private void init(String tigerId, String privateKey) {
     if (tigerId == null) {
       throw new RuntimeException("tigerId is empty.");
     }
@@ -138,25 +132,15 @@ public class TigerHttpClient implements TigerClient {
     this.deviceId = NetworkUtil.getDeviceId();
 
     initLicense();
-    if (Env.PROD == ClientConfig.DEFAULT_CONFIG.getEnv() || StringUtils.isEmpty(serverUrl)) {
-      refreshUrl();
-    } else {
-      this.serverUrl = serverUrl;
-    }
+    refreshUrl();
     if (this.serverUrl == null) {
       throw new RuntimeException("serverUrl is empty.");
     }
   }
 
-  @Deprecated
-  public TigerHttpClient(String serverUrl) {
-    this.serverUrl = serverUrl;
-  }
-
-  @Deprecated
-  public TigerHttpClient(String serverUrl, String accessToken) {
-    this.serverUrl = serverUrl;
+  public TigerHttpClient accessToken(String accessToken) {
     this.accessToken = accessToken;
+    return this;
   }
 
   private void initLicense() {

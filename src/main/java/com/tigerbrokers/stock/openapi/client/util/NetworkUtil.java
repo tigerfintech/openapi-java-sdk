@@ -224,11 +224,11 @@ public class NetworkUtil {
     String port = "";
     if (protocol != Protocol.HTTP) {
       if (clientConfig.getEnv() == Env.PROD) {
-        port = protocol == Protocol.WEB_SOCKET ? TigerApiConstants.DEFAULT_PROD_SOCKET_PORT
-            : TigerApiConstants.DEFAULT_PROD_SOCKET_SSL_PORT;
+        port = clientConfig.isSslSocket ? TigerApiConstants.DEFAULT_PROD_SOCKET_SSL_PORT
+            : TigerApiConstants.DEFAULT_PROD_SOCKET_PORT;
       } else {
-        port = protocol == Protocol.WEB_SOCKET ? TigerApiConstants.DEFAULT_SANDBOX_SOCKET_PORT
-            : TigerApiConstants.DEFAULT_SANDBOX_SOCKET_SSL_PORT;
+        port = clientConfig.isSslSocket ? TigerApiConstants.DEFAULT_SANDBOX_SOCKET_SSL_PORT
+            : TigerApiConstants.DEFAULT_SANDBOX_SOCKET_PORT;
       }
     }
     return port;
@@ -251,28 +251,29 @@ public class NetworkUtil {
   }
 
   private static Map<BizType, String> refreshAndGetServerAddress(Protocol protocol, License license, String originalAddress) {
-    String response = null;
+    ClientConfig clientConfig = ClientConfig.DEFAULT_CONFIG;
+    Env env = clientConfig.getEnv();
+    String port = getDefaultPort(clientConfig, protocol);
+    String commonUrl = null;
+    String domainGardenResponse = null;
     List<Map<String, Object>> domainConfigList = Collections.emptyList();
     try {
-      response = HttpUtils.get(TigerApiConstants.DOMAIN_GARDEN_ADDRESS);
-      Map<String, Object> domainConfigMap = JSON.parseObject(response, Map.class);
+      domainGardenResponse = HttpUtils.get(TigerApiConstants.DOMAIN_GARDEN_ADDRESS);
+      Map<String, Object> domainConfigMap = JSON.parseObject(domainGardenResponse, Map.class);
       if (domainConfigMap != null && domainConfigMap.get("items") != null) {
         domainConfigList = (List<Map<String, Object>>)domainConfigMap.get("items");
       }
     } catch (Throwable th) {
-      ApiLogger.warn("domain garden return:{}, error:{}", response, th.getMessage());
+      ApiLogger.warn("domain garden return:{}, error:{}", domainGardenResponse, th.getMessage());
     }
     // if get domain config data failed and original address is not emtpy, return original address
-    if (domainConfigList.isEmpty() && !StringUtils.isEmpty(originalAddress)) {
-      return new HashMap<BizType, String>(){{
-        put(protocol == Protocol.HTTP ? BizType.TRADE : BizType.SOCKET, originalAddress);}};
+    if (domainConfigList.isEmpty()) {
+      final String addressUrl = StringUtils.isEmpty(originalAddress)
+          ? String.format(protocol.getUrlFormat(), getDefaultUrl(env), port) : originalAddress;
+      return new HashMap<BizType, String>() {{ put(protocol == Protocol.HTTP ? BizType.COMMON : BizType.SOCKET, addressUrl);}};
     }
 
-    ClientConfig clientConfig = ClientConfig.DEFAULT_CONFIG;
-    Env env = clientConfig.getEnv();
-    String port = getDefaultPort(clientConfig, protocol);
     Map<BizType, String> domainUrlMap = new HashMap<>();
-    String commonUrl = null;
     for (Map<String, Object> configMap : domainConfigList) {
       Object openapiConfig = configMap.get(env.getConfigFieldName());
       if (openapiConfig != null && openapiConfig instanceof Map) {

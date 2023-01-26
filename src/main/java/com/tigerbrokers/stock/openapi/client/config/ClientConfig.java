@@ -34,18 +34,6 @@ public class ClientConfig {
   public boolean isSslSocket = true;
 
   /**
-   * http interface server url
-   */
-  @Deprecated
-  public String serverUrl;
-
-  /**
-   * socket server url
-   */
-  @Deprecated
-  public String socketServerUrl;
-
-  /**
    * tigerId : 2015xxxx,  address：https://www.itiger.com/openapi/info
    */
   public String tigerId = null;
