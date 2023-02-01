@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
@@ -176,7 +177,7 @@ public class ApiCallbackDecoder4Stomp extends ApiCallbackDecoder {
       String content = stompFrame.content().toString(DEFAULT_CHARSET);
       callback.error(content);
     } else if (stompFrame != null) {
-      callback.error(JSONObject.toJSONString(stompFrame));
+      callback.error(JSONObject.toJSONString(stompFrame, SerializerFeature.WriteEnumUsingToString));
     } else {
       callback.error("unknown error");
     }

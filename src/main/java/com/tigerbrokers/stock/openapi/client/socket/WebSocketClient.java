@@ -6,7 +6,6 @@ import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
-import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
@@ -130,11 +129,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   public WebSocketClient clientConfig(ClientConfig clientConfig) {
     this.clientConfig = clientConfig;
-    if (StringUtils.isEmpty(clientConfig.socketServerUrl) || Env.PROD == clientConfig.getEnv()) {
-      this.url = NetworkUtil.getServerAddress(null);
-    } else {
-      this.url = clientConfig.socketServerUrl;
-    }
+    this.url = NetworkUtil.getServerAddress(null);
     if (this.sslProvider == null && clientConfig.getSslProvider() != null) {
       this.sslProvider = clientConfig.getSslProvider();
     }
@@ -317,8 +312,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   private InetSocketAddress getNewServerAddress() {
-    if (clientConfig != null && (StringUtils.isEmpty(clientConfig.socketServerUrl)
-        || Env.PROD == clientConfig.getEnv())) {
+    if (clientConfig != null) {
       String newUrl = NetworkUtil.getServerAddress(this.url);
       if (!this.url.equals(newUrl)) {
         InetSocketAddress address = getSocketAddress(newUrl);

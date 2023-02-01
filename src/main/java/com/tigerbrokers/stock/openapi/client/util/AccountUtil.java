@@ -6,8 +6,6 @@ import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCOUNT;
 
@@ -17,7 +15,6 @@ import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.A
  */
 public class AccountUtil {
 
-  private static final Logger log = LoggerFactory.getLogger(AccountUtil.class);
   private static final int PAPER_ACCOUNT_LEN = 17;
 
   public static boolean isOmnibusAccount(String account) {
@@ -27,7 +24,7 @@ public class AccountUtil {
     try {
       return StringUtils.isNumeric(account) && account.length() < PAPER_ACCOUNT_LEN;
     } catch (Exception e) {
-      log.error("isOmnibusAccount {}", e.getMessage(), e);
+      ApiLogger.error("isOmnibusAccount {}", e.getMessage(), e);
       return false;
     }
   }
@@ -39,7 +36,7 @@ public class AccountUtil {
     try {
       return StringUtils.isNumeric(account) && account.length() == PAPER_ACCOUNT_LEN;
     } catch (Exception e) {
-      log.error("isVirtualAccount {}", e.getMessage(), e);
+      ApiLogger.error("isVirtualAccount {}", e.getMessage(), e);
     }
     return false;
   }

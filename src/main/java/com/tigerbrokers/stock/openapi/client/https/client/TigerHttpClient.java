@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.https.client;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
@@ -65,6 +66,7 @@ public class TigerHttpClient implements TigerClient {
   private String tradeToken;
   private String accountType;
   private String deviceId;
+  private int failRetryCounts = TigerApiConstants.DEFAULT_FAIL_RETRY_COUNT;
 
   private static final String ONLINE_PUBLIC_KEY =
       "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDNF3G8SoEcCZh2rshUbayDgLLrj6rKgzNMxDL2HSnKcB0+GPOsndqSv+a4IBu9+I3fyBp5hkyMMG2+AXugd9pMpy6VxJxlNjhX1MYbNTZJUT4nudki4uh+LMOkIBHOceGNXjgB+cXqmlUnjlqha/HgboeHSnSgpM3dKSJQlIOsDwIDAQAB";
@@ -98,7 +100,10 @@ public class TigerHttpClient implements TigerClient {
   }
 
   public TigerHttpClient clientConfig(ClientConfig clientConfig) {
-    init(clientConfig.serverUrl, clientConfig.tigerId, clientConfig.privateKey);
+    init(clientConfig.tigerId, clientConfig.privateKey);
+    if (clientConfig.failRetryCounts <= TigerApiConstants.MAX_FAIL_RETRY_COUNT) {
+      this.failRetryCounts = Math.max(clientConfig.failRetryCounts, 0);
+    }
     initDomainRefreshTask();
     if (clientConfig.isAutoGrabPermission) {
       TigerHttpRequest request = new TigerHttpRequest(MethodName.GRAB_QUOTE_PERMISSION);
@@ -110,13 +115,7 @@ public class TigerHttpClient implements TigerClient {
     return this;
   }
 
-  /** please use TigerHttpClient.getInstance().clientConfig(ClientConfig.DEFAULT_CONFIG) */
-  @Deprecated
-  public TigerHttpClient(String serverUrl, String tigerId, String privateKey) {
-    init(serverUrl, tigerId, privateKey);
-  }
-
-  private void init(String serverUrl, String tigerId, String privateKey) {
+  private void init(String tigerId, String privateKey) {
     if (tigerId == null) {
       throw new RuntimeException("tigerId is empty.");
     }
@@ -133,25 +132,15 @@ public class TigerHttpClient implements TigerClient {
     this.deviceId = NetworkUtil.getDeviceId();
 
     initLicense();
-    if (Env.PROD == ClientConfig.DEFAULT_CONFIG.getEnv() || StringUtils.isEmpty(serverUrl)) {
-      refreshUrl();
-    } else {
-      this.serverUrl = serverUrl;
-    }
+    refreshUrl();
     if (this.serverUrl == null) {
       throw new RuntimeException("serverUrl is empty.");
     }
   }
 
-  @Deprecated
-  public TigerHttpClient(String serverUrl) {
-    this.serverUrl = serverUrl;
-  }
-
-  @Deprecated
-  public TigerHttpClient(String serverUrl, String accessToken) {
-    this.serverUrl = serverUrl;
+  public TigerHttpClient accessToken(String accessToken) {
     this.accessToken = accessToken;
+    return this;
   }
 
   private void initLicense() {
@@ -162,7 +151,7 @@ public class TigerHttpClient implements TigerClient {
         UserLicenseRequest request = UserLicenseRequest.newRequest();
         UserLicenseResponse response = execute(request);
         if (response.isSuccess() && response.getLicenseItem() != null) {
-          ApiLogger.debug("license:{}", JSON.toJSONString(response.getLicenseItem()));
+          ApiLogger.debug("license:{}", JSON.toJSONString(response.getLicenseItem(), SerializerFeature.WriteEnumUsingToString));
           ClientConfig.DEFAULT_CONFIG.license = License.valueOf(response.getLicenseItem().getLicense());
         }
       } catch (Exception e) {
@@ -246,10 +235,11 @@ public class TigerHttpClient implements TigerClient {
     try {
       validate(request);
       // after successful verification（string enumeration values may be reset）, generate JSON data
-      param = JSONObject.toJSONString(buildParams(request));
+      param = JSONObject.toJSONString(buildParams(request), SerializerFeature.WriteEnumUsingToString);
       ApiLogger.debug("request param:{}", param);
 
-      data = HttpUtils.post(getServerUrl(request), param);
+      data = HttpUtils.post(getServerUrl(request), param,
+          MethodName.PLACE_ORDER == request.getApiMethodName() ? 0 : failRetryCounts);
 
       ApiLogger.debug("response result:{}", data);
       if (StringUtils.isEmpty(data)) {
@@ -315,11 +305,11 @@ public class TigerHttpClient implements TigerClient {
     } else {
       ApiModel apiModel = request.getApiModel();
       if (apiModel instanceof BatchApiModel) {
-        params.put(BIZ_CONTENT, JSONObject.toJSONString(((BatchApiModel) apiModel).getItems()));
+        params.put(BIZ_CONTENT, JSONObject.toJSONString(((BatchApiModel) apiModel).getItems(), SerializerFeature.WriteEnumUsingToString));
       } else if (apiModel instanceof TradeOrderModel) {
-        params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel, FastJsonPropertyFilter.getPropertyFilter()));
+        params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel, FastJsonPropertyFilter.getPropertyFilter(), SerializerFeature.WriteEnumUsingToString));
       } else {
-        params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel));
+        params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel, SerializerFeature.WriteEnumUsingToString));
       }
     }
     params.put(TIMESTAMP, request.getTimestamp());

@@ -13,17 +13,10 @@ import com.tigerbrokers.stock.openapi.client.util.QuoteDataUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import com.tigerbrokers.stock.openapi.client.util.TradeTickUtil;
 
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.DEFAULT_PUSH_DATA_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.ERROR_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_CANCEL_SUBSCRIBE_END;
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_QUOTE_CHANGE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUBSCRIBE_END;
 import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUB_SYMBOLS_END;
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_TRADING_TICK_END;
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ASSET;
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ORDER_STATUS;
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_ORDER_TRANSACTION;
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.SUBSCRIBE_POSITION;
 
 /**
  * Description:
@@ -41,15 +34,6 @@ public class ApiCallbackDecoder {
     int code = msg.getCode();
 
     switch (code) {
-      case DEFAULT_PUSH_DATA_END:
-      case SUBSCRIBE_POSITION:
-      case SUBSCRIBE_ASSET:
-      case SUBSCRIBE_ORDER_STATUS:
-      case SUBSCRIBE_ORDER_TRANSACTION:
-      case GET_QUOTE_CHANGE_END:
-      case GET_TRADING_TICK_END:
-        processSubscribeDataChange(msg);
-        break;
       case GET_SUB_SYMBOLS_END:
         processGetSubscribedSymbols(msg);
         break;
@@ -63,7 +47,7 @@ public class ApiCallbackDecoder {
         processErrorEnd(msg);
         break;
       default:
-        processDefault(msg);
+        processSubscribeDataChange(msg);
         break;
     }
   }
@@ -130,7 +114,7 @@ public class ApiCallbackDecoder {
         callback.orderTransactionChange(pushData.getOrderTransactionData());
         break;
       default:
-        ApiLogger.info("push data cannot be processed.", ProtoMessageUtil.toJson(msg));
+        ApiLogger.info("push data cannot be processed. {}", ProtoMessageUtil.toJson(msg));
     }
   }
 
@@ -157,10 +141,6 @@ public class ApiCallbackDecoder {
     } else {
       callback.error("unknown error");
     }
-  }
-
-  private void processDefault(Response msg) {
-    ApiLogger.info("receive MESSAGE's code:{} cannot be processed.", msg.getCode());
   }
 
   public void processHeartBeat(final String content) {

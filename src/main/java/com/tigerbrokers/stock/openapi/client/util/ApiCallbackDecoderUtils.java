@@ -1,10 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.socket.ApiCallbackDecoder;
 import com.tigerbrokers.stock.openapi.client.socket.ApiCallbackDecoder4Stomp;
 import com.tigerbrokers.stock.openapi.client.socket.IdleTriggerHandler;
+import com.tigerbrokers.stock.openapi.client.socket.ProtoSocketHandler;
 import com.tigerbrokers.stock.openapi.client.socket.WebSocketClient;
 import com.tigerbrokers.stock.openapi.client.socket.WebSocketHandler;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
@@ -84,14 +86,14 @@ public class ApiCallbackDecoderUtils {
             String content = frame.content().toString(Charset.defaultCharset());
             try {
               JSONObject jsonObject = JSONObject.parseObject(content);
-              if (jsonObject.getIntValue("code") == TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode()) {
+              if (jsonObject.getIntValue("code") == TigerApiCode.CONNECTION_KICK_OUT_ERROR.getCode()) {
                 ApiLogger.info(content);
                 // close the connection(Do not send disconnect command)
                 WebSocketClient.getInstance().closeConnect(false);
                 String errMessage = jsonObject.getString("message");
                 // callback
-                decoder.getCallback().connectionKickoff(TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode(),
-                    errMessage == null ? TigerApiCode.CONNECTION_KICK_OFF_ERROR.getMessage() : errMessage);
+                decoder.getCallback().connectionKickoff(TigerApiCode.CONNECTION_KICK_OUT_ERROR.getCode(),
+                    errMessage == null ? TigerApiCode.CONNECTION_KICK_OUT_ERROR.getMessage() : errMessage);
                 return;
               }
             } catch (Throwable th) {
@@ -99,7 +101,7 @@ public class ApiCallbackDecoderUtils {
             }
             decoder.getCallback().error(content);
           } else if (frame != null) {
-            decoder.getCallback().error(JSONObject.toJSONString(frame));
+            decoder.getCallback().error(JSONObject.toJSONString(frame, SerializerFeature.WriteEnumUsingToString));
           } else {
             decoder.getCallback().error("unknown error");
           }
@@ -168,9 +170,9 @@ public class ApiCallbackDecoderUtils {
           if (serverSendInterval > 0 || serverReceiveInterval > 0) {
             if (null == ctx.channel().pipeline().get(IDLE_STATE_HANDLER)) {
               serverSendInterval =
-                  serverSendInterval == 0 ? 0 : serverSendInterval + WebSocketHandler.HEART_BEAT_SPAN;
+                  serverSendInterval == 0 ? 0 : serverSendInterval + ProtoSocketHandler.HEART_BEAT_SPAN;
               serverReceiveInterval =
-                  serverReceiveInterval == 0 ? 0 : serverReceiveInterval - WebSocketHandler.HEART_BEAT_SPAN;
+                  serverReceiveInterval == 0 ? 0 : serverReceiveInterval - ProtoSocketHandler.HEART_BEAT_SPAN;
 
               ctx.channel().pipeline().addBefore(WebSocketClient.SOCKET_ENCODER, IDLE_STATE_HANDLER,
                   new IdleStateHandler(serverSendInterval, serverReceiveInterval, 0, TimeUnit.MILLISECONDS));
@@ -194,9 +196,9 @@ public class ApiCallbackDecoderUtils {
     if (decoder.getCallback() != null) {
       if (response.getCode() > 0) {
         try {
-          if (response.getCode() == TigerApiCode.CONNECTION_KICK_OFF_ERROR.getCode()) {
+          if (response.getCode() == TigerApiCode.CONNECTION_KICK_OUT_ERROR.getCode()) {
             String errMessage = response.getMsg() == null
-                ? TigerApiCode.CONNECTION_KICK_OFF_ERROR.getMessage() : response.getMsg();
+                ? TigerApiCode.CONNECTION_KICK_OUT_ERROR.getMessage() : response.getMsg();
             ApiLogger.info(errMessage);
             // close the connection(Do not send disconnect command)
             WebSocketClient.getInstance().closeConnect(false);

@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.util.builder;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.struct.TagValue;
@@ -386,6 +387,7 @@ public class TradeParamBuilder {
   }
 
   public String buildJson() {
-    return JSONObject.toJSONString(build(), FastJsonPropertyFilter.getPropertyFilter());
+    return JSONObject.toJSONString(build(), FastJsonPropertyFilter.getPropertyFilter(),
+        SerializerFeature.WriteEnumUsingToString);
   }
 }
