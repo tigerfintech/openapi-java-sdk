@@ -72,6 +72,12 @@ public enum MethodName {
   OPTION_TRADE_TICK("option_trade_tick", MethodType.QUOTE),
 
   /**
+   * warrant,cbbc
+   */
+  WARRANT_FILTER("warrant_filter", MethodType.QUOTE),
+  WARRANT_REAL_TIME_QUOTE("warrant_real_time_quote", MethodType.QUOTE),
+
+  /**
    * future quote
    */
   FUTURE_EXCHANGE("future_exchange", MethodType.QUOTE),

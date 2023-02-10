@@ -20,6 +20,8 @@ import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureTra
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionChainModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionChainV3Model;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionExpirationModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.option.model.WarrantFilterModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.option.model.WarrantQuoteModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteCapitalFlowModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteCapitalModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteContractModel;
@@ -93,6 +95,8 @@ public class ValidatorManager {
     validatorMap.put(FinancialDailyModel.class, new FinancialDailyRequestValidator());
     validatorMap.put(FinancialReportModel.class, new FinancialReportRequestValidator());
 
+    validatorMap.put(WarrantFilterModel.class, new WarrantFilterRequestValidator());
+    validatorMap.put(WarrantQuoteModel.class, new WarrantQuoteRequestValidator());
   }
 
   private static ValidatorManager single = new ValidatorManager();
