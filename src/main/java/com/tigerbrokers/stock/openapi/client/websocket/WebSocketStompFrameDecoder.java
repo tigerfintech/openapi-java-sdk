@@ -17,7 +17,6 @@ import io.netty.handler.codec.stomp.StompContentSubframe;
 import io.netty.handler.codec.stomp.StompHeaders;
 import io.netty.handler.codec.stomp.StompHeadersSubframe;
 import io.netty.util.internal.AppendableCharSequence;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Locale;
 
@@ -29,8 +28,6 @@ import static io.netty.buffer.ByteBufUtil.readBytes;
  * create at 2018/12/20
  */
 public class WebSocketStompFrameDecoder extends MessageToMessageDecoder<WebSocketFrame> {
-
-  private static final Charset UTF_8 = Charset.forName("UTF-8");
 
   private static final int DEFAULT_CHUNK_SIZE = 8132;
   private static final int DEFAULT_MAX_LINE_LENGTH = 1024;

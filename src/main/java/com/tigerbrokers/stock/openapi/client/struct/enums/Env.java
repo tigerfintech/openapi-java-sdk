@@ -17,4 +17,15 @@ public enum Env {
   public String getConfigFieldName() {
     return configFieldName;
   }
+
+  public static Env getEnv(String name) {
+    if (name == null || name.isEmpty()) {
+      return null;
+    }
+    try {
+      return Env.valueOf(name);
+    } catch (Throwable th) {
+    }
+    return null;
+  }
 }

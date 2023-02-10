@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import java.net.ConnectException;
 import java.util.HashSet;
 import java.util.Set;
@@ -11,6 +12,8 @@ import okhttp3.Response;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.AUTHORIZATION;
 
 /**
  * Web 工具类
@@ -45,10 +48,13 @@ public class HttpUtils {
       throw new RuntimeException("request url or json param cannot be null");
     }
     RequestBody body = RequestBody.create(JSON, json);
-    okhttp3.Request request = new okhttp3.Request.Builder()
+    okhttp3.Request.Builder builder = new okhttp3.Request.Builder()
         .url(url)
-        .post(body)
-        .build();
+        .post(body);
+    if (!StringUtils.isEmpty(ClientConfig.DEFAULT_CONFIG.token)) {
+      builder.header(AUTHORIZATION, ClientConfig.DEFAULT_CONFIG.token);
+    }
+    okhttp3.Request request = builder.build();
     int requstCount = 0;
     String result = null;
     boolean needRetry = retryCount > 0;
@@ -99,9 +105,12 @@ public class HttpUtils {
       throw new RuntimeException("request url param cannot be null");
     }
     try {
-      okhttp3.Request request = new okhttp3.Request.Builder()
-          .url(url)
-          .build();
+      okhttp3.Request.Builder builder = new okhttp3.Request.Builder()
+          .url(url);
+      if (!StringUtils.isEmpty(ClientConfig.DEFAULT_CONFIG.token)) {
+        builder.header(AUTHORIZATION, ClientConfig.DEFAULT_CONFIG.token);
+      }
+      okhttp3.Request request = builder.build();
 
       Response response = client.newCall(request).execute();
       if (response == null) {

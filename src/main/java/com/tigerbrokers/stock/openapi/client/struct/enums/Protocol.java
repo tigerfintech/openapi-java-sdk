@@ -1,7 +1,5 @@
 package com.tigerbrokers.stock.openapi.client.struct.enums;
 
-import com.tigerbrokers.stock.openapi.client.util.StringUtils;
-
 /**
  * Description:
  * Created by liutongping on 2022/03/08.
@@ -27,12 +25,4 @@ public enum Protocol {
     return portFieldName;
   }
 
-  public static boolean isWebSocketUrl(String url) {
-    if (StringUtils.isEmpty(url)) {
-      return false;
-    }
-    String webSocketUrlFormat = WEB_SOCKET.getUrlFormat();
-    String suffix = webSocketUrlFormat.substring(webSocketUrlFormat.lastIndexOf('/'));
-    return url.endsWith(suffix);
-  }
 }
