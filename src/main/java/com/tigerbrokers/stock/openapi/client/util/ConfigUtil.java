@@ -33,6 +33,7 @@ public class ConfigUtil {
   private static final String PRIVATE_KEY_SUFFIX = "-----END";
   private static final String COMMENT_PREFIX = "#";
   private static final char EQUAL_CHAR = '=';
+  private static final String UTF8_BOM="\uFEFF";
 
   private static final String CONFIG_FILE_PRIVATE_KEY = "private_key_pk8";
   private static final String CONFIG_FILE_TIGER_ID = "tiger_id";
@@ -153,6 +154,9 @@ public class ConfigUtil {
     try (BufferedReader bufferedReader = new BufferedReader(new FileReader(configFilePath.toFile()))) {
       String line = null;
       while ((line = bufferedReader.readLine()) != null) {
+        if (line.startsWith(UTF8_BOM)) {
+          line = line.substring(1);
+        }
         line = line.trim();
         if (line.isEmpty() || line.startsWith(COMMENT_PREFIX)) {
           continue;

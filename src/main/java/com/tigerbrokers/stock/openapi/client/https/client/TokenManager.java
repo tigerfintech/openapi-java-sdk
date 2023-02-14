@@ -73,6 +73,7 @@ public class TokenManager {
             }
           }, initialDelay,
           REFRESH_INTERVAL_MS, TimeUnit.MILLISECONDS);
+      ApiLogger.info("init refresh token task success");
     }
   }
 
@@ -120,6 +121,7 @@ public class TokenManager {
           }
           break;
         }
+        TimeUnit.SECONDS.sleep(5);
       } catch (Throwable th) {
         ApiLogger.warn("refreshToken fail. " + th.getMessage());
       } finally {
