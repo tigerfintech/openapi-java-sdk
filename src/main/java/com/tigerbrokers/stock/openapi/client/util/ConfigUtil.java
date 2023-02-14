@@ -34,13 +34,19 @@ public class ConfigUtil {
   private static final String COMMENT_PREFIX = "#";
   private static final char EQUAL_CHAR = '=';
 
+  private static final String PRIVATE_KEY = "private_key_pk8";
+  private static final String TIGER_ID = "tiger_id";
+  private static final String ACCOUNT = "account";
+  private static final String LICENSE = "license";
+  private static final String ENV = "env";
+
   private static final Set<String> configFileKeys = new HashSet<>();
   static {
-    configFileKeys.add("privateKeyPK8");
-    configFileKeys.add("tigerId");
-    configFileKeys.add("account");
-    configFileKeys.add("license");
-    configFileKeys.add("env");
+    configFileKeys.add(PRIVATE_KEY);
+    configFileKeys.add(TIGER_ID);
+    configFileKeys.add(ACCOUNT);
+    configFileKeys.add(LICENSE);
+    configFileKeys.add(ENV);
   }
 
   private ConfigUtil() {}
@@ -52,12 +58,12 @@ public class ConfigUtil {
     dir = dir.trim();
     Path configPath = Paths.get(dir);
     if (Files.notExists(configPath) || !Files.isDirectory(configPath)) {
-      ApiLogger.warn("config file directory[{}] is missing", dir);
+      ApiLogger.info("config file directory[{}] is missing, ingore", dir);
       return false;
     }
     Path configFilePath = Paths.get(dir, fileName);
     if (Files.notExists(configFilePath)) {
-      ApiLogger.warn("config file[{}] is missing", configFilePath.toAbsolutePath().toString());
+      ApiLogger.info("config file[{}] is missing, ingore", configFilePath.toAbsolutePath().toString());
       return false;
     }
     if (!writable && !Files.isReadable(configFilePath)) {
@@ -100,22 +106,22 @@ public class ConfigUtil {
 
     for (Map.Entry<String, String> entry: dataMap.entrySet()) {
       switch (entry.getKey()) {
-        case "privateKeyPK8":
+        case PRIVATE_KEY:
           clientConfig.privateKey = entry.getValue();
           break;
-        case "tigerId":
+        case TIGER_ID:
           clientConfig.tigerId = entry.getValue();
           break;
-        case "account":
+        case ACCOUNT:
           clientConfig.defaultAccount = entry.getValue();
           break;
-        case "license":
+        case LICENSE:
           License license = License.getLicense(entry.getValue());
           if (null != license) {
             clientConfig.license = license;
           }
           break;
-        case "env":
+        case ENV:
           Env env = Env.getEnv(entry.getValue());
           if (null != env) {
             clientConfig.setEnv(env);
@@ -181,7 +187,7 @@ public class ConfigUtil {
       int size = in.available();
       byte[] buffer = new byte[size];
       in.read(buffer);
-      content = ConfigUtil.processPrivateKey(new String(buffer, CHARSET_UTF8));
+      content = processPrivateKey(new String(buffer, CHARSET_UTF8));
     } catch (IOException e) {
       ApiLogger.error("read file fail:" + privateKeyFile, e);
     }
