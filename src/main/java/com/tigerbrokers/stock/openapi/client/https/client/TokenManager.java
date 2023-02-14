@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2023/2/10 6:03 PM
  */
 public class TokenManager {
-  private static TokenManager tokenManager = new TokenManager();
+  private static final TokenManager tokenManager = new TokenManager();
 
   private final long REFRESH_INTERVAL_MS = TimeUnit.DAYS.toMillis(1);
   private ScheduledThreadPoolExecutor executorService;
@@ -72,7 +72,7 @@ public class TokenManager {
               refreshToken();
             }
           }, initialDelay,
-          REFRESH_INTERVAL_MS, TimeUnit.SECONDS);
+          REFRESH_INTERVAL_MS, TimeUnit.MILLISECONDS);
     }
   }
 

@@ -15,7 +15,7 @@ public class DefaultRefreshTokenCallback implements RefreshTokenCallback {
   @Override
   public void tokenChange(ClientConfig clientConfig, String oldToken, UserTokenItem tokenItem) {
     try {
-      ApiLogger.info("tokenChange oleToken:{}, newTokenInfo:{}",
+      ApiLogger.info("tokenChange oldToken:{}, newTokenInfo:{}",
           oldToken, JSONObject.toJSONString(tokenItem));
       clientConfig.token = tokenItem.getToken();
       ConfigUtil.updateTokenFile(clientConfig, tokenItem.getToken());
