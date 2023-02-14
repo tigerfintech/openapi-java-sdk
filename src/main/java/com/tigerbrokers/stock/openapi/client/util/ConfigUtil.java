@@ -34,19 +34,20 @@ public class ConfigUtil {
   private static final String COMMENT_PREFIX = "#";
   private static final char EQUAL_CHAR = '=';
 
-  private static final String PRIVATE_KEY = "private_key_pk8";
-  private static final String TIGER_ID = "tiger_id";
-  private static final String ACCOUNT = "account";
-  private static final String LICENSE = "license";
-  private static final String ENV = "env";
+  private static final String CONFIG_FILE_PRIVATE_KEY = "private_key_pk8";
+  private static final String CONFIG_FILE_TIGER_ID = "tiger_id";
+  private static final String CONFIG_FILE_ACCOUNT = "account";
+  private static final String CONFIG_FILE_LICENSE = "license";
+  private static final String CONFIG_FILE_ENV = "env";
+  private static final String TOKEN_FILE_TOKEN = "token";
 
   private static final Set<String> configFileKeys = new HashSet<>();
   static {
-    configFileKeys.add(PRIVATE_KEY);
-    configFileKeys.add(TIGER_ID);
-    configFileKeys.add(ACCOUNT);
-    configFileKeys.add(LICENSE);
-    configFileKeys.add(ENV);
+    configFileKeys.add(CONFIG_FILE_PRIVATE_KEY);
+    configFileKeys.add(CONFIG_FILE_TIGER_ID);
+    configFileKeys.add(CONFIG_FILE_ACCOUNT);
+    configFileKeys.add(CONFIG_FILE_LICENSE);
+    configFileKeys.add(CONFIG_FILE_ENV);
   }
 
   private ConfigUtil() {}
@@ -83,45 +84,26 @@ public class ConfigUtil {
     }
 
     Path configFilePath = Paths.get(clientConfig.configFilePath.trim(), CONFIG_FILENAME);
-    Map<String, String> dataMap = new HashMap<>();
-    try (BufferedReader bufferedReader = new BufferedReader(new FileReader(configFilePath.toFile()))) {
-       String line = null;
-       while ((line = bufferedReader.readLine()) != null) {
-         line = line.trim();
-         if (line.isEmpty() || line.startsWith(COMMENT_PREFIX)) {
-           continue;
-         }
-         int idx = line.indexOf(EQUAL_CHAR);
-         if (idx <= 0 || idx == line.length() - 1) {
-           continue;
-         }
-         String fieldname = line.substring(0, idx).trim();
-         if (configFileKeys.contains(fieldname)) {
-           dataMap.put(fieldname, line.substring(idx + 1).trim());
-         }
-       }
-    } catch (IOException e) {
-      ApiLogger.error("read file fail:" + configFilePath.toAbsolutePath(), e);
-    }
+    Map<String, String> dataMap = readPropertiesFile(configFilePath, configFileKeys);
 
     for (Map.Entry<String, String> entry: dataMap.entrySet()) {
       switch (entry.getKey()) {
-        case PRIVATE_KEY:
+        case CONFIG_FILE_PRIVATE_KEY:
           clientConfig.privateKey = entry.getValue();
           break;
-        case TIGER_ID:
+        case CONFIG_FILE_TIGER_ID:
           clientConfig.tigerId = entry.getValue();
           break;
-        case ACCOUNT:
+        case CONFIG_FILE_ACCOUNT:
           clientConfig.defaultAccount = entry.getValue();
           break;
-        case LICENSE:
+        case CONFIG_FILE_LICENSE:
           License license = License.getLicense(entry.getValue());
           if (null != license) {
             clientConfig.license = license;
           }
           break;
-        case ENV:
+        case CONFIG_FILE_ENV:
           Env env = Env.getEnv(entry.getValue());
           if (null != env) {
             clientConfig.setEnv(env);
@@ -138,17 +120,8 @@ public class ConfigUtil {
     }
 
     Path tokenFilePath = Paths.get(clientConfig.configFilePath.trim(), TOKEN_FILENAME);
-    String token = null;
-    try (FileInputStream in = new FileInputStream(tokenFilePath.toFile())) {
-      int size = in.available();
-      byte[] buffer = new byte[size];
-      in.read(buffer);
-      String content = new String(buffer, CHARSET_UTF8);
-      token = trim(content, 0, content.length());
-    } catch (IOException e) {
-      ApiLogger.error("read file fail:" + tokenFilePath.toAbsolutePath(), e);
-    }
-
+    Map<String, String> dataMap = readPropertiesFile(tokenFilePath, null);
+    String token = dataMap.get(TOKEN_FILE_TOKEN);
     if (StringUtils.isEmpty(token)) {
       return false;
     }
@@ -166,12 +139,38 @@ public class ConfigUtil {
 
     Path tokenFilePath = Paths.get(clientConfig.configFilePath.trim(), TOKEN_FILENAME);
     try (FileWriter writer = new FileWriter(tokenFilePath.toFile())) {
-      writer.write(token);
+      writer.write((new StringBuilder(TOKEN_FILE_TOKEN)).append(EQUAL_CHAR).append(token).toString());
       return true;
     } catch (IOException e) {
       ApiLogger.error("write file fail:" + tokenFilePath.toAbsolutePath(), e);
     }
     return false;
+  }
+
+  public static Map<String, String> readPropertiesFile(Path configFilePath,
+      Set<String> includeKeys) {
+    Map<String, String> dataMap = new HashMap<>();
+    try (BufferedReader bufferedReader = new BufferedReader(new FileReader(configFilePath.toFile()))) {
+      String line = null;
+      while ((line = bufferedReader.readLine()) != null) {
+        line = line.trim();
+        if (line.isEmpty() || line.startsWith(COMMENT_PREFIX)) {
+          continue;
+        }
+        int idx = line.indexOf(EQUAL_CHAR);
+        if (idx <= 0 || idx == line.length() - 1) {
+          continue;
+        }
+        String fieldname = line.substring(0, idx).trim();
+        if (includeKeys == null || includeKeys.size() == 0
+            || includeKeys.contains(fieldname)) {
+          dataMap.put(fieldname, line.substring(idx + 1).trim());
+        }
+      }
+    } catch (IOException e) {
+      ApiLogger.error("read file fail:" + configFilePath.toAbsolutePath(), e);
+    }
+    return dataMap;
   }
 
   /**
