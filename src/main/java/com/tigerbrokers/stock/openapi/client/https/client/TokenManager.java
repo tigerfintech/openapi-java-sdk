@@ -7,6 +7,7 @@ import com.tigerbrokers.stock.openapi.client.https.response.user.UserTokenRespon
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.ConfigUtil;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -103,8 +104,8 @@ public class TokenManager {
       // ignore
     }
     if (tokenCreateTime + REFRESH_INTERVAL_MS - System.currentTimeMillis() > 0) {
-      ApiLogger.info("refreshToken last update time:{}, ignore",
-          DateUtils.printDate(tokenCreateTime, clientConfig.timeZone));
+      ApiLogger.info("refreshToken last update time:{}, ignore", DateUtils.printDateTime(
+          tokenCreateTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"), clientConfig.timeZone));
       return;
     }
 
