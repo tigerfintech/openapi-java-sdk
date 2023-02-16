@@ -36,9 +36,9 @@ public class WarrantItem implements Serializable {
    * before call level(%)
    */
   private Double beforeCallLevel;
-  /** expiry date，formate：yyyy/MM/dd */
+  /** expiry date，formate：yyyy-MM-dd */
   private String expireDate;
-  /** last trading date, formate: yyyy/MM/dd */
+  /** last trading date, formate: yyyy-MM-dd */
   private String lastTradingDate;
   /** state */
   private WarrantState state;
