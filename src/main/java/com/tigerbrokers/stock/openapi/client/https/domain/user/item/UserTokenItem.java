@@ -12,7 +12,7 @@ public class UserTokenItem extends ApiModel {
   private String license;
   private String token;
   private Long createTime;
-  private Long expriedTime;
+  private Long expiredTime;
 
   public String getTigerId() {
     return tigerId;
@@ -46,12 +46,12 @@ public class UserTokenItem extends ApiModel {
     this.createTime = createTime;
   }
 
-  public Long getExpriedTime() {
-    return expriedTime;
+  public Long getExpiredTime() {
+    return expiredTime;
   }
 
-  public void setExpriedTime(Long expriedTime) {
-    this.expriedTime = expriedTime;
+  public void setExpiredTime(Long expiredTime) {
+    this.expiredTime = expiredTime;
   }
 
   @Override
@@ -61,7 +61,7 @@ public class UserTokenItem extends ApiModel {
         ", license='" + license + '\'' +
         ", token='" + token + '\'' +
         ", createTime='" + createTime + '\'' +
-        ", expriedTime='" + expriedTime + '\'' +
+        ", expiredTime='" + expiredTime + '\'' +
         '}';
   }
 }
