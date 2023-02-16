@@ -102,11 +102,11 @@ public class TigerHttpClient implements TigerClient {
 
   public TigerHttpClient clientConfig(ClientConfig clientConfig) {
     ConfigUtil.loadConfigFile(clientConfig);
-    TokenManager.getInstance().init(clientConfig);
     init(clientConfig.tigerId, clientConfig.privateKey);
     if (clientConfig.failRetryCounts <= TigerApiConstants.MAX_FAIL_RETRY_COUNT) {
       this.failRetryCounts = Math.max(clientConfig.failRetryCounts, 0);
     }
+    TokenManager.getInstance().init(clientConfig);
     initDomainRefreshTask();
     if (clientConfig.isAutoGrabPermission) {
       TigerHttpRequest request = new TigerHttpRequest(MethodName.GRAB_QUOTE_PERMISSION);
