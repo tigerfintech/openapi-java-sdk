@@ -32,9 +32,9 @@ public class SymbolUtil {
     optionSymbol.setExpiry("20" + expiryRightStrike.substring(0, 2) + "-"
         + expiryRightStrike.substring(2, 4) + "-"
         + expiryRightStrike.substring(4, 6));
-    optionSymbol.setRight(expiryRightStrike.substring(6, 7).equals("C") ? "CALL" : "PUT");
+    optionSymbol.setRight(expiryRightStrike.charAt(6) == 'C' ? "CALL" : "PUT");
     optionSymbol.setStrike(
-        Integer.parseInt(expiryRightStrike.substring(7, 12)) + "." + expiryRightStrike.substring(12, 13));
+        Integer.parseInt(expiryRightStrike.substring(7, 12)) + "." + expiryRightStrike.charAt(12));
 
     return optionSymbol;
   }
