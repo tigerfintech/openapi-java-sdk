@@ -18,7 +18,7 @@ public interface ApiComposeCallback extends SubscribeApiCallback {
    * @param errorCode errorCode
    * @param errorMsg errorMsg
    */
-  void connectionKickoff(int errorCode, String errorMsg);
+  void connectionKickout(int errorCode, String errorMsg);
 
   void connectionAck();
 
