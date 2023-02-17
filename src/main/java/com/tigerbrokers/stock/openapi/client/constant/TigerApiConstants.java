@@ -59,7 +59,6 @@ public class TigerApiConstants {
 
   public static final String AUTHORIZATION = "Authorization";
 
-  public static final String DEFAULT_CONFIG_FILE_PATH = "/data0/tiger_config";
   public static final String CONFIG_FILENAME = "tiger_openapi_config.properties";
   public static final String TOKEN_FILENAME = "tiger_openapi_token.properties";
 

@@ -24,7 +24,7 @@ public class ClientConfig {
   /** default client config */
   public static final ClientConfig DEFAULT_CONFIG = new ClientConfig();
 
-  public String configFilePath = TigerApiConstants.DEFAULT_CONFIG_FILE_PATH;
+  public String configFilePath;
 
   private Env env = DEFAULT_ENV;
 
