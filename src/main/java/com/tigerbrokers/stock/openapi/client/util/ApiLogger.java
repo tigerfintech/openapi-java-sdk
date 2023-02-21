@@ -70,7 +70,7 @@ public class ApiLogger {
       timeBasedRollingPolicy.start();
       rollingFileAppender.setName("TigerOpenApi");
       rollingFileAppender.setContext(loggerContext);
-      rollingFileAppender.setFile(fullFilename);
+      //rollingFileAppender.setFile(fullFilename);
       rollingFileAppender.setRollingPolicy(timeBasedRollingPolicy);
       rollingFileAppender.setEncoder(encoder);
       rollingFileAppender.start();
