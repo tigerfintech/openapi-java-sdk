@@ -5,7 +5,7 @@ import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.request.user.UserTokenRefreshRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.user.UserTokenResponse;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
-import com.tigerbrokers.stock.openapi.client.util.ConfigUtil;
+import com.tigerbrokers.stock.openapi.client.util.FileUtil;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -46,10 +46,10 @@ public class TokenManager {
       return;
     }
     this.clientConfig = config;
-    boolean result = ConfigUtil.loadTokenFile(clientConfig);
+    boolean result = FileUtil.loadTokenFile(clientConfig);
     long tokenCreateTime = 0;
     try {
-      tokenCreateTime = ConfigUtil.getCreateTime(clientConfig.token);
+      tokenCreateTime = FileUtil.getCreateTime(clientConfig.token);
     } catch (Throwable th) {
       // ignore
     }
@@ -99,7 +99,7 @@ public class TokenManager {
   private void refreshToken() {
     long tokenCreateTime = 0;
     try {
-      tokenCreateTime = ConfigUtil.getCreateTime(clientConfig.token);
+      tokenCreateTime = FileUtil.getCreateTime(clientConfig.token);
     } catch (Throwable th) {
       // ignore
     }

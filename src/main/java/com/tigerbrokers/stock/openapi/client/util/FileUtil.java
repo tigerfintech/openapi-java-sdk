@@ -27,7 +27,7 @@ import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.T
  * @author bean
  * @date 2023/2/10 2:45 PM
  */
-public class ConfigUtil {
+public class FileUtil {
 
   private static final String PPRVATE_KEY_PREFIX = "KEY-----";
   private static final String PRIVATE_KEY_SUFFIX = "-----END";
@@ -51,7 +51,7 @@ public class ConfigUtil {
     configFileKeys.add(CONFIG_FILE_ENV);
   }
 
-  private ConfigUtil() {}
+  private FileUtil() {}
 
   private static boolean checkFile(String dir, String fileName, boolean writable) {
     if (StringUtils.isEmpty(dir)) {
