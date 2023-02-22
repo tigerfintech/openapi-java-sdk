@@ -42,11 +42,14 @@ public class TokenManager {
   }
 
   public void init(ClientConfig config) {
-    if (config == null || !config.isAutoRefreshToken) {
+    if (config == null) {
       return;
     }
     this.clientConfig = config;
     boolean result = FileUtil.loadTokenFile(clientConfig);
+    if (!config.isAutoRefreshToken) {
+      return;
+    }
     long tokenCreateTime = 0;
     try {
       tokenCreateTime = FileUtil.getCreateTime(clientConfig.token);
