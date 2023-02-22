@@ -71,11 +71,11 @@ public class WarrantQuote implements Serializable {
   private Double premium;
   /** outstanding ratio (0.19% -> 0.0019) */
   private Double outstandingRatio;
-  /** implied volatility */
+  /** implied volatility(only for warrant) */
   private Double impliedVolatility;
   /** in/out price (in the money, 20.744% -> 0.20744) */
   private Double inOutPrice;
-  /** delta */
+  /** delta(only for warrant) */
   private Double delta;
   /** leverage ratio */
   private Double leverageRatio;

@@ -6,11 +6,12 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.slf4j.LoggerFactory;
+
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.CHARSET_UTF8;
 
 /**
  * Description:
@@ -56,7 +57,7 @@ public class ApiLogger {
 
       PatternLayoutEncoder encoder = new PatternLayoutEncoder();
       encoder.setContext(loggerContext);
-      encoder.setCharset(Charset.forName("UTF-8"));
+      encoder.setCharset(CHARSET_UTF8);
       encoder.setPattern("%d %level - %msg%n");
       encoder.start();
 
@@ -69,7 +70,7 @@ public class ApiLogger {
       timeBasedRollingPolicy.start();
       rollingFileAppender.setName("TigerOpenApi");
       rollingFileAppender.setContext(loggerContext);
-      rollingFileAppender.setFile(fullFilename);
+      //rollingFileAppender.setFile(fullFilename);
       rollingFileAppender.setRollingPolicy(timeBasedRollingPolicy);
       rollingFileAppender.setEncoder(encoder);
       rollingFileAppender.start();

@@ -92,7 +92,7 @@ public class ApiCallbackDecoderUtils {
                 WebSocketClient.getInstance().closeConnect(false);
                 String errMessage = jsonObject.getString("message");
                 // callback
-                decoder.getCallback().connectionKickoff(TigerApiCode.CONNECTION_KICK_OUT_ERROR.getCode(),
+                decoder.getCallback().connectionKickout(TigerApiCode.CONNECTION_KICK_OUT_ERROR.getCode(),
                     errMessage == null ? TigerApiCode.CONNECTION_KICK_OUT_ERROR.getMessage() : errMessage);
                 return;
               }
@@ -203,7 +203,7 @@ public class ApiCallbackDecoderUtils {
             // close the connection(Do not send disconnect command)
             WebSocketClient.getInstance().closeConnect(false);
             // callback
-            decoder.getCallback().connectionKickoff(response.getCode(), errMessage);
+            decoder.getCallback().connectionKickout(response.getCode(), errMessage);
             return;
           }
         } catch (Throwable th) {

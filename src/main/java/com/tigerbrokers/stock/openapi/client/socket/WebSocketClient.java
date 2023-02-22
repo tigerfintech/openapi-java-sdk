@@ -7,10 +7,10 @@ import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
-import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
+import com.tigerbrokers.stock.openapi.client.util.FileUtil;
 import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
 import com.tigerbrokers.stock.openapi.client.util.ProtoMessageUtil;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
@@ -128,6 +128,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   public WebSocketClient clientConfig(ClientConfig clientConfig) {
+    FileUtil.loadConfigFile(clientConfig);
     this.clientConfig = clientConfig;
     this.url = NetworkUtil.getServerAddress(null);
     if (this.sslProvider == null && clientConfig.getSslProvider() != null) {
@@ -191,7 +192,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
     group = new NioEventLoopGroup(1);
     bootstrap = new Bootstrap();
-    if (!Protocol.isWebSocketUrl(url)) {
+
+    if (clientConfig.isSslSocket) {
       SslProvider provider = this.sslProvider == null ? SslProvider.OPENSSL : this.sslProvider;
       final String[] protocols = NetworkUtil.getSupportedProtocolsSet(PROTOCOLS, provider);
       if (protocols == null || protocols.length == 0) {
@@ -215,7 +217,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
             if (address == null) {
               throw new RuntimeException("get connect address error.");
             }
-            if (!Protocol.isWebSocketUrl(url)) {
+            if (clientConfig.isSslSocket) {
               p.addLast(TigerApiConstants.SSL_HANDLER_NAME,
                   sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
             }

@@ -46,7 +46,7 @@ public class ApiAuthentication {
   public static ApiAuthentication build(String tigerId, String privateKey, String version) {
     ApiAuthentication authentication = new ApiAuthentication(tigerId);
     try {
-      String sign = TigerSignature.rsaSign(tigerId, privateKey, TigerApiConstants.CHARSET_UTF8);
+      String sign = TigerSignature.rsaSign(tigerId, privateKey, TigerApiConstants.UTF_8);
       authentication.setSign(sign);
       authentication.setVersion(version);
     } catch (Exception e) {

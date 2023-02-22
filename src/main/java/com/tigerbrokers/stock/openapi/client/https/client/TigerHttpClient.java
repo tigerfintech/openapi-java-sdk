@@ -25,6 +25,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.MethodType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.util.AccountUtil;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
+import com.tigerbrokers.stock.openapi.client.util.FileUtil;
 import com.tigerbrokers.stock.openapi.client.util.FastJsonPropertyFilter;
 import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
 import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
@@ -75,7 +76,7 @@ public class TigerHttpClient implements TigerClient {
       "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCbm21i11hgAENGd3/f280PSe4g9YGkS3TEXBYMidihTvHHf+tJ0PYD0o3PruI0hl3qhEjHTAxb75T5YD3SGK4IBhHn/Rk6mhqlGgI+bBrBVYaXixmHfRo75RpUUuWACyeqQkZckgR0McxuW9xRMIa2cXZOoL1E4SL4lXKGhKoWbwIDAQAB";
 
   private String signType = TigerApiConstants.SIGN_TYPE_RSA;
-  private String charset = TigerApiConstants.CHARSET_UTF8;
+  private String charset = TigerApiConstants.UTF_8;
 
   private static final long REFRESH_URL_INTERVAL_SECONDS = 300;
   private ScheduledThreadPoolExecutor domainExecutorService;
@@ -100,10 +101,12 @@ public class TigerHttpClient implements TigerClient {
   }
 
   public TigerHttpClient clientConfig(ClientConfig clientConfig) {
+    FileUtil.loadConfigFile(clientConfig);
     init(clientConfig.tigerId, clientConfig.privateKey);
     if (clientConfig.failRetryCounts <= TigerApiConstants.MAX_FAIL_RETRY_COUNT) {
       this.failRetryCounts = Math.max(clientConfig.failRetryCounts, 0);
     }
+    TokenManager.getInstance().init(clientConfig);
     initDomainRefreshTask();
     if (clientConfig.isAutoGrabPermission) {
       TigerHttpRequest request = new TigerHttpRequest(MethodName.GRAB_QUOTE_PERMISSION);

@@ -113,6 +113,19 @@ public class DateUtils {
   }
 
   /**
+   * Convert to yyyy-MM- or "yyyy-MM-dd HH:mm:ss"
+   * @param timestamp
+   * @param formatter
+   * @param timeZoneId
+   * @return
+   */
+  public static String printDateTime(long timestamp, DateTimeFormatter formatter, TimeZoneId timeZoneId) {
+    timeZoneId = timeZoneId == null ? ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone() : timeZoneId;
+    return formatter.withZone(ZoneId.of(timeZoneId.getZoneId()))
+        .format(Instant.ofEpochMilli(timestamp));
+  }
+
+  /**
    * Convert to yyyy-MM-dd
    * @param timestamp
    * @return

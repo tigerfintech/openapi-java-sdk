@@ -115,6 +115,7 @@ public enum MethodName {
   USER_TRADE_PASSWORD_VERIFY("user_trade_password_verify", MethodType.OTHER),
   USER_TRADE_PASSWORD_RESET("user_trade_password_reset", MethodType.OTHER),
   USER_LICENSE("user_license", MethodType.OTHER),
+  USER_TOKEN_REFRESH("user_token_refresh", MethodType.OTHER),
   ;
 
   private String value;
