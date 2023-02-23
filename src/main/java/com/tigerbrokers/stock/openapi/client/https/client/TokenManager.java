@@ -7,6 +7,13 @@ import com.tigerbrokers.stock.openapi.client.https.response.user.UserTokenRespon
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.FileUtil;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
+import com.tigerbrokers.stock.openapi.client.util.StringUtils;
+import com.tigerbrokers.stock.openapi.client.util.watch.FileWatchedListener;
+import com.tigerbrokers.stock.openapi.client.util.watch.FileWatchedService;
+import com.tigerbrokers.stock.openapi.client.util.watch.TokenFileWatched;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,39 +53,34 @@ public class TokenManager {
       return;
     }
     this.clientConfig = config;
-    boolean result = FileUtil.loadTokenFile(clientConfig);
+    FileUtil.loadTokenFile(config);
+    addTokenFileWatch(config);
+
     if (!config.isAutoRefreshToken) {
       return;
     }
-    long tokenCreateTime = 0;
-    try {
-      tokenCreateTime = FileUtil.getCreateTime(clientConfig.token);
-    } catch (Throwable th) {
-      // ignore
-    }
 
     register(defaultCallback);
-    if (result && tokenCreateTime > 0) {
-      executorService = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
-        @Override
-        public Thread newThread(Runnable r) {
-          Thread t = Executors.defaultThreadFactory().newThread(r);
-          t.setDaemon(true);
-          return t;
-        }
-      });
+    long tokenCreateTime = FileUtil.tryGetCreateTime(clientConfig.token);
 
-      long initialDelay = tokenCreateTime + REFRESH_INTERVAL_MS - System.currentTimeMillis();
-      initialDelay = initialDelay < 0 ? 0 : initialDelay;
-      executorService.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-              refreshToken();
-            }
-          }, initialDelay,
-          REFRESH_INTERVAL_MS, TimeUnit.MILLISECONDS);
-      ApiLogger.info("init refresh token task success");
-    }
+    executorService = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
+      @Override
+      public Thread newThread(Runnable r) {
+        Thread t = Executors.defaultThreadFactory().newThread(r);
+        t.setDaemon(true);
+        return t;
+      }
+    });
+
+    long initialDelay = tokenCreateTime + REFRESH_INTERVAL_MS - System.currentTimeMillis();
+    initialDelay = initialDelay < 0 ? 0 : initialDelay;
+    executorService.scheduleWithFixedDelay(new Runnable() {
+      @Override
+      public void run() {
+        refreshToken();
+      }
+    }, initialDelay, REFRESH_INTERVAL_MS, TimeUnit.MILLISECONDS);
+    ApiLogger.info("init refresh token task success");
   }
 
   public void register(RefreshTokenCallback callback) {
@@ -100,11 +102,13 @@ public class TokenManager {
   }
 
   private void refreshToken() {
-    long tokenCreateTime = 0;
-    try {
-      tokenCreateTime = FileUtil.getCreateTime(clientConfig.token);
-    } catch (Throwable th) {
-      // ignore
+    if (StringUtils.isEmpty(clientConfig.token) && !FileUtil.loadTokenFile(clientConfig)) {
+      return;
+    }
+    long tokenCreateTime = FileUtil.tryGetCreateTime(clientConfig.token);
+    if (tokenCreateTime == 0) {
+      ApiLogger.warn("local token is invalid:{}, refreshToken ignore", clientConfig.token);
+      return;
     }
     if (tokenCreateTime + REFRESH_INTERVAL_MS - System.currentTimeMillis() > 0) {
       ApiLogger.info("refreshToken last update time:{}, ignore", DateUtils.printDateTime(
@@ -132,5 +136,27 @@ public class TokenManager {
         count--;
       }
     } while(count > 0);
+  }
+
+  public void addTokenFileWatch(ClientConfig config) {
+    try {
+      if (null == config || StringUtils.isEmpty(config.configFilePath)) {
+        return;
+      }
+      Path configFilePath = Paths.get(config.configFilePath);
+      if (Files.exists(configFilePath) && Files.isDirectory(configFilePath)) {
+        FileWatchedListener tokenFileListener = new TokenFileWatched(config);
+        FileWatchedService fileWatchedService = new FileWatchedService(configFilePath, tokenFileListener);
+        new Thread() {
+          @Override
+          public void run() {
+            fileWatchedService.watch();
+          }
+        }.start();
+      }
+      ApiLogger.info("addTokenFileWatch success.");
+    } catch (Exception e) {
+      ApiLogger.error("addTokenFileWatch fail.", e);
+    }
   }
 }

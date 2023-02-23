@@ -139,6 +139,13 @@ public class ApiLogger {
     logger.error(message, value, exception);
   }
 
+  public static void error(String message, Throwable th) {
+    if (!enabled || !errorEnabled) {
+      return;
+    }
+    logger.error(message, th);
+  }
+
   public static void error(String message) {
     if (!enabled || !errorEnabled) {
       return;

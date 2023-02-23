@@ -224,6 +224,18 @@ public class FileUtil {
     return builder.toString();
   }
 
+  public static long tryGetCreateTime(String token) {
+    long tokenCreateTime = 0;
+    if (!StringUtils.isEmpty(token)) {
+      try {
+        tokenCreateTime = getCreateTime(token);
+      } catch (Throwable th) {
+        // ignore
+      }
+    }
+    return tokenCreateTime;
+  }
+
   public static long getCreateTime(String token) {
     String text = new String(Base64.getDecoder().decode(
         token.getBytes(CHARSET_UTF8)), CHARSET_UTF8);
