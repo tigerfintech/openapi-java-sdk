@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -29,7 +30,9 @@ import java.util.concurrent.TimeUnit;
 public class TokenManager {
   private static final TokenManager tokenManager = new TokenManager();
 
-  private final long REFRESH_INTERVAL_MS = TimeUnit.DAYS.toMillis(1);
+  // refresh every 5 days by default
+  private final int defaultRefreshIntervalDays = 5;
+  private long refreshIntervalMs = TimeUnit.DAYS.toMillis(defaultRefreshIntervalDays);
   private ScheduledThreadPoolExecutor executorService;
   private ClientConfig clientConfig;
   private final List<RefreshTokenCallback> callbackList = new ArrayList<>();
@@ -59,9 +62,7 @@ public class TokenManager {
     if (!config.isAutoRefreshToken) {
       return;
     }
-
     register(defaultCallback);
-    long tokenCreateTime = FileUtil.tryGetCreateTime(clientConfig.token);
 
     executorService = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
       @Override
@@ -72,15 +73,25 @@ public class TokenManager {
       }
     });
 
-    long initialDelay = tokenCreateTime + REFRESH_INTERVAL_MS - System.currentTimeMillis();
-    initialDelay = initialDelay < 0 ? 0 : initialDelay;
+    if (config.refreshTokenIntervalDays > 0) {
+      refreshIntervalMs = TimeUnit.DAYS.toMillis(config.refreshTokenIntervalDays);
+    }
+    long tokenCreateTime = FileUtil.tryGetCreateTime(clientConfig.token);
+    long initialDelay = tokenCreateTime + refreshIntervalMs - System.currentTimeMillis();
+    if (initialDelay <= 0) {
+      refreshToken();
+      tokenCreateTime = FileUtil.tryGetCreateTime(clientConfig.token);
+      initialDelay = tokenCreateTime + refreshIntervalMs - System.currentTimeMillis();
+    }
+    initialDelay = getDelayTime(clientConfig.refreshTokenTime, initialDelay);
+
     executorService.scheduleWithFixedDelay(new Runnable() {
       @Override
       public void run() {
         refreshToken();
       }
-    }, initialDelay, REFRESH_INTERVAL_MS, TimeUnit.MILLISECONDS);
-    ApiLogger.info("init refresh token task success");
+    }, initialDelay, refreshIntervalMs, TimeUnit.MILLISECONDS);
+    ApiLogger.info("init auto refresh token task success");
   }
 
   public void register(RefreshTokenCallback callback) {
@@ -110,7 +121,7 @@ public class TokenManager {
       ApiLogger.warn("local token is invalid:{}, refreshToken ignore", clientConfig.token);
       return;
     }
-    if (tokenCreateTime + REFRESH_INTERVAL_MS - System.currentTimeMillis() > 0) {
+    if (tokenCreateTime + refreshIntervalMs - System.currentTimeMillis() > 0) {
       ApiLogger.info("refreshToken last update time:{}, ignore", DateUtils.printDateTime(
           tokenCreateTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"), clientConfig.timeZone));
       return;
@@ -136,6 +147,56 @@ public class TokenManager {
         count--;
       }
     } while(count > 0);
+  }
+
+  /**
+   * Update the hour, minute, and second for the specified timestamp
+   * @param baseTimestamp the specified timestamp
+   * @param time formate:HH:mm:ss, 16:30:00 etc
+   * @return
+   */
+  private long getTimeInMillis(long baseTimestamp, String time) {
+    if (StringUtils.isEmpty(time)) {
+      return -1;
+    }
+    time = time.trim().replaceAll(":", "");
+    if (time.length() != 6) {
+      return -1;
+    }
+    Calendar cl = Calendar.getInstance();
+    cl.setTimeInMillis(baseTimestamp);
+    try {
+      cl.set(Calendar.HOUR_OF_DAY, Integer.parseInt(time.substring(0, 2)));
+      cl.set(Calendar.MINUTE, Integer.parseInt(time.substring(2, 4)));
+      cl.set(Calendar.SECOND, Integer.parseInt(time.substring(4, 6)));
+      return cl.getTimeInMillis();
+    } catch (Exception e) {
+    }
+    return -1;
+  }
+
+  /**
+   * get the delay time for refresh token
+   * @param time formate:HH:mm:ss, 16:30:00 etc
+   * @return
+   */
+  private long getDelayTime(String time, long initialDelay) {
+    initialDelay = initialDelay <= 0 ? 0 : initialDelay;
+    long baseTimestamp = System.currentTimeMillis();
+    long refreshTimestamp = getTimeInMillis(baseTimestamp, time);
+    if (refreshTimestamp < 0) {
+      return initialDelay;
+    }
+
+    if (initialDelay > 0) {
+      baseTimestamp += initialDelay;
+      refreshTimestamp = getTimeInMillis(baseTimestamp, time);
+    }
+    long delayTime = refreshTimestamp - baseTimestamp + initialDelay;
+    if (delayTime < 0) {
+      delayTime += TimeUnit.DAYS.toMillis(1);
+    }
+    return delayTime;
   }
 
   public void addTokenFileWatch(ClientConfig config) {

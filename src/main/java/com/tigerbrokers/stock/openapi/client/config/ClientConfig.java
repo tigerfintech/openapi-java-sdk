@@ -52,9 +52,19 @@ public class ClientConfig {
   public String privateKey = null;
 
   /**
-   * token
+   * token(Only Hong Kong license required)
    */
   public String token = null;
+
+  /**
+   * refresh token frequency
+   */
+  public int refreshTokenIntervalDays;
+
+  /**
+   * refresh token time, formate: HH:mm:ss
+   */
+  public String refreshTokenTime;
 
   /**
    * whether to automatically grab quote permission when the initialization instance is completed
