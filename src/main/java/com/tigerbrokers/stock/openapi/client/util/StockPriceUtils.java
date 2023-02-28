@@ -76,6 +76,10 @@ public class StockPriceUtils {
         if (begin.compareTo(price) < 0 && end.compareTo(price) >= 0) {
           return item;
         }
+      } else if (TickSizeType.CLOSED_OPEN == type ) {
+        if (begin.compareTo(price) <= 0 && end.compareTo(price) > 0) {
+          return item;
+        }
       } else if (TickSizeType.CLOSED == type) {
         if (begin.compareTo(price) <= 0 && end.compareTo(price) >= 0) {
           return item;
