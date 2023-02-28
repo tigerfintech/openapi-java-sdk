@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.util;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.TickSizeItem;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TickSizeType;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 /**
@@ -21,7 +22,7 @@ public class StockPriceUtils {
     }
     Double fixedPrice = fixPriceByTickSize(price, tickSizes);
     BigDecimal difference = BigDecimal.valueOf(price).subtract(BigDecimal.valueOf(fixedPrice));
-    return difference.setScale(6, BigDecimal.ROUND_DOWN).compareTo(BigDecimal.ZERO) == 0;
+    return difference.setScale(6, RoundingMode.DOWN).compareTo(BigDecimal.ZERO) == 0;
   }
 
   public static Double fixPriceByTickSize(Double price, List<TickSizeItem> tickSizes) {
@@ -56,7 +57,7 @@ public class StockPriceUtils {
       multiple = multiple.add(BigDecimal.ONE);
     }
 
-    return minTick.multiply(multiple.setScale(0, BigDecimal.ROUND_DOWN)).add(begin).stripTrailingZeros().doubleValue();
+    return minTick.multiply(multiple.setScale(0, RoundingMode.DOWN)).add(begin).stripTrailingZeros().doubleValue();
   }
 
   private static TickSizeItem findTickSize(BigDecimal price, List<TickSizeItem> tickSizes) {
