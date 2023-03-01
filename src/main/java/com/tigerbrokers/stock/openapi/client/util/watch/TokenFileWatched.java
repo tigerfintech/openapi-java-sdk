@@ -1,8 +1,8 @@
 package com.tigerbrokers.stock.openapi.client.util.watch;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
+import com.tigerbrokers.stock.openapi.client.https.client.TokenManager;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
-import com.tigerbrokers.stock.openapi.client.util.FileUtil;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 
@@ -26,7 +26,7 @@ public class TokenFileWatched implements FileWatchedListener {
     if (!TOKEN_FILENAME.equals(fileName)) {
       return;
     }
-    boolean load = FileUtil.loadTokenFile(clientConfig);
+    boolean load = TokenManager.getInstance().loadTokenFile(clientConfig);
     ApiLogger.info("{} is created, reload token ", fileName, load ? "success" : "fail");
 
   }
@@ -37,7 +37,7 @@ public class TokenFileWatched implements FileWatchedListener {
     if (!TOKEN_FILENAME.equals(fileName)) {
       return;
     }
-    boolean load = FileUtil.loadTokenFile(clientConfig);
+    boolean load = TokenManager.getInstance().loadTokenFile(clientConfig);
     ApiLogger.info("{} is modifed, reload token ", fileName, load ? "success" : "fail");
   }
 

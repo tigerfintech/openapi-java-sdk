@@ -27,7 +27,7 @@ import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.T
  * @author bean
  * @date 2023/2/10 2:45 PM
  */
-public class FileUtil {
+public class ConfigFileUtil {
 
   private static final String PPRVATE_KEY_PREFIX = "KEY-----";
   private static final String PRIVATE_KEY_SUFFIX = "-----END";
@@ -40,7 +40,7 @@ public class FileUtil {
   private static final String CONFIG_FILE_ACCOUNT = "account";
   private static final String CONFIG_FILE_LICENSE = "license";
   private static final String CONFIG_FILE_ENV = "env";
-  private static final String TOKEN_FILE_TOKEN = "token";
+  public static final String TOKEN_FILE_TOKEN = "token";
 
   private static final Set<String> configFileKeys = new HashSet<>();
   static {
@@ -51,9 +51,9 @@ public class FileUtil {
     configFileKeys.add(CONFIG_FILE_ENV);
   }
 
-  private FileUtil() {}
+  private ConfigFileUtil() {}
 
-  private static boolean checkFile(String dir, String fileName, boolean writable) {
+  public static boolean checkFile(String dir, String fileName, boolean writable) {
     if (StringUtils.isEmpty(dir)) {
       return false;
     }
@@ -116,30 +116,15 @@ public class FileUtil {
     }
   }
 
-  public static boolean loadTokenFile(ClientConfig clientConfig) {
-    if (!checkFile(clientConfig.configFilePath, TOKEN_FILENAME, false)) {
-      return false;
-    }
-
-    Path tokenFilePath = Paths.get(clientConfig.configFilePath.trim(), TOKEN_FILENAME);
-    Map<String, String> dataMap = readPropertiesFile(tokenFilePath, null);
-    String token = dataMap.get(TOKEN_FILE_TOKEN);
+  public static boolean updateTokenFile(String directory, String fileName, String token) {
     if (StringUtils.isEmpty(token)) {
       return false;
     }
-    clientConfig.token = token;
-    return true;
-  }
-
-  public static boolean updateTokenFile(ClientConfig clientConfig, String token) {
-    if (StringUtils.isEmpty(token)) {
-      return false;
-    }
-    if (!checkFile(clientConfig.configFilePath, TOKEN_FILENAME, true)) {
+    if (!checkFile(directory, fileName, true)) {
       return false;
     }
 
-    Path tokenFilePath = Paths.get(clientConfig.configFilePath.trim(), TOKEN_FILENAME);
+    Path tokenFilePath = Paths.get(directory.trim(), fileName);
     try (FileWriter writer = new FileWriter(tokenFilePath.toFile())) {
       writer.write((new StringBuilder(TOKEN_FILE_TOKEN)).append(EQUAL_CHAR).append(token).toString());
       return true;
@@ -147,6 +132,10 @@ public class FileUtil {
       ApiLogger.error("write file fail:" + tokenFilePath.toAbsolutePath(), e);
     }
     return false;
+  }
+
+  public static Map<String, String> readPropertiesFile(Path configFilePath) {
+    return readPropertiesFile(configFilePath, null);
   }
 
   public static Map<String, String> readPropertiesFile(Path configFilePath,

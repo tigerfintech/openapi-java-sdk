@@ -4,8 +4,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.request.user.UserTokenRefreshRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.user.UserTokenResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
-import com.tigerbrokers.stock.openapi.client.util.FileUtil;
+import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import com.tigerbrokers.stock.openapi.client.util.watch.FileWatchedListener;
@@ -16,12 +17,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TOKEN_FILENAME;
+import static com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil.TOKEN_FILE_TOKEN;
 
 /**
  * @author bean
@@ -56,7 +60,7 @@ public class TokenManager {
       return;
     }
     this.clientConfig = config;
-    FileUtil.loadTokenFile(config);
+    loadTokenFile(config);
     addTokenFileWatch(config);
 
     if (!config.isAutoRefreshToken) {
@@ -76,11 +80,11 @@ public class TokenManager {
     if (config.refreshTokenIntervalDays > 0) {
       refreshIntervalMs = TimeUnit.DAYS.toMillis(config.refreshTokenIntervalDays);
     }
-    long tokenCreateTime = FileUtil.tryGetCreateTime(clientConfig.token);
+    long tokenCreateTime = ConfigFileUtil.tryGetCreateTime(clientConfig.token);
     long initialDelay = tokenCreateTime + refreshIntervalMs - System.currentTimeMillis();
     if (initialDelay <= 0) {
       refreshToken();
-      tokenCreateTime = FileUtil.tryGetCreateTime(clientConfig.token);
+      tokenCreateTime = ConfigFileUtil.tryGetCreateTime(clientConfig.token);
       initialDelay = tokenCreateTime + refreshIntervalMs - System.currentTimeMillis();
     }
     initialDelay = getDelayTime(clientConfig.refreshTokenTime, initialDelay);
@@ -113,10 +117,10 @@ public class TokenManager {
   }
 
   private void refreshToken() {
-    if (StringUtils.isEmpty(clientConfig.token) && !FileUtil.loadTokenFile(clientConfig)) {
+    if (StringUtils.isEmpty(clientConfig.token) && !loadTokenFile(clientConfig)) {
       return;
     }
-    long tokenCreateTime = FileUtil.tryGetCreateTime(clientConfig.token);
+    long tokenCreateTime = ConfigFileUtil.tryGetCreateTime(clientConfig.token);
     if (tokenCreateTime == 0) {
       ApiLogger.warn("local token is invalid:{}, refreshToken ignore", clientConfig.token);
       return;
@@ -149,6 +153,17 @@ public class TokenManager {
     } while(count > 0);
   }
 
+  public boolean loadTokenFile(ClientConfig clientConfig) {
+    Path tokenFilePath = Paths.get(clientConfig.configFilePath.trim(), TOKEN_FILENAME);
+    Map<String, String> dataMap = ConfigFileUtil.readPropertiesFile(tokenFilePath);
+    String token = dataMap.get(TOKEN_FILE_TOKEN);
+    if (StringUtils.isEmpty(token)) {
+      return false;
+    }
+    clientConfig.token = token;
+    return true;
+  }
+
   /**
    * Update the hour, minute, and second for the specified timestamp
    * @param baseTimestamp the specified timestamp
@@ -159,20 +174,10 @@ public class TokenManager {
     if (StringUtils.isEmpty(time)) {
       return -1;
     }
-    time = time.trim().replaceAll(":", "");
-    if (time.length() != 6) {
-      return -1;
-    }
-    Calendar cl = Calendar.getInstance();
-    cl.setTimeInMillis(baseTimestamp);
-    try {
-      cl.set(Calendar.HOUR_OF_DAY, Integer.parseInt(time.substring(0, 2)));
-      cl.set(Calendar.MINUTE, Integer.parseInt(time.substring(2, 4)));
-      cl.set(Calendar.SECOND, Integer.parseInt(time.substring(4, 6)));
-      return cl.getTimeInMillis();
-    } catch (Exception e) {
-    }
-    return -1;
+    TimeZoneId timeZoneId = ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone();
+    Long timestamp = DateUtils.getTimestamp(
+        DateUtils.printDate(baseTimestamp, timeZoneId) + " " + time, timeZoneId);
+    return timestamp == null ? -1 : timestamp;
   }
 
   /**
