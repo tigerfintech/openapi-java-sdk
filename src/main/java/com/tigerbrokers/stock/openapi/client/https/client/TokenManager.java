@@ -12,7 +12,6 @@ import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import com.tigerbrokers.stock.openapi.client.util.watch.FileWatchedListener;
 import com.tigerbrokers.stock.openapi.client.util.watch.FileWatchedService;
 import com.tigerbrokers.stock.openapi.client.util.watch.TokenFileWatched;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
@@ -154,6 +153,9 @@ public class TokenManager {
   }
 
   public boolean loadTokenFile(ClientConfig clientConfig) {
+    if (!ConfigFileUtil.checkFile(clientConfig.configFilePath, TOKEN_FILENAME, false)) {
+      return false;
+    }
     Path tokenFilePath = Paths.get(clientConfig.configFilePath.trim(), TOKEN_FILENAME);
     Map<String, String> dataMap = ConfigFileUtil.readPropertiesFile(tokenFilePath);
     String token = dataMap.get(TOKEN_FILE_TOKEN);
@@ -209,8 +211,9 @@ public class TokenManager {
       if (null == config || StringUtils.isEmpty(config.configFilePath)) {
         return;
       }
-      Path configFilePath = Paths.get(config.configFilePath);
-      if (Files.exists(configFilePath) && Files.isDirectory(configFilePath)) {
+      // if token file exists, add listener
+      if (ConfigFileUtil.checkFile(config.configFilePath, TOKEN_FILENAME, false)) {
+        Path configFilePath = Paths.get(config.configFilePath);
         FileWatchedListener tokenFileListener = new TokenFileWatched(config);
         FileWatchedService fileWatchedService = new FileWatchedService(configFilePath, tokenFileListener);
         new Thread() {
@@ -219,8 +222,9 @@ public class TokenManager {
             fileWatchedService.watch();
           }
         }.start();
+
+        ApiLogger.info("addTokenFileWatch success.");
       }
-      ApiLogger.info("addTokenFileWatch success.");
     } catch (Exception e) {
       ApiLogger.error("addTokenFileWatch fail.", e);
     }
