@@ -59,13 +59,13 @@ public class TokenManager {
       return;
     }
     this.clientConfig = config;
+    register(defaultCallback);
     loadTokenFile(config);
     addTokenFileWatch(config);
 
     if (!config.isAutoRefreshToken) {
       return;
     }
-    register(defaultCallback);
 
     executorService = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
       @Override
