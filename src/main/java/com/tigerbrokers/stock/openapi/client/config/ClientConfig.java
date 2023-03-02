@@ -54,7 +54,7 @@ public class ClientConfig {
   /**
    * token(Only Hong Kong license required)
    */
-  public String token = null;
+  public volatile String token = null;
 
   /**
    * refresh token frequency
