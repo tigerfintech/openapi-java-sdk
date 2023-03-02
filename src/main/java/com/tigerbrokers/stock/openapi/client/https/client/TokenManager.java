@@ -94,7 +94,9 @@ public class TokenManager {
         refreshToken();
       }
     }, initialDelay, refreshIntervalMs, TimeUnit.MILLISECONDS);
-    ApiLogger.info("init auto refresh token task success");
+    if (!StringUtils.isEmpty(clientConfig.token)) {
+      ApiLogger.info("init auto refresh token task success");
+    }
   }
 
   public void register(RefreshTokenCallback callback) {

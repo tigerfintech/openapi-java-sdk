@@ -21,7 +21,6 @@ import java.util.Set;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.CHARSET_UTF8;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.CONFIG_FILENAME;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SEPARATOR;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TOKEN_FILENAME;
 
 /**
  * @author bean
@@ -60,12 +59,12 @@ public class ConfigFileUtil {
     dir = dir.trim();
     Path configPath = Paths.get(dir);
     if (Files.notExists(configPath) || !Files.isDirectory(configPath)) {
-      ApiLogger.info("config file directory[{}] is missing, ingore", dir);
+      ApiLogger.debug("config file directory[{}] is missing, ingore", dir);
       return false;
     }
     Path configFilePath = Paths.get(dir, fileName);
     if (Files.notExists(configFilePath)) {
-      ApiLogger.info("config file[{}] is missing, ingore", configFilePath.toAbsolutePath().toString());
+      ApiLogger.debug("config file[{}] is missing, ingore", configFilePath.toAbsolutePath().toString());
       return false;
     }
     if (!writable && !Files.isReadable(configFilePath)) {
