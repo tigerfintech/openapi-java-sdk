@@ -6,7 +6,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.License;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
-import com.tigerbrokers.stock.openapi.client.util.FileUtil;
+import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
 import com.tigerbrokers.stock.openapi.client.util.builder.HeaderBuilder;
 import io.netty.handler.ssl.SslProvider;
 import java.io.File;
@@ -52,9 +52,19 @@ public class ClientConfig {
   public String privateKey = null;
 
   /**
-   * token
+   * token(Only Hong Kong license required)
    */
-  public String token = null;
+  public volatile String token = null;
+
+  /**
+   * refresh token frequency
+   */
+  public int refreshTokenIntervalDays;
+
+  /**
+   * refresh token time, formate: HH:mm:ss
+   */
+  public String refreshTokenTime;
 
   /**
    * whether to automatically grab quote permission when the initialization instance is completed
@@ -118,7 +128,7 @@ public class ClientConfig {
 
   /**
    * read private key from file(Remove first and last lines and line breaks)
-   * @see FileUtil readPrivateKey()
+   * @see ConfigFileUtil readPrivateKey()
    *
    * @param privateKeyFile absolute path
    * @return privateKey String
@@ -131,7 +141,7 @@ public class ClientConfig {
       int size = in.available();
       byte[] buffer = new byte[size];
       in.read(buffer);
-      content = FileUtil.processPrivateKey(new String(buffer, CHARSET_UTF8));
+      content = ConfigFileUtil.processPrivateKey(new String(buffer, CHARSET_UTF8));
     } catch (IOException e) {
       ApiLogger.error("read file fail:" + privateKeyFile, e);
     }

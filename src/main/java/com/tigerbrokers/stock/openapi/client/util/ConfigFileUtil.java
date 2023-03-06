@@ -21,13 +21,12 @@ import java.util.Set;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.CHARSET_UTF8;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.CONFIG_FILENAME;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SEPARATOR;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TOKEN_FILENAME;
 
 /**
  * @author bean
  * @date 2023/2/10 2:45 PM
  */
-public class FileUtil {
+public class ConfigFileUtil {
 
   private static final String PPRVATE_KEY_PREFIX = "KEY-----";
   private static final String PRIVATE_KEY_SUFFIX = "-----END";
@@ -40,7 +39,7 @@ public class FileUtil {
   private static final String CONFIG_FILE_ACCOUNT = "account";
   private static final String CONFIG_FILE_LICENSE = "license";
   private static final String CONFIG_FILE_ENV = "env";
-  private static final String TOKEN_FILE_TOKEN = "token";
+  public static final String TOKEN_FILE_TOKEN = "token";
 
   private static final Set<String> configFileKeys = new HashSet<>();
   static {
@@ -51,21 +50,21 @@ public class FileUtil {
     configFileKeys.add(CONFIG_FILE_ENV);
   }
 
-  private FileUtil() {}
+  private ConfigFileUtil() {}
 
-  private static boolean checkFile(String dir, String fileName, boolean writable) {
+  public static boolean checkFile(String dir, String fileName, boolean writable) {
     if (StringUtils.isEmpty(dir)) {
       return false;
     }
     dir = dir.trim();
     Path configPath = Paths.get(dir);
     if (Files.notExists(configPath) || !Files.isDirectory(configPath)) {
-      ApiLogger.info("config file directory[{}] is missing, ingore", dir);
+      ApiLogger.debug("config file directory[{}] is missing, ingore", dir);
       return false;
     }
     Path configFilePath = Paths.get(dir, fileName);
     if (Files.notExists(configFilePath)) {
-      ApiLogger.info("config file[{}] is missing, ingore", configFilePath.toAbsolutePath().toString());
+      ApiLogger.debug("config file[{}] is missing, ingore", configFilePath.toAbsolutePath().toString());
       return false;
     }
     if (!writable && !Files.isReadable(configFilePath)) {
@@ -116,30 +115,15 @@ public class FileUtil {
     }
   }
 
-  public static boolean loadTokenFile(ClientConfig clientConfig) {
-    if (!checkFile(clientConfig.configFilePath, TOKEN_FILENAME, false)) {
-      return false;
-    }
-
-    Path tokenFilePath = Paths.get(clientConfig.configFilePath.trim(), TOKEN_FILENAME);
-    Map<String, String> dataMap = readPropertiesFile(tokenFilePath, null);
-    String token = dataMap.get(TOKEN_FILE_TOKEN);
+  public static boolean updateTokenFile(String directory, String fileName, String token) {
     if (StringUtils.isEmpty(token)) {
       return false;
     }
-    clientConfig.token = token;
-    return true;
-  }
-
-  public static boolean updateTokenFile(ClientConfig clientConfig, String token) {
-    if (StringUtils.isEmpty(token)) {
-      return false;
-    }
-    if (!checkFile(clientConfig.configFilePath, TOKEN_FILENAME, true)) {
+    if (!checkFile(directory, fileName, true)) {
       return false;
     }
 
-    Path tokenFilePath = Paths.get(clientConfig.configFilePath.trim(), TOKEN_FILENAME);
+    Path tokenFilePath = Paths.get(directory.trim(), fileName);
     try (FileWriter writer = new FileWriter(tokenFilePath.toFile())) {
       writer.write((new StringBuilder(TOKEN_FILE_TOKEN)).append(EQUAL_CHAR).append(token).toString());
       return true;
@@ -147,6 +131,10 @@ public class FileUtil {
       ApiLogger.error("write file fail:" + tokenFilePath.toAbsolutePath(), e);
     }
     return false;
+  }
+
+  public static Map<String, String> readPropertiesFile(Path configFilePath) {
+    return readPropertiesFile(configFilePath, null);
   }
 
   public static Map<String, String> readPropertiesFile(Path configFilePath,
@@ -222,6 +210,18 @@ public class FileUtil {
       builder.append(ch);
     }
     return builder.toString();
+  }
+
+  public static long tryGetCreateTime(String token) {
+    long tokenCreateTime = 0;
+    if (!StringUtils.isEmpty(token)) {
+      try {
+        tokenCreateTime = getCreateTime(token);
+      } catch (Throwable th) {
+        // ignore
+      }
+    }
+    return tokenCreateTime;
   }
 
   public static long getCreateTime(String token) {

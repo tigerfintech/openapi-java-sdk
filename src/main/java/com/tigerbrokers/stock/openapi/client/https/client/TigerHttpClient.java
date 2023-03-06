@@ -25,7 +25,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.MethodType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.util.AccountUtil;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
-import com.tigerbrokers.stock.openapi.client.util.FileUtil;
+import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
 import com.tigerbrokers.stock.openapi.client.util.FastJsonPropertyFilter;
 import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
 import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
@@ -101,7 +101,7 @@ public class TigerHttpClient implements TigerClient {
   }
 
   public TigerHttpClient clientConfig(ClientConfig clientConfig) {
-    FileUtil.loadConfigFile(clientConfig);
+    ConfigFileUtil.loadConfigFile(clientConfig);
     init(clientConfig.tigerId, clientConfig.privateKey);
     if (clientConfig.failRetryCounts <= TigerApiConstants.MAX_FAIL_RETRY_COUNT) {
       this.failRetryCounts = Math.max(clientConfig.failRetryCounts, 0);

@@ -4,16 +4,27 @@ import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.request.user.UserTokenRefreshRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.user.UserTokenResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
-import com.tigerbrokers.stock.openapi.client.util.FileUtil;
+import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
+import com.tigerbrokers.stock.openapi.client.util.StringUtils;
+import com.tigerbrokers.stock.openapi.client.util.watch.FileWatchedListener;
+import com.tigerbrokers.stock.openapi.client.util.watch.FileWatchedService;
+import com.tigerbrokers.stock.openapi.client.util.watch.TokenFileWatched;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TOKEN_FILENAME;
+import static com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil.TOKEN_FILE_TOKEN;
 
 /**
  * @author bean
@@ -22,7 +33,9 @@ import java.util.concurrent.TimeUnit;
 public class TokenManager {
   private static final TokenManager tokenManager = new TokenManager();
 
-  private final long REFRESH_INTERVAL_MS = TimeUnit.DAYS.toMillis(1);
+  // refresh every 5 days by default
+  private final int defaultRefreshIntervalDays = 5;
+  private long refreshIntervalMs = TimeUnit.DAYS.toMillis(defaultRefreshIntervalDays);
   private ScheduledThreadPoolExecutor executorService;
   private ClientConfig clientConfig;
   private final List<RefreshTokenCallback> callbackList = new ArrayList<>();
@@ -42,39 +55,47 @@ public class TokenManager {
   }
 
   public void init(ClientConfig config) {
-    if (config == null || !config.isAutoRefreshToken) {
+    if (config == null) {
       return;
     }
     this.clientConfig = config;
-    boolean result = FileUtil.loadTokenFile(clientConfig);
-    long tokenCreateTime = 0;
-    try {
-      tokenCreateTime = FileUtil.getCreateTime(clientConfig.token);
-    } catch (Throwable th) {
-      // ignore
+    register(defaultCallback);
+    loadTokenFile(config);
+    addTokenFileWatch(config);
+
+    if (!config.isAutoRefreshToken) {
+      return;
     }
 
-    register(defaultCallback);
-    if (result && tokenCreateTime > 0) {
-      executorService = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
-        @Override
-        public Thread newThread(Runnable r) {
-          Thread t = Executors.defaultThreadFactory().newThread(r);
-          t.setDaemon(true);
-          return t;
-        }
-      });
+    executorService = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
+      @Override
+      public Thread newThread(Runnable r) {
+        Thread t = Executors.defaultThreadFactory().newThread(r);
+        t.setDaemon(true);
+        return t;
+      }
+    });
 
-      long initialDelay = tokenCreateTime + REFRESH_INTERVAL_MS - System.currentTimeMillis();
-      initialDelay = initialDelay < 0 ? 0 : initialDelay;
-      executorService.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-              refreshToken();
-            }
-          }, initialDelay,
-          REFRESH_INTERVAL_MS, TimeUnit.MILLISECONDS);
-      ApiLogger.info("init refresh token task success");
+    if (config.refreshTokenIntervalDays > 0) {
+      refreshIntervalMs = TimeUnit.DAYS.toMillis(config.refreshTokenIntervalDays);
+    }
+    long tokenCreateTime = ConfigFileUtil.tryGetCreateTime(clientConfig.token);
+    long initialDelay = tokenCreateTime + refreshIntervalMs - System.currentTimeMillis();
+    if (initialDelay <= 0) {
+      refreshToken();
+      tokenCreateTime = ConfigFileUtil.tryGetCreateTime(clientConfig.token);
+      initialDelay = tokenCreateTime + refreshIntervalMs - System.currentTimeMillis();
+    }
+    initialDelay = getDelayTime(clientConfig.refreshTokenTime, initialDelay);
+
+    executorService.scheduleWithFixedDelay(new Runnable() {
+      @Override
+      public void run() {
+        refreshToken();
+      }
+    }, initialDelay, refreshIntervalMs, TimeUnit.MILLISECONDS);
+    if (!StringUtils.isEmpty(clientConfig.token)) {
+      ApiLogger.info("init auto refresh token task success");
     }
   }
 
@@ -97,13 +118,15 @@ public class TokenManager {
   }
 
   private void refreshToken() {
-    long tokenCreateTime = 0;
-    try {
-      tokenCreateTime = FileUtil.getCreateTime(clientConfig.token);
-    } catch (Throwable th) {
-      // ignore
+    if (StringUtils.isEmpty(clientConfig.token) && !loadTokenFile(clientConfig)) {
+      return;
     }
-    if (tokenCreateTime + REFRESH_INTERVAL_MS - System.currentTimeMillis() > 0) {
+    long tokenCreateTime = ConfigFileUtil.tryGetCreateTime(clientConfig.token);
+    if (tokenCreateTime == 0) {
+      ApiLogger.warn("local token is invalid:{}, refreshToken ignore", clientConfig.token);
+      return;
+    }
+    if (tokenCreateTime + refreshIntervalMs - System.currentTimeMillis() > 0) {
       ApiLogger.info("refreshToken last update time:{}, ignore", DateUtils.printDateTime(
           tokenCreateTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"), clientConfig.timeZone));
       return;
@@ -129,5 +152,83 @@ public class TokenManager {
         count--;
       }
     } while(count > 0);
+  }
+
+  public boolean loadTokenFile(ClientConfig clientConfig) {
+    if (!ConfigFileUtil.checkFile(clientConfig.configFilePath, TOKEN_FILENAME, false)) {
+      return false;
+    }
+    Path tokenFilePath = Paths.get(clientConfig.configFilePath.trim(), TOKEN_FILENAME);
+    Map<String, String> dataMap = ConfigFileUtil.readPropertiesFile(tokenFilePath);
+    String token = dataMap.get(TOKEN_FILE_TOKEN);
+    if (StringUtils.isEmpty(token)) {
+      return false;
+    }
+    clientConfig.token = token;
+    return true;
+  }
+
+  /**
+   * Update the hour, minute, and second for the specified timestamp
+   * @param baseTimestamp the specified timestamp
+   * @param time formate:HH:mm:ss, 16:30:00 etc
+   * @return
+   */
+  private long getTimeInMillis(long baseTimestamp, String time) {
+    if (StringUtils.isEmpty(time)) {
+      return -1;
+    }
+    TimeZoneId timeZoneId = ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone();
+    Long timestamp = DateUtils.getTimestamp(
+        DateUtils.printDate(baseTimestamp, timeZoneId) + " " + time, timeZoneId);
+    return timestamp == null ? -1 : timestamp;
+  }
+
+  /**
+   * get the delay time for refresh token
+   * @param time formate:HH:mm:ss, 16:30:00 etc
+   * @return
+   */
+  private long getDelayTime(String time, long initialDelay) {
+    initialDelay = initialDelay <= 0 ? 0 : initialDelay;
+    long baseTimestamp = System.currentTimeMillis();
+    long refreshTimestamp = getTimeInMillis(baseTimestamp, time);
+    if (refreshTimestamp < 0) {
+      return initialDelay;
+    }
+
+    if (initialDelay > 0) {
+      baseTimestamp += initialDelay;
+      refreshTimestamp = getTimeInMillis(baseTimestamp, time);
+    }
+    long delayTime = refreshTimestamp - baseTimestamp + initialDelay;
+    if (delayTime < 0) {
+      delayTime += TimeUnit.DAYS.toMillis(1);
+    }
+    return delayTime;
+  }
+
+  public void addTokenFileWatch(ClientConfig config) {
+    try {
+      if (null == config || StringUtils.isEmpty(config.configFilePath)) {
+        return;
+      }
+      // if token file exists, add listener
+      if (ConfigFileUtil.checkFile(config.configFilePath, TOKEN_FILENAME, false)) {
+        Path configFilePath = Paths.get(config.configFilePath);
+        FileWatchedListener tokenFileListener = new TokenFileWatched(config);
+        FileWatchedService fileWatchedService = new FileWatchedService(configFilePath, tokenFileListener);
+        new Thread() {
+          @Override
+          public void run() {
+            fileWatchedService.watch();
+          }
+        }.start();
+
+        ApiLogger.info("addTokenFileWatch success.");
+      }
+    } catch (Exception e) {
+      ApiLogger.error("addTokenFileWatch fail.", e);
+    }
   }
 }
