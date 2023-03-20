@@ -14,6 +14,10 @@ public enum MethodName {
   CANCEL_ORDER("cancel_order", MethodType.TRADE),
   MODIFY_ORDER("modify_order", MethodType.TRADE),
   PREVIEW_ORDER("preview_order", MethodType.TRADE),
+  SEGMENT_FUND_HISTORY("segment_fund_history", MethodType.TRADE),
+  SEGMENT_FUND_AVAILABLE("segment_fund_available", MethodType.TRADE),
+  TRANSFER_SEGMENT_FUND("transfer_segment_fund", MethodType.TRADE),
+  CANCEL_SEGMENT_FUND("cancel_segment_fund", MethodType.TRADE),
 
   /**
    * account/asset
