@@ -18,6 +18,8 @@ public class OptionKlineModel extends OptionCommonModel {
   private Long beginTime;
   @JSONField(name = "end_time")
   private Long endTime;
+  @JSONField(name = "period")
+  private String period;
 
   public OptionKlineModel() {
 
@@ -69,6 +71,14 @@ public class OptionKlineModel extends OptionCommonModel {
     }
   }
 
+  public String getPeriod() {
+    return period;
+  }
+
+  public void setPeriod(String period) {
+    this.period = period;
+  }
+
   @Override
   public String toString() {
     return "OptionKlineModel{" +
@@ -78,6 +88,7 @@ public class OptionKlineModel extends OptionCommonModel {
         ", right='" + right + '\'' +
         ", strike='" + strike + '\'' +
         ", expiry='" + expiry + '\'' +
+        ", period='" + period + '\'' +
         '}';
   }
 }
