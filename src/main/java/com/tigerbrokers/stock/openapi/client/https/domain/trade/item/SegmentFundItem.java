@@ -6,7 +6,7 @@ import java.io.Serializable;
  * @author bean
  * @date 2023/3/20 2:03 PM
  */
-public class SegFundItem implements Serializable {
+public class SegmentFundItem implements Serializable {
   private static final long serialVersionUID = 1L;
 
   private long id;

@@ -6,34 +6,34 @@ import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.SegmentFundModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
-import com.tigerbrokers.stock.openapi.client.https.response.trade.SegFundResponse;
+import com.tigerbrokers.stock.openapi.client.https.response.trade.SegmentFundResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SegmentType;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 
-public class SegFundTransferRequest extends TigerCommonRequest implements TigerRequest<SegFundResponse> {
+public class SegmentFundTransferRequest extends TigerCommonRequest implements TigerRequest<SegmentFundResponse> {
 
-  private SegFundTransferRequest() {
+  private SegmentFundTransferRequest() {
     setApiVersion(TigerApiConstants.DEFAULT_VERSION);
     setApiMethodName(MethodName.TRANSFER_SEGMENT_FUND);
   }
 
-  public static SegFundTransferRequest newRequest(SegmentFundModel model) {
-    SegFundTransferRequest request = new SegFundTransferRequest();
+  public static SegmentFundTransferRequest newRequest(SegmentFundModel model) {
+    SegmentFundTransferRequest request = new SegmentFundTransferRequest();
     request.setApiModel(model);
     return request;
   }
 
-  public static SegFundTransferRequest buildRequest(
+  public static SegmentFundTransferRequest buildRequest(
       SegmentType fromSegType, SegmentType toSegType,
       Currency currency,
       Double amount) {
     return buildRequest(null, fromSegType, toSegType, currency, amount);
   }
 
-  public static SegFundTransferRequest buildRequest(
+  public static SegmentFundTransferRequest buildRequest(
       String account,
       SegmentType fromSegType, SegmentType toSegType,
       Currency currency,
@@ -57,7 +57,7 @@ public class SegFundTransferRequest extends TigerCommonRequest implements TigerR
     return newRequest(model);
   }
 
-  public SegFundTransferRequest fromSegmentType(SegmentType segmentType) {
+  public SegmentFundTransferRequest fromSegmentType(SegmentType segmentType) {
     SegmentFundModel model = (SegmentFundModel) getApiModel();
     if (segmentType != null && segmentType != SegmentType.ALL) {
       model.setFromSegment(segmentType.toString());
@@ -67,7 +67,7 @@ public class SegFundTransferRequest extends TigerCommonRequest implements TigerR
     return this;
   }
 
-  public SegFundTransferRequest toSegmentType(SegmentType segmentType) {
+  public SegmentFundTransferRequest toSegmentType(SegmentType segmentType) {
     SegmentFundModel model = (SegmentFundModel) getApiModel();
     if (segmentType != null && segmentType != SegmentType.ALL) {
       model.setToSegment(segmentType.toString());
@@ -77,38 +77,38 @@ public class SegFundTransferRequest extends TigerCommonRequest implements TigerR
     return this;
   }
 
-  public SegFundTransferRequest currency(Currency currency) {
+  public SegmentFundTransferRequest currency(Currency currency) {
     SegmentFundModel model = (SegmentFundModel) getApiModel();
     model.setCurrency(currency == null ? null : currency.toString());
     return this;
   }
 
-  public SegFundTransferRequest amount(Double amount) {
+  public SegmentFundTransferRequest amount(Double amount) {
     SegmentFundModel model = (SegmentFundModel) getApiModel();
     model.setAmount(amount);
     return this;
   }
 
-  public SegFundTransferRequest account(String account) {
+  public SegmentFundTransferRequest account(String account) {
     SegmentFundModel model = (SegmentFundModel) getApiModel();
     model.setAccount(account);
     return this;
   }
 
-  public SegFundTransferRequest secretKey(String secretKey) {
+  public SegmentFundTransferRequest secretKey(String secretKey) {
     SegmentFundModel model = (SegmentFundModel) getApiModel();
     model.setSecretKey(secretKey);
     return this;
   }
 
-  public SegFundTransferRequest lang(Language lang) {
+  public SegmentFundTransferRequest lang(Language lang) {
     ApiModel model = getApiModel();
     model.setLang(lang);
     return this;
   }
 
   @Override
-  public Class<SegFundResponse> getResponseClass() {
-    return SegFundResponse.class;
+  public Class<SegmentFundResponse> getResponseClass() {
+    return SegmentFundResponse.class;
   }
 }

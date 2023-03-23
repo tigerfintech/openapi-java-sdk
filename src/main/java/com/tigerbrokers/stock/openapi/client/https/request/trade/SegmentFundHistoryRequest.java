@@ -6,66 +6,66 @@ import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.SegmentFundModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
-import com.tigerbrokers.stock.openapi.client.https.response.trade.SegFundResponse;
+import com.tigerbrokers.stock.openapi.client.https.response.trade.SegmentFundsResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 
-public class SegFundCancelRequest extends TigerCommonRequest implements TigerRequest<SegFundResponse> {
+public class SegmentFundHistoryRequest extends TigerCommonRequest implements TigerRequest<SegmentFundsResponse> {
 
-  private SegFundCancelRequest() {
+  private SegmentFundHistoryRequest() {
     setApiVersion(TigerApiConstants.DEFAULT_VERSION);
-    setApiMethodName(MethodName.CANCEL_SEGMENT_FUND);
+    setApiMethodName(MethodName.SEGMENT_FUND_HISTORY);
   }
 
-  public static SegFundCancelRequest newRequest(SegmentFundModel model) {
-    SegFundCancelRequest request = new SegFundCancelRequest();
+  public static SegmentFundHistoryRequest newRequest(SegmentFundModel model) {
+    SegmentFundHistoryRequest request = new SegmentFundHistoryRequest();
     request.setApiModel(model);
     return request;
   }
 
-  public static SegFundCancelRequest buildRequest(Long id) {
-    return buildRequest(null, id);
+  public static SegmentFundHistoryRequest buildRequest(Integer limit) {
+    return buildRequest(null, limit);
   }
 
-  public static SegFundCancelRequest buildRequest(
-      String account, Long id) {
+  public static SegmentFundHistoryRequest buildRequest(
+      String account, Integer limit) {
     SegmentFundModel model = new SegmentFundModel();
     if (StringUtils.isEmpty(account)) {
       model.setAccount(ClientConfig.DEFAULT_CONFIG.defaultAccount);
     } else {
       model.setAccount(account);
     }
-    model.setId(id);
+    model.setLimit(limit);
     return newRequest(model);
   }
 
-  public SegFundCancelRequest id(Long id) {
+  public SegmentFundHistoryRequest limit(Integer limit) {
     SegmentFundModel model = (SegmentFundModel) getApiModel();
-    model.setId(id);
+    model.setLimit(limit);
     return this;
   }
 
-  public SegFundCancelRequest account(String account) {
+  public SegmentFundHistoryRequest account(String account) {
     SegmentFundModel model = (SegmentFundModel) getApiModel();
     model.setAccount(account);
     return this;
   }
 
-  public SegFundCancelRequest secretKey(String secretKey) {
+  public SegmentFundHistoryRequest secretKey(String secretKey) {
     SegmentFundModel model = (SegmentFundModel) getApiModel();
     model.setSecretKey(secretKey);
     return this;
   }
 
-  public SegFundCancelRequest lang(Language lang) {
+  public SegmentFundHistoryRequest lang(Language lang) {
     ApiModel model = getApiModel();
     model.setLang(lang);
     return this;
   }
 
   @Override
-  public Class<SegFundResponse> getResponseClass() {
-    return SegFundResponse.class;
+  public Class<SegmentFundsResponse> getResponseClass() {
+    return SegmentFundsResponse.class;
   }
 }

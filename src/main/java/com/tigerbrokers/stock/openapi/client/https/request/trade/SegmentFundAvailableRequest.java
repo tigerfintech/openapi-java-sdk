@@ -6,32 +6,32 @@ import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.SegmentFundModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
-import com.tigerbrokers.stock.openapi.client.https.response.trade.SegFundAvailableResponse;
+import com.tigerbrokers.stock.openapi.client.https.response.trade.SegmentFundAvailableResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SegmentType;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 
-public class SegFundAvailableRequest extends TigerCommonRequest implements TigerRequest<SegFundAvailableResponse> {
+public class SegmentFundAvailableRequest extends TigerCommonRequest implements TigerRequest<SegmentFundAvailableResponse> {
 
-  private SegFundAvailableRequest() {
+  private SegmentFundAvailableRequest() {
     setApiVersion(TigerApiConstants.DEFAULT_VERSION);
     setApiMethodName(MethodName.SEGMENT_FUND_AVAILABLE);
   }
 
-  public static SegFundAvailableRequest newRequest(SegmentFundModel model) {
-    SegFundAvailableRequest request = new SegFundAvailableRequest();
+  public static SegmentFundAvailableRequest newRequest(SegmentFundModel model) {
+    SegmentFundAvailableRequest request = new SegmentFundAvailableRequest();
     request.setApiModel(model);
     return request;
   }
 
-  public static SegFundAvailableRequest buildRequest(
+  public static SegmentFundAvailableRequest buildRequest(
       SegmentType segmentType, Currency currency) {
     return buildRequest(null, segmentType, currency);
   }
 
-  public static SegFundAvailableRequest buildRequest(
+  public static SegmentFundAvailableRequest buildRequest(
       String account,
       SegmentType segmentType, Currency currency) {
     SegmentFundModel model = new SegmentFundModel();
@@ -49,7 +49,7 @@ public class SegFundAvailableRequest extends TigerCommonRequest implements Tiger
     return newRequest(model);
   }
 
-  public SegFundAvailableRequest segmentType(SegmentType segmentType) {
+  public SegmentFundAvailableRequest segmentType(SegmentType segmentType) {
     SegmentFundModel model = (SegmentFundModel) getApiModel();
     if (segmentType != null && segmentType != SegmentType.ALL) {
       model.setFromSegment(segmentType.toString());
@@ -59,32 +59,32 @@ public class SegFundAvailableRequest extends TigerCommonRequest implements Tiger
     return this;
   }
 
-  public SegFundAvailableRequest currency(Currency currency) {
+  public SegmentFundAvailableRequest currency(Currency currency) {
     SegmentFundModel model = (SegmentFundModel) getApiModel();
     model.setCurrency(currency == null ? null : currency.toString());
     return this;
   }
 
-  public SegFundAvailableRequest account(String account) {
+  public SegmentFundAvailableRequest account(String account) {
     SegmentFundModel model = (SegmentFundModel) getApiModel();
     model.setAccount(account);
     return this;
   }
 
-  public SegFundAvailableRequest secretKey(String secretKey) {
+  public SegmentFundAvailableRequest secretKey(String secretKey) {
     SegmentFundModel model = (SegmentFundModel) getApiModel();
     model.setSecretKey(secretKey);
     return this;
   }
 
-  public SegFundAvailableRequest lang(Language lang) {
+  public SegmentFundAvailableRequest lang(Language lang) {
     ApiModel model = getApiModel();
     model.setLang(lang);
     return this;
   }
 
   @Override
-  public Class<SegFundAvailableResponse> getResponseClass() {
-    return SegFundAvailableResponse.class;
+  public Class<SegmentFundAvailableResponse> getResponseClass() {
+    return SegmentFundAvailableResponse.class;
   }
 }
