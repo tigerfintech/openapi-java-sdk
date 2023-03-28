@@ -9,7 +9,10 @@ public enum OrderType {
   LMT("LMT", "限价"),
   STP("STP", "止损"),
   STP_LMT("STP_LMT", "止损限价"),
-  TRAIL("TRAIL", "跟踪止损");
+  TRAIL("TRAIL", "跟踪止损"),
+  AM("AM", "Auction Market Order"),
+  AL("AL", "Auction Limit Order"),
+  ;
 
   private String type;
   private String desc;

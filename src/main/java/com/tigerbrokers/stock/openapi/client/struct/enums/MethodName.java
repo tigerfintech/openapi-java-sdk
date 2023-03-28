@@ -14,6 +14,9 @@ public enum MethodName {
   CANCEL_ORDER("cancel_order", MethodType.TRADE),
   MODIFY_ORDER("modify_order", MethodType.TRADE),
   PREVIEW_ORDER("preview_order", MethodType.TRADE),
+  TRANSFER_SEGMENT_FUND("transfer_segment_fund", MethodType.TRADE),
+  CANCEL_SEGMENT_FUND("cancel_segment_fund", MethodType.TRADE),
+  PLACE_FOREX_ORDER("place_forex_order", MethodType.TRADE),
 
   /**
    * account/asset
@@ -28,6 +31,8 @@ public enum MethodName {
   INACTIVE_ORDERS("inactive_orders", MethodType.TRADE),
   FILLED_ORDERS("filled_orders", MethodType.TRADE),
   ORDER_TRANSACTIONS("order_transactions", MethodType.TRADE),
+  SEGMENT_FUND_HISTORY("segment_fund_history", MethodType.TRADE),
+  SEGMENT_FUND_AVAILABLE("segment_fund_available", MethodType.TRADE),
 
   /**
    * contract

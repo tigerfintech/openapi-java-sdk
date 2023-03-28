@@ -464,6 +464,21 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     return this;
   }
 
+  /**
+   * set action order
+   * @param orderType AM(Auction Market Order) or AL(Auction Limit Order)
+   * @param timeInForce DAY/OPG, OPG:Only the pre-market bidding is valid (the Hong Kong Stock Exchange will automatically submit the pre-market order to participate in the transaction if there is no transaction)
+   * @return
+   */
+  public TradeOrderRequest setAuctionOrder(OrderType orderType, TimeInForce timeInForce) {
+    if (orderType == OrderType.AM || orderType == OrderType.AL) {
+      TradeOrderModel model = (TradeOrderModel) getApiModel();
+      model.setOrderType(orderType);
+      model.setTimeInForce(timeInForce == TimeInForce.OPG ? timeInForce : TimeInForce.DAY);
+    }
+    return this;
+  }
+
   @Override
   public Class<TradeOrderResponse> getResponseClass() {
     return TradeOrderResponse.class;
