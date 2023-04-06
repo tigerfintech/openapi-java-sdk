@@ -20,6 +20,7 @@ public class OptionKlineModel extends OptionCommonModel {
   private Long endTime;
   @JSONField(name = "period")
   private String period;
+  private Integer limit;
 
   public OptionKlineModel() {
 
@@ -77,6 +78,14 @@ public class OptionKlineModel extends OptionCommonModel {
 
   public void setPeriod(String period) {
     this.period = period;
+  }
+
+  public Integer getLimit() {
+    return limit;
+  }
+
+  public void setLimit(Integer limit) {
+    this.limit = limit;
   }
 
   @Override

@@ -465,9 +465,11 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
   }
 
   /**
-   * set action order
+   * set action order in the Hong Kong Stock Exchange
    * @param orderType AM(Auction Market Order) or AL(Auction Limit Order)
-   * @param timeInForce DAY/OPG, OPG:Only the pre-market bidding is valid (the Hong Kong Stock Exchange will automatically submit the pre-market order to participate in the transaction if there is no transaction)
+   * @param timeInForce DAY/OPG,
+   *                   OPG:Participate in the pre-market auction;
+   *                   DAY:Participate in the after-hours auction
    * @return
    */
   public TradeOrderRequest setAuctionOrder(OrderType orderType, TimeInForce timeInForce) {
