@@ -33,6 +33,7 @@ public enum MethodName {
   ORDER_TRANSACTIONS("order_transactions", MethodType.TRADE),
   SEGMENT_FUND_HISTORY("segment_fund_history", MethodType.TRADE),
   SEGMENT_FUND_AVAILABLE("segment_fund_available", MethodType.TRADE),
+  ESTIMATE_TRADABLE_QUANTITY("estimate_tradable_quantity", MethodType.TRADE),
 
   /**
    * contract
