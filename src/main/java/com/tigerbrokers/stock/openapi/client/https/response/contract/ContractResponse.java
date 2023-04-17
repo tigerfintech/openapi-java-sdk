@@ -3,8 +3,6 @@ package com.tigerbrokers.stock.openapi.client.https.response.contract;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 用于接受账户api合约接口的返回值
@@ -22,14 +20,5 @@ public class ContractResponse extends TigerResponse {
 
   public void setItem(ContractItem item) {
     this.item = item;
-  }
-
-  @Deprecated
-  public List<ContractItem> getItems() {
-    List<ContractItem> list = new ArrayList<>();
-    if (item != null) {
-      list.add(item);
-    }
-    return list;
   }
 }

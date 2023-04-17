@@ -11,11 +11,6 @@ public class TradeOrderResponse extends TigerResponse {
   @JSONField(name = "data")
   private TradeOrderItem item;
 
-  @Deprecated
-  public String getData() {
-    return item == null ? null : JSON.toJSONString(item, SerializerFeature.WriteEnumUsingToString);
-  }
-
   public TradeOrderItem getItem() {
     return item;
   }

@@ -24,6 +24,7 @@ public class TradeOrder implements Serializable {
 
   private Long id;
   private Integer orderId;
+  private String externalId;
   private Long parentId;
   private String account;
   private String action;
@@ -158,6 +159,14 @@ public class TradeOrder implements Serializable {
 
   public void setOrderId(Integer orderId) {
     this.orderId = orderId;
+  }
+
+  public String getExternalId() {
+    return externalId;
+  }
+
+  public void setExternalId(String externalId) {
+    this.externalId = externalId;
   }
 
   public Long getParentId() {
