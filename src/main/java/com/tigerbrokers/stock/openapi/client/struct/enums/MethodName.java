@@ -67,6 +67,7 @@ public enum MethodName {
   CAPITAL_DISTRIBUTION("capital_distribution", MethodType.QUOTE),
   CAPITAL_FLOW("capital_flow", MethodType.QUOTE),
   MARKET_SCANNER("market_scanner", MethodType.QUOTE),
+  MARKET_SCANNER_TAGS("market_scanner_tags", MethodType.QUOTE),
 
   /**
    * option quote
