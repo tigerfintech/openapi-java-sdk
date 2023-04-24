@@ -72,6 +72,7 @@ public class TradeOrder implements Serializable {
 
   private Boolean canModify;
   private Boolean canCancel;
+  private Boolean isOpen;
 
   public String getSymbol() {
     return symbol;
@@ -471,5 +472,13 @@ public class TradeOrder implements Serializable {
 
   public void setCanCancel(Boolean canCancel) {
     this.canCancel = canCancel;
+  }
+
+  public Boolean getIsOpen() {
+    return isOpen;
+  }
+
+  public void setIsOpen(Boolean isOpen) {
+    this.isOpen = isOpen;
   }
 }

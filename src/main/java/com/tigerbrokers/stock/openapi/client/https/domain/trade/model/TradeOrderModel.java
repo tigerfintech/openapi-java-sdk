@@ -154,7 +154,7 @@ public class TradeOrderModel extends ApiModel {
   private String userMark;
 
   /**
-   * attached order type：PROFIT/LOSS
+   * attached order type：PROFIT/LOSS/BRACKETS
    */
   @JSONField(name = "attach_type")
   private AttachType attachType;
