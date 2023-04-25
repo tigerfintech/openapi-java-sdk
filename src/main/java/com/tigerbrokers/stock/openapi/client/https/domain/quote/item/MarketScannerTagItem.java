@@ -1,7 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.quote.item;
 
 import com.tigerbrokers.stock.openapi.client.struct.TagValue;
-import com.tigerbrokers.stock.openapi.client.struct.enums.MultiTagField;
 import java.io.Serializable;
 import java.util.List;
 
@@ -13,20 +12,29 @@ import java.util.List;
  */
 public class MarketScannerTagItem implements Serializable {
 
+  private String market;
   /**
    * multi tag field
    */
-  private MultiTagField multiTagField;
+  private String multiTagField;
   /**
    * multi tag field's tagList
    */
   private List<TagValue> tagList;
 
-  public MultiTagField getMultiTagField() {
+  public String getMarket() {
+    return market;
+  }
+
+  public void setMarket(String market) {
+    this.market = market;
+  }
+
+  public String getMultiTagField() {
     return multiTagField;
   }
 
-  public void setMultiTagField(MultiTagField multiTagField) {
+  public void setMultiTagField(String multiTagField) {
     this.multiTagField = multiTagField;
   }
 
