@@ -54,6 +54,14 @@ public class ContractItem extends ApiModel {
   private List<TickSizeItem> tickSizes;
   private Boolean isEtf;
   private Integer etfLeverage;
+  /** Intraday initial margin discount */
+  private Double discountedDayInitialMargin;
+  /** Intraday maintenance margin discount */
+  private Double discountedDayMaintenanceMargin;
+  /** Intraday margin discount period time zone  */
+  private String discountedTimeZoneCode;
+  private String discountedStartAt;
+  private String discountedEndAt;
 
   public Integer getContractId() {
     return contractId;
