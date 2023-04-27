@@ -356,6 +356,46 @@ public class ContractItem extends ApiModel {
     this.etfLeverage = etfLeverage;
   }
 
+  public Double getDiscountedDayInitialMargin() {
+    return discountedDayInitialMargin;
+  }
+
+  public void setDiscountedDayInitialMargin(Double discountedDayInitialMargin) {
+    this.discountedDayInitialMargin = discountedDayInitialMargin;
+  }
+
+  public Double getDiscountedDayMaintenanceMargin() {
+    return discountedDayMaintenanceMargin;
+  }
+
+  public void setDiscountedDayMaintenanceMargin(Double discountedDayMaintenanceMargin) {
+    this.discountedDayMaintenanceMargin = discountedDayMaintenanceMargin;
+  }
+
+  public String getDiscountedTimeZoneCode() {
+    return discountedTimeZoneCode;
+  }
+
+  public void setDiscountedTimeZoneCode(String discountedTimeZoneCode) {
+    this.discountedTimeZoneCode = discountedTimeZoneCode;
+  }
+
+  public String getDiscountedStartAt() {
+    return discountedStartAt;
+  }
+
+  public void setDiscountedStartAt(String discountedStartAt) {
+    this.discountedStartAt = discountedStartAt;
+  }
+
+  public String getDiscountedEndAt() {
+    return discountedEndAt;
+  }
+
+  public void setDiscountedEndAt(String discountedEndAt) {
+    this.discountedEndAt = discountedEndAt;
+  }
+
   @Override
   public String toString() {
     return "ContractItem{" +
