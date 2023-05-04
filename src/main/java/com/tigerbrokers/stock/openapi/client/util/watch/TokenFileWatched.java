@@ -27,7 +27,7 @@ public class TokenFileWatched implements FileWatchedListener {
       return;
     }
     boolean load = TokenManager.getInstance().loadTokenFile(clientConfig);
-    ApiLogger.info("{} is created, reload token ", fileName, load ? "success" : "fail");
+    ApiLogger.info("{} is created, reload token {}", fileName, load ? "success" : "fail");
 
   }
 
@@ -38,7 +38,7 @@ public class TokenFileWatched implements FileWatchedListener {
       return;
     }
     boolean load = TokenManager.getInstance().loadTokenFile(clientConfig);
-    ApiLogger.info("{} is modifed, reload token ", fileName, load ? "success" : "fail");
+    ApiLogger.info("{} is modifed, reload token {}", fileName, load ? "success" : "fail");
   }
 
   @Override
