@@ -54,6 +54,14 @@ public class ContractItem extends ApiModel {
   private List<TickSizeItem> tickSizes;
   private Boolean isEtf;
   private Integer etfLeverage;
+  /** Intraday initial margin discount */
+  private Double discountedDayInitialMargin;
+  /** Intraday maintenance margin discount */
+  private Double discountedDayMaintenanceMargin;
+  /** Intraday margin discount period time zone  */
+  private String discountedTimeZoneCode;
+  private String discountedStartAt;
+  private String discountedEndAt;
 
   public Integer getContractId() {
     return contractId;
@@ -346,6 +354,46 @@ public class ContractItem extends ApiModel {
 
   public void setEtfLeverage(Integer etfLeverage) {
     this.etfLeverage = etfLeverage;
+  }
+
+  public Double getDiscountedDayInitialMargin() {
+    return discountedDayInitialMargin;
+  }
+
+  public void setDiscountedDayInitialMargin(Double discountedDayInitialMargin) {
+    this.discountedDayInitialMargin = discountedDayInitialMargin;
+  }
+
+  public Double getDiscountedDayMaintenanceMargin() {
+    return discountedDayMaintenanceMargin;
+  }
+
+  public void setDiscountedDayMaintenanceMargin(Double discountedDayMaintenanceMargin) {
+    this.discountedDayMaintenanceMargin = discountedDayMaintenanceMargin;
+  }
+
+  public String getDiscountedTimeZoneCode() {
+    return discountedTimeZoneCode;
+  }
+
+  public void setDiscountedTimeZoneCode(String discountedTimeZoneCode) {
+    this.discountedTimeZoneCode = discountedTimeZoneCode;
+  }
+
+  public String getDiscountedStartAt() {
+    return discountedStartAt;
+  }
+
+  public void setDiscountedStartAt(String discountedStartAt) {
+    this.discountedStartAt = discountedStartAt;
+  }
+
+  public String getDiscountedEndAt() {
+    return discountedEndAt;
+  }
+
+  public void setDiscountedEndAt(String discountedEndAt) {
+    this.discountedEndAt = discountedEndAt;
   }
 
   @Override
