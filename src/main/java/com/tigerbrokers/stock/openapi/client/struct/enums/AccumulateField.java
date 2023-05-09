@@ -48,7 +48,7 @@ public enum AccumulateField {
     AccumulateField_CurrentRatio(20, "currentRatio"),
     /** 速动比率 */
     AccumulateField_QuickRatio(21, "quickRatio"),
-    /** 经营现金流 */
+    /** 经营现金流同比率 */
     AccumulateField_CashFromOpsRatio(22, "cash4OpsRatio"),
     /** 投资现金流 */
     AccumulateField_CashFromInvesting(23, "cash4Invest"),
