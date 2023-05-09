@@ -13,7 +13,7 @@ public enum AccumulateField {
     /** 涨跌幅*（精确到小数点后 3 位，超出部分会被舍弃）例如填写 [0.005,0.01] 值区间  */
     AccumulateField_ChangeRate(1, "changeRate"),
     /** 涨跌额*（精确到小数点后 3 位，超出部分会被舍弃）例如填写 [0.005,0.01] 值区间 */
-    AccumulateField_ChangeValue(2, "change"),
+    AccumulateField_ChangeValue(2, "changeVal"),
     /** 总负债增长率 */
     AccumulateField_TotalLiabilities_Ratio_Annual(3, "totalLiabilitiesRatio"),
     /** 净资产增长率 */
@@ -38,10 +38,6 @@ public enum AccumulateField {
     AccumulateField_ROE(13, "ROE"),
     /** ROA =净资产收益率 */
     AccumulateField_ROA(14, "ROA"),
-    /** 股息   hermes $ */
-    AccumulateField_DividePrice(15, "dividePrice"),
-    /** 股息收益率 选股服务自身计算 */
-    AccumulateField_DivideRate(16, "divideRate"),
     /** 毛利率 */
     AccumulateField_GrossProfitRate(17, "grossMargin"),
     /** 净利率* */
@@ -53,17 +49,19 @@ public enum AccumulateField {
     /** 速动比率 */
     AccumulateField_QuickRatio(21, "quickRatio"),
     /** 经营现金流 */
-    AccumulateField_CashFromOps(22, "cash4Ops"),
+    AccumulateField_CashFromOpsRatio(22, "cash4OpsRatio"),
     /** 投资现金流 */
     AccumulateField_CashFromInvesting(23, "cash4Invest"),
     /** 筹资现金流 */
     AccumulateField_CashFromFinancing(24, "cash4Finance"),
     /** 资产负债率 */
     AccumulateField_TotalLiabilitiesToTotalAssets(25, "allLiabAndAssets"),
-    /** 经营现金流同比增长率; （T期CFO-T-1期CFO）/T-1期CFO *100%  */
-    AccumulateField_CashFromOps_yearOnYear_Ratio(26, "cash4OpsYearOnYearRatio"),
     /** 净资产收益率ROE同比增长率  （T期ROE-T-1期ROE）/T-1期ROE *100%*/
     AccumulateField_ROE_yearOnYear_Ratio(27, "netIncomeYearOnYearRatio"),
+    /** 营业利润占比 */
+    AccumulateField_Operating_Profits_Ratio(28, "OperatingProfitsRatio"),
+    /** 经营现金流  */
+    AccumulateField_CashFromOpsVal(29, "cash4OpsVal"),
     ;
 
     private String value;
