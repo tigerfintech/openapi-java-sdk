@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.util;
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
+import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
@@ -65,14 +66,17 @@ public class AccountUtil {
     if (null == request) {
       return null;
     }
-    String account;
+    String account = null;
     if (request instanceof TigerHttpRequest) {
       String bizContent = ((TigerHttpRequest) request).getBizContent();
       account = (String)JSONObject.parseObject(bizContent).get(ACCOUNT);
-    } else {
+    } else if (request.getApiModel() == null && request instanceof TigerCommonRequest) {
+      String bizContent = ((TigerCommonRequest) request).getBizContent();
+      account = (String)JSONObject.parseObject(bizContent).get(ACCOUNT);
+    } else if (request.getApiModel() != null) {
       ApiModel apiModel = request.getApiModel();
       if (apiModel instanceof BatchApiModel) {
-        apiModel = (ApiModel)((BatchApiModel) apiModel).getItems().get(0);
+        apiModel = (ApiModel) ((BatchApiModel) apiModel).getItems().get(0);
       }
       account = apiModel.getAccount();
     }

@@ -9,6 +9,7 @@ import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
+import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.user.UserLicenseRequest;
@@ -305,6 +306,8 @@ public class TigerHttpClient implements TigerClient {
     params.put(SDK_VERSION, SdkVersionUtils.getSdkVersion());
     if (request instanceof TigerHttpRequest) {
       params.put(BIZ_CONTENT, ((TigerHttpRequest) request).getBizContent());
+    } else if (request.getApiModel() == null && request instanceof TigerCommonRequest) {
+      params.put(BIZ_CONTENT, ((TigerCommonRequest) request).getBizContent());
     } else {
       ApiModel apiModel = request.getApiModel();
       if (apiModel instanceof BatchApiModel) {
