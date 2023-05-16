@@ -59,38 +59,32 @@ public enum StockField {
     StockField_EarningDate(23, "earningDate"),
     /** 市盈率* TTM（精确到小数点后 3 位，超出部分会被舍弃）例如填写 [0.005,0.01] 值区间 */
     StockField_PeTTM(24, "peRate"),
-    /** 市净率*（精确到小数点后 3 位，超出部分会被舍弃）例如填写 [0.005,0.01] 值区间 */
-    StockField_PbRate(25, "pbRate"),
     /** 股息   hermes $ */
-    StockField_DividePrice(26, "dividePrice"),
+    StockField_DividePrice(26, "dividePriceVal"),
     /** 股息收益率 选股服务自身计算 */
-    StockField_DivideRate(27, "divideRate"),
+    StockField_DivideRate(27, "divideRateVal"),
     /** 股票交易市场 */
     StockField_Exchange(29, "exchange"),
     /** 换手率*（精确到小数点后 3 位，超出部分会被舍弃）例如填写 [0.005,0.01] 值区间 */
     StockField_TurnoverRate(30, "turnoverRate"),
     /** 上市时间 */
     StockField_ListingDate(31, "listingDate"),
-    /** 市盈率LYR* TTM（精确到小数点后 3 位，超出部分会被舍弃）例如填写 [0.005,0.01] 值区间 */
-    StockField_LyrPeRate(32, "LyrPeRate"),
     /** 总股本* */
     StockField_Share(33, "shares"),
     /** 上市价格* */
     StockField_ListingPrice(34, "listingPrice"),
-    /** 交易币种* */
-    StockField_TradeCurrency(35, "tradeCurrency"),
     /** 最新价-发行价* */
     StockField_DiffBetweenLastPriceAndListPrice(36, "DiffBetweenLastPriceAndListPrice"),
     /** 每股收益 lyr=Last Year Ratio 静态市盈率 */
     StockField_lyr_Eps(37, "lyrEps"),
     /** 未平仓做空量 */
-    StockField_Open_Short_Interest(38, "OpenShortInterest"),
+    StockField_Open_Short_Interest(38, "OpenShortInterestVal"),
     /** 未平仓做空比例 = 未平仓做空量/总股本 */
     StockField_Open_Short_Interest_Ratio(39, "OpenShortInterestRatio"),
     /** 产权比率 = Liability/Equity 总负债/股东 */
-    StockField_Equity_Ratio(40, "EquityRatio"),
+    StockField_Equity_Ratio(40, "totalDebtToEquity"),
     /** 权益乘数 = Asset/Equity */
-    StockField_Equity_Multiplier(41, "EquityMultiplier"),
+    StockField_Equity_Multiplier(41, "totalLiabilitiesToTotalAssets"),
     /** 最新股东数 */
     StockField_Holder_Nums(42, "holderNums"),
     /** 最新股东户数增长率 */
@@ -115,14 +109,24 @@ public enum StockField {
     StockField_Top20_Composition_Rate(52, "Top20CompoRate"),
     /** 溢价率(折扣率) - ETF */
     StockField_DiscountPremium(53, "discountPremium"),
-    /** 股息率 - ETF */
-    StockField_dividend_Rate(54, "dividendRate"),
     /** 资产规模-净值 - ETF */
     StockField_Net_Worth_Aum(55, "aum"),
     /** 资产规模-现价 - ETF */
     StockField_assetSize(56, "assetSize"),
     /** 振幅 */
     StockField_Amplitude(57, "Amplitude"),
+    /** 盘前涨跌幅 */
+    StockField_Pre_ChangeRate(58, "preChangeRate"),
+    /** 盘中涨跌幅 */
+    StockField_current_ChangeRate(59, "curChangeRate"),
+    /** 盘后涨跌幅 */
+    StockField_Post_ChangeRate(60, "postChangeRate"),
+    /** 成分变动 - etf */
+    StockField_ETF_LastHoldingChangeDay(61, "LastHoldingChangeDay"),
+    /** 持仓数量 - etf */
+    StockField_ETF_HoldingCount(62, "etfHoldingCount"),
+    /** 净利润 不带周期 */
+    StockField_Net_Income(63, "netIncomeVal"),
     ;
 
     @Getter

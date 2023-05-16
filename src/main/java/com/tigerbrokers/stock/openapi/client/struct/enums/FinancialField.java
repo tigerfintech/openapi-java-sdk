@@ -13,19 +13,15 @@ import java.util.Set;
  */
 public enum FinancialField {
     /** 毛利率*（精确到小数点后 3 位，超出部分会被舍弃）例如填写 [0.005,0.01] 值区间 */
-    FinancialField_GrossProfitRate(1, "grossMargin"),
+    FinancialField_GrossProfitRate(1, "grossMarginVal"),
     /** 净利率*（精确到小数点后 3 位，超出部分会被舍弃）例如填写 [0.005,0.01] 值区间 */
-    FinancialField_NetProfitRate(2, "netIncomeMargin"),
+    FinancialField_NetProfitRate(2, "netIncomeMarginVal"),
     /** 扣非净利润率  *（精确到小数点后 3 位，超出部分会被舍弃）例如填写 [0.005,0.01] 值区间 */
     FinancialField_EarningsFromContOpsMargin(3, "earningsFromContOpsMargin"),
-    /** 总负债/股东权益* (单位：元) */
-    FinancialField_TotalDebtToEquity(4, "totalDebtToEquity"),
     /** 长期负债/股东权益 **/
     FinancialField_LongTermDebtToEquity(5, "ltDebtToEquity"),
     /** EBIT/利息支出 **/
     FinancialField_EbitToInterestExp(6, "ebitToInterestExp"),
-    /** 总负债/总资产 **/
-    FinancialField_TotalLiabilitiesToTotalAssets(7, "totalLiabilitiesToTotalAssets"),
     /** 总资产周转率（精确到小数点后 3 位，超出部分会被舍弃）例如填写 [0.005,0.01] 值区间 */
     FinancialField_TotalAssetTurnover(8, "totalAssetTurnover"),
     /** 应收帐款周转率 */
@@ -33,9 +29,9 @@ public enum FinancialField {
     /** 存货周转率（精确到小数点后 3 位，超出部分会被舍弃）例如填写 [0.005,0.01] 值区间 */
     FinancialField_InventoryTurnover(10, "inventoryTurnover"),
     /** 流动比率（精确到小数点后 3 位，超出部分会被舍弃）例如填写 [0.005,0.01] 值区间 */
-    FinancialField_CurrentRatio(11, "currentRatio"),
+    FinancialField_CurrentRatio(11, "currentRatioVal"),
     /** 速动比率（精确到小数点后 3 位，超出部分会被舍弃）例如填写 [0.005,0.01] 值区间 */
-    FinancialField_QuickRatio(12, "quickRatio"),
+    FinancialField_QuickRatio(12, "quickRatioVal"),
     /** 资产回报率 总资产收益率 *$ TTM（精确到小数点后 3 位，超出部分会被舍弃）例如填写 [0.005,0.01] 值区间 */
     FinancialField_ROATTM(13, "roa"),
     /** 净资产收益率 $（精确到小数点后 3 位，超出部分会被舍弃）例如填写 [0.005,0.01] 值区间 */
@@ -54,7 +50,7 @@ public enum FinancialField {
     FinancialField_TotalAssets1YrGrowth(20, "totalAssets1YrGrowth"),
     /** 有形资产一年增长率 */
     FinancialField_TangibleBookValue1YrGrowth(21, "tangibleBookValue1YrGrowth"),
-    /** 经营现金流一年增长率 */
+    /** 经营现金流一年增长率 = 经营现金流同比增长率 */
     FinancialField_CashFromOperations1YrGrowth(22, "cashFromOperations1YrGrowth"),
     /** 资本开支一年增长率 */
     FinancialField_CapitalExpenditures1YrGrowth(23, "capitalExpenditures1YrGrowth"),
@@ -85,7 +81,7 @@ public enum FinancialField {
     /** 筹资现金流 */
     FinancialField_CashFromFinancing(36, "cashFromFinancing"),
     /** 净利润2年复合增长率 */
-    FinancialField_NormalizedNetIncome2YrCagr(37, "normalizedNetIncome2YrCagr"),
+    FinancialField_NormalizedNetIncome2YrCagr(37, "netIncome2YrCagr"),
     /** 营收2年复合增长率 */
     FinancialField_TotalRevenues2YrCagr(38, "totalRevenues2YrCagr"),
     /** 净利润5年复合增长率 */
@@ -93,11 +89,11 @@ public enum FinancialField {
     /** 营收5年复合增长率 */
     FinancialField_TotalRevenues5YrCagr(40, "totalRevenues5YrCagr"),
     /** 总资产 */
-    FinancialField_TotalAssets(41, "totalAssets"),
+    FinancialField_TotalAssets(41, "totalAssetsVal"),
     /** 固定资产周转率（精确到小数点后 3 位，超出部分会被舍弃）例如填写 [0.005,0.01] 值区间 */
     FinancialField_FixedAssetTurnover(42, "fixedAssetTurnover"),
     /** 营业利润 */
-    FinancialField_OperatingIncome(43, "operatingIncome"),
+    FinancialField_OperatingIncome(43, "operatingIncomeVal"),
     /** 营业总收入 */
     FinancialField_TotalRevenue(44, "totalRevenue"),
     /** 市盈率LYR PE =price-to-earnings ratio */
@@ -108,10 +104,6 @@ public enum FinancialField {
     FinancialField_LYR_PS(47, "LyrPS"),
     /** 市销率TTM PS =Price-to-sales Ratio */
     FinancialField_TTM_PS(48, "ttmPS"),
-    /** 市净率LYR PB =price/book value ratio */
-    FinancialField_LYR_PB(47, "LyrPB"),
-    /** 市净率TTM PB =price/book value ratio */
-    FinancialField_TTM_PB(48, "ttmPB"),
     /** 当日主力净流入额 */
     FinancialField_LargeInflowAmountToday(49, "largeInflowAmountToday"),
     /** 当日主力增仓占比 */
@@ -152,7 +144,10 @@ public enum FinancialField {
     FinancialField_Lst2YearAnnualVolatility(67, "lst2YearAnnualVolatility"),
     /** 近5年年化波动率  ETF */
     FinancialField_Lst5YearAnnualVolatility(68, "lst5YearAnnualVolatility"),
-
+    /** 市净率LYR PB =price/book value ratio */
+    FinancialField_LYR_PB(69, "LyrPB"),
+    /** 市净率TTM PB =price/book value ratio */
+    FinancialField_TTM_PB(70, "ttmPB"),
     ;
 
     @Getter

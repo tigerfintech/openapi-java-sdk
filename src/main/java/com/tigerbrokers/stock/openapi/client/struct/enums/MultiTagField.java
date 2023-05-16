@@ -47,7 +47,14 @@ public enum MultiTagField {
     MultiTagField_Week52HighFlag(17, "week52HighFlag"),
     /** 52周最低 0 否 1是 */
     MultiTagField_Week52LowFlag(18, "week52LowFlag"),
-
+    /** 交易币种 ,需要具体币种 */
+    MultiTagField_TradeCurrency(19, "tradeCurrency"),
+    /** ETF类型 ，需要具体类型 */
+    MultiTagField_ETF_TYPE(20, "etfType"),
+    /** 股票市场，这里支持多个市场 ，需要具体类型 QotMarket股票市场,传递里面的value值 */
+    MultiTagField_Market_Name(21, "marketName"),
+    /** 一级行业级别  需要传递具体sectorId */
+    MultiTagField_One_Sectors_Level(22, "oneSectorsLevel"),
     ;
 
     @Getter
