@@ -74,6 +74,11 @@ public class TradeOrder implements Serializable {
   private Boolean canCancel;
   private Boolean isOpen;
 
+  private String comboType;
+  private String comboTypeDesc;
+  /** order's multi leg info */
+  private List<OrderLeg> legs;
+
   public String getSymbol() {
     return symbol;
   }
@@ -480,5 +485,29 @@ public class TradeOrder implements Serializable {
 
   public void setIsOpen(Boolean isOpen) {
     this.isOpen = isOpen;
+  }
+
+  public String getComboType() {
+    return comboType;
+  }
+
+  public void setComboType(String comboType) {
+    this.comboType = comboType;
+  }
+
+  public String getComboTypeDesc() {
+    return comboTypeDesc;
+  }
+
+  public void setComboTypeDesc(String comboTypeDesc) {
+    this.comboTypeDesc = comboTypeDesc;
+  }
+
+  public List<OrderLeg> getLegs() {
+    return legs;
+  }
+
+  public void setLegs(List<OrderLeg> legs) {
+    this.legs = legs;
   }
 }

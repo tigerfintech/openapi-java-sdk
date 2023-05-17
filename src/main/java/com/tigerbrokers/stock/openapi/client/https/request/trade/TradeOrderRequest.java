@@ -4,6 +4,7 @@ import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
+import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.ContractLeg;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
@@ -11,6 +12,7 @@ import com.tigerbrokers.stock.openapi.client.https.response.trade.TradeOrderResp
 import com.tigerbrokers.stock.openapi.client.struct.TagValue;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AttachType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.ComboType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
@@ -149,6 +151,30 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
       }
     }
     return model;
+  }
+
+  public static TradeOrderRequest buildMultiLegOrder(String account,
+      List<ContractLeg> contractLegs, ComboType comboType, ActionType action, Integer quantity,
+      OrderType orderType, Double limitPrice, Double auxPrice, Double trailingPercent) {
+    if (contractLegs == null) {
+      throw new IllegalArgumentException("parameter 'contractLegs' is null");
+    }
+    if (orderType == null) {
+      throw new IllegalArgumentException("parameter 'orderType' is null");
+    }
+    TradeOrderModel model = new TradeOrderModel();
+    model.setSecType(SecType.MLEG);
+    model.setAccount(StringUtils.isEmpty(account) ? ClientConfig.DEFAULT_CONFIG.defaultAccount : account);
+    model.setAction(action);
+    model.setTotalQuantity(quantity);
+    model.setContractLegs(contractLegs);
+
+    model.setOrderType(orderType);
+    model.setLimitPrice(limitPrice);
+    model.setAuxPrice(auxPrice);
+    model.setTrailingPercent(trailingPercent);
+    model.setTimeInForce(TimeInForce.DAY);
+    return newRequest(model);
   }
 
   public static TradeOrderRequest newRequest(TradeOrderModel model) {
