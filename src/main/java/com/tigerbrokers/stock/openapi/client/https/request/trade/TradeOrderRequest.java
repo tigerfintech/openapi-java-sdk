@@ -164,6 +164,7 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     }
     TradeOrderModel model = new TradeOrderModel();
     model.setSecType(SecType.MLEG);
+    model.setComboType(comboType.name());
     model.setAccount(StringUtils.isEmpty(account) ? ClientConfig.DEFAULT_CONFIG.defaultAccount : account);
     model.setAction(action);
     model.setTotalQuantity(quantity);
