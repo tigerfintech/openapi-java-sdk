@@ -39,7 +39,6 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import io.netty.util.internal.ConcurrentSet;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -73,7 +72,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private ApiAuthentication authentication;
   private ApiComposeCallback apiComposeCallback;
   private final Set<Subject> subscribeList = new CopyOnWriteArraySet<>();
-  private final Set<String> subscribeSymbols = new ConcurrentSet<>();
   private volatile CountDownLatch connectCountDown = new CountDownLatch(1);
 
   private EventLoopGroup group = null;
@@ -595,7 +593,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
       returnStr = ((StompFrame)subscribeData).headers().getAsString(StompHeaders.ID);
     }
     channel.writeAndFlush(subscribeData);
-    subscribeSymbols.addAll(symbols);
     ApiLogger.info("send subscribe [{}] message, symbols:{}", subject, symbols);
 
     return returnStr;
@@ -616,7 +613,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
       returnStr = ((StompFrame)unsubscribeData).headers().getAsString(StompHeaders.ID);
     }
     channel.writeAndFlush(unsubscribeData);
-    subscribeSymbols.removeAll(symbols);
     ApiLogger.info("send cancel subscribe [{}] message, symbols:{}.", subject, symbols);
 
     return returnStr;
