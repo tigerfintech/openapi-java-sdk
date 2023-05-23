@@ -147,7 +147,9 @@ public class ProtoMessageUtil {
 
     Request.Subscribe.Builder subBuild = Request.Subscribe.newBuilder();
     subBuild.setDataType(SocketCommon.DataType.valueOf(subject.name()));
-    subBuild.setSymbols(HeaderBuilder.join(symbols));
+    if (symbols != null) {
+      subBuild.setSymbols(HeaderBuilder.join(symbols));
+    }
 
     builder.setSubscribe(subBuild.build());
     return builder.build();
