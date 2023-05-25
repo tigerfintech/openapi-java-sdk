@@ -17,7 +17,7 @@ public class SortFieldData implements Serializable {
   /** 排序属性 */
   @JSONField(name = "field_name")
   private Integer fieldName;
-  /** 时间周期 AccumulatePeriod 非必传项-只有排序为Acc相关字段，需要此字段 */
+  /** 时间周期 AccumulatePeriod, 非必传项-只有排序为Accumulate相关字段，需要此字段 */
   private Integer period;
   /** 排序属性所属类别 参考 FieldBelongType */
   @JSONField(name = "field_type")
