@@ -17,6 +17,8 @@ public class SortFieldData implements Serializable {
   /** 排序属性 */
   @JSONField(name = "field_name")
   private Integer fieldName;
+  /** 时间周期 AccumulatePeriod 非必传项-只有排序为Acc相关字段，需要此字段 */
+  private Integer period;
   /** 排序属性所属类别 参考 FieldBelongType */
   @JSONField(name = "field_type")
   private FieldBelongType fieldType;
@@ -32,6 +34,10 @@ public class SortFieldData implements Serializable {
     return this.fieldName;
   }
 
+  public Integer getPeriod() {
+    return period;
+  }
+
   public FieldBelongType getFieldType() {
     return this.fieldType;
   }
@@ -44,6 +50,10 @@ public class SortFieldData implements Serializable {
     this.fieldName = fieldName;
   }
 
+  public void setPeriod(Integer period) {
+    this.period = period;
+  }
+
   public void setFieldType(FieldBelongType fieldType) {
     this.fieldType = fieldType;
   }
@@ -52,8 +62,9 @@ public class SortFieldData implements Serializable {
     this.sortDir = sortDir;
   }
 
-  public SortFieldData(Integer fieldName, FieldBelongType fieldType, SortDir sortDir) {
+  public SortFieldData(Integer fieldName, Integer period, FieldBelongType fieldType, SortDir sortDir) {
     this.fieldName = fieldName;
+    this.period = period;
     this.fieldType = fieldType;
     this.sortDir = sortDir;
   }
@@ -63,6 +74,7 @@ public class SortFieldData implements Serializable {
 
   public static class SortFieldDataBuilder {
     private Integer fieldName;
+    private Integer period;
     private FieldBelongType fieldType;
     private SortDir sortDir;
 
@@ -71,6 +83,11 @@ public class SortFieldData implements Serializable {
 
     public SortFieldData.SortFieldDataBuilder fieldName(Integer fieldName) {
       this.fieldName = fieldName;
+      return this;
+    }
+
+    public SortFieldData.SortFieldDataBuilder period(Integer period) {
+      this.period = period;
       return this;
     }
 
@@ -85,12 +102,17 @@ public class SortFieldData implements Serializable {
     }
 
     public SortFieldData build() {
-      return new SortFieldData(this.fieldName, this.fieldType, this.sortDir);
+      return new SortFieldData(this.fieldName, this.period, this.fieldType, this.sortDir);
     }
 
     @Override
     public String toString() {
-      return "SortFieldData.SortFieldDataBuilder(fieldName=" + this.fieldName + ", fieldType=" + this.fieldType + ", sortDir=" + this.sortDir + ")";
+      return "SortFieldDataBuilder{" +
+              "fieldName=" + fieldName +
+              ", period=" + period +
+              ", fieldType=" + fieldType +
+              ", sortDir=" + sortDir +
+              '}';
     }
   }
 }
