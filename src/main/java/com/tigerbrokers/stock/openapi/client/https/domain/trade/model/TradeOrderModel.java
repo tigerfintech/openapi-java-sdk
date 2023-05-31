@@ -10,6 +10,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TradeOrderModel extends ApiModel {
@@ -430,6 +431,16 @@ public class TradeOrderModel extends ApiModel {
 
   public void setAlgoParams(List<TagValue> algoParams) {
     this.algoParams = algoParams;
+  }
+
+  public void addAlgoParam(TagValue algoParam) {
+    if (algoParam == null) {
+      return;
+    }
+    if (this.algoParams == null) {
+      this.algoParams = new ArrayList<>();
+    }
+    this.algoParams.add(algoParam);
   }
 
   public String getSource() {
