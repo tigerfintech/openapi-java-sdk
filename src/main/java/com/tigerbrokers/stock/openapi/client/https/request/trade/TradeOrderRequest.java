@@ -219,7 +219,7 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     model.addAlgoParam(TagValue.buildTagValue(VAPOrderConstants.START_TIME, startTime));
     model.addAlgoParam(TagValue.buildTagValue(VAPOrderConstants.END_TIME, endTime));
     model.addAlgoParam(TagValue.buildTagValue(VAPOrderConstants.ALLOW_PAST_END_TIME, allowPastEndTime));
-    if (OrderType.VWAP.name().equals(orderType)) {
+    if (OrderType.VWAP == orderType) {
       model.addAlgoParam(TagValue.buildTagValue(VAPOrderConstants.NO_TAKE_LIQ, noTakeLiq));
       model.addAlgoParam(TagValue.buildTagValue(VAPOrderConstants.PARTICIPATION_RATE, participationRate));
     }
