@@ -201,7 +201,7 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
       Boolean allowPastEndTime, Boolean noTakeLiq,
       Double participationRate,
       Double limitPrice) {
-    if (!OrderType.TWAP.name().equals(orderType) && !OrderType.VWAP.name().equals(orderType)) {
+    if (OrderType.TWAP != orderType && OrderType.VWAP != orderType) {
       throw new IllegalArgumentException("parameter 'orderType' must be ['TWAP', 'VWAP']");
     }
 
