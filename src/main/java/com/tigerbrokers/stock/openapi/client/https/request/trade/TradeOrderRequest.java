@@ -181,24 +181,23 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
 
   public static TradeOrderRequest buildTWAPOrder(String account,
       String symbol, ActionType action, Integer quantity,
-      Long startTime, Long endTime, Boolean allowPastEndTime, Double limitPrice) {
+      Long startTime, Long endTime, Double limitPrice) {
     return buildWAPOrder(account, symbol, action, quantity, OrderType.TWAP,
-        startTime, endTime, allowPastEndTime, null, null, limitPrice);
+        startTime, endTime, null, limitPrice);
   }
 
   public static TradeOrderRequest buildVWAPOrder(String account,
       String symbol, ActionType action, Integer quantity,
       Long startTime, Long endTime,
-      Boolean allowPastEndTime, Boolean noTakeLiq,
       Double participationRate, Double limitPrice) {
     return buildWAPOrder(account, symbol, action, quantity, OrderType.VWAP,
-        startTime, endTime, allowPastEndTime, noTakeLiq, participationRate, limitPrice);
+        startTime, endTime, participationRate, limitPrice);
   }
 
   public static TradeOrderRequest buildWAPOrder(String account,
       String symbol, ActionType action, Integer quantity,
       OrderType orderType, Long startTime, Long endTime,
-      Boolean allowPastEndTime, Boolean noTakeLiq,
+      //Boolean allowPastEndTime, Boolean noTakeLiq,
       Double participationRate,
       Double limitPrice) {
     if (OrderType.TWAP != orderType && OrderType.VWAP != orderType) {
@@ -206,6 +205,7 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     }
 
     TradeOrderModel model = new TradeOrderModel();
+    model.setOutsideRth(Boolean.FALSE);
     model.setSecType(SecType.STK);
     model.setAccount(StringUtils.isEmpty(account) ? ClientConfig.DEFAULT_CONFIG.defaultAccount : account);
     model.setAction(action);
@@ -218,9 +218,9 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     model.setAlgoStrategy(orderType.name());
     model.addAlgoParam(TagValue.buildTagValue(VAPOrderConstants.START_TIME, startTime));
     model.addAlgoParam(TagValue.buildTagValue(VAPOrderConstants.END_TIME, endTime));
-    model.addAlgoParam(TagValue.buildTagValue(VAPOrderConstants.ALLOW_PAST_END_TIME, allowPastEndTime));
+    //model.addAlgoParam(TagValue.buildTagValue(VAPOrderConstants.ALLOW_PAST_END_TIME, allowPastEndTime));
     if (OrderType.VWAP == orderType) {
-      model.addAlgoParam(TagValue.buildTagValue(VAPOrderConstants.NO_TAKE_LIQ, noTakeLiq));
+      //model.addAlgoParam(TagValue.buildTagValue(VAPOrderConstants.NO_TAKE_LIQ, noTakeLiq));
       model.addAlgoParam(TagValue.buildTagValue(VAPOrderConstants.PARTICIPATION_RATE, participationRate));
     }
     return newRequest(model);
