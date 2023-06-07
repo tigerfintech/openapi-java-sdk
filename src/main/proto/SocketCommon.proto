@@ -32,6 +32,7 @@ message SocketCommon {
     Position = 7;
     OrderStatus = 8;
     OrderTransaction = 9;
+    QuoteTop = 10;
   }
 
   enum QuoteType {
