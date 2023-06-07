@@ -11,7 +11,7 @@ message StockTopData {
   repeated TopData topDatas = 3;
 
   message TopData {
-    string fieldName = 1; // changeRate, turnoverRate, tradeAmount, tradeVolume, amplitude, changeRate5Min, preChangeRate, postChangeRate
+    string targetName = 1; // changeRate, changeRate5Min, turnoverRate, amount, volume, amplitude
     repeated StockItem items = 2;
   }
 
