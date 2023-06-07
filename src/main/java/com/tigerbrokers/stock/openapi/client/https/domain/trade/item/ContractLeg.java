@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.trade.item;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Right;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
@@ -9,6 +10,7 @@ public class ContractLeg implements Serializable {
   private static final long serialVersionUID = 1L;
 
   private String symbol;
+  @JSONField(name = "sec_type")
   private String secType;
   private String expiry;
   private String strike;
