@@ -9,6 +9,7 @@ import com.tigerbrokers.stock.openapi.client.socket.data.pb.PositionData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteBBOData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteBasicData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteDepthData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.StockTopData;
 
 /**
  * Description:
@@ -88,6 +89,11 @@ public abstract class ApiComposeCallback4Stomp implements ApiComposeCallback {
 
   @Override
   public void depthQuoteChange(QuoteDepthData data) {
+    // do nothing for protobuf data
+  }
+
+  @Override
+  public void stockTopPush(StockTopData data) {
     // do nothing for protobuf data
   }
 }
