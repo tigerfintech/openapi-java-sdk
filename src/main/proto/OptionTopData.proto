@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package com.tigerbrokers.stock.openapi.client.socket.data.pb;
+
+option java_package = "com.tigerbrokers.stock.openapi.client.socket.data.pb";
+option java_multiple_files = true;
+
+message OptionTopData {
+  string market = 1;
+  int64 timestamp = 2;
+  repeated TopData topData = 3;
+
+  message TopData {
+    string targetName = 1; // tick, volume, amount, openInt
+    repeated Tick tick = 2; // large order(tick)
+    repeated OptionItem item = 3; // target value top list(volume, amount, openInt)
+  }
+
+  message Tick {
+    string symbol = 1;
+    string expiry = 2; // formate:yyyyMMdd
+    string strike = 3; // strike price
+    string right = 4; // CALL/PUT
+    string dir = 5;     // BUY/SELL
+    double volumn = 6;  // target value: volumn > 1000
+    double price = 7;   // trade price
+    double amount = 8;  // trade amount
+    int64 tradeTime = 9;// trade timestamp
+  }
+
+  message OptionItem {
+    string symbol = 1;
+    string expiry = 2; // formate:yyyyMMdd
+    string strike = 3; // strike price
+    string right = 4; // CALL/PUT
+    double totalAmount = 5;  // total trade amount
+    double totalVolumn = 6;  // total trade volumn
+    double totalOpenInt = 7; // open interest
+    double volumnToOI = 8; // Volume to Open Interest
+    double latestPrice = 9;  // option latest price
+    int64 updateTime = 10;    // uptate timestamp
+  }
+}

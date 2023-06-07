@@ -8,6 +8,7 @@ import public "QuoteDepthData.proto";
 import public "TradeTickData.proto";
 import public "OrderTransactionData.proto";
 import public "StockTopData.proto";
+import public "OptionTopData.proto";
 
 package com.tigerbrokers.stock.openapi.client.socket.data.pb;
 
@@ -25,5 +26,6 @@ message PushData {
       OrderStatusData orderStatusData = 7;
       OrderTransactionData orderTransactionData = 8;
       StockTopData stockTopData = 9;
+      OptionTopData optionTopData = 10;
   }
 }
