@@ -22,7 +22,7 @@ message OptionTopData {
     string strike = 3; // strike price
     string right = 4; // CALL/PUT
     string dir = 5;     // BUY/SELL
-    double volumn = 6;  // target value: volumn > 1000
+    double volume = 6;  // target value: volume > 1000
     double price = 7;   // trade price
     double amount = 8;  // trade amount
     int64 tradeTime = 9;// trade timestamp
@@ -34,9 +34,9 @@ message OptionTopData {
     string strike = 3; // strike price
     string right = 4; // CALL/PUT
     double totalAmount = 5;  // total trade amount
-    double totalVolumn = 6;  // total trade volumn
+    double totalVolume = 6;  // total trade volume
     double totalOpenInt = 7; // open interest
-    double volumnToOI = 8; // Volume to Open Interest
+    double volumeToOI = 8; // Volume to Open Interest
     double latestPrice = 9;  // option latest price
     int64 updateTime = 10;    // uptate timestamp
   }

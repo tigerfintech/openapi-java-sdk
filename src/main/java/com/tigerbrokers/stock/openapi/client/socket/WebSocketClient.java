@@ -7,7 +7,9 @@ import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
+import com.tigerbrokers.stock.openapi.client.struct.enums.OptionTopTarget;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
+import com.tigerbrokers.stock.openapi.client.struct.enums.StockTopTarget;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
@@ -43,6 +45,7 @@ import io.netty.util.internal.ConcurrentSet;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
@@ -650,6 +653,72 @@ public class WebSocketClient implements SubscribeAsyncApi {
       return String.valueOf(subscribeData.getId());
     }
     return null;
+  }
+
+  @Override
+  public String subscribeQuoteTop(Market market, Set<StockTopTarget> targetNames) {
+    Set<String> names = new HashSet<>();
+    if (targetNames != null) {
+      for (StockTopTarget target : targetNames) {
+        names.add(target.getValue());
+      }
+    }
+    return subscribeTopData(QuoteSubject.StockTop, market, names);
+  }
+
+  @Override
+  public String cancelSubscribeQuoteTop(Market market, Set<StockTopTarget> targetNames) {
+    Set<String> names = new HashSet<>();
+    if (targetNames != null) {
+      for (StockTopTarget target : targetNames) {
+        names.add(target.getValue());
+      }
+    }
+    return cancelSubscribeTopData(QuoteSubject.StockTop, market, names);
+  }
+
+  @Override
+  public String subscribeOptionTop(Market market, Set<OptionTopTarget> targetNames) {
+    Set<String> names = new HashSet<>();
+    if (targetNames != null) {
+      for (OptionTopTarget target : targetNames) {
+        names.add(target.getValue());
+      }
+    }
+    return subscribeTopData(QuoteSubject.OptionTop, market, names);
+  }
+
+  @Override
+  public String cancelSubscribeOptionTop(Market market, Set<OptionTopTarget> targetNames) {
+    Set<String> names = new HashSet<>();
+    if (targetNames != null) {
+      for (OptionTopTarget target : targetNames) {
+        names.add(target.getValue());
+      }
+    }
+    return cancelSubscribeTopData(QuoteSubject.OptionTop, market, names);
+  }
+
+  private String subscribeTopData(QuoteSubject subject, Market market, Set<String> targetNames) {
+    if (!isConnected()) {
+      notConnect();
+      return null;
+    }
+    Request subscribeData = ProtoMessageUtil.buildSubscribeMessage(market, subject, targetNames);
+    channel.writeAndFlush(subscribeData);
+    ApiLogger.info("send subscribe [{}] message, market:{}", subject, market);
+    return String.valueOf(subscribeData.getId());
+  }
+
+  private String cancelSubscribeTopData(QuoteSubject subject, Market market, Set<String> targetNames) {
+    if (!isConnected()) {
+      notConnect();
+      return null;
+    }
+    Request subscribeData = ProtoMessageUtil.buildUnSubscribeMessage(market, subject, targetNames);
+    channel.writeAndFlush(subscribeData);
+    ApiLogger.info("send cancel subscribe [{}] message, market:{}", subject, market);
+    return String.valueOf(subscribeData.getId());
   }
 
   @Override
