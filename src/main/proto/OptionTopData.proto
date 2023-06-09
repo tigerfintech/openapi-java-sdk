@@ -11,12 +11,12 @@ message OptionTopData {
   repeated TopData topData = 3;
 
   message TopData {
-    string targetName = 1; // tick, volume, amount, openInt
-    repeated Tick tick = 2; // large order(tick)
+    string targetName = 1; // bigOrder, volume, amount, openInt
+    repeated BigOrder bigOrder = 2; // large order(bigOrder)
     repeated OptionItem item = 3; // target value top list(volume, amount, openInt)
   }
 
-  message Tick {
+  message BigOrder {
     string symbol = 1;
     string expiry = 2; // formate:yyyyMMdd
     string strike = 3; // strike price
@@ -36,7 +36,7 @@ message OptionTopData {
     double totalAmount = 5;  // total trade amount
     double totalVolume = 6;  // total trade volume
     double totalOpenInt = 7; // open interest
-    double volumeToOI = 8; // Volume to Open Interest
+    double volumeToOpenInt = 8; // Volume to Open Interest
     double latestPrice = 9;  // option latest price
     int64 updateTime = 10;    // uptate timestamp
   }
