@@ -115,7 +115,7 @@ public class ProtoMessageUtil {
     return builder.build();
   }
 
-  public static Request buildSubscribeMessage(Market market, QuoteSubject subject, Set<String> symbols) {
+  public static Request buildSubscribeMessage(Market market, QuoteSubject subject, Set<String> targetNames) {
     Request.Builder builder = Request.newBuilder();
     builder.setCommand(SocketCommon.Command.SUBSCRIBE)
         .setId(increment.addAndGet(1));
@@ -123,8 +123,8 @@ public class ProtoMessageUtil {
     Request.Subscribe.Builder subBuild = Request.Subscribe.newBuilder();
     subBuild.setDataType(SocketCommon.DataType.valueOf(subject.name()));
     subBuild.setMarket(market.name());
-    if (symbols != null) {
-      subBuild.setSymbols(HeaderBuilder.join(symbols));
+    if (targetNames != null) {
+      subBuild.setSymbols(HeaderBuilder.join(targetNames));
     }
 
     builder.setSubscribe(subBuild.build());
@@ -150,7 +150,9 @@ public class ProtoMessageUtil {
 
     Request.Subscribe.Builder subBuild = Request.Subscribe.newBuilder();
     subBuild.setDataType(SocketCommon.DataType.valueOf(subject.name()));
-    subBuild.setSymbols(HeaderBuilder.join(symbols));
+    if (symbols != null) {
+      subBuild.setSymbols(HeaderBuilder.join(symbols));
+    }
 
     builder.setSubscribe(subBuild.build());
     return builder.build();
