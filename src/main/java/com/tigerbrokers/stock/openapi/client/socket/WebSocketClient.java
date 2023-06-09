@@ -41,7 +41,6 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import io.netty.util.internal.ConcurrentSet;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -76,7 +75,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private ApiAuthentication authentication;
   private ApiComposeCallback apiComposeCallback;
   private final Set<Subject> subscribeList = new CopyOnWriteArraySet<>();
-  private final Set<String> subscribeSymbols = new ConcurrentSet<>();
   private volatile CountDownLatch connectCountDown = new CountDownLatch(1);
 
   private EventLoopGroup group = null;
@@ -203,10 +201,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
         throw new RuntimeException("supported protocols is empty.");
       }
       sslCtx = SslContextBuilder.forClient()
-              .protocols(protocols)
-              .trustManager(InsecureTrustManagerFactory.INSTANCE)
-              .sslProvider(provider)
-              .build();
+          .protocols(protocols)
+          .trustManager(InsecureTrustManagerFactory.INSTANCE)
+          .sslProvider(provider)
+          .build();
     }
 
     bootstrap.group(group).option(ChannelOption.TCP_NODELAY, true)
@@ -598,7 +596,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
       returnStr = ((StompFrame)subscribeData).headers().getAsString(StompHeaders.ID);
     }
     channel.writeAndFlush(subscribeData);
-    subscribeSymbols.addAll(symbols);
     ApiLogger.info("send subscribe [{}] message, symbols:{}", subject, symbols);
 
     return returnStr;
@@ -619,7 +616,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
       returnStr = ((StompFrame)unsubscribeData).headers().getAsString(StompHeaders.ID);
     }
     channel.writeAndFlush(unsubscribeData);
-    subscribeSymbols.removeAll(symbols);
     ApiLogger.info("send cancel subscribe [{}] message, symbols:{}.", subject, symbols);
 
     return returnStr;
@@ -627,32 +623,12 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   @Override
   public String subscribeMarketQuote(Market market, QuoteSubject subject) {
-    if (!isConnected()) {
-      notConnect();
-      return null;
-    }
-    if (this.isProtobuf) {
-      Request subscribeData = ProtoMessageUtil.buildSubscribeMessage(market, subject);
-      channel.writeAndFlush(subscribeData);
-      ApiLogger.info("send subscribe [{}] message, market:{}", subject, market);
-      return String.valueOf(subscribeData.getId());
-    }
-    return null;
+    return subscribeMarketData(market, subject, null);
   }
 
   @Override
   public String cancelSubscribeMarketQuote(Market market, QuoteSubject subject) {
-    if (!isConnected()) {
-      notConnect();
-      return null;
-    }
-    if (this.isProtobuf) {
-      Request subscribeData = ProtoMessageUtil.buildUnSubscribeMessage(market, subject);
-      channel.writeAndFlush(subscribeData);
-      ApiLogger.info("send cancel subscribe [{}] message, market:{}", subject, market);
-      return String.valueOf(subscribeData.getId());
-    }
-    return null;
+    return cancelSubscribeMarketData(market, subject, null);
   }
 
   @Override
@@ -663,7 +639,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
         names.add(target.getValue());
       }
     }
-    return subscribeTopData(QuoteSubject.StockTop, market, names);
+    return subscribeMarketData(market, QuoteSubject.StockTop, names);
   }
 
   @Override
@@ -674,7 +650,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
         names.add(target.getValue());
       }
     }
-    return cancelSubscribeTopData(QuoteSubject.StockTop, market, names);
+    return cancelSubscribeMarketData(market, QuoteSubject.StockTop, names);
   }
 
   @Override
@@ -685,7 +661,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
         names.add(target.getValue());
       }
     }
-    return subscribeTopData(QuoteSubject.OptionTop, market, names);
+    return subscribeMarketData(market, QuoteSubject.OptionTop, names);
   }
 
   @Override
@@ -696,10 +672,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
         names.add(target.getValue());
       }
     }
-    return cancelSubscribeTopData(QuoteSubject.OptionTop, market, names);
+    return cancelSubscribeMarketData(market, QuoteSubject.OptionTop, names);
   }
 
-  private String subscribeTopData(QuoteSubject subject, Market market, Set<String> targetNames) {
+  private String subscribeMarketData(Market market, QuoteSubject subject, Set<String> targetNames) {
     if (!isConnected()) {
       notConnect();
       return null;
@@ -710,7 +686,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     return String.valueOf(subscribeData.getId());
   }
 
-  private String cancelSubscribeTopData(QuoteSubject subject, Market market, Set<String> targetNames) {
+  private String cancelSubscribeMarketData(Market market, QuoteSubject subject, Set<String> targetNames) {
     if (!isConnected()) {
       notConnect();
       return null;
