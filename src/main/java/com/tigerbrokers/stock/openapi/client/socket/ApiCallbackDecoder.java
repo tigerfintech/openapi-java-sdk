@@ -113,9 +113,9 @@ public class ApiCallbackDecoder {
       case OrderTransaction:
         callback.orderTransactionChange(pushData.getOrderTransactionData());
         break;
-      case QuoteTop:
+      case StockTop:
         callback.stockTopPush(pushData.getStockTopData());
-      case QuoteOptionTop:
+      case OptionTop:
         callback.optionTopPush(pushData.getOptionTopData());
         break;
       default:
