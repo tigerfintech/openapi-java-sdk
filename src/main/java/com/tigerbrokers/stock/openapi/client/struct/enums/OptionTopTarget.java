@@ -7,7 +7,7 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
 public enum OptionTopTarget {
 
   BigOrder("bigOrder"),
-  Volumn("volume"),
+  Volume("volume"),
   Amount("amount"),
   OpenInt("openInt"),
   ;
