@@ -1,9 +1,9 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
-import com.tigerbrokers.stock.openapi.client.struct.enums.OptionTopTarget;
+import com.tigerbrokers.stock.openapi.client.struct.enums.OptionRankingIndicator;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
-import com.tigerbrokers.stock.openapi.client.struct.enums.StockTopTarget;
+import com.tigerbrokers.stock.openapi.client.struct.enums.StockRankingIndicator;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import java.util.Set;
 
@@ -140,7 +140,7 @@ public interface SubscribeAsyncApi {
    * @param targetNames quote top target names
    * @return
    */
-  public String subscribeQuoteTop(Market market, Set<StockTopTarget> targetNames);
+  public String subscribeQuoteTop(Market market, Set<StockRankingIndicator> targetNames);
 
   /**
    * cancel subscribe quote-top-data of the specified market
@@ -148,7 +148,7 @@ public interface SubscribeAsyncApi {
    * @param targetNames quote top target names
    * @return
    */
-  public String cancelSubscribeQuoteTop(Market market, Set<StockTopTarget> targetNames);
+  public String cancelSubscribeQuoteTop(Market market, Set<StockRankingIndicator> targetNames);
 
   /**
    * subscribe option-top-data of the specified market
@@ -156,7 +156,7 @@ public interface SubscribeAsyncApi {
    * @param targetNames option top target names
    * @return
    */
-  public String subscribeOptionTop(Market market, Set<OptionTopTarget> targetNames);
+  public String subscribeOptionTop(Market market, Set<OptionRankingIndicator> targetNames);
 
   /**
    * cancel subscribe option-top-data of the specified market
@@ -164,7 +164,7 @@ public interface SubscribeAsyncApi {
    * @param targetNames option top target names
    * @return
    */
-  public String cancelSubscribeOptionTop(Market market, Set<OptionTopTarget> targetNames);
+  public String cancelSubscribeOptionTop(Market market, Set<OptionRankingIndicator> targetNames);
 
   /**
    * query subscribed symbol list

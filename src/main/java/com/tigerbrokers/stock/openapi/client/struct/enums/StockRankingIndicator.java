@@ -4,7 +4,7 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
  * Description:
  * Created by bean on 2023/06/08.
  */
-public enum StockTopTarget {
+public enum StockRankingIndicator {
 
   ChangeRate("changeRate"),
   ChangeRate5Min("changeRate5Min"),
@@ -16,7 +16,7 @@ public enum StockTopTarget {
 
   private final String value;
 
-  StockTopTarget(String value) {
+  StockRankingIndicator(String value) {
     this.value = value;
   }
 
@@ -24,10 +24,10 @@ public enum StockTopTarget {
     return value;
   }
 
-  public static StockTopTarget getTargetByValue(String value) {
-    for (StockTopTarget target : StockTopTarget.values()) {
-      if (target.getValue().equals(value)) {
-        return target;
+  public static StockRankingIndicator getIndicatorByValue(String value) {
+    for (StockRankingIndicator indicator : StockRankingIndicator.values()) {
+      if (indicator.getValue().equals(value)) {
+        return indicator;
       }
     }
     return null;

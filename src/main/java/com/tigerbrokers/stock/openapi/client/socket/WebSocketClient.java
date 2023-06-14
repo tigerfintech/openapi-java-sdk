@@ -7,9 +7,9 @@ import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
-import com.tigerbrokers.stock.openapi.client.struct.enums.OptionTopTarget;
+import com.tigerbrokers.stock.openapi.client.struct.enums.OptionRankingIndicator;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
-import com.tigerbrokers.stock.openapi.client.struct.enums.StockTopTarget;
+import com.tigerbrokers.stock.openapi.client.struct.enums.StockRankingIndicator;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
@@ -632,10 +632,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   @Override
-  public String subscribeQuoteTop(Market market, Set<StockTopTarget> targetNames) {
+  public String subscribeQuoteTop(Market market, Set<StockRankingIndicator> targetNames) {
     Set<String> names = new HashSet<>();
     if (targetNames != null) {
-      for (StockTopTarget target : targetNames) {
+      for (StockRankingIndicator target : targetNames) {
         names.add(target.getValue());
       }
     }
@@ -643,10 +643,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   @Override
-  public String cancelSubscribeQuoteTop(Market market, Set<StockTopTarget> targetNames) {
+  public String cancelSubscribeQuoteTop(Market market, Set<StockRankingIndicator> targetNames) {
     Set<String> names = new HashSet<>();
     if (targetNames != null) {
-      for (StockTopTarget target : targetNames) {
+      for (StockRankingIndicator target : targetNames) {
         names.add(target.getValue());
       }
     }
@@ -654,10 +654,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   @Override
-  public String subscribeOptionTop(Market market, Set<OptionTopTarget> targetNames) {
+  public String subscribeOptionTop(Market market, Set<OptionRankingIndicator> targetNames) {
     Set<String> names = new HashSet<>();
     if (targetNames != null) {
-      for (OptionTopTarget target : targetNames) {
+      for (OptionRankingIndicator target : targetNames) {
         names.add(target.getValue());
       }
     }
@@ -665,10 +665,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   @Override
-  public String cancelSubscribeOptionTop(Market market, Set<OptionTopTarget> targetNames) {
+  public String cancelSubscribeOptionTop(Market market, Set<OptionRankingIndicator> targetNames) {
     Set<String> names = new HashSet<>();
     if (targetNames != null) {
-      for (OptionTopTarget target : targetNames) {
+      for (OptionRankingIndicator target : targetNames) {
         names.add(target.getValue());
       }
     }

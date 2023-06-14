@@ -4,7 +4,7 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
  * Description:
  * Created by bean on 2023/06/08.
  */
-public enum OptionTopTarget {
+public enum OptionRankingIndicator {
 
   BigOrder("bigOrder"),
   Volume("volume"),
@@ -14,7 +14,7 @@ public enum OptionTopTarget {
 
   private final String value;
 
-  OptionTopTarget(String value) {
+  OptionRankingIndicator(String value) {
     this.value = value;
   }
 
@@ -22,10 +22,10 @@ public enum OptionTopTarget {
     return value;
   }
 
-  public static OptionTopTarget getTargetByValue(String value) {
-    for (OptionTopTarget target : OptionTopTarget.values()) {
-      if (target.getValue().equals(value)) {
-        return target;
+  public static OptionRankingIndicator getIndicatorByValue(String value) {
+    for (OptionRankingIndicator indicator : OptionRankingIndicator.values()) {
+      if (indicator.getValue().equals(value)) {
+        return indicator;
       }
     }
     return null;
