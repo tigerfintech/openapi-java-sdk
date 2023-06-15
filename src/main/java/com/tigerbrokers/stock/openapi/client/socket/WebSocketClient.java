@@ -632,66 +632,66 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   @Override
-  public String subscribeQuoteTop(Market market, Set<StockRankingIndicator> targetNames) {
+  public String subscribeQuoteTop(Market market, Set<StockRankingIndicator> indicatorNames) {
     Set<String> names = new HashSet<>();
-    if (targetNames != null) {
-      for (StockRankingIndicator target : targetNames) {
-        names.add(target.getValue());
+    if (indicatorNames != null) {
+      for (StockRankingIndicator indicator : indicatorNames) {
+        names.add(indicator.getValue());
       }
     }
     return subscribeMarketData(market, QuoteSubject.StockTop, names);
   }
 
   @Override
-  public String cancelSubscribeQuoteTop(Market market, Set<StockRankingIndicator> targetNames) {
+  public String cancelSubscribeQuoteTop(Market market, Set<StockRankingIndicator> indicatorNames) {
     Set<String> names = new HashSet<>();
-    if (targetNames != null) {
-      for (StockRankingIndicator target : targetNames) {
-        names.add(target.getValue());
+    if (indicatorNames != null) {
+      for (StockRankingIndicator indicator : indicatorNames) {
+        names.add(indicator.getValue());
       }
     }
     return cancelSubscribeMarketData(market, QuoteSubject.StockTop, names);
   }
 
   @Override
-  public String subscribeOptionTop(Market market, Set<OptionRankingIndicator> targetNames) {
+  public String subscribeOptionTop(Market market, Set<OptionRankingIndicator> indicatorNames) {
     Set<String> names = new HashSet<>();
-    if (targetNames != null) {
-      for (OptionRankingIndicator target : targetNames) {
-        names.add(target.getValue());
+    if (indicatorNames != null) {
+      for (OptionRankingIndicator indicator : indicatorNames) {
+        names.add(indicator.getValue());
       }
     }
     return subscribeMarketData(market, QuoteSubject.OptionTop, names);
   }
 
   @Override
-  public String cancelSubscribeOptionTop(Market market, Set<OptionRankingIndicator> targetNames) {
+  public String cancelSubscribeOptionTop(Market market, Set<OptionRankingIndicator> indicatorNames) {
     Set<String> names = new HashSet<>();
-    if (targetNames != null) {
-      for (OptionRankingIndicator target : targetNames) {
-        names.add(target.getValue());
+    if (indicatorNames != null) {
+      for (OptionRankingIndicator indicator : indicatorNames) {
+        names.add(indicator.getValue());
       }
     }
     return cancelSubscribeMarketData(market, QuoteSubject.OptionTop, names);
   }
 
-  private String subscribeMarketData(Market market, QuoteSubject subject, Set<String> targetNames) {
+  private String subscribeMarketData(Market market, QuoteSubject subject, Set<String> indicatorNames) {
     if (!isConnected()) {
       notConnect();
       return null;
     }
-    Request subscribeData = ProtoMessageUtil.buildSubscribeMessage(market, subject, targetNames);
+    Request subscribeData = ProtoMessageUtil.buildSubscribeMessage(market, subject, indicatorNames);
     channel.writeAndFlush(subscribeData);
     ApiLogger.info("send subscribe [{}] message, market:{}", subject, market);
     return String.valueOf(subscribeData.getId());
   }
 
-  private String cancelSubscribeMarketData(Market market, QuoteSubject subject, Set<String> targetNames) {
+  private String cancelSubscribeMarketData(Market market, QuoteSubject subject, Set<String> indicatorNames) {
     if (!isConnected()) {
       notConnect();
       return null;
     }
-    Request subscribeData = ProtoMessageUtil.buildUnSubscribeMessage(market, subject, targetNames);
+    Request subscribeData = ProtoMessageUtil.buildUnSubscribeMessage(market, subject, indicatorNames);
     channel.writeAndFlush(subscribeData);
     ApiLogger.info("send cancel subscribe [{}] message, market:{}", subject, market);
     return String.valueOf(subscribeData.getId());

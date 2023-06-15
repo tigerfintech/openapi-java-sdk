@@ -135,36 +135,36 @@ public interface SubscribeAsyncApi {
   public String cancelSubscribeMarketQuote(Market market, QuoteSubject subject);
 
   /**
-   * subscribe quote-top-data of the specified market
+   * subscribe stock-top-data of the specified market
    * @param market Market
-   * @param targetNames quote top target names
+   * @param indicatorNames stock top quote's indicator names
    * @return
    */
-  public String subscribeQuoteTop(Market market, Set<StockRankingIndicator> targetNames);
+  public String subscribeQuoteTop(Market market, Set<StockRankingIndicator> indicatorNames);
 
   /**
-   * cancel subscribe quote-top-data of the specified market
+   * cancel subscribe stock-top-data of the specified market
    * @param market Market
-   * @param targetNames quote top target names
+   * @param indicatorNames stock top quote's indicator names
    * @return
    */
-  public String cancelSubscribeQuoteTop(Market market, Set<StockRankingIndicator> targetNames);
+  public String cancelSubscribeQuoteTop(Market market, Set<StockRankingIndicator> indicatorNames);
 
   /**
    * subscribe option-top-data of the specified market
    * @param market Market
-   * @param targetNames option top target names
+   * @param indicatorNames option top quote's indicator names
    * @return
    */
-  public String subscribeOptionTop(Market market, Set<OptionRankingIndicator> targetNames);
+  public String subscribeOptionTop(Market market, Set<OptionRankingIndicator> indicatorNames);
 
   /**
    * cancel subscribe option-top-data of the specified market
    * @param market Market
-   * @param targetNames option top target names
+   * @param indicatorNames option top quote's indicator names
    * @return
    */
-  public String cancelSubscribeOptionTop(Market market, Set<OptionRankingIndicator> targetNames);
+  public String cancelSubscribeOptionTop(Market market, Set<OptionRankingIndicator> indicatorNames);
 
   /**
    * query subscribed symbol list
