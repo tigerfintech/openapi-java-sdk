@@ -2,7 +2,7 @@ package com.tigerbrokers.stock.openapi.client.https.request.trade;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
-import com.tigerbrokers.stock.openapi.client.constant.WAPOrderConstants;
+import com.tigerbrokers.stock.openapi.client.constant.TradeConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.ContractLeg;
@@ -216,12 +216,12 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     model.setTimeInForce(TimeInForce.DAY);
 
     model.setAlgoStrategy(orderType.name());
-    model.addAlgoParam(TagValue.buildTagValue(WAPOrderConstants.START_TIME, startTime));
-    model.addAlgoParam(TagValue.buildTagValue(WAPOrderConstants.END_TIME, endTime));
+    model.addAlgoParam(TagValue.buildTagValue(TradeConstants.START_TIME, startTime));
+    model.addAlgoParam(TagValue.buildTagValue(TradeConstants.END_TIME, endTime));
     //model.addAlgoParam(TagValue.buildTagValue(WAPOrderConstants.ALLOW_PAST_END_TIME, allowPastEndTime));
     if (OrderType.VWAP == orderType) {
       //model.addAlgoParam(TagValue.buildTagValue(WAPOrderConstants.NO_TAKE_LIQ, noTakeLiq));
-      model.addAlgoParam(TagValue.buildTagValue(WAPOrderConstants.PARTICIPATION_RATE, participationRate));
+      model.addAlgoParam(TagValue.buildTagValue(TradeConstants.PARTICIPATION_RATE, participationRate));
     }
     return newRequest(model);
   }
