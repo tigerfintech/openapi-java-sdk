@@ -6,10 +6,9 @@ import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
+import com.tigerbrokers.stock.openapi.client.struct.Indicator;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
-import com.tigerbrokers.stock.openapi.client.struct.enums.OptionRankingIndicator;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
-import com.tigerbrokers.stock.openapi.client.struct.enums.StockRankingIndicator;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
@@ -632,47 +631,23 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   @Override
-  public String subscribeQuoteTop(Market market, Set<StockRankingIndicator> indicatorNames) {
-    Set<String> names = new HashSet<>();
-    if (indicatorNames != null) {
-      for (StockRankingIndicator indicator : indicatorNames) {
-        names.add(indicator.getValue());
-      }
-    }
-    return subscribeMarketData(market, QuoteSubject.StockTop, names);
+  public String subscribeStockTop(Market market, Set<Indicator> indicators) {
+    return subscribeMarketData(market, QuoteSubject.StockTop, Indicator.getValues(indicators));
   }
 
   @Override
-  public String cancelSubscribeQuoteTop(Market market, Set<StockRankingIndicator> indicatorNames) {
-    Set<String> names = new HashSet<>();
-    if (indicatorNames != null) {
-      for (StockRankingIndicator indicator : indicatorNames) {
-        names.add(indicator.getValue());
-      }
-    }
-    return cancelSubscribeMarketData(market, QuoteSubject.StockTop, names);
+  public String cancelSubscribeStockTop(Market market, Set<Indicator> indicators) {
+    return cancelSubscribeMarketData(market, QuoteSubject.StockTop, Indicator.getValues(indicators));
   }
 
   @Override
-  public String subscribeOptionTop(Market market, Set<OptionRankingIndicator> indicatorNames) {
-    Set<String> names = new HashSet<>();
-    if (indicatorNames != null) {
-      for (OptionRankingIndicator indicator : indicatorNames) {
-        names.add(indicator.getValue());
-      }
-    }
-    return subscribeMarketData(market, QuoteSubject.OptionTop, names);
+  public String subscribeOptionTop(Market market, Set<Indicator> indicators) {
+    return subscribeMarketData(market, QuoteSubject.OptionTop, Indicator.getValues(indicators));
   }
 
   @Override
-  public String cancelSubscribeOptionTop(Market market, Set<OptionRankingIndicator> indicatorNames) {
-    Set<String> names = new HashSet<>();
-    if (indicatorNames != null) {
-      for (OptionRankingIndicator indicator : indicatorNames) {
-        names.add(indicator.getValue());
-      }
-    }
-    return cancelSubscribeMarketData(market, QuoteSubject.OptionTop, names);
+  public String cancelSubscribeOptionTop(Market market, Set<Indicator> indicators) {
+    return cancelSubscribeMarketData(market, QuoteSubject.OptionTop, Indicator.getValues(indicators));
   }
 
   private String subscribeMarketData(Market market, QuoteSubject subject, Set<String> indicatorNames) {

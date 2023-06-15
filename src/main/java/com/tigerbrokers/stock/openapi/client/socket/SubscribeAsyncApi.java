@@ -1,9 +1,8 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
+import com.tigerbrokers.stock.openapi.client.struct.Indicator;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
-import com.tigerbrokers.stock.openapi.client.struct.enums.OptionRankingIndicator;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
-import com.tigerbrokers.stock.openapi.client.struct.enums.StockRankingIndicator;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import java.util.Set;
 
@@ -137,34 +136,34 @@ public interface SubscribeAsyncApi {
   /**
    * subscribe stock-top-data of the specified market
    * @param market Market
-   * @param indicatorNames stock top quote's indicator names
+   * @param indicators stock top quote's indicator
    * @return
    */
-  public String subscribeQuoteTop(Market market, Set<StockRankingIndicator> indicatorNames);
+  public String subscribeStockTop(Market market, Set<Indicator> indicators);
 
   /**
    * cancel subscribe stock-top-data of the specified market
    * @param market Market
-   * @param indicatorNames stock top quote's indicator names
+   * @param indicators stock top quote's indicator
    * @return
    */
-  public String cancelSubscribeQuoteTop(Market market, Set<StockRankingIndicator> indicatorNames);
+  public String cancelSubscribeStockTop(Market market, Set<Indicator> indicators);
 
   /**
    * subscribe option-top-data of the specified market
    * @param market Market
-   * @param indicatorNames option top quote's indicator names
+   * @param indicators option top quote's indicator
    * @return
    */
-  public String subscribeOptionTop(Market market, Set<OptionRankingIndicator> indicatorNames);
+  public String subscribeOptionTop(Market market, Set<Indicator> indicators);
 
   /**
    * cancel subscribe option-top-data of the specified market
    * @param market Market
-   * @param indicatorNames option top quote's indicator names
+   * @param indicators option top quote's indicator
    * @return
    */
-  public String cancelSubscribeOptionTop(Market market, Set<OptionRankingIndicator> indicatorNames);
+  public String cancelSubscribeOptionTop(Market market, Set<Indicator> indicators);
 
   /**
    * query subscribed symbol list

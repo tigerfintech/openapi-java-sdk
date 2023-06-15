@@ -1,10 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.struct.enums;
 
+import com.tigerbrokers.stock.openapi.client.struct.Indicator;
+
 /**
  * Description:
  * Created by bean on 2023/06/08.
  */
-public enum OptionRankingIndicator {
+public enum OptionRankingIndicator implements Indicator {
 
   BigOrder("bigOrder"),
   Volume("volume"),
@@ -18,6 +20,7 @@ public enum OptionRankingIndicator {
     this.value = value;
   }
 
+  @Override
   public String getValue() {
     return value;
   }

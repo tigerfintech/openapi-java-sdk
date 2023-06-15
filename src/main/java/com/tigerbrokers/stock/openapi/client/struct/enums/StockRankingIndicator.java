@@ -1,16 +1,18 @@
 package com.tigerbrokers.stock.openapi.client.struct.enums;
 
+import com.tigerbrokers.stock.openapi.client.struct.Indicator;
+
 /**
  * Description:
  * Created by bean on 2023/06/08.
  */
-public enum StockRankingIndicator {
+public enum StockRankingIndicator implements Indicator {
 
   ChangeRate("changeRate"),
   ChangeRate5Min("changeRate5Min"),
   TurnoverRate("turnoverRate"),
-  TradeAmount("amount"),
-  TradeVolume("volume"),
+  Amount("amount"),// trade amount
+  Volume("volume"),// trade volume
   Amplitude("amplitude"),
   ;
 
@@ -20,6 +22,7 @@ public enum StockRankingIndicator {
     this.value = value;
   }
 
+  @Override
   public String getValue() {
     return value;
   }
