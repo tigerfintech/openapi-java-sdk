@@ -123,7 +123,7 @@ public interface SubscribeAsyncApi {
    * @param subject QuoteSubject
    * @return
    */
-  public String subscribeMarketQuote(Market market, QuoteSubject subject);
+  String subscribeMarketQuote(Market market, QuoteSubject subject);
 
   /**
    * cancel subscribe quote-data of the specified market
@@ -131,7 +131,7 @@ public interface SubscribeAsyncApi {
    * @param subject QuoteSubject
    * @return
    */
-  public String cancelSubscribeMarketQuote(Market market, QuoteSubject subject);
+  String cancelSubscribeMarketQuote(Market market, QuoteSubject subject);
 
   /**
    * subscribe stock-top-data of the specified market
@@ -139,7 +139,7 @@ public interface SubscribeAsyncApi {
    * @param indicators stock top quote's indicator
    * @return
    */
-  public String subscribeStockTop(Market market, Set<Indicator> indicators);
+  String subscribeStockTop(Market market, Set<Indicator> indicators);
 
   /**
    * cancel subscribe stock-top-data of the specified market
@@ -147,7 +147,7 @@ public interface SubscribeAsyncApi {
    * @param indicators stock top quote's indicator
    * @return
    */
-  public String cancelSubscribeStockTop(Market market, Set<Indicator> indicators);
+  String cancelSubscribeStockTop(Market market, Set<Indicator> indicators);
 
   /**
    * subscribe option-top-data of the specified market
