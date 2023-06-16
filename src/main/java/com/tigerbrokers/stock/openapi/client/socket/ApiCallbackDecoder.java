@@ -115,6 +115,7 @@ public class ApiCallbackDecoder {
         break;
       case StockTop:
         callback.stockTopPush(pushData.getStockTopData());
+        break;
       case OptionTop:
         callback.optionTopPush(pushData.getOptionTopData());
         break;
