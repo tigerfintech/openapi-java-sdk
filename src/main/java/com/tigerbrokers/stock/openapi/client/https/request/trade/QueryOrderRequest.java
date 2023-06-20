@@ -14,6 +14,10 @@ import java.time.format.DateTimeFormatter;
 public class QueryOrderRequest extends TigerCommonRequest implements TigerRequest<BatchOrderResponse> {
 
   public QueryOrderRequest() {
+    new QueryOrderRequest(MethodName.ORDERS);
+  }
+
+  public QueryOrderRequest(MethodName methodName) {
     super.apiMethodName = MethodName.ORDERS;
     DateTimeFormatter dtf = DateUtils.DATETIME_FORMAT;
     timestamp = dtf.format(LocalDateTime.now(ZoneId.of(TimeZoneId.Shanghai.getZoneId())));
