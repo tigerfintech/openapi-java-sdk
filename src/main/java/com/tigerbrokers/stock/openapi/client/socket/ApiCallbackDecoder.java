@@ -113,6 +113,12 @@ public class ApiCallbackDecoder {
       case OrderTransaction:
         callback.orderTransactionChange(pushData.getOrderTransactionData());
         break;
+      case StockTop:
+        callback.stockTopPush(pushData.getStockTopData());
+        break;
+      case OptionTop:
+        callback.optionTopPush(pushData.getOptionTopData());
+        break;
       default:
         ApiLogger.info("push data cannot be processed. {}", ProtoMessageUtil.toJson(msg));
     }

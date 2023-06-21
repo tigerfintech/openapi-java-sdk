@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
+import com.tigerbrokers.stock.openapi.client.struct.Indicator;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
@@ -122,7 +123,7 @@ public interface SubscribeAsyncApi {
    * @param subject QuoteSubject
    * @return
    */
-  public String subscribeMarketQuote(Market market, QuoteSubject subject);
+  String subscribeMarketQuote(Market market, QuoteSubject subject);
 
   /**
    * cancel subscribe quote-data of the specified market
@@ -130,7 +131,39 @@ public interface SubscribeAsyncApi {
    * @param subject QuoteSubject
    * @return
    */
-  public String cancelSubscribeMarketQuote(Market market, QuoteSubject subject);
+  String cancelSubscribeMarketQuote(Market market, QuoteSubject subject);
+
+  /**
+   * subscribe stock-top-data of the specified market
+   * @param market Market
+   * @param indicators stock top quote's indicator
+   * @return
+   */
+  String subscribeStockTop(Market market, Set<Indicator> indicators);
+
+  /**
+   * cancel subscribe stock-top-data of the specified market
+   * @param market Market
+   * @param indicators stock top quote's indicator
+   * @return
+   */
+  String cancelSubscribeStockTop(Market market, Set<Indicator> indicators);
+
+  /**
+   * subscribe option-top-data of the specified market
+   * @param market Market
+   * @param indicators option top quote's indicator
+   * @return
+   */
+  public String subscribeOptionTop(Market market, Set<Indicator> indicators);
+
+  /**
+   * cancel subscribe option-top-data of the specified market
+   * @param market Market
+   * @param indicators option top quote's indicator
+   * @return
+   */
+  public String cancelSubscribeOptionTop(Market market, Set<Indicator> indicators);
 
   /**
    * query subscribed symbol list
