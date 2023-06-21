@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.https.domain.trade.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.ContractLeg;
 import com.tigerbrokers.stock.openapi.client.struct.TagValue;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AttachType;
@@ -9,6 +10,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TradeOrderModel extends ApiModel {
@@ -194,6 +196,15 @@ public class TradeOrderModel extends ApiModel {
    */
   @JSONField(name = "stop_loss_trailing_amount")
   private Double stopLossTrailingAmount;
+
+  /**
+   * Multi Order's type: COVERED,PROTECTIVE,VERTICAL,STRADDLE,STRANGLE,CALENDAR,DIAGONAL,SYNTHETIC,CUSTOM
+   */
+  @JSONField(name = "combo_type")
+  private String comboType;
+
+  @JSONField(name = "contract_legs")
+  private List<ContractLeg> contractLegs;
 
   public TradeOrderModel() {
   }
@@ -422,6 +433,16 @@ public class TradeOrderModel extends ApiModel {
     this.algoParams = algoParams;
   }
 
+  public void addAlgoParam(TagValue algoParam) {
+    if (algoParam == null) {
+      return;
+    }
+    if (this.algoParams == null) {
+      this.algoParams = new ArrayList<>();
+    }
+    this.algoParams.add(algoParam);
+  }
+
   public String getSource() {
     return source;
   }
@@ -534,6 +555,23 @@ public class TradeOrderModel extends ApiModel {
     this.stopLossTrailingAmount = stopLossTrailingAmount;
   }
 
+  public String getComboType() {
+    return comboType;
+  }
+
+  public void setComboType(String comboType) {
+    this.comboType = comboType;
+  }
+
+  public List<ContractLeg> getContractLegs() {
+    return contractLegs;
+  }
+
+  public void setContractLegs(
+      List<ContractLeg> contractLegs) {
+    this.contractLegs = contractLegs;
+  }
+
   @Override
   public String toString() {
     return "TradeOrderModel{" +
@@ -577,6 +615,7 @@ public class TradeOrderModel extends ApiModel {
         ", stopLossTif=" + stopLossTif +
         ", stopLossTrailingPercent=" + stopLossTrailingPercent +
         ", stopLossTrailingAmount=" + stopLossTrailingAmount +
+        ", comboType=" + comboType +
         '}';
   }
 }

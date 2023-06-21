@@ -20,11 +20,11 @@ public class PlaceOrderRequestValidator implements RequestValidator<TradeOrderMo
     if (StringUtils.isEmpty(model.getAccount())) {
       throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "account");
     }
-    if (StringUtils.isEmpty(model.getSymbol())) {
-      throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "symbol");
-    }
     if (model.getSecType() == null) {
       throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "sec_type");
+    }
+    if (SecType.MLEG != model.getSecType() && StringUtils.isEmpty(model.getSymbol())) {
+      throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "symbol");
     }
     if (model.getAction() == null) {
       throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "action");

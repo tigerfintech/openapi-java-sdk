@@ -12,6 +12,8 @@ public enum OrderType {
   TRAIL("TRAIL", "跟踪止损"),
   AM("AM", "Auction Market Order"),
   AL("AL", "Auction Limit Order"),
+  TWAP("TWAP", "Time Weighted Average Price"),// 时间加权平均价格算法
+  VWAP("VWAP", "Volume Weighted Average Price"),// 成交量加权平均价格算法
   ;
 
   private String type;

@@ -44,6 +44,7 @@ public enum MethodName {
   /**
    * quote
    */
+  KLINE_QUOTA("kline_quota", MethodType.QUOTE),
   MARKET_STATE("market_state", MethodType.QUOTE),
   ALL_SYMBOLS("all_symbols", MethodType.QUOTE),
   ALL_SYMBOL_NAMES("all_symbol_names", MethodType.QUOTE),
