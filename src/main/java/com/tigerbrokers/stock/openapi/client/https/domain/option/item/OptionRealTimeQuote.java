@@ -196,6 +196,12 @@ public class OptionRealTimeQuote implements Serializable {
         ", openInterest=" + openInterest +
         ", multiplier=" + multiplier +
         ", lastTimestamp=" + lastTimestamp +
+        ", impliedVol=" + impliedVol +
+        ", delta=" + delta +
+        ", gamma=" + gamma +
+        ", theta=" + theta +
+        ", vega=" + vega +
+        ", rho=" + rho +
         '}';
   }
 }
