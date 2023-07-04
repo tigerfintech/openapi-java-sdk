@@ -69,7 +69,7 @@ public class NetworkUtil {
           if (item == null || item.length() == 0 || "0" .equals(item)) {
             continue;
           }
-          // ipv6可能忽略前导的0
+          // ipv6 may ignore the leading 0
           if (item.length() == 3 || item.length() == 1) {
             item = "0" + item;
           }

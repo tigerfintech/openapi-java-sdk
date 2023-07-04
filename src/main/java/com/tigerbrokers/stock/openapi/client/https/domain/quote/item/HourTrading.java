@@ -9,7 +9,7 @@ import java.io.Serializable;
 public class HourTrading implements Serializable {
 
   /**
-   * 盘前、盘后
+   * pre-market、after hours
    */
   private String tag;
 

@@ -84,9 +84,9 @@ public class WebSocketHandshakerHandler extends SimpleChannelInboundHandler<Obje
     FullHttpResponse response;
     if (!this.handshaker.isHandshakeComplete()) {
       response = (FullHttpResponse) msg;
-      //握手协议返回，设置结束握手
+      //The handshake protocol returns, and the setting ends the handshake
       handshaker.finishHandshake(ch, response);
-      //发送stomp connect请求
+      //Send a stomp connect request
       StompFrame connectFrame;
       if (0 == this.clientReceiveInterval && 0 == this.clientSendInterval) {
         connectFrame = StompMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),

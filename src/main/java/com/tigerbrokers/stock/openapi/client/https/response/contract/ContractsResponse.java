@@ -9,8 +9,8 @@ import java.util.Map;
 
 /**
  * 用于接受账户api合约接口的返回值
- * 作者：ltc
- * 时间：2019/05/29
+ * author：ltc
+ * date：2019/05/29
  */
 public class ContractsResponse extends TigerResponse {
 

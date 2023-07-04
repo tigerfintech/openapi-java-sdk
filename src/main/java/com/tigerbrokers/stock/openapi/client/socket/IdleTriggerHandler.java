@@ -13,7 +13,6 @@ import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.H
 /**
  * @author  zhaolei
  * @since  2019/3/13
- * 描述
  */
 public class IdleTriggerHandler extends ChannelInboundHandlerAdapter {
   private ApiCallbackDecoder apiCallbackDecoder = null;

@@ -10,11 +10,11 @@ import java.io.Serializable;
  */
 public class MarketIndicatorValue implements Serializable {
 
-    /** 指标索引 **/
+    /** index **/
     private Integer index;
-    /** 指标名称 **/
+    /** name **/
     private String name;
-    /** 指标值 **/
+    /** value **/
     private Object value;
 
     public MarketIndicatorValue() {

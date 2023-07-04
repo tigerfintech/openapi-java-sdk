@@ -71,7 +71,6 @@ public class ProtoMessageUtilTest {
     // TODO delete
     QuoteData.Builder build = QuoteData.newBuilder();
     build.setSymbol("00700");
-    //build.setSymbol(null);不能设置为null
     // build.setAskSize(Int32Value.of(1));
     build.setAskSize(1);
     build.setBidSize(68);

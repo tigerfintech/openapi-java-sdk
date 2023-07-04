@@ -13,7 +13,7 @@ public interface RspProtocolType {
   int DEFAULT_PUSH_DATA_END = 0;
 
   /**
-   * 交易
+   * trading
    */
   int GET_ORDER_NO_END = 1;
   int PREVIEW_ORDER_END = 2;
@@ -29,7 +29,7 @@ public interface RspProtocolType {
   int SUBSCRIBE_ORDER_TRANSACTION = 12;
 
   /**
-   * 行情
+   * quote
    */
   int GET_MARKET_STATE_END = 101;
   int GET_ALL_SYMBOLS_END = 102;

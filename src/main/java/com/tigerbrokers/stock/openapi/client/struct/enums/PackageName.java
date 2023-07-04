@@ -2,12 +2,12 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
 
 public enum PackageName {
   /**
-   * 明星股
+   * popular stock
    */
   package_popular,
 
   /**
-   * 中概股
+   * Chinese stocks
    */
   package_china,
 
@@ -17,27 +17,27 @@ public enum PackageName {
   package_etf,
 
   /**
-   * 标普500
+   * S&P 500
    */
   package_indices_INX,
 
   /**
-   * 罗素2000
+   * Russell 2000
    */
   package_indices_RUT,
 
   /**
-   * 恒生指数
+   * hang seng index
    */
   package_HSI,
 
   /**
-   * 国企指数
+   * China HSCEI
    */
   package_HSCEI,
 
   /**
-   * 红筹指数
+   * Red Chip Index
    */
   package_HSCCI
 }

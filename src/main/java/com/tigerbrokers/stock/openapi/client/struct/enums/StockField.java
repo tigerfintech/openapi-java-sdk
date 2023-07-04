@@ -175,7 +175,7 @@ public enum StockField {
     }
 
     /**
-     * 获取所有的value
+     * Get all values
      */
     public static Set<String> getAllValues() {
         Set<String> retSet = new HashSet<>();

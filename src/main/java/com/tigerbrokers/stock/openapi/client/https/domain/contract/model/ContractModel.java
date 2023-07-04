@@ -4,8 +4,8 @@ import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 
 /**
- * 作者：ltc
- * 时间：2019/05/29
+ * author：ltc
+ * date：2019/05/29
  */
 public class ContractModel extends BaseContractModel {
 

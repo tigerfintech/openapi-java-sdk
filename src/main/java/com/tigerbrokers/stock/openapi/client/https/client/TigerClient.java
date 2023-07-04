@@ -10,10 +10,10 @@ import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 public interface TigerClient {
 
   /**
-   * @param request 请求对象
-   * @param <T> request类型
-   * @return TigerResponse 响应对象
-   * @throws TigerApiException api异常
+   * @param request request parameter
+   * @param <T> request type
+   * @return TigerResponse response object
+   * @throws TigerApiException api exception
    */
   <T extends TigerResponse> T execute(TigerRequest<T> request) throws TigerApiException;
 }

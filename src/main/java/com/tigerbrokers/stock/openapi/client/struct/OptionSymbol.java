@@ -1,8 +1,8 @@
 package com.tigerbrokers.stock.openapi.client.struct;
 
 /**
- * 作者：ltc
- * 时间：2019/09/04
+ * author：ltc
+ * date：2019/09/04
  */
 public class OptionSymbol {
 
