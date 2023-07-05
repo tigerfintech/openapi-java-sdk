@@ -9,7 +9,7 @@ public interface ReqProtocolType {
   String REQ_HEADER = "req-type";
 
   /**
-   * 交易
+   * trading
    */
   int ORDER_NO = 1;
   int PREVIEW_ORDER = 2;
@@ -22,7 +22,7 @@ public interface ReqProtocolType {
   int REQ_ACCOUNT = 9;
 
   /**
-   * 行情
+   * quote
    */
   int REQ_MARKET_STATE = 101;
   int REQ_ALL_SYMBOLS = 102;

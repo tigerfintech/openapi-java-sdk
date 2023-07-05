@@ -5,9 +5,9 @@ import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.Contract
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 
 /**
- * 用于接受账户api合约接口的返回值
- * 作者：ltc
- * 时间：2019/05/29
+ * The return value of the contract API
+ * author：ltc
+ * date：2019/05/29
  */
 public class ContractResponse extends TigerResponse {
 

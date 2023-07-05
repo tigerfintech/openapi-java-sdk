@@ -41,7 +41,7 @@ import java.util.Map;
 
 /**
  * @author liutongping
- * @date 2022/5/23 下午7:52
+ * @date 2022/5/23 19:52
  */
 public class ValidatorManager {
   private Map<Class<? extends ApiModel>, RequestValidator> validatorMap = new HashMap<>();

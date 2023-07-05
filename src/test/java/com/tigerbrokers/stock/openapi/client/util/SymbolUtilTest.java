@@ -23,7 +23,7 @@ public class SymbolUtilTest {
     Assert.assertTrue(SymbolUtil.isFutureSymbol("NG2302"));
     Assert.assertTrue(SymbolUtil.isFutureSymbol("CL2306"));
 
-    // 特殊特使期货，数字开头结尾的合约code
+    // Futures with special characters, contracts that start with numbers and end with numbers
     Assert.assertTrue(SymbolUtil.isFutureSymbol("10Ymain"));
     Assert.assertTrue(SymbolUtil.isFutureSymbol("5YYmain"));
     Assert.assertTrue(SymbolUtil.isFutureSymbol("M2Kmain"));
@@ -41,7 +41,7 @@ public class SymbolUtilTest {
     Assert.assertTrue(SymbolUtil.isFutureSymbol("A50main"));
     Assert.assertTrue(SymbolUtil.isFutureSymbol("A502306"));
 
-    // 其他
+    // other
     Assert.assertFalse(SymbolUtil.isFutureSymbol("AAPL"));
     Assert.assertFalse(SymbolUtil.isFutureSymbol("00700"));
     Assert.assertFalse(SymbolUtil.isFutureSymbol("BK4555"));

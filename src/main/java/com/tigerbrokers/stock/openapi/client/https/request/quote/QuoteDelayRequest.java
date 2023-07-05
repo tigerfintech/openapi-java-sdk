@@ -8,7 +8,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import java.util.List;
 
 /**
- * Description: 延迟行情
+ * Description: delay quote reqest
  * Created by sk on 2021/11/18.
  */
 public class QuoteDelayRequest extends TigerCommonRequest implements TigerRequest<QuoteDelayResponse> {

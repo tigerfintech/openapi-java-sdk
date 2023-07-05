@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.AUTHORIZATION;
 
 /**
- * Web 工具类
+ * Web Util Class
  */
 public class HttpUtils {
 

@@ -24,7 +24,6 @@ import static io.netty.handler.codec.stomp.StompHeaders.HEART_BEAT;
 /**
  * @author  zhaolei
  * @since  2018/12/20
- * 描述
  */
 public class ApiCallbackDecoderUtils {
 

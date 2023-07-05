@@ -36,8 +36,8 @@ public class ProtoMessageUtil {
    * @param tigerId tigerId
    * @param sign sign
    * @param version version
-   * @param sendInterval client能保证发送心跳的最小间隔，0代表采用服务端配置
-   * @param receiveInterval client希望收到server心跳的间隔，0代表采用服务端配置
+   * @param sendInterval The client can guarantee the minimum interval for sending heartbeats, 0 means adopting server configuration
+   * @param receiveInterval The interval at which the client expects to receive the heartbeat from the server, 0 means the server configuration is used
    * @return StompFrame
    */
   public static Request buildConnectMessage(String tigerId, String sign, String version,

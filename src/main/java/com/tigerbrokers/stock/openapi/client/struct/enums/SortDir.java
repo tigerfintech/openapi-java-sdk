@@ -3,16 +3,16 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
 import lombok.Getter;
 
 /**
- * Description: 排序方向
+ * Description: sort direction
  *
  * @author kevin
  * @date 2022/10/27
  */
 public enum SortDir {
 
-    SortDir_No(0), // 不排序
-    SortDir_Ascend(1), // 升序
-    SortDir_Descend(2), // 降序
+    SortDir_No(0), // no sort
+    SortDir_Ascend(1), // sort by ascend
+    SortDir_Descend(2), // sort by descend
     ;
 
     @Getter
@@ -23,7 +23,7 @@ public enum SortDir {
     }
 
     /**
-     * 是否降序
+     * Is it in descending order
      */
     public static Boolean isDescDirection(Integer value) {
         if (0 == value) {

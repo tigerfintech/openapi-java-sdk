@@ -3,16 +3,15 @@ package com.tigerbrokers.stock.openapi.client.struct;
 /**
  * @author  zhaolei
  * @since  2019/3/12
- * 描述
  */
 public class ClientHeartBeatData {
 
   /**
-   * client能保证发送心跳的最小间隔，0代表client不发送心跳
+   * The client can guarantee the minimum interval for sending heartbeats, 0 means the client does not send heartbeats
    */
   private int sendInterval = 0;
   /**
-   * client希望收到server心跳的间隔，0代表client不希望收到server的心跳
+   * The client wants to receive the heartbeat interval of the server, 0 means the client does not want to receive the server's heartbeat
    */
   private int receiveInterval = 0;
 
