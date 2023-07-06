@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 public class QueryOrderRequest extends TigerCommonRequest implements TigerRequest<BatchOrderResponse> {
 
   public QueryOrderRequest() {
-    new QueryOrderRequest(MethodName.ORDERS);
+    this(MethodName.ORDERS);
   }
 
   public QueryOrderRequest(MethodName methodName) {
