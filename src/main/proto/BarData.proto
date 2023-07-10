@@ -1,0 +1,19 @@
+syntax = "proto3";
+package com.tigerbrokers.stock.openapi.client.socket.data.pb;
+
+option java_package = "com.tigerbrokers.stock.openapi.client.socket.data.pb";
+option java_multiple_files = true;
+
+message BarData {
+  string ktype = 1;
+  uint64 minute = 2; // timestamp
+  string symbol = 3;
+  double open = 4;
+  double close = 5;
+  double high = 6;
+  double low = 7;
+  double avg = 8; // average price
+  int64 volume = 9;
+  int32 count = 10;
+  optional double amount = 11;
+}
