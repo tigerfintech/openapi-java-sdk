@@ -23,8 +23,10 @@ public class SubscribedSymbol {
   private int askBidUsed;
 
   private int tradeTickLimit;
-
   private int tradeTickUsed;
+
+  private int klineLimit;
+  private int klineUsed;
 
   /**
    * subscribed quote symbol's detail
@@ -40,6 +42,11 @@ public class SubscribedSymbol {
    * subscribed trade-tick symbol's detail
    */
   Set<String> subscribedTradeTickSymbols;
+
+  /**
+   * subscribed kline symbol's detail
+   */
+  Set<String> subscribedKlineSymbols;
 
   Set<String> subscribedMarketQuote;
 
@@ -121,5 +128,29 @@ public class SubscribedSymbol {
 
   public void setSubscribedTradeTickSymbols(Set<String> subscribedTradeTickSymbols) {
     this.subscribedTradeTickSymbols = subscribedTradeTickSymbols;
+  }
+
+  public int getKlineLimit() {
+    return klineLimit;
+  }
+
+  public void setKlineLimit(int klineLimit) {
+    this.klineLimit = klineLimit;
+  }
+
+  public int getKlineUsed() {
+    return klineUsed;
+  }
+
+  public void setKlineUsed(int klineUsed) {
+    this.klineUsed = klineUsed;
+  }
+
+  public Set<String> getSubscribedKlineSymbols() {
+    return subscribedKlineSymbols;
+  }
+
+  public void setSubscribedKlineSymbols(Set<String> subscribedKlineSymbols) {
+    this.subscribedKlineSymbols = subscribedKlineSymbols;
   }
 }
