@@ -39,6 +39,28 @@ public class QuoteSymbolRequest extends TigerCommonRequest implements TigerReque
     return request;
   }
 
+  public QuoteMarketModel getApiModel() {
+    if (apiModel == null) {
+      apiModel = new QuoteMarketModel();
+    }
+    return (QuoteMarketModel)apiModel;
+  }
+
+  public QuoteSymbolRequest packageName(PackageName packageName) {
+    getApiModel().setPackageName(packageName);
+    return this;
+  }
+
+  public QuoteSymbolRequest market(Market market) {
+    getApiModel().setMarket(market);
+    return this;
+  }
+
+  public QuoteSymbolRequest includeOTC(Boolean includeOTC) {
+    getApiModel().setIncludeOTC(includeOTC);
+    return this;
+  }
+
   @Override
   public Class<QuoteSymbolResponse> getResponseClass() {
     return QuoteSymbolResponse.class;
