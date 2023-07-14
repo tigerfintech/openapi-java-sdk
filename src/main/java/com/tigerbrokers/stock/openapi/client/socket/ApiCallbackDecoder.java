@@ -96,7 +96,7 @@ public class ApiCallbackDecoder {
         }
         break;
       case TradeTick:
-        callback.tradeTickChange(TradeTickUtil.convert(pushData.getTradeTickData()));
+        callback.tradeTickChange(pushData.getTickData());
         break;
       case QuoteDepth:
         callback.depthQuoteChange(pushData.getQuoteDepthData());

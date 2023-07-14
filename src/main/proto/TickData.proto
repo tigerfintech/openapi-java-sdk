@@ -1,0 +1,15 @@
+syntax = "proto3";
+package com.tigerbrokers.stock.openapi.client.socket.data.pb;
+
+option java_package = "com.tigerbrokers.stock.openapi.client.socket.data.pb";
+option java_multiple_files = true;
+
+message TickData {
+  string symbol = 1;
+  int64 time = 2;      // Execution time of transaction.
+  float price = 3;     // Transaction price.
+  int32 volume = 4;    // Transaction volume.
+  int64 sequence = 5;  // The order in which upstream data arrives, for reference only.
+  int32 dir = 6;       // buy/sell direction
+  int32 type = 7;      // Indicate upward or downward movement in the price of a security.
+}
