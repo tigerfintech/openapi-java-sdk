@@ -96,8 +96,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private static final long RECONNECT_DELAY_TIME = 3 * 1000;
   private static final long RECONNECT_INTERVAL_TIME = 10 * 1000;
 
-  private int clientSendInterval = 30000;
-  private int clientReceiveInterval = 30000;
+  private int clientSendInterval = 10000;
+  private int clientReceiveInterval = 10000;
   private static final int CLIENT_SEND_INTERVAL_MIN = 10000;
   private static final int CLIENT_RECEIVE_INTERVAL_MIN = 10000;
 
