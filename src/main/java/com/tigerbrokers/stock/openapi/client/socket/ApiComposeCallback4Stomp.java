@@ -95,7 +95,7 @@ public abstract class ApiComposeCallback4Stomp implements ApiComposeCallback {
   }
 
   @Override
-  public void barPush(BarData data) {
+  public void barChange(BarData data) {
     // do nothing for protobuf data
   }
 
