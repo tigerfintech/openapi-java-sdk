@@ -96,6 +96,11 @@ public class ClientConfig {
    */
   public int failRetryCounts = TigerApiConstants.DEFAULT_FAIL_RETRY_COUNT;
 
+  /**
+   * subscribed tradetick data, whether it is a full version or a snapshot version
+   */
+  public boolean isGetFullTick = false;
+
   private ClientConfig() {
   }
 
