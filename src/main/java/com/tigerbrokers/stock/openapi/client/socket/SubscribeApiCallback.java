@@ -40,11 +40,11 @@ public interface SubscribeApiCallback {
 
   void depthQuoteChange(QuoteDepthData data);
 
+  void barChange(BarData data);
+
   void stockTopPush(StockTopData data);
 
   void optionTopPush(OptionTopData data);
-
-  void barPush(BarData data);
 
   void subscribeEnd(int id, String subject, String result);
 
