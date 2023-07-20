@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tigerbrokers.stock.openapi.client.socket.data.TradeTick;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.AssetData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.BarData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.OptionTopData;
@@ -58,7 +59,11 @@ public abstract class ApiComposeCallback4Stomp implements ApiComposeCallback {
   }
 
   @Override
-  public void tradeTickChange(TickData data) {
+  public void tradeTickChange(TradeTick data) {
+    // do nothing for protobuf data
+  }
+  @Override
+  public void fullTickChange(TickData data) {
     // do nothing for protobuf data
   }
 
@@ -95,7 +100,7 @@ public abstract class ApiComposeCallback4Stomp implements ApiComposeCallback {
   }
 
   @Override
-  public void barPush(BarData data) {
+  public void barChange(BarData data) {
     // do nothing for protobuf data
   }
 

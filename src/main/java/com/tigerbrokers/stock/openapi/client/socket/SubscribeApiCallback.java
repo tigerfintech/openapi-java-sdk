@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
+import com.tigerbrokers.stock.openapi.client.socket.data.TradeTick;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.AssetData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.BarData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.OptionTopData;
@@ -27,7 +28,8 @@ public interface SubscribeApiCallback {
 
   void assetChange(AssetData data);
 
-  void tradeTickChange(TickData data);
+  void tradeTickChange(TradeTick data);
+  void fullTickChange(TickData data);
 
   void quoteChange(QuoteBasicData data);
   void quoteAskBidChange(QuoteBBOData data);
