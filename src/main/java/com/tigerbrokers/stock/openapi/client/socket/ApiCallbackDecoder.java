@@ -120,7 +120,7 @@ public class ApiCallbackDecoder {
         callback.optionTopPush(pushData.getOptionTopData());
         break;
       case Kline:
-        callback.barPush(pushData.getBarData());
+        callback.barChange(pushData.getBarData());
         break;
       default:
         ApiLogger.info("push data cannot be processed. {}", ProtoMessageUtil.toJson(msg));
