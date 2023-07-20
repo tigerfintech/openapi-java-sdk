@@ -54,7 +54,7 @@ public class ProtoMessageUtil {
         .setSdkVersion(SdkVersionUtils.getSdkVersion())
         .setTigerId(tigerId)
         .setSign(sign)
-        .setIsGetFullTick(ClientConfig.DEFAULT_CONFIG.useFullStockTick)
+        .setUseFullStockTick(ClientConfig.DEFAULT_CONFIG.useFullStockTick)
         .setSendInterval(sendInterval).setReceiveInterval(receiveInterval);
 
     builder.setConnect(conBuild.build());
