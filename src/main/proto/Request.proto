@@ -19,7 +19,7 @@ message Request {
     optional string acceptVersion = 4;
     optional uint32 sendInterval = 5;
     optional uint32 receiveInterval = 6;
-    optional bool isGetFullTick = 7;
+    optional bool useFullStockTick = 7;
   }
 
   message Subscribe {
