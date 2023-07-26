@@ -206,6 +206,10 @@ public class TradeOrderModel extends ApiModel {
   @JSONField(name = "contract_legs")
   private List<ContractLeg> contractLegs;
 
+  /** Order by amount (such as general fund subscription) */
+  @JSONField(name = "cash_amount")
+  private Double cashAmount;
+
   public TradeOrderModel() {
   }
 
@@ -572,6 +576,14 @@ public class TradeOrderModel extends ApiModel {
     this.contractLegs = contractLegs;
   }
 
+  public Double getCashAmount() {
+    return cashAmount;
+  }
+
+  public void setCashAmount(Double cashAmount) {
+    this.cashAmount = cashAmount;
+  }
+
   @Override
   public String toString() {
     return "TradeOrderModel{" +
@@ -616,6 +628,7 @@ public class TradeOrderModel extends ApiModel {
         ", stopLossTrailingPercent=" + stopLossTrailingPercent +
         ", stopLossTrailingAmount=" + stopLossTrailingAmount +
         ", comboType=" + comboType +
+        ", cashAmount=" + cashAmount +
         '}';
   }
 }
