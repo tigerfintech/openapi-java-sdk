@@ -32,7 +32,7 @@ public class PlaceOrderRequestValidator implements RequestValidator<TradeOrderMo
     if (model.getOrderType() == null) {
       throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "order_type");
     }
-    if (SecType.FUND.name().equals(model.getSecType())) {
+    if (SecType.FUND == model.getSecType()) {
       if (model.getCashAmount() == null) {
         throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "cash_amount");
       } else if (model.getCashAmount() <= 0) {
