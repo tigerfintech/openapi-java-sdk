@@ -120,6 +120,14 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     return newRequest(tradeOrderModel);
   }
 
+  public static TradeOrderRequest buildAmountOrder(String account, ContractItem contract,
+      ActionType action, Double cashAmount) {
+    TradeOrderModel tradeOrderModel = buildTradeOrderModel(account, contract, action, null);
+    tradeOrderModel.setOrderType(OrderType.MKT);
+    tradeOrderModel.setCashAmount(cashAmount);
+    return newRequest(tradeOrderModel);
+  }
+
   public static TradeOrderModel buildTradeOrderModel(String account, ContractItem contract,
       ActionType action, Integer quantity) {
     if (contract == null) {
@@ -335,6 +343,12 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
   public TradeOrderRequest setTotalQuantity(Integer totalQuantity) {
     TradeOrderModel model = (TradeOrderModel) getApiModel();
     model.setTotalQuantity(totalQuantity);
+    return this;
+  }
+
+  public TradeOrderRequest setCashAmount(Double cashAmount) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setCashAmount(cashAmount);
     return this;
   }
 

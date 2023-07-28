@@ -61,6 +61,11 @@ public class OrderParameter implements Serializable {
   @JSONField(name = "total_quantity")
   private Integer totalQuantity;
   /**
+   * order cash amount
+   */
+  @JSONField(name = "cash_amount")
+  private Double cashAmount;
+  /**
    * 有效时间
    * DAY：当日有效
    * GTC：取消前有效
@@ -267,6 +272,14 @@ public class OrderParameter implements Serializable {
 
   public void setTotalQuantity(Integer totalQuantity) {
     this.totalQuantity = totalQuantity;
+  }
+
+  public Double getCashAmount() {
+    return cashAmount;
+  }
+
+  public void setCashAmount(Double cashAmount) {
+    this.cashAmount = cashAmount;
   }
 
   public TimeInForce getTimeInForce() {
@@ -569,6 +582,7 @@ public class OrderParameter implements Serializable {
         ", action=" + action +
         ", currency=" + currency +
         ", totalQuantity=" + totalQuantity +
+        ", cashAmount=" + cashAmount +
         ", timeInForce=" + timeInForce +
         ", expireTime=" + expireTime +
         ", orderType=" + orderType +

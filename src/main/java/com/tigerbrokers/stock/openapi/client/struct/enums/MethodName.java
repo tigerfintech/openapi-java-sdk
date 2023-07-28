@@ -110,6 +110,14 @@ public enum MethodName {
   STOCK_INDUSTRY("stock_industry", MethodType.QUOTE),
 
   /**
+   * fund quote
+   */
+  FUND_ALL_SYMBOLS("fund_all_symbols", MethodType.QUOTE),
+  FUND_CONTRACTS("fund_contracts", MethodType.QUOTE),
+  FUND_QUOTE("fund_quote", MethodType.QUOTE),
+  FUND_HISTORY_QUOTE("fund_history_quote", MethodType.QUOTE),
+
+  /**
    * grab quote
    */
   GRAB_QUOTE_PERMISSION("grab_quote_permission", MethodType.QUOTE),

@@ -35,7 +35,11 @@ public class TradeOrder implements Serializable {
 
   private Long totalQuantity;
   private Long filledQuantity;
+  private Integer filledQuantityScale;
   private Double cashQuantity;
+  private Double totalCashAmount;
+  private Double filledCashAmount;
+  private Double refundCashAmount;
   private Double lastFillPrice;
   private Double avgFillPrice;
   private String timeInForce;
@@ -46,6 +50,7 @@ public class TradeOrder implements Serializable {
   private Double commission;
   private Double realizedPnl;
   private String remark;
+  private String triggerStatus;
 
   private Boolean liquidation;
   private Long openTime;
@@ -56,6 +61,7 @@ public class TradeOrder implements Serializable {
 
   private String attrDesc;
   private String userMark;
+  private List<String> attrList;
 
   private Integer ocaGroupId;
   private String comboLegs;
@@ -509,5 +515,53 @@ public class TradeOrder implements Serializable {
 
   public void setLegs(List<OrderLeg> legs) {
     this.legs = legs;
+  }
+
+  public Integer getFilledQuantityScale() {
+    return filledQuantityScale;
+  }
+
+  public void setFilledQuantityScale(Integer filledQuantityScale) {
+    this.filledQuantityScale = filledQuantityScale;
+  }
+
+  public Double getTotalCashAmount() {
+    return totalCashAmount;
+  }
+
+  public void setTotalCashAmount(Double totalCashAmount) {
+    this.totalCashAmount = totalCashAmount;
+  }
+
+  public Double getFilledCashAmount() {
+    return filledCashAmount;
+  }
+
+  public void setFilledCashAmount(Double filledCashAmount) {
+    this.filledCashAmount = filledCashAmount;
+  }
+
+  public Double getRefundCashAmount() {
+    return refundCashAmount;
+  }
+
+  public void setRefundCashAmount(Double refundCashAmount) {
+    this.refundCashAmount = refundCashAmount;
+  }
+
+  public String getTriggerStatus() {
+    return triggerStatus;
+  }
+
+  public void setTriggerStatus(String triggerStatus) {
+    this.triggerStatus = triggerStatus;
+  }
+
+  public List<String> getAttrList() {
+    return attrList;
+  }
+
+  public void setAttrList(List<String> attrList) {
+    this.attrList = attrList;
   }
 }
