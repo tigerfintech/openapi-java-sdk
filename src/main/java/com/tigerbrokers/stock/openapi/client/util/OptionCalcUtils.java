@@ -497,7 +497,7 @@ public class OptionCalcUtils {
         if (quoteMarketResponse != null && quoteMarketResponse.isSuccess()) {
           List<MarketItem> marketItems = quoteMarketResponse.getMarketItems();
           if (!isEmpty(marketItems)) {
-            return "交易中".equals(marketItems.get(0).getMarketStatus());
+            return "TRADING".equals(marketItems.get(0).getStatus());
           }
         }
         return false;
