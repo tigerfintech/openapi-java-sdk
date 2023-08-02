@@ -6,8 +6,10 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
  */
 public enum TimeZoneId {
 
+  HongKong("Asia/Hong_Kong"),
   Shanghai("Asia/Shanghai"),
   NewYork("America/New_York"),
+  Chicago("America/Chicago"),
   Singapore("Asia/Singapore"),
   Sydney("Australia/Sydney"),
   Auckland("Pacific/Auckland"),
