@@ -428,7 +428,7 @@ public class OptionCalcUtils {
    */
   public static OptionFundamentals getOptionFundamentals(TigerHttpClient client, String symbol, String right,
       String strike, String expiry) throws Exception {
-    if (!DateUtils.isDateBeforeToday(expiry)) {
+    if (!DateUtils.isDateBeforeToday(expiry, TimeZoneId.NewYork)) {
       throw new RuntimeException("Option expiration date cannot be earlier than the current date.");
     }
 
@@ -445,17 +445,17 @@ public class OptionCalcUtils {
     if (optionBriefItem.getBidPrice() == null) {
       optionBriefItem.setBidPrice(0D);
     }
-    if (optionBriefItem.getStrike() == null) {
+    double target = (optionBriefItem.getAskPrice() + optionBriefItem.getBidPrice()) / 2;
+    if (optionBriefItem.getStrike() == null || target <= 0D) {
       throw new RuntimeException("Unable to obtain option summary information.");
     }
-    double target = (optionBriefItem.getAskPrice() + optionBriefItem.getBidPrice()) / 2;
 
     OptionFundamentals result =
         calcOptionIndex(optionBriefItem.getRatesBonds(), optionBriefItem.getExpiry(),
             DateUtils.parseEpochMill(dividendTask.get().getExecuteDate()), latestPriceTask.get(), target,
             dividendTask.get().getAmount(), Double.parseDouble(optionBriefItem.getStrike()), optionBriefItem.getRight(),
             System.currentTimeMillis(), marketStateTask.get());
-    result.setOpenInterest(optionBriefItem.getOpenInterest());
+    result.setOpenInterest(optionBriefItem.getOpenInterest() == null ? 0 : optionBriefItem.getOpenInterest());
     String volatility = null;
     if (optionBriefItem.getVolatility() != null && optionBriefItem.getVolatility().contains("%")) {
       volatility = optionBriefItem.getVolatility().replaceAll("%", "");
