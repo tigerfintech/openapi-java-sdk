@@ -428,7 +428,7 @@ public class OptionCalcUtils {
    */
   public static OptionFundamentals getOptionFundamentals(TigerHttpClient client, String symbol, String right,
       String strike, String expiry) throws Exception {
-    if (!DateUtils.isDateBeforeToday(expiry, TimeZoneId.NewYork)) {
+    if (DateUtils.isDateBeforeToday(expiry, TimeZoneId.NewYork)) {
       throw new RuntimeException("Option expiration date cannot be earlier than the current date.");
     }
 
