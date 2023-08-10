@@ -35,7 +35,7 @@ public class FinancialExchangeRateItem extends ApiModel {
   @Override
   public String toString() {
     return "FinancialDailyItem{" +
-        "symbol='" + symbol + '\'' +
+        "currency='" + currency + '\'' +
         ", dailyValueList=" + JSONObject.toJSONString(dailyValueList) +
         '}';
   }
