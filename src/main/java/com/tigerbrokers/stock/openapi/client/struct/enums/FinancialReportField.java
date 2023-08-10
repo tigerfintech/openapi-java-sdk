@@ -496,6 +496,7 @@ public enum FinancialReportField {
   unleveredFreeCashFlowMargin("unlevered_free_cash_flow_margin", 4437L, 0),
   normalizedNetIncomeMargin("normalized_net_income_margin", 4420L, 0),
   floatPercent("float_percent", 4170L, 0),
+
   gainAssetsCfBnk("gain_assets_cf_bnk", 2089L, 0),
   gainLoansRec("gain_loans_rec", 195L, 0),
   incEquityRecBnk("inc_equity_rec_bnk", 46L, 0),
