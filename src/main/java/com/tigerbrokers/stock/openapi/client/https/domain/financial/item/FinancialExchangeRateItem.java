@@ -12,15 +12,15 @@ import java.util.List;
  */
 public class FinancialExchangeRateItem extends ApiModel {
 
-  private String symbol;
+  private String currency;
   private List<DailyValue> dailyValueList;
 
-  public String getSymbol() {
-    return symbol;
+  public String getCurrency() {
+    return currency;
   }
 
-  public void setSymbol(String symbol) {
-    this.symbol = symbol;
+  public void setCurrency(String currency) {
+    this.currency = currency;
   }
 
   public List<DailyValue> getDailyValueList() {
