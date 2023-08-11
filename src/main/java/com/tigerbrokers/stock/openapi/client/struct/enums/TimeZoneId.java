@@ -27,7 +27,7 @@ public enum TimeZoneId {
 
   public static TimeZoneId getTimeZoneIdByMarket(Market market) {
     if (market == null) {
-      return Shanghai;
+      return HongKong;
     }
     switch (market) {
       case US:
@@ -41,10 +41,11 @@ public enum TimeZoneId {
       case SG:
         return Singapore;
       case CN:
+        return Shanghai;
       case HK:
-        return Shanghai;
+        return HongKong;
       default:
-        return Shanghai;
+        return HongKong;
     }
   }
 }

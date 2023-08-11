@@ -108,6 +108,8 @@ public enum MethodName {
   INDUSTRY_LIST("industry_list", MethodType.QUOTE),
   INDUSTRY_STOCKS("industry_stocks", MethodType.QUOTE),
   STOCK_INDUSTRY("stock_industry", MethodType.QUOTE),
+  FINANCIAL_CURRENCY("financial_currency", MethodType.QUOTE),
+  FINANCIAL_EXCHANGE_RATE("financial_exchange_rate", MethodType.QUOTE),
 
   /**
    * fund quote
