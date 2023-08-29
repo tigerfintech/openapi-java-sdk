@@ -98,6 +98,7 @@ public enum MethodName {
   FUTURE_REAL_TIME_QUOTE("future_real_time_quote", MethodType.QUOTE),
   FUTURE_TICK("future_tick", MethodType.QUOTE),
   FUTURE_TRADING_DATE("future_trading_date", MethodType.QUOTE),
+  FUTURE_HISTORY_MAIN_CONTRACT("future_history_main_contract", MethodType.QUOTE),
 
   /**
    * fundmental data
