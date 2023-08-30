@@ -25,8 +25,8 @@ public class FutureHistoryMainContractRequest extends TigerCommonRequest impleme
   /**
    * build FutureHistoryMainContractRequest
    * @param contractCodes
-   * @param beginTime included
-   * @param endTime excluded
+   * @param beginTime begin time, excluded
+   * @param endTime end time, included
    * @return
    */
   public static FutureHistoryMainContractRequest newRequest(List<String> contractCodes,
@@ -47,8 +47,8 @@ public class FutureHistoryMainContractRequest extends TigerCommonRequest impleme
   /**
    * build FutureHistoryMainContractRequest
    * @param contractCodes
-   * @param beginTime included, yyyy-MM-dd
-   * @param endTime excluded, yyyy-MM-dd
+   * @param beginTime begin time, excluded, yyyy-MM-dd
+   * @param endTime end time, included, yyyy-MM-dd
    * @param zoneId time zone
    * @return
    */
