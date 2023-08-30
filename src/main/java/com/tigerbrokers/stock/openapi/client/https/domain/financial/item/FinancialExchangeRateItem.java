@@ -40,7 +40,7 @@ public class FinancialExchangeRateItem extends ApiModel {
         '}';
   }
 
-  private class DailyValue {
+  public class DailyValue {
     private Date date;
     private BigDecimal value;
 
