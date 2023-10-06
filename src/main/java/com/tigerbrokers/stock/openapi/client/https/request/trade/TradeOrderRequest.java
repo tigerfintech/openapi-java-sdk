@@ -22,6 +22,8 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
 import com.tigerbrokers.stock.openapi.client.util.AccountUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class TradeOrderRequest extends TigerCommonRequest implements TigerRequest<TradeOrderResponse> {
@@ -232,6 +234,45 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
       model.addAlgoParam(TagValue.buildTagValue(TradeConstants.PARTICIPATION_RATE, participationRate));
     }
     return newRequest(model);
+  }
+
+  public static TradeOrderRequest buildOCABracketsOrder(
+          ContractItem contract, ActionType action, Integer quantity,
+          Double profitTakerPrice, TimeInForce profitTakerTif, Boolean profitTakerRth,
+          Double stopLossPrice, Double stopLossLimitPrice, TimeInForce stopLossTif, Boolean stopLossRth) {
+    return buildOCABracketsOrder(ClientConfig.DEFAULT_CONFIG.defaultAccount, contract, action, quantity,
+            profitTakerPrice, profitTakerTif, profitTakerRth,
+            stopLossPrice, stopLossLimitPrice, stopLossTif, stopLossRth);
+  }
+
+  public static TradeOrderRequest buildOCABracketsOrder(
+          String account, ContractItem contract, ActionType action, Integer quantity,
+          Double profitTakerPrice, TimeInForce profitTakerTif, Boolean profitTakerRth,
+          Double stopLossPrice, Double stopLossLimitPrice, TimeInForce stopLossTif, Boolean stopLossRth) {
+    TradeOrderModel profitTakerOrder = buildTradeOrderModel(account, contract, action, quantity);
+    profitTakerOrder.setOrderType(OrderType.LMT);
+    profitTakerOrder.setLimitPrice(profitTakerPrice);
+    profitTakerOrder.setTimeInForce(profitTakerTif);
+    profitTakerOrder.setOutsideRth(profitTakerRth);
+
+    TradeOrderModel stopLossOrder = buildTradeOrderModel(account, contract, action, quantity);
+    if (stopLossLimitPrice == null) {
+      stopLossOrder.setOrderType(OrderType.STP);
+    } else {
+      stopLossOrder.setOrderType(OrderType.STP_LMT);
+      stopLossOrder.setLimitPrice(stopLossLimitPrice);
+    }
+    stopLossOrder.setAuxPrice(stopLossPrice);
+    stopLossOrder.setTimeInForce(stopLossTif);
+    stopLossOrder.setOutsideRth(stopLossRth);
+
+    List<TradeOrderModel> ocaOrders = new ArrayList<>();
+    ocaOrders.add(profitTakerOrder);
+    ocaOrders.add(stopLossOrder);
+
+    TradeOrderModel tradeOrderModel = new TradeOrderModel();
+    tradeOrderModel.setOcaOrders(ocaOrders);
+    return newRequest(tradeOrderModel);
   }
 
   public static TradeOrderRequest newRequest(TradeOrderModel model) {

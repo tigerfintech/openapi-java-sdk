@@ -1,6 +1,8 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.trade.model;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.ContractLeg;
 import com.tigerbrokers.stock.openapi.client.struct.TagValue;
@@ -10,6 +12,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -205,6 +208,9 @@ public class TradeOrderModel extends ApiModel {
 
   @JSONField(name = "contract_legs")
   private List<ContractLeg> contractLegs;
+
+  @JSONField(name = "oca_orders")
+  private List<TradeOrderModel> ocaOrders;
 
   /** Order by amount (such as general fund subscription) */
   @JSONField(name = "cash_amount")
@@ -576,6 +582,14 @@ public class TradeOrderModel extends ApiModel {
     this.contractLegs = contractLegs;
   }
 
+  public List<TradeOrderModel> getOcaOrders() {
+    return ocaOrders;
+  }
+
+  public void setOcaOrders(List<TradeOrderModel> ocaOrders) {
+    this.ocaOrders = ocaOrders;
+  }
+
   public Double getCashAmount() {
     return cashAmount;
   }
@@ -629,6 +643,7 @@ public class TradeOrderModel extends ApiModel {
         ", stopLossTrailingAmount=" + stopLossTrailingAmount +
         ", comboType=" + comboType +
         ", cashAmount=" + cashAmount +
+        ", ocaOrders=" + ocaOrders == null ? "" : JSONObject.toJSONString(ocaOrders, SerializerFeature.WriteEnumUsingToString) +
         '}';
   }
 }
