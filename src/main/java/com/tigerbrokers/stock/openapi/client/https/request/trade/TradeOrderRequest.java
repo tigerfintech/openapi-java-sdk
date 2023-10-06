@@ -272,6 +272,7 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
 
     TradeOrderModel tradeOrderModel = new TradeOrderModel();
     tradeOrderModel.setOcaOrders(ocaOrders);
+    tradeOrderModel.setAccount(account);
     return newRequest(tradeOrderModel);
   }
 

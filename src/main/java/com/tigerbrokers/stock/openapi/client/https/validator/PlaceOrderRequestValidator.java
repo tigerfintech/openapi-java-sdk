@@ -17,6 +17,12 @@ public class PlaceOrderRequestValidator implements RequestValidator<TradeOrderMo
 
   @Override
   public void validate(TradeOrderModel model) throws TigerApiException {
+    if (model.getOcaOrders() != null && model.getOcaOrders().size() > 0) {
+      for (TradeOrderModel item : model.getOcaOrders()) {
+        validate(item);
+      }
+      return;
+    }
     if (StringUtils.isEmpty(model.getAccount())) {
       throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "account");
     }
