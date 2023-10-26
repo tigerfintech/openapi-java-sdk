@@ -5,5 +5,5 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
  * Created by lijiawen on 2022/06/23.
  */
 public enum TradeSession {
-  PreMarket, Regular, AfterHours
+  PreMarket, Regular, AfterHours, All
 }
