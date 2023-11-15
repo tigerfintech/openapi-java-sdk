@@ -38,7 +38,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 期权指标计算器
+ * Options Indicator Calculator
  */
 public class OptionCalcUtils {
 
@@ -52,13 +52,13 @@ public class OptionCalcUtils {
 
   private static ExecutorService executorService = new ThreadPoolExecutor(4, 4,
       0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(1024), new ThreadFactory() {
-        @Override
-        public Thread newThread(Runnable r) {
-          Thread t = Executors.defaultThreadFactory().newThread(r);
-          t.setDaemon(true);
-          return t;
-        }
-      }
+    @Override
+    public Thread newThread(Runnable r) {
+      Thread t = Executors.defaultThreadFactory().newThread(r);
+      t.setDaemon(true);
+      return t;
+    }
+  }
       , new ThreadPoolExecutor.AbortPolicy());
 
   private static double N(double z) {
@@ -105,7 +105,7 @@ public class OptionCalcUtils {
   }
 
   private static double optionPriceAmericanCallApproximatedBaw(double S, double X, double r, double b, double sigma,
-      double time) {
+                                                               double time) {
     double sigma_sqr = sigma * sigma;
     double time_sqrt = Math.sqrt(time);
     double nn = 2.0 * b / sigma_sqr;
@@ -152,7 +152,7 @@ public class OptionCalcUtils {
   }
 
   private static double optionPriceAmericanPutApproximatedBaw(double S, double X, double r, double b, double sigma,
-      double time) {
+                                                              double time) {
     double sigma_sqr = sigma * sigma;
     double time_sqrt = Math.sqrt(time);
     double M = 2.0 * r / sigma_sqr;
@@ -196,7 +196,7 @@ public class OptionCalcUtils {
   }
 
   /**
-   * 买入盈利概率
+   * Buy Profit Probability
    */
   private static double optionBuyCallProfitRate(double S, double K, double p, double r, double sigma, double time) {
     double time_sqrt = Math.sqrt(time);
@@ -206,7 +206,7 @@ public class OptionCalcUtils {
   }
 
   /**
-   * 买入盈利概率
+   * Buy Profit Probability
    */
   private static double optionBuyPutProfitRate(double S, double K, double p, double r, double sigma, double time) {
     double time_sqrt = Math.sqrt(time);
@@ -217,9 +217,9 @@ public class OptionCalcUtils {
   }
 
   /**
-   * 求call的隐含波动率
+   * Calculate the implied volatility of a call
    *
-   * @param target 目标价
+   * @param target target price
    * @param S 股票 价格
    * @param X 行权价格
    * @param r 国债利率
@@ -265,7 +265,7 @@ public class OptionCalcUtils {
   }
 
   /**
-   * 求put的隐含波动率
+   * Calculate the implied volatility of a put
    *
    * @param target 目标价
    * @param S 股票 价格
@@ -293,10 +293,10 @@ public class OptionCalcUtils {
   }
 
   private static OptionMetrics optionPricePartialsCallBlackScholes(double S,     // spot price
-                                                                              double K,     // Strike (exercise) price,
-                                                                              double r,     // interest rate
-                                                                              double sigma, // volatility
-                                                                              double time) {   // partial wrt r
+                                                                   double K,     // Strike (exercise) price,
+                                                                   double r,     // interest rate
+                                                                   double sigma, // volatility
+                                                                   double time) {   // partial wrt r
     double time_sqrt = Math.sqrt(time);
     double d1 = (Math.log(S / K) + r * time) / (sigma * time_sqrt) + 0.5 * sigma * time_sqrt;
     double d2 = d1 - (sigma * time_sqrt);
@@ -370,8 +370,8 @@ public class OptionCalcUtils {
    * @param isTrading 是否在正股交易时间
    */
   private static OptionFundamentals calcOptionIndex(double r, long expiryLong, long executeDateLong,
-      double latestPrice, double targetPrice, double dividendAmount, double strike, String type, long currentTime,
-      boolean isTrading) {
+                                                    double latestPrice, double targetPrice, double dividendAmount, double strike, String type, long currentTime,
+                                                    boolean isTrading) {
 
     OptionFundamentals result = new OptionFundamentals();
     double diff = ((expiryLong - currentTime) /
@@ -416,25 +416,29 @@ public class OptionCalcUtils {
   }
 
   /**
-   * 该方法封装了获取期权基本面信息的请求过程
+   * Get option fundamental information（include option greek values）
    *
    * @param client TigerHttpClient
-   * @param symbol 股票代码
+   * @param symbol Stock code
    * @param right CALL or PUT
-   * @param strike 行权价
-   * @param expiry 过期日（yyyy-MM-dd）
-   * @return 期权基本面信息
+   * @param strike strike price
+   * @param expiry Expiration date（yyyy-MM-dd）
+   * @param underlyingSymbol underlying symbol（if null, If empty, defaults to the same value as 'symbol'）
+   * @return option fundamental information
    * @throws Exception runtime exception
    */
   public static OptionFundamentals getOptionFundamentals(TigerHttpClient client, String symbol, String right,
-      String strike, String expiry) throws Exception {
+                                                         String strike, String expiry, String underlyingSymbol) throws Exception {
     if (DateUtils.isDateBeforeToday(expiry, TimeZoneId.NewYork)) {
       throw new RuntimeException("Option expiration date cannot be earlier than the current date.");
+    }
+    if (StringUtils.isEmpty(underlyingSymbol)) {
+      underlyingSymbol = symbol;
     }
 
     FutureTask<CorporateDividendItem> dividendTask = getCorporateDividendTask(client, symbol);
     FutureTask<Boolean> marketStateTask = getMarketStateTask(client);
-    FutureTask<Double> latestPriceTask = getLatestPriceTask(client, symbol);
+    FutureTask<Double> latestPriceTask = getLatestPriceTask(client, underlyingSymbol);
     FutureTask<OptionBriefItem> optionBriefTask =
         getOptionBriefTask(client, symbol, right, strike, DateUtils.parseEpochMill(expiry, TimeZoneId.NewYork));
 
@@ -534,7 +538,7 @@ public class OptionCalcUtils {
   }
 
   private static FutureTask<OptionBriefItem> getOptionBriefTask(TigerHttpClient client, String symbol, String right,
-      String strike, long expiryDate) {
+                                                                String strike, long expiryDate) {
     FutureTask<OptionBriefItem> optionBriefItemTask = new FutureTask<>(new Callable<OptionBriefItem>() {
       @Override
       public OptionBriefItem call() throws Exception {
@@ -558,13 +562,13 @@ public class OptionCalcUtils {
   }
 
   public static OptionFundamentals calcOptionIndex(Right optionType, double underlying, double strike, double riskFreeRate,
-                                                         double dividendRate, double impliedVolatility, LocalDate settlementDate, LocalDate expirationDate) {
+                                                   double dividendRate, double impliedVolatility, LocalDate settlementDate, LocalDate expirationDate) {
 
     FDAmericanDividendOptionHelper helper = new FDAmericanDividendOptionHelper(optionType == Right.CALL ? Option.Type.Call : Option.Type.Put, underlying, strike,
-            riskFreeRate, dividendRate, impliedVolatility,
-            new org.jquantlib.time.Date(settlementDate.getDayOfMonth(), settlementDate.getMonthValue(), settlementDate.getYear()),
-            new org.jquantlib.time.Date(expirationDate.getDayOfMonth(), expirationDate.getMonthValue(), expirationDate.getYear()),
-            new ArrayList<>(), new ArrayList<>());
+        riskFreeRate, dividendRate, impliedVolatility,
+        new org.jquantlib.time.Date(settlementDate.getDayOfMonth(), settlementDate.getMonthValue(), settlementDate.getYear()),
+        new org.jquantlib.time.Date(expirationDate.getDayOfMonth(), expirationDate.getMonthValue(), expirationDate.getYear()),
+        new ArrayList<>(), new ArrayList<>());
 
     OptionMetrics optionIndex = new OptionMetrics(helper.delta(), helper.gamma(), helper.theta(), helper.vega(), helper.rho());
     OptionFundamentals optionFundamentals = new OptionFundamentals();
