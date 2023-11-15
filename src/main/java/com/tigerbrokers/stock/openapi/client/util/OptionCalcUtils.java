@@ -452,7 +452,7 @@ public class OptionCalcUtils {
       underlyingSymbol = symbol;
     }
 
-    FutureTask<CorporateDividendItem> dividendTask = getCorporateDividendTask(client, symbol);
+    FutureTask<CorporateDividendItem> dividendTask = getCorporateDividendTask(client, underlyingSymbol);
     FutureTask<Boolean> marketStateTask = getMarketStateTask(client);
     FutureTask<Double> latestPriceTask = getLatestPriceTask(client, underlyingSymbol);
     FutureTask<OptionBriefItem> optionBriefTask =
