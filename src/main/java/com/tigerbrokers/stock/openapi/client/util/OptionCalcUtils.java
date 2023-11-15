@@ -423,12 +423,28 @@ public class OptionCalcUtils {
    * @param right CALL or PUT
    * @param strike strike price
    * @param expiry Expiration date（yyyy-MM-dd）
+   * @return option fundamental information
+   * @throws Exception runtime exception
+   */
+  public static OptionFundamentals getOptionFundamentals(TigerHttpClient client, String symbol, String right,
+                                                         String strike, String expiry) throws Exception {
+    return getOptionFundamentals(client, symbol, right, strike, expiry, null);
+  }
+
+  /**
+   * Get option fundamental information（include option greek values）
+   *
+   * @param client TigerHttpClient
+   * @param symbol Stock code
+   * @param right CALL or PUT
+   * @param strike strike price
+   * @param expiry Expiration date（yyyy-MM-dd）
    * @param underlyingSymbol underlying symbol（if null, If empty, defaults to the same value as 'symbol'）
    * @return option fundamental information
    * @throws Exception runtime exception
    */
   public static OptionFundamentals getOptionFundamentals(TigerHttpClient client, String symbol, String right,
-                                                         String strike, String expiry, String underlyingSymbol) throws Exception {
+      String strike, String expiry, String underlyingSymbol) throws Exception {
     if (DateUtils.isDateBeforeToday(expiry, TimeZoneId.NewYork)) {
       throw new RuntimeException("Option expiration date cannot be earlier than the current date.");
     }
