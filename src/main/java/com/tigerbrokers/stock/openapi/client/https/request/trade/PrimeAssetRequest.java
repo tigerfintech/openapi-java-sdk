@@ -46,6 +46,10 @@ public class PrimeAssetRequest extends TigerCommonRequest implements TigerReques
         return primeAssetRequest;
     }
 
+    public void setConsolidated(Boolean consolidated) {
+        ((PrimeAssetModel)apiModel).setConsolidated(consolidated);
+    }
+
     @Override
     public Class<PrimeAssetResponse> getResponseClass() {
         return PrimeAssetResponse.class;
