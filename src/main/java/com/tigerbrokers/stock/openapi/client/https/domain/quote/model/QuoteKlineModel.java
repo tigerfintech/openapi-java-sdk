@@ -16,7 +16,7 @@ public class QuoteKlineModel extends QuoteSymbolModel {
 
   @JSONField(name = "period")
   private String kType;
-  private RightOption right;
+  private String right;
   @JSONField(name = "begin_time")
   private Long beginTime;
   @JSONField(name = "end_time")
@@ -63,11 +63,15 @@ public class QuoteKlineModel extends QuoteSymbolModel {
     this.kType = kType;
   }
 
-  public RightOption getRight() {
+  public String getRight() {
     return right;
   }
 
   public void setRight(RightOption right) {
+    this.right = right == null ? null : right.name();
+  }
+
+  public void setRight(String right) {
     this.right = right;
   }
 
