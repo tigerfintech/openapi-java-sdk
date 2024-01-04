@@ -15,6 +15,7 @@ public class PrimeAssetModel extends ApiModel {
     private String baseCurrency;
     @JSONField(name = "secret_key")
     private String secretKey;
+    private Boolean consolidated;
 
     public PrimeAssetModel(String account) {
         this.account = account;
@@ -53,5 +54,13 @@ public class PrimeAssetModel extends ApiModel {
 
     public void setSecretKey(String secretKey) {
         this.secretKey = secretKey;
+    }
+
+    public Boolean getConsolidated() {
+        return consolidated;
+    }
+
+    public void setConsolidated(Boolean consolidated) {
+        this.consolidated = consolidated;
     }
 }
