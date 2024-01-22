@@ -18,10 +18,12 @@ public class TradeOrderItem extends ApiModel {
     this.id = id;
   }
 
+  @Deprecated
   public long getOrderId() {
     return orderId;
   }
 
+  @Deprecated
   public void setOrderId(long orderId) {
     this.orderId = orderId;
   }
