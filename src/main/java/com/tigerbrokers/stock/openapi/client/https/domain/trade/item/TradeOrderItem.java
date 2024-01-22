@@ -5,6 +5,7 @@ import java.util.List;
 
 public class TradeOrderItem extends ApiModel {
   private long id;
+  @Deprecated
   private long orderId;
   private List<Long> subIds;
   private List<TradeOrder> orders;
