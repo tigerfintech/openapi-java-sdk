@@ -1,6 +1,15 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
-import com.alibaba.fastjson.JSONObject;
+import com.tigerbrokers.stock.openapi.client.socket.data.TradeTick;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.AssetData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.OptionTopData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.OrderStatusData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.OrderTransactionData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.PositionData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteBBOData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteBasicData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteDepthData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.StockTopData;
 import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
 
 /**
@@ -9,25 +18,34 @@ import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
  */
 public interface SubscribeApiCallback {
 
-  void orderStatusChange(JSONObject jsonObject);
+  void orderStatusChange(OrderStatusData data);
 
-  void positionChange(JSONObject jsonObject);
+  void orderTransactionChange(OrderTransactionData data);
 
-  void assetChange(JSONObject jsonObject);
+  void positionChange(PositionData data);
 
-  void quoteChange(JSONObject jsonObject);
+  void assetChange(AssetData data);
 
-  void tradeTickChange(JSONObject jsonObject);
+  void tradeTickChange(TradeTick data);
 
-  void optionChange(JSONObject jsonObject);
+  void quoteChange(QuoteBasicData data);
+  void quoteAskBidChange(QuoteBBOData data);
 
-  void futureChange(JSONObject jsonObject);
+  void optionChange(QuoteBasicData data);
+  void optionAskBidChange(QuoteBBOData data);
 
-  void depthQuoteChange(JSONObject jsonObject);
+  void futureChange(QuoteBasicData data);
+  void futureAskBidChange(QuoteBBOData data);
 
-  void subscribeEnd(String id, String subject, JSONObject jsonObject);
+  void depthQuoteChange(QuoteDepthData data);
 
-  void cancelSubscribeEnd(String id, String subject, JSONObject jsonObject);
+  void stockTopPush(StockTopData data);
+
+  void optionTopPush(OptionTopData data);
+
+  void subscribeEnd(int id, String subject, String result);
+
+  void cancelSubscribeEnd(int id, String subject, String result);
 
   void getSubscribedSymbolEnd(SubscribedSymbol subscribedSymbol);
 }

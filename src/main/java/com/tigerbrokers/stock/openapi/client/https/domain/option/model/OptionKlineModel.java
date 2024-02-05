@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.https.domain.option.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
+import com.tigerbrokers.stock.openapi.client.struct.enums.SortDir;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
@@ -18,6 +19,12 @@ public class OptionKlineModel extends OptionCommonModel {
   private Long beginTime;
   @JSONField(name = "end_time")
   private Long endTime;
+  @JSONField(name = "period")
+  private String period;
+  private Integer limit;
+  /** sort directions  */
+  @JSONField(name = "sort_dir")
+  private SortDir sortDir;
 
   public OptionKlineModel() {
 
@@ -69,6 +76,30 @@ public class OptionKlineModel extends OptionCommonModel {
     }
   }
 
+  public String getPeriod() {
+    return period;
+  }
+
+  public void setPeriod(String period) {
+    this.period = period;
+  }
+
+  public Integer getLimit() {
+    return limit;
+  }
+
+  public void setLimit(Integer limit) {
+    this.limit = limit;
+  }
+
+  public SortDir getSortDir() {
+    return sortDir;
+  }
+
+  public void setSortDir(SortDir sortDir) {
+    this.sortDir = sortDir;
+  }
+
   @Override
   public String toString() {
     return "OptionKlineModel{" +
@@ -78,6 +109,8 @@ public class OptionKlineModel extends OptionCommonModel {
         ", right='" + right + '\'' +
         ", strike='" + strike + '\'' +
         ", expiry='" + expiry + '\'' +
+        ", period='" + period + '\'' +
+        ", sortDir='" + sortDir + '\'' +
         '}';
   }
 }

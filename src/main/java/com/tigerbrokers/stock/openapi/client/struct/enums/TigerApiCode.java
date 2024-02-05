@@ -30,8 +30,9 @@ public enum TigerApiCode implements CodeEnumType {
   SUBSCRIBE_OTHER_SUBJECT_ERROR(3005, "register subject (except quote) error"),
   UNSUBSCRIBE_ERROR(3006, "unsubscribe error"),
   UNKNOWN_STOMP_COMMAND(3007, "unknown stomp command"),
+  SUBSCRIBE_CHANNEL_ERROR(3008, "subscribe channel error"),
 
-  CONNECTION_KICK_OFF_ERROR(4001, "kick off by a new connection"),
+  CONNECTION_KICK_OUT_ERROR(4001, "kick out by a new connection"),
 
   SIGN_CHECK_FAILED(40013, "check sign and data fail"),
 
@@ -42,7 +43,6 @@ public enum TigerApiCode implements CodeEnumType {
   HTTP_BIZ_PARAM_VALUE_ERROR(10102, "client biz param error(%s is incorrect)"),
   HTTP_BIZ_PARAM_RANGE_ERROR(10103, "client biz param error('%s' cannot be greater than '%s')"),
   HTTP_BIZ_PARAM_CONCTRACT_SECTYPE_ERROR(10104, "client biz param error('sec_type':'%s' is not supported, all supported sec_type include:['OPT','WAR','IOPT'])"),
-  HTTP_BIZ_PARAM_PRICE_ERROR(10105, "client biz param error(%s)"),
   ;
 
   int code;

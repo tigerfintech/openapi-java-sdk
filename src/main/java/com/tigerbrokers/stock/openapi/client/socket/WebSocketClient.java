@@ -3,13 +3,17 @@ package com.tigerbrokers.stock.openapi.client.socket;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
-import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
-import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteKeyType;
+import com.tigerbrokers.stock.openapi.client.struct.Indicator;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
+import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
 import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
+import com.tigerbrokers.stock.openapi.client.util.ProtoMessageUtil;
 import com.tigerbrokers.stock.openapi.client.util.StompMessageUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import io.netty.bootstrap.Bootstrap;
@@ -23,6 +27,10 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.protobuf.ProtobufDecoder;
+import io.netty.handler.codec.protobuf.ProtobufEncoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 import io.netty.handler.codec.stomp.StompFrame;
 import io.netty.handler.codec.stomp.StompHeaders;
 import io.netty.handler.codec.stomp.StompSubframeAggregator;
@@ -32,12 +40,9 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import io.netty.util.internal.ConcurrentSet;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
@@ -56,17 +61,18 @@ import javax.net.ssl.SSLException;
  */
 public class WebSocketClient implements SubscribeAsyncApi {
 
-  public final static String STOMP_ENCODER = "stompEncoder";
-  public final static String STOMP_DECODER = "stompDecoder";
+  public final static String SOCKET_ENCODER = "socketEncoder";
+  public final static String SOCKET_DECODER = "socketDecoder";
   private static final String[] PROTOCOLS = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"};
 
   private ClientConfig clientConfig;
   private SslProvider sslProvider = null;
   private String url;
+
+  private boolean isProtobuf = true;
   private ApiAuthentication authentication;
   private ApiComposeCallback apiComposeCallback;
   private final Set<Subject> subscribeList = new CopyOnWriteArraySet<>();
-  private final Set<String> subscribeSymbols = new ConcurrentSet<>();
   private volatile CountDownLatch connectCountDown = new CountDownLatch(1);
 
   private EventLoopGroup group = null;
@@ -90,8 +96,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private static final long RECONNECT_DELAY_TIME = 3 * 1000;
   private static final long RECONNECT_INTERVAL_TIME = 10 * 1000;
 
-  private int clientSendInterval = 30000;
-  private int clientReceiveInterval = 30000;
+  private int clientSendInterval = 10000;
+  private int clientReceiveInterval = 10000;
   private static final int CLIENT_SEND_INTERVAL_MIN = 10000;
   private static final int CLIENT_RECEIVE_INTERVAL_MIN = 10000;
 
@@ -121,36 +127,19 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   public WebSocketClient clientConfig(ClientConfig clientConfig) {
+    ConfigFileUtil.loadConfigFile(clientConfig);
     this.clientConfig = clientConfig;
-    if (StringUtils.isEmpty(clientConfig.socketServerUrl) || Env.PROD == clientConfig.getEnv()) {
-      this.url = NetworkUtil.getServerAddress(null);
-    } else {
-      this.url = clientConfig.socketServerUrl;
-    }
+    this.url = NetworkUtil.getServerAddress(null);
     if (this.sslProvider == null && clientConfig.getSslProvider() != null) {
       this.sslProvider = clientConfig.getSslProvider();
     }
     if (this.authentication == null) {
       ApiAuthentication authentication = ApiAuthentication.build(clientConfig.tigerId, clientConfig.privateKey);
-      if (!StringUtils.isEmpty(clientConfig.stompVersion)) {
-        authentication.setVersion(clientConfig.stompVersion);
+      if (!StringUtils.isEmpty(clientConfig.version)) {
+        authentication.setVersion(clientConfig.version);
       }
       this.authentication = authentication;
     }
-    return this;
-  }
-
-  /** please use clientConfig() method */
-  @Deprecated
-  public WebSocketClient url(String url) {
-    this.url = url;
-    return this;
-  }
-
-  /** please use clientConfig() method */
-  @Deprecated
-  public WebSocketClient authentication(final ApiAuthentication authentication) {
-    this.authentication = authentication;
     return this;
   }
 
@@ -184,6 +173,13 @@ public class WebSocketClient implements SubscribeAsyncApi {
     if (this.apiComposeCallback == null) {
       throw new IllegalArgumentException("apiComposeCallback is missing.");
     }
+    if (apiComposeCallback instanceof ApiComposeCallback4Stomp) {
+      this.isProtobuf = false;
+    } else if (apiComposeCallback instanceof ApiComposeCallback) {
+      this.isProtobuf = true;
+    } else {
+      throw new IllegalArgumentException("please use ApiComposeCallback's instance.");
+    }
     if (connectCountDown.getCount() == 0) {
       connectCountDown = new CountDownLatch(1);
     }
@@ -195,17 +191,18 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
     group = new NioEventLoopGroup(1);
     bootstrap = new Bootstrap();
-    if (!isStompBaseWebSocket()) {
+
+    if (clientConfig.isSslSocket) {
       SslProvider provider = this.sslProvider == null ? SslProvider.OPENSSL : this.sslProvider;
       final String[] protocols = NetworkUtil.getSupportedProtocolsSet(PROTOCOLS, provider);
       if (protocols == null || protocols.length == 0) {
         throw new RuntimeException("supported protocols is empty.");
       }
       sslCtx = SslContextBuilder.forClient()
-              .protocols(protocols)
-              .trustManager(InsecureTrustManagerFactory.INSTANCE)
-              .sslProvider(provider)
-              .build();
+          .protocols(protocols)
+          .trustManager(InsecureTrustManagerFactory.INSTANCE)
+          .sslProvider(provider)
+          .build();
     }
 
     bootstrap.group(group).option(ChannelOption.TCP_NODELAY, true)
@@ -219,24 +216,30 @@ public class WebSocketClient implements SubscribeAsyncApi {
             if (address == null) {
               throw new RuntimeException("get connect address error.");
             }
-            if (!isStompBaseWebSocket()) {
+            if (clientConfig.isSslSocket) {
               p.addLast(TigerApiConstants.SSL_HANDLER_NAME,
                   sslCtx.newHandler(ch.alloc(), address.getHostName(), address.getPort()));
             }
-            final WebSocketHandler handler =
-                new WebSocketHandler(authentication, apiComposeCallback, clientSendInterval, clientReceiveInterval);
-            p.addLast(STOMP_ENCODER, new StompSubframeEncoder());
-            p.addLast(STOMP_DECODER, new StompSubframeDecoder());
-            p.addLast("aggregator", new StompSubframeAggregator(65535));
-            p.addLast("webSocketHandler", handler);
+            if (isProtobuf) {
+              final ProtoSocketHandler handler =
+                  new ProtoSocketHandler(authentication, apiComposeCallback, clientSendInterval, clientReceiveInterval);
+              p.addLast(SOCKET_DECODER, new ProtobufVarint32FrameDecoder());
+              p.addLast(new ProtobufDecoder(Response.getDefaultInstance()));
+              p.addLast(new ProtobufVarint32LengthFieldPrepender());
+              p.addLast(SOCKET_ENCODER, new ProtobufEncoder());
+              p.addLast("webSocketHandler", handler);
+            } else {
+              final WebSocketHandler handler =
+                  new WebSocketHandler(authentication, apiComposeCallback, clientSendInterval, clientReceiveInterval);
+              p.addLast(SOCKET_ENCODER, new StompSubframeEncoder());
+              p.addLast(SOCKET_DECODER, new StompSubframeDecoder());
+              p.addLast("aggregator", new StompSubframeAggregator(65535));
+              p.addLast("webSocketHandler", handler);
+            }
           }
         });
 
     isInitial = true;
-  }
-
-  private boolean isStompBaseWebSocket() {
-    return this.url.contains("/stomp");
   }
 
   public void connectCountDown() {
@@ -310,8 +313,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   private InetSocketAddress getNewServerAddress() {
-    if (clientConfig != null && (StringUtils.isEmpty(clientConfig.socketServerUrl)
-        || Env.PROD == clientConfig.getEnv())) {
+    if (clientConfig != null) {
       String newUrl = NetworkUtil.getServerAddress(this.url);
       if (!this.url.equals(newUrl)) {
         InetSocketAddress address = getSocketAddress(newUrl);
@@ -354,6 +356,9 @@ public class WebSocketClient implements SubscribeAsyncApi {
   public String getUrl() {
     return this.url;
   }
+  public boolean isUseProtobuf() {
+    return this.isProtobuf;
+  }
 
   /**
    * destroy the reconnect thread, then send disconnect command and close the connection
@@ -370,7 +375,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   public void closeConnect(boolean sendDisconnectCommand) {
     destroyConnectCommand();
     if (sendDisconnectCommand) {
-      sendDisconnectFrame();
+      sendDisconnectData();
     }
     try {
       if (channel != null) {
@@ -390,18 +395,20 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
   }
 
-  private synchronized void sendDisconnectFrame() {
+  private synchronized void sendDisconnectData() {
     if (!isConnected()) {
       notConnect();
       return;
     }
-    StompFrame disconnectFrame = StompMessageUtil.buildDisconnectMessage(authentication.getTigerId());
-    ChannelFuture channelFuture = channel.writeAndFlush(disconnectFrame);
+    Object disconnectData = this.isProtobuf
+        ? ProtoMessageUtil.buildDisconnectMessage()
+        : StompMessageUtil.buildDisconnectMessage(authentication.getTigerId());
+    ChannelFuture channelFuture = channel.writeAndFlush(disconnectData);
     try {
       channelFuture.sync();
-      ApiLogger.info("sendDisconnectFrame finished, tiger id:{}", authentication.getTigerId());
+      ApiLogger.info("sendDisconnect finished, tiger id:{}", authentication.getTigerId());
     } catch (InterruptedException e) {
-      ApiLogger.error("sendDisconnectFrame error, tiger id:{}", authentication.getTigerId(), e);
+      ApiLogger.error("sendDisconnect error, tiger id:{}", authentication.getTigerId(), e);
     }
   }
 
@@ -476,29 +483,8 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   @Override
-  public String subscribe(Subject subject, List<String> focusKeys) {
-    if (!isConnected()) {
-      notConnect();
-      return null;
-    }
-    StompFrame frame = StompMessageUtil.buildSubscribeMessage(subject, new HashSet<>(focusKeys));
-    channel.writeAndFlush(frame);
-    subscribeList.add(subject);
-
-    return frame.headers().getAsString(StompHeaders.ID);
-  }
-
-  @Override
   public String subscribe(Subject subject) {
-    if (!isConnected()) {
-      notConnect();
-      return null;
-    }
-    StompFrame frame = StompMessageUtil.buildSubscribeMessage(subject);
-    channel.writeAndFlush(frame);
-    subscribeList.add(subject);
-
-    return frame.headers().getAsString(StompHeaders.ID);
+    return subscribe(null, subject);
   }
 
   @Override
@@ -507,24 +493,19 @@ public class WebSocketClient implements SubscribeAsyncApi {
       notConnect();
       return null;
     }
-    StompFrame frame = StompMessageUtil.buildSubscribeMessage(account, subject, null);
-    channel.writeAndFlush(frame);
-    subscribeList.add(subject);
-
-    return frame.headers().getAsString(StompHeaders.ID);
-  }
-
-  @Override
-  public String subscribe(String account, Subject subject, List<String> focusKeys) {
-    if (!isConnected()) {
-      notConnect();
-      return null;
+    String returnStr;
+    Object subscribeData;
+    if (this.isProtobuf) {
+      subscribeData = ProtoMessageUtil.buildSubscribeMessage(account, subject);
+      returnStr = String.valueOf(((Request)subscribeData).getId());
+    } else {
+      subscribeData = StompMessageUtil.buildSubscribeMessage(account, subject, null);
+      returnStr = ((StompFrame)subscribeData).headers().getAsString(StompHeaders.ID);
     }
-    StompFrame frame = StompMessageUtil.buildSubscribeMessage(account, subject, new HashSet<>(focusKeys));
-    channel.writeAndFlush(frame);
+    channel.writeAndFlush(subscribeData);
     subscribeList.add(subject);
 
-    return frame.headers().getAsString(StompHeaders.ID);
+    return returnStr;
   }
 
   @Override
@@ -533,27 +514,24 @@ public class WebSocketClient implements SubscribeAsyncApi {
       notConnect();
       return null;
     }
-    StompFrame frame = StompMessageUtil.buildUnSubscribeMessage(subject);
-    channel.writeAndFlush(frame);
+    String returnStr;
+    Object unsubscribeData;
+    if (this.isProtobuf) {
+      unsubscribeData = ProtoMessageUtil.buildUnSubscribeMessage(subject);
+      returnStr = String.valueOf(((Request)unsubscribeData).getId());
+    } else {
+      unsubscribeData = StompMessageUtil.buildUnSubscribeMessage(subject);
+      returnStr = ((StompFrame)unsubscribeData).headers().getAsString(StompHeaders.ID);
+    }
+    channel.writeAndFlush(unsubscribeData);
     subscribeList.remove(subject);
 
-    return frame.headers().getAsString(StompHeaders.ID);
+    return returnStr;
   }
 
   @Override
   public String subscribeQuote(Set<String> symbols) {
     return subscribeQuote(symbols, QuoteSubject.Quote);
-  }
-
-  @Override
-  public String subscribeQuote(Set<String> symbols, QuoteKeyType quoteKeyType) {
-    List<String> focusKeys = (quoteKeyType == null ? null : quoteKeyType.getFocusKeys());
-    return subscribeQuote(symbols, QuoteSubject.Quote, focusKeys);
-  }
-
-  @Override
-  public String subscribeQuote(Set<String> symbols, List<String> focusKeys) {
-    return subscribeQuote(symbols, QuoteSubject.Quote, focusKeys);
   }
 
   @Override
@@ -602,25 +580,23 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   private String subscribeQuote(Set<String> symbols, QuoteSubject subject) {
-    return subscribeQuote(symbols, subject, null);
-  }
-
-  private String subscribeQuote(Set<String> symbols, QuoteSubject subject, List<String> focusKeys) {
     if (!isConnected()) {
       notConnect();
       return null;
     }
-    StompFrame frame;
-    if (focusKeys == null) {
-      frame = StompMessageUtil.buildSubscribeMessage(symbols, subject);
+    String returnStr;
+    Object subscribeData;
+    if (this.isProtobuf) {
+      subscribeData = ProtoMessageUtil.buildSubscribeMessage(symbols, subject);
+      returnStr = String.valueOf(((Request)subscribeData).getId());
     } else {
-      frame = StompMessageUtil.buildSubscribeMessage(symbols, subject, new HashSet<>(focusKeys));
+      subscribeData = StompMessageUtil.buildSubscribeMessage(symbols, subject, null);
+      returnStr = ((StompFrame)subscribeData).headers().getAsString(StompHeaders.ID);
     }
-    channel.writeAndFlush(frame);
-    subscribeSymbols.addAll(symbols);
-    ApiLogger.info("send subscribe [{}] message, symbols:{},focusKeys:{}", subject, symbols, focusKeys);
+    channel.writeAndFlush(subscribeData);
+    ApiLogger.info("send subscribe [{}] message, symbols:{}", subject, symbols);
 
-    return frame.headers().getAsString(StompHeaders.ID);
+    return returnStr;
   }
 
   private String cancelSubscribeQuote(Set<String> symbols, QuoteSubject subject) {
@@ -628,29 +604,92 @@ public class WebSocketClient implements SubscribeAsyncApi {
       notConnect();
       return null;
     }
-    StompFrame frame = StompMessageUtil.buildUnSubscribeMessage(symbols, subject);
-    channel.writeAndFlush(frame);
-    subscribeSymbols.removeAll(symbols);
+    String returnStr;
+    Object unsubscribeData;
+    if (this.isProtobuf) {
+      unsubscribeData = ProtoMessageUtil.buildUnSubscribeMessage(symbols, subject);
+      returnStr = String.valueOf(((Request)unsubscribeData).getId());
+    } else {
+      unsubscribeData = StompMessageUtil.buildUnSubscribeMessage(symbols, subject);
+      returnStr = ((StompFrame)unsubscribeData).headers().getAsString(StompHeaders.ID);
+    }
+    channel.writeAndFlush(unsubscribeData);
     ApiLogger.info("send cancel subscribe [{}] message, symbols:{}.", subject, symbols);
 
-    return frame.headers().getAsString(StompHeaders.ID);
+    return returnStr;
   }
 
   @Override
-  public String getSubscribedSymbols() {
-    return sendMessage(ReqProtocolType.REQ_SUB_SYMBOLS, null);
+  public String subscribeMarketQuote(Market market, QuoteSubject subject) {
+    return subscribeMarketData(market, subject, null);
   }
 
-  private String sendMessage(int reqType, String message) {
+  @Override
+  public String cancelSubscribeMarketQuote(Market market, QuoteSubject subject) {
+    return cancelSubscribeMarketData(market, subject, null);
+  }
+
+  @Override
+  public String subscribeStockTop(Market market, Set<Indicator> indicators) {
+    return subscribeMarketData(market, QuoteSubject.StockTop, Indicator.getValues(indicators));
+  }
+
+  @Override
+  public String cancelSubscribeStockTop(Market market, Set<Indicator> indicators) {
+    return cancelSubscribeMarketData(market, QuoteSubject.StockTop, Indicator.getValues(indicators));
+  }
+
+  @Override
+  public String subscribeOptionTop(Market market, Set<Indicator> indicators) {
+    return subscribeMarketData(market, QuoteSubject.OptionTop, Indicator.getValues(indicators));
+  }
+
+  @Override
+  public String cancelSubscribeOptionTop(Market market, Set<Indicator> indicators) {
+    return cancelSubscribeMarketData(market, QuoteSubject.OptionTop, Indicator.getValues(indicators));
+  }
+
+  private String subscribeMarketData(Market market, QuoteSubject subject, Set<String> indicatorNames) {
     if (!isConnected()) {
       notConnect();
       return null;
     }
-    ApiLogger.info("reqType:{},send message:{}", reqType, message);
-    StompFrame frame = StompMessageUtil.buildSendMessage(reqType, message);
-    channel.writeAndFlush(frame);
+    Request subscribeData = ProtoMessageUtil.buildSubscribeMessage(market, subject, indicatorNames);
+    channel.writeAndFlush(subscribeData);
+    ApiLogger.info("send subscribe [{}] message, market:{}", subject, market);
+    return String.valueOf(subscribeData.getId());
+  }
 
-    return frame.headers().getAsString(StompHeaders.ID);
+  private String cancelSubscribeMarketData(Market market, QuoteSubject subject, Set<String> indicatorNames) {
+    if (!isConnected()) {
+      notConnect();
+      return null;
+    }
+    Request subscribeData = ProtoMessageUtil.buildUnSubscribeMessage(market, subject, indicatorNames);
+    channel.writeAndFlush(subscribeData);
+    ApiLogger.info("send cancel subscribe [{}] message, market:{}", subject, market);
+    return String.valueOf(subscribeData.getId());
+  }
+
+  @Override
+  public String getSubscribedSymbols() {
+    if (!isConnected()) {
+      notConnect();
+      return null;
+    }
+    ApiLogger.info("send getSubscribedSymbols message");
+    String returnStr;
+    Object msgData;
+    if (this.isProtobuf) {
+      msgData = ProtoMessageUtil.buildSendMessage();
+      returnStr = String.valueOf(((Request)msgData).getId());
+    } else {
+      msgData = StompMessageUtil.buildSendMessage(ReqProtocolType.REQ_SUB_SYMBOLS, null);
+      returnStr = ((StompFrame)msgData).headers().getAsString(StompHeaders.ID);
+    }
+    channel.writeAndFlush(msgData);
+
+    return returnStr;
   }
 
   private void notConnect() {

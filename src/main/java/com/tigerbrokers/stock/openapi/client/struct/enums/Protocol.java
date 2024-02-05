@@ -6,8 +6,8 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
  */
 public enum Protocol {
   HTTP("https://%s/gateway", ""),
-  STOMP_WEBSOCKET("wss://%s:%s/stomp", "port"),
-  STOMP("wss://%s:%s", "socket_port");
+  WEB_SOCKET("wss://%s:%s/stomp", "port"),
+  SECURE_SOCKET("wss://%s:%s", "socket_port");
 
   private String urlFormat;
   private String portFieldName;
@@ -24,4 +24,5 @@ public enum Protocol {
   public String getPortFieldName() {
     return portFieldName;
   }
+
 }

@@ -7,13 +7,13 @@ package com.tigerbrokers.stock.openapi.client.constant;
 public interface RspProtocolType {
 
   String RET_HEADER = "ret-type";
-  String SUBSCRIPTION_HEADER = "subscription";
   String ID_HEADER = "id";
 
   int CONNECTION_END = -1;
+  int DEFAULT_PUSH_DATA_END = 0;
 
   /**
-   * 交易
+   * trading
    */
   int GET_ORDER_NO_END = 1;
   int PREVIEW_ORDER_END = 2;
@@ -26,9 +26,10 @@ public interface RspProtocolType {
   int SUBSCRIBE_ORDER_STATUS = 9;
   int SUBSCRIBE_POSITION = 10;
   int SUBSCRIBE_ASSET = 11;
+  int SUBSCRIBE_ORDER_TRANSACTION = 12;
 
   /**
-   * 行情
+   * quote
    */
   int GET_MARKET_STATE_END = 101;
   int GET_ALL_SYMBOLS_END = 102;

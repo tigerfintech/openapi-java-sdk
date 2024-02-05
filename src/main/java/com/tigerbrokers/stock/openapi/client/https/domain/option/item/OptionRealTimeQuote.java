@@ -21,6 +21,12 @@ public class OptionRealTimeQuote implements Serializable {
   private Integer openInterest;
   private Integer multiplier;
   private Long lastTimestamp;
+  private Double impliedVol;
+  private Double delta;
+  private Double gamma;
+  private Double theta;
+  private Double vega;
+  private Double rho;
 
   public String getIdentifier() {
     return identifier;
@@ -126,6 +132,54 @@ public class OptionRealTimeQuote implements Serializable {
     this.lastTimestamp = lastTimestamp;
   }
 
+  public Double getImpliedVol() {
+    return impliedVol;
+  }
+
+  public void setImpliedVol(Double impliedVol) {
+    this.impliedVol = impliedVol;
+  }
+
+  public Double getDelta() {
+    return delta;
+  }
+
+  public void setDelta(Double delta) {
+    this.delta = delta;
+  }
+
+  public Double getGamma() {
+    return gamma;
+  }
+
+  public void setGamma(Double gamma) {
+    this.gamma = gamma;
+  }
+
+  public Double getTheta() {
+    return theta;
+  }
+
+  public void setTheta(Double theta) {
+    this.theta = theta;
+  }
+
+  public Double getVega() {
+    return vega;
+  }
+
+  public void setVega(Double vega) {
+    this.vega = vega;
+  }
+
+  public Double getRho() {
+    return rho;
+  }
+
+  public void setRho(Double rho) {
+    this.rho = rho;
+  }
+
   @Override
   public String toString() {
     return "OptionRealTimeQuote{" +
@@ -142,6 +196,12 @@ public class OptionRealTimeQuote implements Serializable {
         ", openInterest=" + openInterest +
         ", multiplier=" + multiplier +
         ", lastTimestamp=" + lastTimestamp +
+        ", impliedVol=" + impliedVol +
+        ", delta=" + delta +
+        ", gamma=" + gamma +
+        ", theta=" + theta +
+        ", vega=" + vega +
+        ", rho=" + rho +
         '}';
   }
 }

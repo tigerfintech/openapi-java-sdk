@@ -4,7 +4,6 @@ import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.struct.enums.BizType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.License;
-import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
 
 import io.netty.handler.ssl.SslProvider;
 import java.util.Map;
@@ -47,27 +46,27 @@ public class NetworkUtilTest {
 
       // prod
       config.setEnv(Env.PROD);
-      config.setSubscribeProtocol(Protocol.STOMP_WEBSOCKET);
+      config.isSslSocket = false;
       System.out.println("\r\nenv:" + config.getEnv()
-          + ", subscribeProtocal:" + config.getSubscribeProtocol());
+          + ", isSslSocket:" + config.isSslSocket);
       System.out.println(NetworkUtil.getHttpServerAddress(null));
       Assert.assertEquals("https://openapi.tigerfintech.com/gateway", NetworkUtil.getHttpServerAddress(null));
       System.out.println(NetworkUtil.getServerAddress(null));
       Assert.assertEquals("wss://openapi.tigerfintech.com:9887/stomp", NetworkUtil.getServerAddress(null));
-      config.setSubscribeProtocol(Protocol.STOMP);
+      config.isSslSocket = true;
       System.out.println(NetworkUtil.getServerAddress(null));
       Assert.assertEquals("wss://openapi.tigerfintech.com:9883", NetworkUtil.getServerAddress(null));
 
       // SANDBOX
       config.setEnv(Env.SANDBOX);
-      config.setSubscribeProtocol(Protocol.STOMP_WEBSOCKET);
+      config.isSslSocket = false;
       System.out.println("\r\nenv:" + config.getEnv()
-          + ", subscribeProtocal:" + config.getSubscribeProtocol());
+          + ", isSslSocket:" + config.isSslSocket);
       System.out.println(NetworkUtil.getHttpServerAddress(null));
       Assert.assertEquals("https://openapi-sandbox.tigerfintech.com/gateway", NetworkUtil.getHttpServerAddress(null));
       System.out.println(NetworkUtil.getServerAddress(null));
       Assert.assertEquals("wss://openapi-sandbox.tigerfintech.com:9889/stomp", NetworkUtil.getServerAddress(null));
-      config.setSubscribeProtocol(Protocol.STOMP);
+      config.isSslSocket = true;
       System.out.println(NetworkUtil.getServerAddress(null));
       Assert.assertEquals("wss://openapi-sandbox.tigerfintech.com:9885", NetworkUtil.getServerAddress(null));
 
@@ -98,14 +97,15 @@ public class NetworkUtilTest {
 
       // prod
       config.setEnv(Env.PROD);
-      config.setSubscribeProtocol(Protocol.STOMP_WEBSOCKET);
+      config.isSslSocket = false;
       System.out.println("\r\nenv:" + config.getEnv()
-          + ", subscribeProtocal:" + config.getSubscribeProtocol());
+          + ", isSslSocket:" + config.isSslSocket);
       System.out.println(NetworkUtil.getHttpServerAddress(null));
       Assert.assertEquals("https://openapi.tigerfintech.com/gateway", NetworkUtil.getHttpServerAddress(null));
       System.out.println(NetworkUtil.getServerAddress(null));
       Assert.assertEquals("wss://openapi.tigerfintech.com:9887/stomp", NetworkUtil.getServerAddress(null));
-      config.setSubscribeProtocol(Protocol.STOMP);
+
+      config.isSslSocket = true;
       System.out.println(NetworkUtil.getServerAddress(null));
       Assert.assertEquals("wss://openapi.tigerfintech.com:9883", NetworkUtil.getServerAddress(null));
 
@@ -149,14 +149,15 @@ public class NetworkUtilTest {
 
       // prod
       config.setEnv(Env.PROD);
-      config.setSubscribeProtocol(Protocol.STOMP_WEBSOCKET);
+      config.isSslSocket = false;
       System.out.println("\r\nenv:" + config.getEnv()
-          + ", subscribeProtocal:" + config.getSubscribeProtocol());
+          + ", isSslSocket:" + config.isSslSocket);
       System.out.println(NetworkUtil.getHttpServerAddress(null));
       Assert.assertEquals("https://openapi.tigerfintech.com/gateway", NetworkUtil.getHttpServerAddress(null));
       System.out.println(NetworkUtil.getServerAddress(null));
       Assert.assertEquals("wss://openapi.tigerfintech.com:9887/stomp", NetworkUtil.getServerAddress(null));
-      config.setSubscribeProtocol(Protocol.STOMP);
+
+      config.isSslSocket = true;
       System.out.println(NetworkUtil.getServerAddress(null));
       Assert.assertEquals("wss://openapi.tigerfintech.com:9883", NetworkUtil.getServerAddress(null));
 

@@ -9,14 +9,14 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 
 /**
- * 作者：ltc
- * 时间：2019/05/29
+ * author：ltc
+ * date：2019/05/29
  */
 public class ContractRequest extends TigerCommonRequest implements TigerRequest<ContractResponse> {
 
   public ContractRequest() {
     setApiMethodName(MethodName.CONTRACT);
-    setApiVersion(V2_0);
+    setApiVersion(V3_0);
   }
 
   public static ContractRequest newRequest(ContractModel contractModel) {

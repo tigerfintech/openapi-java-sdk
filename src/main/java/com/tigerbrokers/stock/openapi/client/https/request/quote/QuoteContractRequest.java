@@ -8,7 +8,6 @@ import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteContractR
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
-import java.util.List;
 
 /**
  * Description:
@@ -21,24 +20,24 @@ public class QuoteContractRequest extends TigerCommonRequest implements TigerReq
     setApiMethodName(MethodName.QUOTE_CONTRACT);
   }
 
-  public static QuoteContractRequest newRequest(List<String> symbols) {
-    return newRequest(symbols, SecType.WAR);
+  public static QuoteContractRequest newRequest(String symbol) {
+    return newRequest(symbol, SecType.WAR);
   }
 
-  public static QuoteContractRequest newRequest(List<String> symbols, SecType secType) {
-    return newRequest(symbols, secType, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
+  public static QuoteContractRequest newRequest(String symbol, SecType secType) {
+    return newRequest(symbol, secType, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
   }
 
-  public static QuoteContractRequest newRequest(List<String> symbols, SecType secType, Language lang) {
+  public static QuoteContractRequest newRequest(String symbol, SecType secType, Language lang) {
     QuoteContractRequest request = new QuoteContractRequest();
-    QuoteContractModel model = new QuoteContractModel(symbols, secType, lang);
+    QuoteContractModel model = new QuoteContractModel(symbol, secType, lang);
     request.setApiModel(model);
     return request;
   }
 
-  public static QuoteContractRequest newRequest(List<String> symbols, SecType secType, String expiry) {
+  public static QuoteContractRequest newRequest(String symbol, SecType secType, String expiry) {
     QuoteContractRequest request = new QuoteContractRequest();
-    QuoteContractModel model = new QuoteContractModel(symbols, secType, expiry);
+    QuoteContractModel model = new QuoteContractModel(symbol, secType, expiry);
     request.setApiModel(model);
     return request;
   }

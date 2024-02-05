@@ -9,52 +9,52 @@ import java.io.Serializable;
 public class QuoteContract implements Serializable {
 
   /**
-   * 合约代码
+   * symbol
    */
   protected String symbol;
 
   /**
-   * 合约名称
+   * name
    */
   protected String name;
 
   /**
-   * 交易所
+   * exchange
    */
   protected String exchange;
 
   /**
-   * 市场
+   * market
    */
   protected String market;
 
   /**
-   * 合约类型
+   * security type
    */
   protected String secType;
 
   /**
-   * 币种
+   * currency
    */
   protected String currency;
 
   /**
-   * 到期日(期权、窝轮、牛熊证、期货)，格式：yyyy-MM-dd
+   * expiry(Options、WAR、CBBC、Futures)，format：yyyy-MM-dd
    */
   protected String expiry;
 
   /**
-   * 底层价格
+   * strike price
    */
   protected String strike;
 
   /**
-   * 每手数量
+   * multiplier
    */
   protected Double multiplier;
 
   /**
-   * 期权方向（PUT/CALL)
+   * direction（PUT/CALL)
    */
   private String right;
 

@@ -5,11 +5,11 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
  * Created by lijiawen on 2018/07/16.
  */
 public enum QuoteCode implements CodeEnumType {
-  SUCCESS(0, "成功"),
+  SUCCESS(0, "success"),
 
-  UNKOWN_ERRO(10000, "未知错误"),
+  UNKOWN_ERRO(10000, "unknown error"),
 
-  PARAM_ERROR(10001, "输入参数错误");
+  PARAM_ERROR(10001, "input parameter error");
 
   private int code;
 

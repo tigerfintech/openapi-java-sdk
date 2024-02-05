@@ -1,9 +1,9 @@
 package com.tigerbrokers.stock.openapi.client.struct;
 
 /**
- * 期权基本面信息
- * 作者：ltc
- * 时间：2019/08/27
+ * Options Fundamentals Information
+ * author：ltc
+ * date：2019/08/27
  */
 public class OptionFundamentals {
 
@@ -29,42 +29,47 @@ public class OptionFundamentals {
   double rho;
 
   /**
-   * 期权预测价值
+   * Option Predictive Value
    */
   double predictedValue;
 
   /**
-   * 时间价值
+   * option time value
    */
   double timeValue;
   /**
-   * 溢价率
+   * Premium rate
    */
   double premiumRate;
   /**
-   * 买入盈利率
+   * Profit rate
    */
   double profitRate;
   /**
-   * 隐含波动率
+   * implied volatility
    */
   double volatility;
   /**
-   * 杠杆率
+   * leverage
    */
   double leverage;
   /**
-   * 内在价值
+   * inside value
    */
   double insideValue;
   /**
-   * 历史波动率
+   * historical volatility
    */
   double historyVolatility;
   /**
-   * 未平合约数
+   * open interest
    */
   double openInterest;
+
+  /**
+   * for debug and validate
+   */
+  String metricParam;
 
   public double getDelta() {
     return delta;
@@ -176,5 +181,13 @@ public class OptionFundamentals {
 
   public void setOpenInterest(double openInterest) {
     this.openInterest = openInterest;
+  }
+
+  public String getMetricParam() {
+    return metricParam;
+  }
+
+  public void setMetricParam(String metricParam) {
+    this.metricParam = metricParam;
   }
 }

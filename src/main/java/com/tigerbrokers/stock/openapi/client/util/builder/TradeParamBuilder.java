@@ -1,6 +1,8 @@
 package com.tigerbrokers.stock.openapi.client.util.builder;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.struct.TagValue;
@@ -112,6 +114,13 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder cashAmount(Double cashAmount) {
+    if (cashAmount != null) {
+      this.orderParameter.setCashAmount(cashAmount);
+    }
+    return this;
+  }
+
   public TradeParamBuilder action(ActionType action) {
     if (action != null) {
       this.orderParameter.setAction(action);
@@ -129,6 +138,13 @@ public class TradeParamBuilder {
   public TradeParamBuilder timeInForce(TimeInForce timeInForce) {
     if (timeInForce != null) {
       this.orderParameter.setTimeInForce(timeInForce);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder expireTime(Long expireTime) {
+    if (expireTime != null) {
+      this.orderParameter.setExpireTime(expireTime);
     }
     return this;
   }
@@ -232,6 +248,13 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder userMark(String userMark) {
+    if (userMark != null) {
+      this.orderParameter.setUserMark(userMark);
+    }
+    return this;
+  }
+
   public TradeParamBuilder contract(ContractItem contract) {
     symbol(contract.getSymbol())
         .right(contract.getRight())
@@ -296,6 +319,13 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder setStopLossOrderType(OrderType stopLossOrderType) {
+    if (stopLossOrderType != null) {
+      this.orderParameter.setStopLossOrderType(stopLossOrderType);
+    }
+    return this;
+  }
+
   public TradeParamBuilder stopLossOrderId(Integer stopLossOrderId) {
     if (stopLossOrderId != null) {
       this.orderParameter.setStopLossOrderId(stopLossOrderId);
@@ -310,9 +340,30 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder setStopLossLimitPrice(Double stopLossLimitPrice) {
+    if (stopLossLimitPrice != null) {
+      this.orderParameter.setStopLossLimitPrice(stopLossLimitPrice);
+    }
+    return this;
+  }
+
   public TradeParamBuilder stopLossTif(TimeInForce stopLossTif) {
     if (stopLossTif != null) {
       this.orderParameter.setStopLossTif(stopLossTif);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder setStopLossTrailingPercent(Double stopLossTrailingPercent) {
+    if (stopLossTrailingPercent != null) {
+      this.orderParameter.setStopLossTrailingPercent(stopLossTrailingPercent);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder setStopLossTrailingAmount(Double stopLossTrailingAmount) {
+    if (stopLossTrailingAmount != null) {
+      this.orderParameter.setStopLossTrailingAmount(stopLossTrailingAmount);
     }
     return this;
   }
@@ -343,6 +394,7 @@ public class TradeParamBuilder {
   }
 
   public String buildJson() {
-    return JSONObject.toJSONString(build(), FastJsonPropertyFilter.getPropertyFilter());
+    return JSONObject.toJSONString(build(), FastJsonPropertyFilter.getPropertyFilter(),
+        SerializerFeature.WriteEnumUsingToString);
   }
 }

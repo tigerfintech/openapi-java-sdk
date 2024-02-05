@@ -9,26 +9,25 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.stomp.StompFrame;
-import java.util.concurrent.TimeUnit;
 
 @ChannelHandler.Sharable
 public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
 
   private ApiAuthentication authentication;
-  private ApiCallbackDecoder decoder;
+  private ApiCallbackDecoder4Stomp decoder;
   private int clientSendInterval = 0;
   private int clientReceiveInterval = 0;
   public final static int HEART_BEAT_SPAN = 1000;
 
   public WebSocketHandler(ApiAuthentication authentication, ApiComposeCallback callback) {
     this.authentication = authentication;
-    this.decoder = new ApiCallbackDecoder(callback);
+    this.decoder = new ApiCallbackDecoder4Stomp((ApiComposeCallback4Stomp) callback);
   }
 
   public WebSocketHandler(ApiAuthentication authentication, ApiComposeCallback callback, int sendInterval,
       int receiveInterval) {
     this.authentication = authentication;
-    this.decoder = new ApiCallbackDecoder(callback);
+    this.decoder = new ApiCallbackDecoder4Stomp((ApiComposeCallback4Stomp) callback);
     this.clientSendInterval = sendInterval;
     this.clientReceiveInterval = receiveInterval;
   }
@@ -46,11 +45,6 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<StompFrame> {
     }
     ApiLogger.info("netty channel active. channel:{}, preparing to send connect token frame:{}",
         ctx.channel().id().asShortText(), connectFrame);
-    try {
-      TimeUnit.MILLISECONDS.sleep(200);
-    } catch (InterruptedException ie) {
-      // ignore
-    }
     ctx.writeAndFlush(connectFrame).addListener(new ChannelFutureListener() {
       @Override
       public void operationComplete(ChannelFuture future) {

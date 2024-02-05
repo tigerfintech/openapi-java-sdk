@@ -40,7 +40,6 @@ public class QuoteTradeTickRequest extends TigerCommonRequest implements TigerRe
     return request;
   }
 
-  @Deprecated
   public static QuoteTradeTickRequest newRequest(List<String> symbols, Long beginIndex, Long endIndex) {
     QuoteTradeTickRequest request = new QuoteTradeTickRequest();
     QuoteTradeTickModel model = new QuoteTradeTickModel(symbols, beginIndex, endIndex,
@@ -49,7 +48,15 @@ public class QuoteTradeTickRequest extends TigerCommonRequest implements TigerRe
     return request;
   }
 
-  @Deprecated
+  public static QuoteTradeTickRequest newRequest(List<String> symbols, Long beginIndex, Long endIndex, Integer limit) {
+    QuoteTradeTickRequest request = new QuoteTradeTickRequest();
+    QuoteTradeTickModel model = new QuoteTradeTickModel(symbols, beginIndex, endIndex,
+            ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
+    model.setLimit(limit);
+    request.setApiModel(model);
+    return request;
+  }
+
   public static QuoteTradeTickRequest newRequest(List<String> symbols, Long beginIndex, Long endIndex, Language lang) {
     QuoteTradeTickRequest request = new QuoteTradeTickRequest();
     QuoteTradeTickModel model = new QuoteTradeTickModel(symbols, beginIndex, endIndex, lang);

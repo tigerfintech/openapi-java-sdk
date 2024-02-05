@@ -14,6 +14,9 @@ public enum MethodName {
   CANCEL_ORDER("cancel_order", MethodType.TRADE),
   MODIFY_ORDER("modify_order", MethodType.TRADE),
   PREVIEW_ORDER("preview_order", MethodType.TRADE),
+  TRANSFER_SEGMENT_FUND("transfer_segment_fund", MethodType.TRADE),
+  CANCEL_SEGMENT_FUND("cancel_segment_fund", MethodType.TRADE),
+  PLACE_FOREX_ORDER("place_forex_order", MethodType.TRADE),
 
   /**
    * account/asset
@@ -28,6 +31,9 @@ public enum MethodName {
   INACTIVE_ORDERS("inactive_orders", MethodType.TRADE),
   FILLED_ORDERS("filled_orders", MethodType.TRADE),
   ORDER_TRANSACTIONS("order_transactions", MethodType.TRADE),
+  SEGMENT_FUND_HISTORY("segment_fund_history", MethodType.TRADE),
+  SEGMENT_FUND_AVAILABLE("segment_fund_available", MethodType.TRADE),
+  ESTIMATE_TRADABLE_QUANTITY("estimate_tradable_quantity", MethodType.TRADE),
 
   /**
    * contract
@@ -38,6 +44,7 @@ public enum MethodName {
   /**
    * quote
    */
+  KLINE_QUOTA("kline_quota", MethodType.QUOTE),
   MARKET_STATE("market_state", MethodType.QUOTE),
   ALL_SYMBOLS("all_symbols", MethodType.QUOTE),
   ALL_SYMBOL_NAMES("all_symbol_names", MethodType.QUOTE),
@@ -57,6 +64,11 @@ public enum MethodName {
   QUOTE_DELAY("quote_delay", MethodType.QUOTE),
   /** trading calendar */
   TRADING_CALENDAR("trading_calendar", MethodType.QUOTE),
+  STOCK_BROKER("stock_broker", MethodType.QUOTE),
+  CAPITAL_DISTRIBUTION("capital_distribution", MethodType.QUOTE),
+  CAPITAL_FLOW("capital_flow", MethodType.QUOTE),
+  MARKET_SCANNER("market_scanner", MethodType.QUOTE),
+  MARKET_SCANNER_TAGS("market_scanner_tags", MethodType.QUOTE),
 
   /**
    * option quote
@@ -66,6 +78,12 @@ public enum MethodName {
   OPTION_BRIEF("option_brief", MethodType.QUOTE),
   OPTION_KLINE("option_kline", MethodType.QUOTE),
   OPTION_TRADE_TICK("option_trade_tick", MethodType.QUOTE),
+
+  /**
+   * warrant,cbbc
+   */
+  WARRANT_FILTER("warrant_filter", MethodType.QUOTE),
+  WARRANT_REAL_TIME_QUOTE("warrant_real_time_quote", MethodType.QUOTE),
 
   /**
    * future quote
@@ -80,6 +98,7 @@ public enum MethodName {
   FUTURE_REAL_TIME_QUOTE("future_real_time_quote", MethodType.QUOTE),
   FUTURE_TICK("future_tick", MethodType.QUOTE),
   FUTURE_TRADING_DATE("future_trading_date", MethodType.QUOTE),
+  FUTURE_HISTORY_MAIN_CONTRACT("future_history_main_contract", MethodType.QUOTE),
 
   /**
    * fundmental data
@@ -90,6 +109,16 @@ public enum MethodName {
   INDUSTRY_LIST("industry_list", MethodType.QUOTE),
   INDUSTRY_STOCKS("industry_stocks", MethodType.QUOTE),
   STOCK_INDUSTRY("stock_industry", MethodType.QUOTE),
+  FINANCIAL_CURRENCY("financial_currency", MethodType.QUOTE),
+  FINANCIAL_EXCHANGE_RATE("financial_exchange_rate", MethodType.QUOTE),
+
+  /**
+   * fund quote
+   */
+  FUND_ALL_SYMBOLS("fund_all_symbols", MethodType.QUOTE),
+  FUND_CONTRACTS("fund_contracts", MethodType.QUOTE),
+  FUND_QUOTE("fund_quote", MethodType.QUOTE),
+  FUND_HISTORY_QUOTE("fund_history_quote", MethodType.QUOTE),
 
   /**
    * grab quote
@@ -105,6 +134,7 @@ public enum MethodName {
   USER_TRADE_PASSWORD_VERIFY("user_trade_password_verify", MethodType.OTHER),
   USER_TRADE_PASSWORD_RESET("user_trade_password_reset", MethodType.OTHER),
   USER_LICENSE("user_license", MethodType.OTHER),
+  USER_TOKEN_REFRESH("user_token_refresh", MethodType.OTHER),
   ;
 
   private String value;

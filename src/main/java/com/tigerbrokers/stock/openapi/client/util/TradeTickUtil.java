@@ -2,8 +2,13 @@ package com.tigerbrokers.stock.openapi.client.util;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.tigerbrokers.stock.openapi.client.socket.data.TradeTick;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.TradeTickData;
+import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -260,5 +265,112 @@ public class TradeTickUtil {
     jsonObject.remove("mergedVols");
 
     return jsonObject;
+  }
+
+  public static TradeTick convert(TradeTickData source) {
+    String secType = source.getSecType();
+    if (SecType.FUT.name().equals(secType)) {
+      return convertFutureData(source);
+    } else {
+      return convertStockData(source);
+    }
+  }
+
+  public static TradeTick convertStockData(TradeTickData source) {
+    TradeTick tradeTick = new TradeTick();
+
+    tradeTick.setSecType(SecType.STK);
+    tradeTick.setSymbol(source.getSymbol());
+    tradeTick.setQuoteLevel(source.getQuoteLevel());
+    tradeTick.setTimestamp(source.getTimestamp());
+    List<Long> timeList = source.getTimeList();
+    List<Long> pricesList = source.getPriceList();
+    List<String> partCodeList = source.getPartCodeList();
+    List<Long> volumeList = source.getVolumeList();
+    String cond = source.getCond();
+    String tickType = source.getType();
+    long startSn = source.getSn();
+    boolean isUsStockSymbol = SymbolUtil.isUsStockSymbol(source.getSymbol());
+
+    List<TradeTick.Tick> ticks = new ArrayList<>(source.getTimeCount());
+    tradeTick.setTicks(ticks);
+    if (timeList != null && timeList.size() > 0) {
+      long currentTime = 0;
+      long priceBase = source.getPriceBase();
+      double denominator = Math.pow(10, source.getPriceOffset());
+      for (int i = 0; i < timeList.size(); i++) {
+        TradeTick.Tick tickData = new TradeTick.Tick();
+        ticks.add(tickData);
+
+        // recover time: time[i] = time[i] + time[i-1]
+        currentTime += timeList.get(i);
+        tickData.setTime(currentTime);
+        // recover price: price[i] = (priceBase + price[i]) / 10^priceOffset
+        tickData.setPrice((priceBase + pricesList.get(i).doubleValue()) / denominator);
+
+        tickData.setSn(startSn++);
+        tickData.setVolume(volumeList.get(i));
+        if (i < partCodeList.size()) {
+          tickData.setPartCode(getPartShortNameByCode(partCodeList.get(i)));
+          tickData.setPartName(getPartNameByCode(partCodeList.get(i)));
+        }
+
+        Character condChar = null;
+        if (cond != null && cond.length() > i) {
+          condChar = cond.charAt(i);
+        }
+        tickData.setCond(getTradeCondByCode(isUsStockSymbol, condChar));
+        if (tickType != null && tickType.length() > i) {
+          tickData.setTickType(tickType.substring(i, i+1));
+        }
+      }
+    }
+
+    return tradeTick;
+  }
+
+  public static TradeTick convertFutureData(TradeTickData source) {
+    TradeTick tradeTick = new TradeTick();
+
+    tradeTick.setSecType(SecType.FUT);
+    tradeTick.setSymbol(source.getSymbol());
+    tradeTick.setTimestamp(source.getTimestamp());
+    List<Long> timeList = source.getTimeList();
+    List<Long> pricesList = source.getPriceList();
+    long startSn = source.getSn();
+    List<TradeTickData.MergedVol> mergedVolsArray = source.getMergedVolsList();
+    int totalCount = 0;
+    for (TradeTickData.MergedVol item : mergedVolsArray) {
+      totalCount += item.getMergeTimes();
+    }
+
+    List<TradeTick.Tick> ticks = new ArrayList<>(totalCount);
+    tradeTick.setTicks(ticks);
+    if (timeList != null && timeList.size() > 0) {
+      long currentTime = 0;
+      long priceBase = source.getPriceBase();
+      double denominator = Math.pow(10, source.getPriceOffset());
+      for (int i = 0; i < timeList.size(); i++) {
+
+        // recover time: time[i] = time[i] + time[i-1]
+        currentTime += timeList.get(i);
+        // recover price: price[i] = (priceBase + price[i]) / 10^priceOffset
+        double curPrices = (priceBase + pricesList.get(i).doubleValue()) / denominator;
+
+        List<Long> volsList = mergedVolsArray.get(i).getVolList();
+        int mergeTimes = mergedVolsArray.get(i).getMergeTimes();
+        for (int j = 0; j < mergeTimes; j++) {
+          TradeTick.Tick tickData = new TradeTick.Tick();
+          ticks.add(tickData);
+          tickData.setSn(startSn * 10 + j);
+          tickData.setVolume(volsList.get(j));
+          tickData.setTime(currentTime);
+          tickData.setPrice(curPrices);
+        }
+        startSn++;
+      }
+    }
+
+    return tradeTick;
   }
 }

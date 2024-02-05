@@ -1,7 +1,10 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.trade.model;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.ContractLeg;
 import com.tigerbrokers.stock.openapi.client.struct.TagValue;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AttachType;
@@ -9,6 +12,8 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class TradeOrderModel extends ApiModel {
@@ -63,6 +68,12 @@ public class TradeOrderModel extends ApiModel {
   @JSONField(name = "time_in_force")
   private TimeInForce timeInForce;
   /**
+   * GTD order's expire time
+   */
+  @JSONField(name = "expire_time")
+  private Long expireTime;
+
+  /**
    * order type
    */
   @JSONField(name = "order_type")
@@ -84,44 +95,46 @@ public class TradeOrderModel extends ApiModel {
   @JSONField(name = "adjust_limit")
   private Double adjustLimit;
   /**
-   * 股票止损价。当 order_type 为STP,STP_LMT时该参数必需，当 order_type 为 TRAIL时,aux_price为跟踪额
+   * stop loss price. This parameter is required when order_type is STP and STP_LMT,
+   * when order_type is TRAIL, aux_price is the stop loss trailing amount
    */
   @JSONField(name = "aux_price")
   private Double auxPrice;
 
   /**
-   * 跟踪止损单 - 百分比。当 order_type 为 TRAIL时,aux_price和trailing_percent两者互斥
+   * Trailing Stop Order - trailing percentage. When order_type is TRAIL,
+   * trailing_percent is preferred when both aux_price and trailing_percent have values
    */
   @JSONField(name = "trailing_percent")
   private Double trailingPercent;
 
   /**
-   * true 允许盘前盘后交易(美股专属)
+   * Allow pre-market and after-hours trading. default is true
    */
   @JSONField(name = "outside_rth")
-  private Boolean outsideRth;
+  private Boolean outsideRth = Boolean.TRUE;
   /**
-   * 市场
+   * market
    */
   private String market;
   /**
-   * 交易所
+   * exchange
    */
   private String exchange;
   /**
-   * 期权、涡轮、牛熊证字段
+   * expiry(for options, warran, cbbc)
    */
   private String expiry;
   /**
-   * 底层价格(期权、涡轮、牛熊证专属)
+   * strike price (for options, warran, cbbc)
    */
   private String strike;
   /**
-   * 期权方向 PUT/CALL(期权、涡轮、牛熊证专属)
+   * PUT/CALL (for options, warran, cbbc)
    */
   private String right;
   /**
-   * 1手单位(期权、涡轮、牛熊证专属)
+   * lot size(for futures, options, warran, cbbc)
    */
   private Float multiplier;
 
@@ -140,21 +153,19 @@ public class TradeOrderModel extends ApiModel {
 
   private String source;
   /**
-   * 用户备注信息
+   * user remark info
    */
   @JSONField(name = "user_mark")
   private String userMark;
 
   /**
-   * 附加订单类型：
-   * PROFIT
-   * LOSS
+   * attached order type：PROFIT/LOSS/BRACKETS
    */
   @JSONField(name = "attach_type")
   private AttachType attachType;
 
   /**
-   * 止盈订单
+   * attached profit taker order
    */
   @JSONField(name = "profit_taker_orderId")
   private Integer profitTakerOrderId;
@@ -188,6 +199,22 @@ public class TradeOrderModel extends ApiModel {
    */
   @JSONField(name = "stop_loss_trailing_amount")
   private Double stopLossTrailingAmount;
+
+  /**
+   * Multi Order's type: COVERED,PROTECTIVE,VERTICAL,STRADDLE,STRANGLE,CALENDAR,DIAGONAL,SYNTHETIC,CUSTOM
+   */
+  @JSONField(name = "combo_type")
+  private String comboType;
+
+  @JSONField(name = "contract_legs")
+  private List<ContractLeg> contractLegs;
+
+  @JSONField(name = "oca_orders")
+  private List<TradeOrderModel> ocaOrders;
+
+  /** Order by amount (such as general fund subscription) */
+  @JSONField(name = "cash_amount")
+  private Double cashAmount;
 
   public TradeOrderModel() {
   }
@@ -270,6 +297,14 @@ public class TradeOrderModel extends ApiModel {
 
   public void setTimeInForce(TimeInForce timeInForce) {
     this.timeInForce = timeInForce;
+  }
+
+  public Long getExpireTime() {
+    return expireTime;
+  }
+
+  public void setExpireTime(Long expireTime) {
+    this.expireTime = expireTime;
   }
 
   public OrderType getOrderType() {
@@ -408,6 +443,16 @@ public class TradeOrderModel extends ApiModel {
     this.algoParams = algoParams;
   }
 
+  public void addAlgoParam(TagValue algoParam) {
+    if (algoParam == null) {
+      return;
+    }
+    if (this.algoParams == null) {
+      this.algoParams = new ArrayList<>();
+    }
+    this.algoParams.add(algoParam);
+  }
+
   public String getSource() {
     return source;
   }
@@ -520,6 +565,39 @@ public class TradeOrderModel extends ApiModel {
     this.stopLossTrailingAmount = stopLossTrailingAmount;
   }
 
+  public String getComboType() {
+    return comboType;
+  }
+
+  public void setComboType(String comboType) {
+    this.comboType = comboType;
+  }
+
+  public List<ContractLeg> getContractLegs() {
+    return contractLegs;
+  }
+
+  public void setContractLegs(
+      List<ContractLeg> contractLegs) {
+    this.contractLegs = contractLegs;
+  }
+
+  public List<TradeOrderModel> getOcaOrders() {
+    return ocaOrders;
+  }
+
+  public void setOcaOrders(List<TradeOrderModel> ocaOrders) {
+    this.ocaOrders = ocaOrders;
+  }
+
+  public Double getCashAmount() {
+    return cashAmount;
+  }
+
+  public void setCashAmount(Double cashAmount) {
+    this.cashAmount = cashAmount;
+  }
+
   @Override
   public String toString() {
     return "TradeOrderModel{" +
@@ -559,9 +637,13 @@ public class TradeOrderModel extends ApiModel {
         ", stopLossOrderType=" + stopLossOrderType +
         ", stopLossOrderId=" + stopLossOrderId +
         ", stopLossPrice=" + stopLossPrice +
+        ", stopLossLimitPrice=" + stopLossLimitPrice +
         ", stopLossTif=" + stopLossTif +
         ", stopLossTrailingPercent=" + stopLossTrailingPercent +
         ", stopLossTrailingAmount=" + stopLossTrailingAmount +
+        ", comboType=" + comboType +
+        ", cashAmount=" + cashAmount +
+        ", ocaOrders=" + ocaOrders == null ? "" : JSONObject.toJSONString(ocaOrders, SerializerFeature.WriteEnumUsingToString) +
         '}';
   }
 }

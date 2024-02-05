@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.util.builder;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
@@ -243,6 +244,13 @@ public class AccountParamBuilder {
     return this;
   }
 
+  public AccountParamBuilder pageToken(String pageToken) {
+    if (pageToken != null) {
+      paramMap.put("page_token", pageToken);
+    }
+    return this;
+  }
+
   public AccountParamBuilder sortBy(OrderSortBy orderSortBy) {
     if (orderSortBy != null) {
       paramMap.put("sort_by", orderSortBy.name());
@@ -255,15 +263,13 @@ public class AccountParamBuilder {
    * @return
    */
   public String buildJson() {
-    JSONObject jsonObject = new JSONObject();
     if (paramMap.get("account") == null) {
       paramMap.put("account", ClientConfig.DEFAULT_CONFIG.defaultAccount);
     }
     if (paramMap.get("lang") == null) {
       paramMap.put("lang", ClientConfig.DEFAULT_CONFIG.getDefaultLanguage().name());
     }
-    jsonObject.putAll(paramMap);
-    return jsonObject.toJSONString();
+    return JSONObject.toJSONString(paramMap, SerializerFeature.WriteEnumUsingToString);
   }
 
   /**
@@ -271,11 +277,9 @@ public class AccountParamBuilder {
    * @return
    */
   public String buildJsonWithoutDefaultAccount() {
-    JSONObject jsonObject = new JSONObject();
     if (paramMap.get("lang") == null) {
       paramMap.put("lang", ClientConfig.DEFAULT_CONFIG.getDefaultLanguage().name());
     }
-    jsonObject.putAll(paramMap);
-    return jsonObject.toJSONString();
+    return JSONObject.toJSONString(paramMap, SerializerFeature.WriteEnumUsingToString);
   }
 }

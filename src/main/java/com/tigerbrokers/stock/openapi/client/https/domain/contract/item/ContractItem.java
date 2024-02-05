@@ -1,10 +1,9 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.contract.item;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.fund.item.FundContractItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.item.FutureContractItem;
 import com.tigerbrokers.stock.openapi.client.struct.OptionSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
@@ -32,16 +31,10 @@ public class ContractItem extends ApiModel {
   private String localSymbol;
   private String tradingClass;
   private String name;
-  /** please use 'tradeable' */
-  @Deprecated
-  private Integer status;
   private Boolean tradeable;
   private Boolean closeOnly;
   private Double minTick;
   private Boolean marginable;
-  /** please use 'shortInitialMargin' and 'shortMaintenanceMargin' */
-  @Deprecated
-  private Double shortMargin;
   private Double shortInitialMargin;
   private Double shortMaintenanceMargin;
   private Double shortFeeRate;
@@ -53,14 +46,21 @@ public class ContractItem extends ApiModel {
   private String lastTradingDate;
   private String firstNoticeDate;
   private Long lastBiddingCloseTime;
-  /** please use 'tradeable' */
-  @Deprecated
-  private Boolean trade;
   private Boolean continuous;
   /** future contract fields */
   private String type;
   private String ibCode;
   private List<TickSizeItem> tickSizes;
+  private Boolean isEtf;
+  private Integer etfLeverage;
+  /** Intraday initial margin discount */
+  private Double discountedDayInitialMargin;
+  /** Intraday maintenance margin discount */
+  private Double discountedDayMaintenanceMargin;
+  /** Intraday margin discount period time zone  */
+  private String discountedTimeZoneCode;
+  private String discountedStartAt;
+  private String discountedEndAt;
 
   public Integer getContractId() {
     return contractId;
@@ -190,16 +190,6 @@ public class ContractItem extends ApiModel {
     this.name = name;
   }
 
-  @Deprecated
-  public Integer getStatus() {
-    return status;
-  }
-
-  @Deprecated
-  public void setStatus(Integer status) {
-    this.status = status;
-  }
-
   public Boolean isTradeable() {
     return tradeable;
   }
@@ -230,14 +220,6 @@ public class ContractItem extends ApiModel {
 
   public void setMarginable(Boolean marginable) {
     this.marginable = marginable;
-  }
-
-  public Double getShortMargin() {
-    return shortMargin;
-  }
-
-  public void setShortMargin(Double shortMargin) {
-    this.shortMargin = shortMargin;
   }
 
   public Double getShortInitialMargin() {
@@ -320,15 +302,6 @@ public class ContractItem extends ApiModel {
     this.lastBiddingCloseTime = lastBiddingCloseTime;
   }
 
-  @Deprecated
-  public Boolean isTrade() {
-    return trade;
-  }
-
-  public void setTrade(Boolean trade) {
-    this.trade = trade;
-  }
-
   public Boolean isContinuous() {
     return continuous;
   }
@@ -362,42 +335,106 @@ public class ContractItem extends ApiModel {
     this.tickSizes = tickSizes;
   }
 
+  public Boolean isEtf() {
+    return isEtf;
+  }
+
+  public Boolean getEtf() {
+    return isEtf;
+  }
+
+  public void setEtf(Boolean etf) {
+    isEtf = etf;
+  }
+
+  public Integer getEtfLeverage() {
+    return etfLeverage;
+  }
+
+  public void setEtfLeverage(Integer etfLeverage) {
+    this.etfLeverage = etfLeverage;
+  }
+
+  public Double getDiscountedDayInitialMargin() {
+    return discountedDayInitialMargin;
+  }
+
+  public void setDiscountedDayInitialMargin(Double discountedDayInitialMargin) {
+    this.discountedDayInitialMargin = discountedDayInitialMargin;
+  }
+
+  public Double getDiscountedDayMaintenanceMargin() {
+    return discountedDayMaintenanceMargin;
+  }
+
+  public void setDiscountedDayMaintenanceMargin(Double discountedDayMaintenanceMargin) {
+    this.discountedDayMaintenanceMargin = discountedDayMaintenanceMargin;
+  }
+
+  public String getDiscountedTimeZoneCode() {
+    return discountedTimeZoneCode;
+  }
+
+  public void setDiscountedTimeZoneCode(String discountedTimeZoneCode) {
+    this.discountedTimeZoneCode = discountedTimeZoneCode;
+  }
+
+  public String getDiscountedStartAt() {
+    return discountedStartAt;
+  }
+
+  public void setDiscountedStartAt(String discountedStartAt) {
+    this.discountedStartAt = discountedStartAt;
+  }
+
+  public String getDiscountedEndAt() {
+    return discountedEndAt;
+  }
+
+  public void setDiscountedEndAt(String discountedEndAt) {
+    this.discountedEndAt = discountedEndAt;
+  }
+
   @Override
   public String toString() {
     return "ContractItem{" +
-        "contractId=" + contractId +
-        ", identifier='" + identifier + '\'' +
-        ", symbol='" + symbol + '\'' +
-        ", secType='" + secType + '\'' +
-        ", expiry='" + expiry + '\'' +
-        ", contractMonth='" + contractMonth + '\'' +
-        ", strike=" + strike +
-        ", right='" + right + '\'' +
-        ", multiplier=" + multiplier +
-        ", exchange='" + exchange + '\'' +
-        ", market='" + market + '\'' +
-        ", primaryExchange='" + primaryExchange + '\'' +
-        ", currency='" + currency + '\'' +
-        ", localSymbol='" + localSymbol + '\'' +
-        ", tradingClass='" + tradingClass + '\'' +
-        ", name='" + name + '\'' +
-        ", tradeable=" + tradeable +
-        ", minTick=" + minTick +
-        ", marginable=" + marginable +
-        ", shortableCount=" + shortableCount +
-        ", shortInitialMargin=" + shortInitialMargin +
-        ", shortMaintenanceMargin=" + shortMaintenanceMargin +
-        ", shortFeeRate=" + shortFeeRate +
-        ", longInitialMargin=" + longInitialMargin +
-        ", longMaintenanceMargin=" + longMaintenanceMargin +
-        ", lastTradingDate='" + lastTradingDate + '\'' +
-        ", firstNoticeDate='" + firstNoticeDate + '\'' +
-        ", lastBiddingCloseTime=" + lastBiddingCloseTime +
-        ", ibCode=" + ibCode +
-        ", type=" + type +
-        ", trade=" + trade +
-        ", continuous=" + continuous +
-        '}';
+            "contractId=" + contractId +
+            ", identifier='" + identifier + '\'' +
+            ", symbol='" + symbol + '\'' +
+            ", secType='" + secType + '\'' +
+            ", expiry='" + expiry + '\'' +
+            ", contractMonth='" + contractMonth + '\'' +
+            ", strike=" + strike +
+            ", right='" + right + '\'' +
+            ", multiplier=" + multiplier +
+            ", exchange='" + exchange + '\'' +
+            ", market='" + market + '\'' +
+            ", primaryExchange='" + primaryExchange + '\'' +
+            ", currency='" + currency + '\'' +
+            ", localSymbol='" + localSymbol + '\'' +
+            ", tradingClass='" + tradingClass + '\'' +
+            ", name='" + name + '\'' +
+            ", tradeable=" + tradeable +
+            ", closeOnly=" + closeOnly +
+            ", minTick=" + minTick +
+            ", marginable=" + marginable +
+            ", shortInitialMargin=" + shortInitialMargin +
+            ", shortMaintenanceMargin=" + shortMaintenanceMargin +
+            ", shortFeeRate=" + shortFeeRate +
+            ", shortable=" + shortable +
+            ", shortableCount=" + shortableCount +
+            ", longInitialMargin=" + longInitialMargin +
+            ", longMaintenanceMargin=" + longMaintenanceMargin +
+            ", lastTradingDate='" + lastTradingDate + '\'' +
+            ", firstNoticeDate='" + firstNoticeDate + '\'' +
+            ", lastBiddingCloseTime=" + lastBiddingCloseTime +
+            ", continuous=" + continuous +
+            ", type='" + type + '\'' +
+            ", ibCode='" + ibCode + '\'' +
+            ", tickSizes=" + tickSizes +
+            ", isEtf=" + isEtf +
+            ", etfLeverage=" + etfLeverage +
+            '}';
   }
 
   public static ContractItem convert(FutureContractItem futureContractItem) {
@@ -416,8 +453,17 @@ public class ContractItem extends ApiModel {
     contractItem.setFirstNoticeDate(futureContractItem.getFirstNoticeDate());
     contractItem.setLastBiddingCloseTime(futureContractItem.getLastBiddingCloseTime());
     contractItem.setCurrency(futureContractItem.getCurrency());
-    contractItem.setTrade(futureContractItem.isTrade());
+    contractItem.setTradeable(futureContractItem.isTrade());
     contractItem.setContinuous(futureContractItem.isContinuous());
+    return contractItem;
+  }
+
+  public static ContractItem convert(FundContractItem fundContractItem) {
+    ContractItem contractItem = new ContractItem();
+    contractItem.setSecType(SecType.FUND.name());
+    contractItem.setSymbol(fundContractItem.getSymbol());
+    contractItem.setMarket(fundContractItem.getMarket());
+    contractItem.setCurrency(fundContractItem.getCurrency());
     return contractItem;
   }
 
@@ -498,27 +544,11 @@ public class ContractItem extends ApiModel {
     return contractItem;
   }
 
-  public static ContractItem convertFromJson(String data) {
-    if (data.startsWith("{\"items\":")) {
-      data = data.substring("{\"items\":".length(), data.length() - 1);
-      List<ContractItem> items = JSON.parseObject(data, new TypeReference<List<ContractItem>>() {
-      });
-      if (items == null || items.size() == 0) {
-        return new ContractItem();
-      }
-      return items.get(0);
-    } else {
-      return JSON.parseObject(data, ContractItem.class);
-    }
-  }
-
-  public static List<ContractItem> convertFromJsonV2(String data) {
-    if (data.startsWith("{\"items\":")) {
-      data = data.substring("{\"items\":" .length(), data.length() - 1);
-      List<ContractItem> items = JSON.parseObject(data, new TypeReference<List<ContractItem>>() {
-      });
-      return items;
-    }
-    return null;
+  public static ContractItem buildFundContract(String symbol, String currency) {
+    ContractItem contractItem = new ContractItem();
+    contractItem.setSecType(SecType.FUND.name());
+    contractItem.setSymbol(symbol);
+    contractItem.setCurrency(currency);
+    return contractItem;
   }
 }

@@ -3,23 +3,23 @@ package com.tigerbrokers.stock.openapi.client.https.domain.quote.item;
 import java.io.Serializable;
 
 /**
- * 作者：ltc
- * 时间：2019/08/13
+ * author：ltc
+ * date：2019/08/13
  */
 public class DepthEntry implements Serializable {
 
   /**
-   * 价格
+   * price
    */
   private Double price;
 
   /**
-   * 订单数量
+   * quantity of order
    */
   private Integer count;
 
   /**
-   * 股数
+   * quantity of symbol
    */
   private Integer volume;
 

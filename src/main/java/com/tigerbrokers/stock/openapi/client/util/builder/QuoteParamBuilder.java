@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.util.builder;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.struct.enums.KType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
@@ -196,10 +197,10 @@ public class QuoteParamBuilder {
   }
 
   public QuoteParameter build() {
-    return JSONObject.parseObject(JSON.toJSONString(paramMap), QuoteParameter.class);
+    return JSONObject.parseObject(JSON.toJSONString(paramMap, SerializerFeature.WriteEnumUsingToString), QuoteParameter.class);
   }
 
   public String buildJson() {
-    return JSONObject.toJSONString(paramMap);
+    return JSONObject.toJSONString(paramMap, SerializerFeature.WriteEnumUsingToString);
   }
 }

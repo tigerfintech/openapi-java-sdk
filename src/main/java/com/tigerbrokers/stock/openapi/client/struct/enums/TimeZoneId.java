@@ -6,9 +6,14 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
  */
 public enum TimeZoneId {
 
+  HongKong("Asia/Hong_Kong"),
   Shanghai("Asia/Shanghai"),
   NewYork("America/New_York"),
-  Singapore("Asia/Singapore");
+  Chicago("America/Chicago"),
+  Singapore("Asia/Singapore"),
+  Sydney("Australia/Sydney"),
+  Auckland("Pacific/Auckland"),
+  London("Europe/London");
 
   private String zoneId;
 
@@ -22,15 +27,25 @@ public enum TimeZoneId {
 
   public static TimeZoneId getTimeZoneIdByMarket(Market market) {
     if (market == null) {
-      return Shanghai;
+      return HongKong;
     }
     switch (market) {
       case US:
         return NewYork;
+      case AU:
+        return Sydney;
+      case NZ:
+        return Auckland;
+      case UK:
+        return London;
+      case SG:
+        return Singapore;
+      case CN:
+        return Shanghai;
       case HK:
-        return Shanghai;
+        return HongKong;
       default:
-        return Shanghai;
+        return HongKong;
     }
   }
 }

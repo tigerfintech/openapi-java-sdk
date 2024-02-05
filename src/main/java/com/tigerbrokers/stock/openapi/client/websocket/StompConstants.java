@@ -6,13 +6,13 @@ package com.tigerbrokers.stock.openapi.client.websocket;
  */
 public class StompConstants {
 
-  //carriage return 回车
+  //carriage return CR
   static final byte CR = 13;
-  //line feed character 换行
+  //line feed character LF
   static final byte LF = 10;
-  //null 空字符
+  //null
   static final byte NUL = 0;
-  //colon 冒号
+  //colon ':'
   static final byte COLON = 58;
 
   private StompConstants() {

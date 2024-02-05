@@ -15,12 +15,12 @@ public class SignItem implements Serializable {
   }
 
   /**
-   * 签名源串
+   * signature source string
    */
   private String signSource;
 
   /**
-   * 签名
+   * signature content
    */
   private String sign;
 

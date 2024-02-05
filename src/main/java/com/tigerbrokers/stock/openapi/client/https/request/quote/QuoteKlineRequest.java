@@ -53,22 +53,30 @@ public class QuoteKlineRequest extends TigerCommonRequest implements TigerReques
     return kType != null ? kType.getValue() : KType.day.getValue();
   }
 
+  public QuoteKlineModel getApiModel() {
+    if (apiModel == null) {
+      apiModel = new QuoteKlineModel();
+    }
+    return (QuoteKlineModel)apiModel;
+  }
+
   public QuoteKlineRequest withLimit(int limit) {
     if (limit > 0) {
-      if (apiModel instanceof QuoteKlineModel) {
-        QuoteKlineModel klineModel = (QuoteKlineModel) apiModel;
-        klineModel.setLimit(limit);
-      }
+      getApiModel().setLimit(limit);
     }
     return this;
   }
 
   public QuoteKlineRequest withRight(RightOption rightOption) {
     if (rightOption != null) {
-      if (apiModel instanceof QuoteKlineModel) {
-        QuoteKlineModel klineModel = (QuoteKlineModel) apiModel;
-        klineModel.setRight(rightOption);
-      }
+      getApiModel().setRight(rightOption);
+    }
+    return this;
+  }
+
+  public QuoteKlineRequest withRight(String rightOption) {
+    if (rightOption != null) {
+      getApiModel().setRight(rightOption);
     }
     return this;
   }
@@ -78,10 +86,7 @@ public class QuoteKlineRequest extends TigerCommonRequest implements TigerReques
    * @param pageToken
    */
   public void withPageToken(String pageToken) {
-    if (apiModel != null && apiModel instanceof QuoteKlineModel) {
-      QuoteKlineModel klineModel = (QuoteKlineModel) apiModel;
-      klineModel.setPageToken(pageToken);
-    }
+    getApiModel().setPageToken(pageToken);
   }
 
   @Override

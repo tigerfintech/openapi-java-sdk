@@ -8,8 +8,8 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import java.util.List;
 
 /**
- * 作者：ltc
- * 时间：2019/08/13
+ * author：ltc
+ * date：2019/08/13
  */
 public class QuoteDepthRequest extends TigerCommonRequest implements TigerRequest<QuoteDepthResponse> {
 
