@@ -13,7 +13,7 @@ message BarData {
   float avg = 6;      // The average price of current minute.
   int64 volume = 7;   // Cumulative trading volume in current minute.
   int32 count = 8;    // The number of transaction in current minute.
-  string symbol = 9; // symbol
-  optional double amount = 10;  // Cumulative turnover in current minute.
+  string symbol = 9;  // symbol
+  double amount = 10;  // Cumulative turnover in current minute.
   optional uint64 serverTimestamp = 11;
 }

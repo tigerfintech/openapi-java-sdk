@@ -17,6 +17,12 @@ public class PlaceOrderRequestValidator implements RequestValidator<TradeOrderMo
 
   @Override
   public void validate(TradeOrderModel model) throws TigerApiException {
+    if (model.getOcaOrders() != null && model.getOcaOrders().size() > 0) {
+      for (TradeOrderModel item : model.getOcaOrders()) {
+        validate(item);
+      }
+      return;
+    }
     if (StringUtils.isEmpty(model.getAccount())) {
       throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "account");
     }
@@ -32,10 +38,18 @@ public class PlaceOrderRequestValidator implements RequestValidator<TradeOrderMo
     if (model.getOrderType() == null) {
       throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "order_type");
     }
-    if (model.getTotalQuantity() == null) {
-      throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "total_quantity");
-    } else if (model.getTotalQuantity() <= 0) {
-      throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "total_quantity");
+    if (SecType.FUND == model.getSecType()) {
+      if (model.getCashAmount() == null) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "cash_amount");
+      } else if (model.getCashAmount() <= 0) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "cash_amount");
+      }
+    } else {
+      if (model.getTotalQuantity() == null) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "total_quantity");
+      } else if (model.getTotalQuantity() <= 0) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "total_quantity");
+      }
     }
 
     if (model.getOrderType() == OrderType.LMT || model.getOrderType() == OrderType.STP_LMT

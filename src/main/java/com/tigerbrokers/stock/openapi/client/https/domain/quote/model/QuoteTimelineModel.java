@@ -3,6 +3,8 @@ package com.tigerbrokers.stock.openapi.client.https.domain.quote.model;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeLineType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
+
 import java.util.List;
 
 /**
@@ -22,21 +24,21 @@ public class QuoteTimelineModel extends QuoteSymbolModel {
     this.period = TimeLineType.day.name();
   }
 
-  public QuoteTimelineModel(List<String> symbols, Long beginTime, boolean includeHourTrading) {
-    super(symbols, includeHourTrading);
+  public QuoteTimelineModel(List<String> symbols, Long beginTime, TradeSession tradeSession) {
+    super(symbols, tradeSession);
     this.beginTime = beginTime;
     this.period = TimeLineType.day.name();
   }
 
-  public QuoteTimelineModel(List<String> symbols, Long beginTime, boolean includeHourTrading, Language language) {
-    super(symbols, includeHourTrading, language);
+  public QuoteTimelineModel(List<String> symbols, Long beginTime, TradeSession tradeSession, Language language) {
+    super(symbols, tradeSession, language);
     this.beginTime = beginTime;
     this.period = TimeLineType.day.name();
   }
 
-  public QuoteTimelineModel(List<String> symbols, Long beginTime, boolean includeHourTrading, TimeLineType timeLineType,
-      Language language) {
-    super(symbols, includeHourTrading, language);
+  public QuoteTimelineModel(List<String> symbols, Long beginTime, TradeSession tradeSession, TimeLineType timeLineType,
+                            Language language) {
+    super(symbols, tradeSession, language);
     this.beginTime = beginTime;
     if (timeLineType != null) {
       this.period = timeLineType.name();

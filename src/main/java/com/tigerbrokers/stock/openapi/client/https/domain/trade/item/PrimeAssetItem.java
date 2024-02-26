@@ -62,6 +62,7 @@ public class PrimeAssetItem extends ApiModel {
         private Double buyingPower;
         private Double leverage;
         private List<CurrencyAssets> currencyAssets;
+        private List<String> consolidatedSegTypes;
 
         public String getCapability() {
             return capability;
@@ -215,6 +216,14 @@ public class PrimeAssetItem extends ApiModel {
             this.currencyAssets = currencyAssets;
         }
 
+        public List<String> getConsolidatedSegTypes() {
+            return consolidatedSegTypes;
+        }
+
+        public void setConsolidatedSegTypes(List<String> consolidatedSegTypes) {
+            this.consolidatedSegTypes = consolidatedSegTypes;
+        }
+
         public CurrencyAssets getAssetByCurrency(Currency currency) {
             if (currency == Currency.ALL) {
                 return null;
@@ -240,6 +249,7 @@ public class PrimeAssetItem extends ApiModel {
         private Double stockMarketValue;
         private Double optionMarketValue;
         private Double futuresMarketValue;
+        private Double fundMarketValue;
         private Double unrealizedPL;
         private Double realizedPL;
 
@@ -297,6 +307,14 @@ public class PrimeAssetItem extends ApiModel {
 
         public void setFuturesMarketValue(Double futuresMarketValue) {
             this.futuresMarketValue = futuresMarketValue;
+        }
+
+        public Double getFundMarketValue() {
+            return fundMarketValue;
+        }
+
+        public void setFundMarketValue(Double fundMarketValue) {
+            this.fundMarketValue = fundMarketValue;
         }
 
         public Double getUnrealizedPL() {
