@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.request.trade;
 
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.PrimeAssetModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
@@ -44,6 +45,17 @@ public class PrimeAssetRequest extends TigerCommonRequest implements TigerReques
         PrimeAssetRequest primeAssetRequest = new PrimeAssetRequest();
         primeAssetRequest.setApiModel(new PrimeAssetModel(account, baseCurrency.name(), secretKey));
         return primeAssetRequest;
+    }
+
+    public PrimeAssetModel getApiModel() {
+        if (apiModel == null) {
+            apiModel = new PrimeAssetModel(ClientConfig.DEFAULT_CONFIG.defaultAccount);
+        }
+        return (PrimeAssetModel)apiModel;
+    }
+
+    public void setConsolidated(Boolean consolidated) {
+        getApiModel().setConsolidated(consolidated);
     }
 
     @Override

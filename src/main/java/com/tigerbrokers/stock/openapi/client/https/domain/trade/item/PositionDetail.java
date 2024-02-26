@@ -11,6 +11,7 @@ public class PositionDetail implements Serializable {
 
   private String account;
   private long position;
+  private int positionScale;
   private Double averageCost;
   private Double averageCostByAverage;
   private Double marketValue;
@@ -48,6 +49,14 @@ public class PositionDetail implements Serializable {
 
   public void setPosition(long position) {
     this.position = position;
+  }
+
+  public int getPositionScale() {
+    return positionScale;
+  }
+
+  public void setPositionScale(int positionScale) {
+    this.positionScale = positionScale;
   }
 
   public Double getAverageCost() {

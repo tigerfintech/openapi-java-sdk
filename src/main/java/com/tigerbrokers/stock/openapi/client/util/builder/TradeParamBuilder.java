@@ -114,6 +114,13 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder cashAmount(Double cashAmount) {
+    if (cashAmount != null) {
+      this.orderParameter.setCashAmount(cashAmount);
+    }
+    return this;
+  }
+
   public TradeParamBuilder action(ActionType action) {
     if (action != null) {
       this.orderParameter.setAction(action);

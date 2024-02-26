@@ -30,7 +30,7 @@ public class CorporateActionRequestValidator implements RequestValidator<Corpora
     if (null == model.getEndDate()) {
       throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "end_date");
     }
-    if (!model.getBeginDate().before(model.getEndDate())) {
+    if (model.getBeginDate().after(model.getEndDate())) {
       throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_RANGE_ERROR, "begin_date", "end_date");
     }
   }

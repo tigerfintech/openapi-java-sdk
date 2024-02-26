@@ -98,6 +98,7 @@ public enum MethodName {
   FUTURE_REAL_TIME_QUOTE("future_real_time_quote", MethodType.QUOTE),
   FUTURE_TICK("future_tick", MethodType.QUOTE),
   FUTURE_TRADING_DATE("future_trading_date", MethodType.QUOTE),
+  FUTURE_HISTORY_MAIN_CONTRACT("future_history_main_contract", MethodType.QUOTE),
 
   /**
    * fundmental data
@@ -108,6 +109,16 @@ public enum MethodName {
   INDUSTRY_LIST("industry_list", MethodType.QUOTE),
   INDUSTRY_STOCKS("industry_stocks", MethodType.QUOTE),
   STOCK_INDUSTRY("stock_industry", MethodType.QUOTE),
+  FINANCIAL_CURRENCY("financial_currency", MethodType.QUOTE),
+  FINANCIAL_EXCHANGE_RATE("financial_exchange_rate", MethodType.QUOTE),
+
+  /**
+   * fund quote
+   */
+  FUND_ALL_SYMBOLS("fund_all_symbols", MethodType.QUOTE),
+  FUND_CONTRACTS("fund_contracts", MethodType.QUOTE),
+  FUND_QUOTE("fund_quote", MethodType.QUOTE),
+  FUND_HISTORY_QUOTE("fund_history_quote", MethodType.QUOTE),
 
   /**
    * grab quote
