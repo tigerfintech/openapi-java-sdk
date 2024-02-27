@@ -10,6 +10,5 @@ message TickData {
   float price = 3;     // Transaction price.
   int32 volume = 4;    // Transaction volume.
   int64 sequence = 5;  // The order in which upstream data arrives, for reference only.
-  int32 dir = 6;       // buy/sell direction
-  int32 type = 7;      // Indicate upward or downward movement in the price of a security.
+  string type = 6;     // buy/sell direction. Active buy(+); Active sell(-); Neutral transaction(*)
 }
