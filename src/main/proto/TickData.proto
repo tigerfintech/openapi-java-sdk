@@ -11,4 +11,5 @@ message TickData {
   int32 volume = 4;    // Transaction volume.
   int64 sequence = 5;  // The order in which upstream data arrives, for reference only.
   string type = 6;     // buy/sell direction. Active buy(+); Active sell(-); Neutral transaction(*)
+  string cond = 7;     // The trade condition for irregular transaction. (Optional)
 }
