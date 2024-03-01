@@ -48,6 +48,8 @@ public class TradeOrder implements Serializable {
   private Boolean outsideRth;
 
   private Double commission;
+  /** Goods and Services Tax (TBSG only) */
+  private Double gst;
   private Double realizedPnl;
   private String remark;
   private String triggerStatus;
