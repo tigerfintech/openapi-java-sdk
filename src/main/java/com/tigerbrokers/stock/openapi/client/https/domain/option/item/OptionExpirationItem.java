@@ -12,6 +12,7 @@ public class OptionExpirationItem extends ApiModel {
   private String symbol;
   private List<String> dates;
   private List<Long> timestamps;
+  private List<String> periodTags;
   private Integer count;
 
   public String getSymbol() {
@@ -36,6 +37,14 @@ public class OptionExpirationItem extends ApiModel {
 
   public void setTimestamps(List<Long> timestamps) {
     this.timestamps = timestamps;
+  }
+
+  public List<String> getPeriodTags() {
+    return periodTags;
+  }
+
+  public void setPeriodTags(List<String> periodTags) {
+    this.periodTags = periodTags;
   }
 
   public Integer getCount() {

@@ -48,6 +48,8 @@ public class TradeOrder implements Serializable {
   private Boolean outsideRth;
 
   private Double commission;
+  /** Goods and Services Tax (TBSG only) */
+  private Double gst;
   private Double realizedPnl;
   private String remark;
   private String triggerStatus;
@@ -315,6 +317,14 @@ public class TradeOrder implements Serializable {
 
   public void setCommission(Double commission) {
     this.commission = commission;
+  }
+
+  public Double getGst() {
+    return gst;
+  }
+
+  public void setGst(Double gst) {
+    this.gst = gst;
   }
 
   public Double getRealizedPnl() {
