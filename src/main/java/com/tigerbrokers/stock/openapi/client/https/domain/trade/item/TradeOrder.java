@@ -319,6 +319,14 @@ public class TradeOrder implements Serializable {
     this.commission = commission;
   }
 
+  public Double getGst() {
+    return gst;
+  }
+
+  public void setGst(Double gst) {
+    this.gst = gst;
+  }
+
   public Double getRealizedPnl() {
     return realizedPnl;
   }
