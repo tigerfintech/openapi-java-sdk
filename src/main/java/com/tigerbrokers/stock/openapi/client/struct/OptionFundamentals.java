@@ -66,6 +66,11 @@ public class OptionFundamentals {
    */
   double openInterest;
 
+  /**
+   * for debug and validate
+   */
+  String metricParam;
+
   public double getDelta() {
     return delta;
   }
@@ -176,5 +181,13 @@ public class OptionFundamentals {
 
   public void setOpenInterest(double openInterest) {
     this.openInterest = openInterest;
+  }
+
+  public String getMetricParam() {
+    return metricParam;
+  }
+
+  public void setMetricParam(String metricParam) {
+    this.metricParam = metricParam;
   }
 }

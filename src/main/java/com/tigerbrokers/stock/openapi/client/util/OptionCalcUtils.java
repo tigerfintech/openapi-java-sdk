@@ -21,6 +21,8 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Right;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadFactory;
+
+import org.jquantlib.helper.BSMEuropeanDividendOptionHelper;
 import org.jquantlib.helper.FDAmericanDividendOptionHelper;
 import org.jquantlib.instruments.Option;
 
@@ -45,6 +47,8 @@ public class OptionCalcUtils {
   private static final int TIME_MILLIS_IN_ONE_HOUR = 60 * 60 * 1000;
 
   private static double ACCURACY = 1.0e-6;
+
+  private static final String METRIC_PARAM_FORMAT = "rates=%s;expiry=%s;latestPrice=%s;target=%s;ask=%s;bid=%s;dividendAmount=%s";
 
   private static double n(double x) {
     return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-x * x / 2);
@@ -470,10 +474,13 @@ public class OptionCalcUtils {
       throw new RuntimeException("Unable to obtain option summary information.");
     }
 
+    Double latestPrice = latestPriceTask.get();
+    Double dividendAmount = dividendTask.get().getAmount();
+
     OptionFundamentals result =
         calcOptionIndex(optionBriefItem.getRatesBonds(), optionBriefItem.getExpiry(),
-            DateUtils.parseEpochMill(dividendTask.get().getExecuteDate()), latestPriceTask.get(), target,
-            dividendTask.get().getAmount(), Double.parseDouble(optionBriefItem.getStrike()), optionBriefItem.getRight(),
+            DateUtils.parseEpochMill(dividendTask.get().getExecuteDate()), latestPrice, target,
+                dividendAmount, Double.parseDouble(optionBriefItem.getStrike()), optionBriefItem.getRight(),
             System.currentTimeMillis(), marketStateTask.get());
     result.setOpenInterest(optionBriefItem.getOpenInterest() == null ? 0 : optionBriefItem.getOpenInterest());
     String volatility = null;
@@ -482,6 +489,8 @@ public class OptionCalcUtils {
     }
     double historyVolatility = volatility == null || volatility.isEmpty() ? 0.0 : Double.parseDouble(volatility);
     result.setHistoryVolatility(historyVolatility);
+
+    result.setMetricParam(String.format(METRIC_PARAM_FORMAT,optionBriefItem.getRatesBonds(), optionBriefItem.getExpiry(),latestPrice ,target,optionBriefItem.getAskPrice(),optionBriefItem.getBidPrice(),dividendAmount));
     return result;
   }
 
@@ -596,5 +605,62 @@ public class OptionCalcUtils {
     optionFundamentals.setPredictedValue(helper.NPV());
     return optionFundamentals;
   }
+
+  public static OptionFundamentals calcOptionIndex(Right optionType, double underlying, double strike, double riskFreeRate,
+                                                   double dividendRate, Double askPrice, Double bidPrice, LocalDate settlementDate, LocalDate expirationDate) {
+
+    FDAmericanDividendOptionHelper helper = new FDAmericanDividendOptionHelper(optionType == Right.CALL ? Option.Type.Call : Option.Type.Put, underlying, strike,
+            riskFreeRate, dividendRate,
+            new org.jquantlib.time.Date(settlementDate.getDayOfMonth(), settlementDate.getMonthValue(), settlementDate.getYear()),
+            new org.jquantlib.time.Date(expirationDate.getDayOfMonth(), expirationDate.getMonthValue(), expirationDate.getYear()));
+
+    double ivol = helper.impliedVolatility(calculateAvgPrice(askPrice,bidPrice));
+    helper.updateImpliedVolatility(ivol);
+
+    OptionMetrics optionIndex = new OptionMetrics(helper.delta(), helper.gamma(), helper.theta(), helper.vega(), helper.rho());
+    OptionFundamentals optionFundamentals = new OptionFundamentals();
+    optionFundamentals.setDelta(optionIndex.getDelta());
+    optionFundamentals.setGamma(optionIndex.getGamma());
+    optionFundamentals.setTheta(optionIndex.getTheta());
+    optionFundamentals.setVega(optionIndex.getVega());
+    optionFundamentals.setRho(optionIndex.getRho());
+    optionFundamentals.setPredictedValue(helper.NPV());
+    return optionFundamentals;
+  }
+
+  public static OptionFundamentals calcEuropeanOptionIndex(Right optionType, double underlying, double strike, double riskFreeRate,
+                                                   double dividendRate, Double askPrice, Double bidPrice, LocalDate settlementDate, LocalDate expirationDate) {
+
+    BSMEuropeanDividendOptionHelper helper = new BSMEuropeanDividendOptionHelper(optionType == Right.CALL ? Option.Type.Call : Option.Type.Put, underlying, strike,
+            riskFreeRate, dividendRate,
+            new org.jquantlib.time.Date(settlementDate.getDayOfMonth(), settlementDate.getMonthValue(), settlementDate.getYear()),
+            new org.jquantlib.time.Date(expirationDate.getDayOfMonth(), expirationDate.getMonthValue(), expirationDate.getYear()));
+
+    double ivol = helper.impliedVolatility(calculateAvgPrice(askPrice,bidPrice));
+    helper.updateImpliedVolatility(ivol);
+
+    OptionMetrics optionIndex = new OptionMetrics(helper.delta(), helper.gamma(), helper.theta(), helper.vega(), helper.rho());
+    OptionFundamentals optionFundamentals = new OptionFundamentals();
+    optionFundamentals.setDelta(optionIndex.getDelta());
+    optionFundamentals.setGamma(optionIndex.getGamma());
+    optionFundamentals.setTheta(optionIndex.getTheta());
+    optionFundamentals.setVega(optionIndex.getVega());
+    optionFundamentals.setRho(optionIndex.getRho());
+    optionFundamentals.setPredictedValue(helper.NPV());
+    return optionFundamentals;
+  }
+
+  public static double calculateAvgPrice(Double askPrice, Double bidPrice) {
+    double avgPrice;
+    if (askPrice == null && bidPrice == null) {
+      avgPrice = 0D;
+    } else if (askPrice != null && bidPrice != null) {
+      avgPrice = (askPrice + bidPrice) / 2;
+    } else {
+      avgPrice = askPrice == null ? bidPrice : askPrice;
+    }
+    return avgPrice;
+  }
+
 }
 
