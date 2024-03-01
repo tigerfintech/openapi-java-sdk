@@ -127,9 +127,17 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   public WebSocketClient clientConfig(ClientConfig clientConfig) {
+    return clientConfig(clientConfig, null);
+  }
+
+  public WebSocketClient clientConfig(ClientConfig clientConfig, String url) {
     ConfigFileUtil.loadConfigFile(clientConfig);
     this.clientConfig = clientConfig;
-    this.url = NetworkUtil.getServerAddress(null);
+    if (StringUtils.isEmpty(url)) {
+      this.url = NetworkUtil.getServerAddress(null);
+    } else {
+      this.url = url;
+    }
     if (this.sslProvider == null && clientConfig.getSslProvider() != null) {
       this.sslProvider = clientConfig.getSslProvider();
     }
