@@ -40,7 +40,7 @@ public interface SubscribeApiCallback {
 
   void depthQuoteChange(QuoteDepthData data);
 
-  void barChange(BarData data);
+  void klineChange(BarData data);
 
   void stockTopPush(StockTopData data);
 
