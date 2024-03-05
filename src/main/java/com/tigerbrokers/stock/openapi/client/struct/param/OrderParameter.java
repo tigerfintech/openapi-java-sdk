@@ -59,7 +59,12 @@ public class OrderParameter implements Serializable {
    * 订单数量
    */
   @JSONField(name = "total_quantity")
-  private Integer totalQuantity;
+  private Long totalQuantity;
+  /**
+   * 下单数量的偏移量
+   */
+  @JSONField(name = "total_quantity_scale")
+  private Integer totalQuantityScale;
   /**
    * order cash amount
    */
@@ -266,12 +271,20 @@ public class OrderParameter implements Serializable {
     this.currency = currency;
   }
 
-  public Integer getTotalQuantity() {
+  public Long getTotalQuantity() {
     return totalQuantity;
   }
 
-  public void setTotalQuantity(Integer totalQuantity) {
+  public void setTotalQuantity(Long totalQuantity) {
     this.totalQuantity = totalQuantity;
+  }
+
+  public Integer getTotalQuantityScale() {
+    return totalQuantityScale;
+  }
+
+  public void setTotalQuantityScale(Integer totalQuantityScale) {
+    this.totalQuantityScale = totalQuantityScale;
   }
 
   public Double getCashAmount() {
@@ -582,6 +595,7 @@ public class OrderParameter implements Serializable {
         ", action=" + action +
         ", currency=" + currency +
         ", totalQuantity=" + totalQuantity +
+        ", totalQuantityScale=" + totalQuantityScale +
         ", cashAmount=" + cashAmount +
         ", timeInForce=" + timeInForce +
         ", expireTime=" + expireTime +
