@@ -2,7 +2,7 @@ package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.tigerbrokers.stock.openapi.client.socket.data.TradeTick;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.AssetData;
-import com.tigerbrokers.stock.openapi.client.socket.data.pb.BarData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.KlineData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.OptionTopData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.OrderStatusData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.OrderTransactionData;
@@ -42,7 +42,7 @@ public interface SubscribeApiCallback {
 
   void depthQuoteChange(QuoteDepthData data);
 
-  void klineChange(BarData data);
+  void klineChange(KlineData data);
 
   void stockTopPush(StockTopData data);
 

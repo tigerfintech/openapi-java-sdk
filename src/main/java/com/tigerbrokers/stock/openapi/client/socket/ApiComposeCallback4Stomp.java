@@ -3,7 +3,7 @@ package com.tigerbrokers.stock.openapi.client.socket;
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.socket.data.TradeTick;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.AssetData;
-import com.tigerbrokers.stock.openapi.client.socket.data.pb.BarData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.KlineData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.OptionTopData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.OrderStatusData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.OrderTransactionData;
@@ -100,7 +100,7 @@ public abstract class ApiComposeCallback4Stomp implements ApiComposeCallback {
   }
 
   @Override
-  public void klineChange(BarData data) {
+  public void klineChange(KlineData data) {
     // do nothing for protobuf data
   }
 
