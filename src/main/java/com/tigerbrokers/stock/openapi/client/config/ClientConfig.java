@@ -99,7 +99,7 @@ public class ClientConfig {
   /**
    * subscribed tradetick data, Whether to use the full version of the stock tick
    */
-  public boolean useFullStockTick = false;
+  public boolean useFullTick = false;
 
   private ClientConfig() {
   }
