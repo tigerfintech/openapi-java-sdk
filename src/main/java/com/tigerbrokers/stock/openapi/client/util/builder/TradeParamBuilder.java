@@ -107,6 +107,14 @@ public class TradeParamBuilder {
     return this;
   }
 
+  @Deprecated
+  public TradeParamBuilder totalQuantity(Integer totalQuantity) {
+    if (totalQuantity != null) {
+      this.orderParameter.setTotalQuantity(totalQuantity.longValue());
+    }
+    return this;
+  }
+
   public TradeParamBuilder totalQuantity(Long totalQuantity) {
     if (totalQuantity != null) {
       this.orderParameter.setTotalQuantity(totalQuantity);
