@@ -114,6 +114,13 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder totalQuantityScale(Integer totalQuantityScale) {
+    if (totalQuantityScale != null) {
+      this.orderParameter.setTotalQuantityScale(totalQuantityScale);
+    }
+    return this;
+  }
+
   public TradeParamBuilder cashAmount(Double cashAmount) {
     if (cashAmount != null) {
       this.orderParameter.setCashAmount(cashAmount);
