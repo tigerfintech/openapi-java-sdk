@@ -39,6 +39,14 @@ public class OptionExpirationItem extends ApiModel {
     this.timestamps = timestamps;
   }
 
+  public List<String> getPeriodTags() {
+    return periodTags;
+  }
+
+  public void setPeriodTags(List<String> periodTags) {
+    this.periodTags = periodTags;
+  }
+
   public Integer getCount() {
     return count;
   }

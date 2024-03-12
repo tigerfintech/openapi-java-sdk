@@ -34,6 +34,7 @@ public class TradeOrder implements Serializable {
   private Double trailingPercent;
 
   private Long totalQuantity;
+  private Integer totalQuantityScale;
   private Long filledQuantity;
   private Integer filledQuantityScale;
   private Double cashQuantity;
@@ -247,6 +248,14 @@ public class TradeOrder implements Serializable {
     this.totalQuantity = totalQuantity;
   }
 
+  public Integer getTotalQuantityScale() {
+    return totalQuantityScale;
+  }
+
+  public void setTotalQuantityScale(Integer totalQuantityScale) {
+    this.totalQuantityScale = totalQuantityScale;
+  }
+
   public Long getFilledQuantity() {
     return filledQuantity;
   }
@@ -317,6 +326,14 @@ public class TradeOrder implements Serializable {
 
   public void setCommission(Double commission) {
     this.commission = commission;
+  }
+
+  public Double getGst() {
+    return gst;
+  }
+
+  public void setGst(Double gst) {
+    this.gst = gst;
   }
 
   public Double getRealizedPnl() {
