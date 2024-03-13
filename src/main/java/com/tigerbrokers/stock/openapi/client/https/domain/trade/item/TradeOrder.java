@@ -34,6 +34,7 @@ public class TradeOrder implements Serializable {
   private Double trailingPercent;
 
   private Long totalQuantity;
+  private Integer totalQuantityScale;
   private Long filledQuantity;
   private Integer filledQuantityScale;
   private Double cashQuantity;
@@ -245,6 +246,14 @@ public class TradeOrder implements Serializable {
 
   public void setTotalQuantity(Long totalQuantity) {
     this.totalQuantity = totalQuantity;
+  }
+
+  public Integer getTotalQuantityScale() {
+    return totalQuantityScale;
+  }
+
+  public void setTotalQuantityScale(Integer totalQuantityScale) {
+    this.totalQuantityScale = totalQuantityScale;
   }
 
   public Long getFilledQuantity() {
