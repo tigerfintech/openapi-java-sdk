@@ -57,7 +57,12 @@ public class TradeOrderModel extends ApiModel {
    * total quantity
    */
   @JSONField(name = "total_quantity")
-  private Integer totalQuantity;
+  private Long totalQuantity;
+  /**
+   * total quantity scale
+   */
+  @JSONField(name = "total_quantity_scale")
+  private Integer totalQuantityScale;
   /**
    * order validity time range
    * DAY：valid for the day
@@ -283,12 +288,20 @@ public class TradeOrderModel extends ApiModel {
     this.currency = currency;
   }
 
-  public Integer getTotalQuantity() {
+  public Long getTotalQuantity() {
     return totalQuantity;
   }
 
-  public void setTotalQuantity(Integer totalQuantity) {
+  public void setTotalQuantity(Long totalQuantity) {
     this.totalQuantity = totalQuantity;
+  }
+
+  public Integer getTotalQuantityScale() {
+    return totalQuantityScale;
+  }
+
+  public void setTotalQuantityScale(Integer totalQuantityScale) {
+    this.totalQuantityScale = totalQuantityScale;
   }
 
   public TimeInForce getTimeInForce() {
@@ -610,6 +623,7 @@ public class TradeOrderModel extends ApiModel {
         ", action=" + action +
         ", currency=" + currency +
         ", totalQuantity=" + totalQuantity +
+        ", totalQuantityScale=" + totalQuantityScale +
         ", timeInForce=" + timeInForce +
         ", orderType=" + orderType +
         ", limitPrice=" + limitPrice +
