@@ -36,6 +36,28 @@ public class OptionChainQueryV3Request extends TigerCommonRequest implements Tig
     return request;
   }
 
+  public OptionChainV3Model getApiModel() {
+    if (apiModel == null) {
+      apiModel = new OptionChainV3Model();
+    }
+    return (OptionChainV3Model)apiModel;
+  }
+
+  public OptionChainQueryV3Request setOptionBasic(List<OptionChainModel> items) {
+    getApiModel().setOptionBasic(items);
+    return this;
+  }
+
+  public OptionChainQueryV3Request setOptionFilter(OptionChainFilterModel filter) {
+    getApiModel().setOptionFilter(filter);
+    return this;
+  }
+
+  public OptionChainQueryV3Request setReturnGreekValue(Boolean returnGreekValue) {
+    getApiModel().setReturnGreekValue(returnGreekValue);
+    return this;
+  }
+
   @Override
   public Class<OptionChainResponse> getResponseClass() {
     return OptionChainResponse.class;
