@@ -255,14 +255,14 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
   }
 
   public static TradeOrderRequest buildMultiLegOrder(String account,
-      List<ContractLeg> contractLegs, ComboType comboType, ActionType action, Integer quantity,
+      List<ContractLeg> contractLegs, ComboType comboType, Integer quantity,
       OrderType orderType, Double limitPrice, Double auxPrice, Double trailingPercent) {
-    return buildMultiLegOrder(account, contractLegs, comboType, action, convertToLong(quantity),
+    return buildMultiLegOrder(account, contractLegs, comboType, convertToLong(quantity),
         null, orderType, limitPrice, auxPrice, trailingPercent);
   }
 
   public static TradeOrderRequest buildMultiLegOrder(String account,
-      List<ContractLeg> contractLegs, ComboType comboType, ActionType action, Long quantity, Integer quantityScale,
+      List<ContractLeg> contractLegs, ComboType comboType, Long quantity, Integer quantityScale,
       OrderType orderType, Double limitPrice, Double auxPrice, Double trailingPercent) {
     if (contractLegs == null) {
       throw new IllegalArgumentException("parameter 'contractLegs' is null");
@@ -274,7 +274,6 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     model.setSecType(SecType.MLEG);
     model.setComboType(comboType.name());
     model.setAccount(StringUtils.isEmpty(account) ? ClientConfig.DEFAULT_CONFIG.defaultAccount : account);
-    model.setAction(action);
     model.setTotalQuantity(quantity);
     model.setTotalQuantityScale(quantityScale);
     model.setContractLegs(contractLegs);
