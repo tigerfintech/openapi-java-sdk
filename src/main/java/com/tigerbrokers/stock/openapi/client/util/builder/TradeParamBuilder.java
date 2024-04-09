@@ -409,7 +409,6 @@ public class TradeParamBuilder {
   }
 
   public String buildJson() {
-    return JSONObject.toJSONString(build(), FastJsonPropertyFilter.getPropertyFilter(),
-        SerializerFeature.WriteEnumUsingToString);
+    return JSONObject.toJSONString(build(), SerializerFeature.WriteEnumUsingToString);
   }
 }
