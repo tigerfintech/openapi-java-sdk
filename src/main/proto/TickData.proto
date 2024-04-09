@@ -12,7 +12,7 @@ message TickData {
 
   message Tick {
     int64 sn = 1;        // The order in which upstream data arrives, for reference only.
-    int64 time = 2;      // Execution time of transaction. 13位的时间戳
+    int64 time = 2;      // Execution time of transaction. 13-digit timestamp
     float price = 3;     // Transaction price.
     int32 volume = 4;    // Transaction volume.
     string type = 5;     // buy/sell direction. Active buy(+); Active sell(-); Neutral transaction(*)
