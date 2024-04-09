@@ -27,7 +27,6 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.util.AccountUtil;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
-import com.tigerbrokers.stock.openapi.client.util.FastJsonPropertyFilter;
 import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
 import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
 import com.tigerbrokers.stock.openapi.client.util.SdkVersionUtils;
@@ -313,7 +312,7 @@ public class TigerHttpClient implements TigerClient {
       if (apiModel instanceof BatchApiModel) {
         params.put(BIZ_CONTENT, JSONObject.toJSONString(((BatchApiModel) apiModel).getItems(), SerializerFeature.WriteEnumUsingToString));
       } else if (apiModel instanceof TradeOrderModel) {
-        params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel, FastJsonPropertyFilter.getPropertyFilter(), SerializerFeature.WriteEnumUsingToString));
+        params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel, SerializerFeature.WriteEnumUsingToString));
       } else {
         params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel, SerializerFeature.WriteEnumUsingToString));
       }
