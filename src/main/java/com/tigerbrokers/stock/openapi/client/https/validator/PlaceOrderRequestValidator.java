@@ -32,7 +32,7 @@ public class PlaceOrderRequestValidator implements RequestValidator<TradeOrderMo
     if (SecType.MLEG != model.getSecType() && StringUtils.isEmpty(model.getSymbol())) {
       throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "symbol");
     }
-    if (SecType.MLEG != model.getSecType() && model.getAction() == null) {
+    if (model.getAction() == null) {
       throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "action");
     }
     if (model.getOrderType() == null) {
