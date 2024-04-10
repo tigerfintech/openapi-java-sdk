@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.socket;
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.socket.data.TradeTick;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.AssetData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.KlineData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.OptionTopData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.OrderStatusData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.OrderTransactionData;
@@ -11,6 +12,7 @@ import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteBBOData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteBasicData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteDepthData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.StockTopData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.TickData;
 
 /**
  * Description:
@@ -60,6 +62,10 @@ public abstract class ApiComposeCallback4Stomp implements ApiComposeCallback {
   public void tradeTickChange(TradeTick data) {
     // do nothing for protobuf data
   }
+  @Override
+  public void fullTickChange(TickData data) {
+    // do nothing for protobuf data
+  }
 
   @Override
   public void quoteChange(QuoteBasicData data) {
@@ -90,6 +96,11 @@ public abstract class ApiComposeCallback4Stomp implements ApiComposeCallback {
 
   @Override
   public void depthQuoteChange(QuoteDepthData data) {
+    // do nothing for protobuf data
+  }
+
+  @Override
+  public void klineChange(KlineData data) {
     // do nothing for protobuf data
   }
 

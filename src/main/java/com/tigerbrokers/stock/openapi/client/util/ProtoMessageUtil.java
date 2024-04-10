@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.util;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.SocketCommon;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
@@ -53,6 +54,7 @@ public class ProtoMessageUtil {
         .setSdkVersion(SdkVersionUtils.getSdkVersion())
         .setTigerId(tigerId)
         .setSign(sign)
+        .setUseFullTick(ClientConfig.DEFAULT_CONFIG.useFullTick)
         .setSendInterval(sendInterval).setReceiveInterval(receiveInterval);
 
     builder.setConnect(conBuild.build());

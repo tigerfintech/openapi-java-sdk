@@ -14,6 +14,8 @@ public class OptionChainV3Model extends ApiModel {
   private List<OptionChainModel> optionBasic;
   @JSONField(name = "option_filter")
   private OptionChainFilterModel optionFilter;
+  @JSONField(name = "return_greek_value")
+  private Boolean returnGreekValue;
 
   public List<OptionChainModel> getOptionBasic() {
     return optionBasic;
@@ -31,11 +33,20 @@ public class OptionChainV3Model extends ApiModel {
     this.optionFilter = optionFilter;
   }
 
+  public Boolean getReturnGreekValue() {
+    return returnGreekValue;
+  }
+
+  public void setReturnGreekValue(Boolean returnGreekValue) {
+    this.returnGreekValue = returnGreekValue;
+  }
+
   @Override
   public String toString() {
     return "OptionChainV2Model{" +
         "optionBasic=" + optionBasic +
         ", optionFilter=" + optionFilter +
+        ", returnGreekValue=" + returnGreekValue +
         '}';
   }
 }

@@ -96,6 +96,11 @@ public class ClientConfig {
    */
   public int failRetryCounts = TigerApiConstants.DEFAULT_FAIL_RETRY_COUNT;
 
+  /**
+   * subscribed tradetick data, Whether to use the full version of the stock tick
+   */
+  public boolean useFullTick = false;
+
   private ClientConfig() {
   }
 
