@@ -78,6 +78,7 @@ public enum MethodName {
   OPTION_BRIEF("option_brief", MethodType.QUOTE),
   OPTION_KLINE("option_kline", MethodType.QUOTE),
   OPTION_TRADE_TICK("option_trade_tick", MethodType.QUOTE),
+  OPTION_DEPTH("option_depth", MethodType.QUOTE),
 
   /**
    * warrant,cbbc
