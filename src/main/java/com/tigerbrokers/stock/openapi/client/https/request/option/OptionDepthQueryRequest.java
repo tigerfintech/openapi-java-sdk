@@ -34,24 +34,23 @@ public class OptionDepthQueryRequest extends TigerCommonRequest implements Tiger
     batchApiModel.setMarket(market == null ? Market.US : market);
   }
 
-  public OptionDepthQueryRequest of(Market market) {
+  public OptionDepthQueryRequest market(Market market) {
     ((BatchApiModel)getApiModel()).setMarket(market);
     return this;
   }
 
-  public OptionDepthQueryRequest of(List<OptionCommonModel> items) {
-    ((BatchApiModel)getApiModel()).setItems(items);
-    return this;
+  public static OptionDepthQueryRequest of(List<OptionCommonModel> items) {
+    return new OptionDepthQueryRequest(items);
   }
 
-  public OptionDepthQueryRequest of(OptionCommonModel... itemArray) {
+  public static OptionDepthQueryRequest of(OptionCommonModel... itemArray) {
     List<OptionCommonModel> items = new ArrayList<>();
     if (itemArray != null && itemArray.length > 0) {
       for (OptionCommonModel model : itemArray) {
         items.add(model);
       }
     }
-    return of(items);
+    return new OptionDepthQueryRequest(items);
   }
 
   @Override
