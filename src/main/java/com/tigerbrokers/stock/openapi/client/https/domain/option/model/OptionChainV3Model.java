@@ -5,10 +5,9 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.option.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import java.util.List;
 
-public class OptionChainV3Model extends ApiModel {
+public class OptionChainV3Model extends OptionModel {
 
   @JSONField(name = "option_basic")
   private List<OptionChainModel> optionBasic;
@@ -45,6 +44,7 @@ public class OptionChainV3Model extends ApiModel {
   public String toString() {
     return "OptionChainV2Model{" +
         "optionBasic=" + optionBasic +
+        ", market=" + market +
         ", optionFilter=" + optionFilter +
         ", returnGreekValue=" + returnGreekValue +
         '}';

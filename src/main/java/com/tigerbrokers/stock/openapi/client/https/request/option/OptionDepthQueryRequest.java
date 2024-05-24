@@ -1,8 +1,8 @@
 package com.tigerbrokers.stock.openapi.client.https.request.option;
 
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
-import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionCommonModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionBasicModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.option.OptionDepthResponse;
@@ -29,13 +29,14 @@ public class OptionDepthQueryRequest extends TigerCommonRequest implements Tiger
 
   public OptionDepthQueryRequest(List<OptionCommonModel> items, Market market) {
     this();
-    BatchApiModel batchApiModel = new BatchApiModel(items);
-    setApiModel(batchApiModel);
-    batchApiModel.setMarket(market == null ? Market.US : market);
+    OptionBasicModel depthModel = new OptionBasicModel();
+    depthModel.setOptionBasic(items);
+    depthModel.setMarket(market == null ? Market.US : market);
+    setApiModel(depthModel);
   }
 
   public OptionDepthQueryRequest market(Market market) {
-    ((BatchApiModel)getApiModel()).setMarket(market);
+    ((OptionBasicModel)getApiModel()).setMarket(market == null ? Market.US : market);
     return this;
   }
 
