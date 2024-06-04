@@ -413,6 +413,9 @@ public class TradeParamBuilder {
     if (StringUtils.isEmpty(this.orderParameter.getLang())) {
       this.orderParameter.setLang(ClientConfig.DEFAULT_CONFIG.getDefaultLanguage().name());
     }
+    if (StringUtils.isEmpty(this.orderParameter.getSecretKey())) {
+      this.orderParameter.setSecretKey(ClientConfig.DEFAULT_CONFIG.secretKey);
+    }
     return this.orderParameter;
   }
 

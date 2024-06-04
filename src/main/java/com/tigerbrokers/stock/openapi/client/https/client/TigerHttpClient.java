@@ -29,6 +29,7 @@ import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
 import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
 import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
+import com.tigerbrokers.stock.openapi.client.util.ReflectionUtil;
 import com.tigerbrokers.stock.openapi.client.util.SdkVersionUtils;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import com.tigerbrokers.stock.openapi.client.util.TigerSignature;
@@ -311,9 +312,8 @@ public class TigerHttpClient implements TigerClient {
       ApiModel apiModel = request.getApiModel();
       if (apiModel instanceof BatchApiModel) {
         params.put(BIZ_CONTENT, JSONObject.toJSONString(((BatchApiModel) apiModel).getItems(), SerializerFeature.WriteEnumUsingToString));
-      } else if (apiModel instanceof TradeOrderModel) {
-        params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel, SerializerFeature.WriteEnumUsingToString));
       } else {
+        setDefaultSecretKey(apiModel, request.getApiMethodName());
         params.put(BIZ_CONTENT, JSONObject.toJSONString(apiModel, SerializerFeature.WriteEnumUsingToString));
       }
     }
@@ -339,6 +339,15 @@ public class TigerHttpClient implements TigerClient {
     }
 
     return params;
+  }
+
+  private void setDefaultSecretKey(ApiModel apiModel, MethodName methodName) {
+    if (methodName != null && methodName.getType() == MethodType.TRADE
+        && !StringUtils.isEmpty(apiModel.getAccount())
+        && !StringUtils.isEmpty(ClientConfig.DEFAULT_CONFIG.secretKey)) {
+      // set default secretKey
+      ReflectionUtil.checkAndSetDefaultValue(apiModel, "secretKey", ClientConfig.DEFAULT_CONFIG.secretKey);
+    }
   }
 
   /**
