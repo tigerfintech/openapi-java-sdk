@@ -346,7 +346,7 @@ public class TigerHttpClient implements TigerClient {
         && !StringUtils.isEmpty(apiModel.getAccount())
         && !StringUtils.isEmpty(ClientConfig.DEFAULT_CONFIG.secretKey)) {
       // set default secretKey
-      ReflectionUtil.checkAndSetDefaultValue(apiModel, "secretKey", ClientConfig.DEFAULT_CONFIG.secretKey);
+      ReflectionUtil.checkAndSetDefaultValue(apiModel, "secretKey", "setSecretKey", ClientConfig.DEFAULT_CONFIG.secretKey);
     }
   }
 

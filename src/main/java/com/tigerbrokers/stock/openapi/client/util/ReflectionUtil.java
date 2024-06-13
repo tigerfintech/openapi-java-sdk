@@ -1,6 +1,8 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * @author liutongping
@@ -9,9 +11,14 @@ import java.lang.reflect.Field;
 public class ReflectionUtil {
 
   @SuppressWarnings("unchecked")
-  public static void checkAndSetDefaultValue(Object bean, String fieldName, Object defaultValue) {
+  public static void checkAndSetDefaultValue(Object bean, String fieldName, String setMethodName, Object defaultValue) {
     try {
       Class<?> clazz = bean.getClass();
+      Method setNameMethod = getMethod(clazz, setMethodName, defaultValue.getClass());
+      if (setNameMethod != null) {
+        setNameMethod.invoke(bean, defaultValue);
+        return;
+      }
       Field field = clazz.getDeclaredField(fieldName);
       if (field == null) {
         return;
@@ -21,8 +28,16 @@ public class ReflectionUtil {
       if (value == null) {
         field.set(bean, defaultValue);
       }
-    } catch (NoSuchFieldException | IllegalAccessException e) {
+    } catch (InvocationTargetException | NoSuchFieldException | IllegalAccessException e) {
       ApiLogger.error("checkAndSetDefaultValue failed:{}", e.getMessage(), e);
+    }
+  }
+
+  public static Method getMethod(Class<?> clazz, String methodName, Class<?> parameterType) {
+    try {
+      return clazz.getMethod(methodName, parameterType);
+    } catch (NoSuchMethodException e) {
+      return null;
     }
   }
 }
