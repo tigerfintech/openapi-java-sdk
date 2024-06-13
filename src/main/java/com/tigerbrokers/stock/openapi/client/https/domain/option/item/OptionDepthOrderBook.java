@@ -11,7 +11,7 @@ import java.io.Serializable;
 public class OptionDepthOrderBook implements Serializable {
 
   private Float price;
-  private PartCode code;
+  private String code;
   private Integer size;
   private Long timestamp;
   private Integer volume;
@@ -25,11 +25,11 @@ public class OptionDepthOrderBook implements Serializable {
     this.price = price;
   }
 
-  public PartCode getCode() {
+  public String getCode() {
     return code;
   }
 
-  public void setCode(PartCode code) {
+  public void setCode(String code) {
     this.code = code;
   }
 
