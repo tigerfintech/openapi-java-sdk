@@ -20,7 +20,8 @@ public enum PartCode {
   BX("t", 12),
   C2("w", 13),
   PHLX("x", 14),
-  BZX("z", 15);
+  BZX("z", 15),
+  MEMX("u", 16);
 
   static final PartCode[] partCodes = new PartCode[values().length];
   final String code;
