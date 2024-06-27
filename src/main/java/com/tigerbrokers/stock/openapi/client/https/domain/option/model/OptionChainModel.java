@@ -1,7 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.option.model;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
-import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 import com.tigerbrokers.stock.openapi.client.util.SymbolUtil;
@@ -11,13 +10,12 @@ import java.util.Date;
  * Description:
  * Created by lijiawen on 2018/12/26.
  */
-public class OptionChainModel extends ApiModel {
+public class OptionChainModel extends OptionModel {
 
   private String symbol;
   private Long expiry;
 
   public OptionChainModel() {
-
   }
 
   public OptionChainModel(String symbol, Long expiry) {
@@ -26,8 +24,12 @@ public class OptionChainModel extends ApiModel {
   }
 
   public OptionChainModel(String symbol, String expiry) {
+    this(symbol, expiry, SymbolUtil.getZoneIdBySymbol(symbol));
+  }
+
+  public OptionChainModel(String symbol, String expiry, TimeZoneId timeZoneId) {
     this.symbol = symbol;
-    Date date = DateUtils.getZoneDate(expiry, SymbolUtil.getZoneIdBySymbol(symbol));
+    Date date = DateUtils.getZoneDate(expiry, timeZoneId);
     if (date != null) {
       this.expiry = date.getTime();
     }
@@ -50,10 +52,7 @@ public class OptionChainModel extends ApiModel {
   }
 
   public void setExpiry(String expiry) {
-    Date date = DateUtils.getZoneDate(expiry, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
-    if (date != null) {
-      this.expiry = date.getTime();
-    }
+    setExpiry(expiry, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
   }
 
   public void setExpiry(String expiry, TimeZoneId zoneId) {
@@ -66,7 +65,8 @@ public class OptionChainModel extends ApiModel {
   @Override
   public String toString() {
     return "OptionChainModel{" +
-        "symbol='" + symbol + '\'' +
+        "market='" + market + '\'' +
+        ", symbol='" + symbol + '\'' +
         ", expiry='" + expiry + '\'' +
         '}';
   }

@@ -266,10 +266,7 @@ public class AccountParamBuilder {
     if (paramMap.get("account") == null) {
       paramMap.put("account", ClientConfig.DEFAULT_CONFIG.defaultAccount);
     }
-    if (paramMap.get("lang") == null) {
-      paramMap.put("lang", ClientConfig.DEFAULT_CONFIG.getDefaultLanguage().name());
-    }
-    return JSONObject.toJSONString(paramMap, SerializerFeature.WriteEnumUsingToString);
+    return buildJsonWithoutDefaultAccount();
   }
 
   /**
@@ -279,6 +276,9 @@ public class AccountParamBuilder {
   public String buildJsonWithoutDefaultAccount() {
     if (paramMap.get("lang") == null) {
       paramMap.put("lang", ClientConfig.DEFAULT_CONFIG.getDefaultLanguage().name());
+    }
+    if (paramMap.get("secretKey") == null) {
+      paramMap.put("secretKey", ClientConfig.DEFAULT_CONFIG.secretKey);
     }
     return JSONObject.toJSONString(paramMap, SerializerFeature.WriteEnumUsingToString);
   }

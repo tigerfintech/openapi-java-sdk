@@ -47,6 +47,7 @@ public class TradeOrder implements Serializable {
   private Long expireTime;
   private String goodTillDate;
   private Boolean outsideRth;
+  private String tradingSessionType;
 
   private Double commission;
   /** Goods and Services Tax (TBSG only) */
@@ -318,6 +319,14 @@ public class TradeOrder implements Serializable {
 
   public void setOutsideRth(Boolean outsideRth) {
     this.outsideRth = outsideRth;
+  }
+
+  public String getTradingSessionType() {
+    return tradingSessionType;
+  }
+
+  public void setTradingSessionType(String tradingSessionType) {
+    this.tradingSessionType = tradingSessionType;
   }
 
   public Double getCommission() {

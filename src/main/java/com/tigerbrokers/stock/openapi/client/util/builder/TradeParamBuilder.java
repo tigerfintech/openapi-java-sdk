@@ -14,6 +14,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
 import com.tigerbrokers.stock.openapi.client.struct.param.OrderParameter;
 import com.tigerbrokers.stock.openapi.client.util.FastJsonPropertyFilter;
 
@@ -103,6 +104,13 @@ public class TradeParamBuilder {
   public TradeParamBuilder outsideRth(Boolean outsideRth) {
     if (outsideRth != null) {
       this.orderParameter.setOutsideRth(outsideRth);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder tradingSessionType(TradeSession tradingSessionType) {
+    if (tradingSessionType != null) {
+      this.orderParameter.setTradingSessionType(tradingSessionType);
     }
     return this;
   }
@@ -404,6 +412,9 @@ public class TradeParamBuilder {
     }
     if (StringUtils.isEmpty(this.orderParameter.getLang())) {
       this.orderParameter.setLang(ClientConfig.DEFAULT_CONFIG.getDefaultLanguage().name());
+    }
+    if (StringUtils.isEmpty(this.orderParameter.getSecretKey())) {
+      this.orderParameter.setSecretKey(ClientConfig.DEFAULT_CONFIG.secretKey);
     }
     return this.orderParameter;
   }
