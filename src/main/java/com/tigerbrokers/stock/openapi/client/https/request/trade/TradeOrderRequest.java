@@ -20,6 +20,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
 import com.tigerbrokers.stock.openapi.client.util.AccountUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 
@@ -700,6 +701,12 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
   public TradeOrderRequest setExpireTime(Long expireTime) {
     TradeOrderModel model = (TradeOrderModel) getApiModel();
     model.setExpireTime(expireTime);
+    return this;
+  }
+
+  public TradeOrderRequest setTradingSessionType(TradeSession tradingSessionType) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setTradingSessionType(tradingSessionType);
     return this;
   }
 

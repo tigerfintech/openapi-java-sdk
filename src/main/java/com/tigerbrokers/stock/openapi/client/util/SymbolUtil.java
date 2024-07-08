@@ -14,6 +14,7 @@ public class SymbolUtil {
 
   private static Pattern CHAR_SYMBOL_PATTERN = Pattern.compile("[A-Z]+(.[A-Z0-9]+)?");
   private static Pattern FUTURE_SYMBOL_PATTERN = Pattern.compile("^[0-9A-Z]+([0-9]{4}|main){1}$");
+  private static final String MARKET_POSTFIX_HK = ".HK";
 
   public static OptionSymbol convertToOptionSymbolObject(String identifier) throws TigerApiException {
     if (identifier == null || identifier.length() != 21) {
@@ -49,9 +50,19 @@ public class SymbolUtil {
     return false;
   }
 
+  public static boolean isHkOptionSymbol(String symbol) {
+    if (symbol == null || symbol.isEmpty()) {
+      return false;
+    }
+    return symbol.endsWith(MARKET_POSTFIX_HK);
+  }
+
   public static TimeZoneId getZoneIdBySymbol(String symbol) {
     if (StringUtils.isEmpty(symbol)) {
       return ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone();
+    }
+    if (SymbolUtil.isHkOptionSymbol(symbol)) {
+      return TimeZoneId.HongKong;
     }
     return SymbolUtil.isUsStockSymbol(symbol) ? TimeZoneId.NewYork : TimeZoneId.Shanghai;
   }

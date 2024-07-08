@@ -17,6 +17,8 @@ public class BaseContractModel extends ApiModel {
   private Double strike;
   private String right;
   private String exchange;
+  @JSONField(name = "secret_key")
+  private String secretKey;
 
   public String getAccount() {
     return account;
@@ -72,5 +74,13 @@ public class BaseContractModel extends ApiModel {
 
   public void setExchange(String exchange) {
     this.exchange = exchange;
+  }
+
+  public String getSecretKey() {
+    return secretKey;
+  }
+
+  public void setSecretKey(String secretKey) {
+    this.secretKey = secretKey;
   }
 }

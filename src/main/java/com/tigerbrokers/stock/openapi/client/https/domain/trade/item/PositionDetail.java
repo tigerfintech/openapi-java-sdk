@@ -34,6 +34,10 @@ public class PositionDetail implements Serializable {
   private String right;
   private Double multiplier;
   private Long updateTimestamp;
+  /** maintenance margin percent */
+  private Double mmPercent;
+  /** maintenance margin value */
+  private Double mmValue;
 
   public String getAccount() {
     return account;
@@ -225,5 +229,21 @@ public class PositionDetail implements Serializable {
 
   public void setUpdateTimestamp(Long updateTimestamp) {
     this.updateTimestamp = updateTimestamp;
+  }
+
+  public Double getMmPercent() {
+    return mmPercent;
+  }
+
+  public void setMmPercent(Double mmPercent) {
+    this.mmPercent = mmPercent;
+  }
+
+  public Double getMmValue() {
+    return mmValue;
+  }
+
+  public void setMmValue(Double mmValue) {
+    this.mmValue = mmValue;
   }
 }
