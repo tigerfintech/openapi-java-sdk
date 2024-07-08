@@ -39,13 +39,7 @@ public class PlaceOrderRequestValidator implements RequestValidator<TradeOrderMo
     if (model.getOrderType() == null) {
       throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "order_type");
     }
-    if (SecType.FUND == model.getSecType() && ActionType.BUY == model.getAction()) {
-      if (model.getCashAmount() == null) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "cash_amount");
-      } else if (model.getCashAmount() <= 0) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "cash_amount");
-      }
-    } else {
+    if (SecType.FUND != model.getSecType()) {
       if (model.getTotalQuantity() == null) {
         throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "total_quantity");
       } else if (model.getTotalQuantity() <= 0) {
