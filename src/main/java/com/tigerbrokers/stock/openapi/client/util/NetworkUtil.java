@@ -269,7 +269,7 @@ public class NetworkUtil {
     // if get domain config data failed and original address is not emtpy, return original address
     if (domainConfigList.isEmpty()) {
       final String addressUrl = StringUtils.isEmpty(originalAddress)
-          ? String.format(protocol.getUrlFormat(), getDefaultUrl(env), port) : originalAddress;
+          ? String.format(protocol.getUrlFormat(), getDefaultUrl(env, protocol), port) : originalAddress;
       return new HashMap<BizType, String>() {{ put(protocol == Protocol.HTTP ? BizType.COMMON : BizType.SOCKET, addressUrl);}};
     }
 
@@ -296,7 +296,7 @@ public class NetworkUtil {
       }
     }
     if (commonUrl == null) {
-      commonUrl = getDefaultUrl(env);
+      commonUrl = getDefaultUrl(env, protocol);
       domainUrlMap.put(BizType.COMMON, String.format(protocol.getUrlFormat(), commonUrl, port));
     }
     if (protocol != Protocol.HTTP) {
@@ -305,7 +305,7 @@ public class NetworkUtil {
     return domainUrlMap;
   }
 
-  private static String getDefaultUrl(Env env) {
+  private static String getDefaultUrl(Env env, Protocol protocol) {
     if (env == null) {
       return TigerApiConstants.DEFAULT_PROD_DOMAIN_URL;
     }
@@ -313,7 +313,7 @@ public class NetworkUtil {
       case SANDBOX:
         return TigerApiConstants.DEFAULT_SANDBOX_DOMAIN_URL;
       case TEST:
-        return TigerApiConstants.DEFAULT_TEST_DOMAIN_URL;
+        return Protocol.HTTP == protocol ? TigerApiConstants.DEFAULT_TEST_DOMAIN_URL : TigerApiConstants.API_TEST_SOCKET_DOMAIN_URL;
       default:
         return TigerApiConstants.DEFAULT_PROD_DOMAIN_URL;
     }
