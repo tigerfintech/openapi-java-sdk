@@ -64,7 +64,7 @@ public class TigerApiConstants {
 
   public static final String API_ONLINE_DOMAIN_URL = "openapi.tigerfintech.com";
   public static final String API_SANDBOX_DOMAIN_URL = "openapi-sandbox.tigerfintech.com";
-  public static final String API_TEST_DOMAIN_URL = "openapi-test.qa.tigerbrokers.net";
+  public static final String API_TEST_DOMAIN_URL = "openapi-socket.platform-test.hy-test.dns-test.tiger";
 
   public static final String DEFAULT_PROD_DOMAIN_URL = API_ONLINE_DOMAIN_URL;
   public static final String DEFAULT_SANDBOX_DOMAIN_URL = API_SANDBOX_DOMAIN_URL;
