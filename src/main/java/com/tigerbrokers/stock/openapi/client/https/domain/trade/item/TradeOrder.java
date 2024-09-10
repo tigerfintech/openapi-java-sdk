@@ -82,6 +82,10 @@ public class TradeOrder implements Serializable {
 
   private Boolean canModify;
   private Boolean canCancel;
+  /** order replace status(NONE, RECEIVED, REPLACED, FAILED) */
+  private String replaceStatus;
+  /** order cancel status(NONE, RECEIVED, FAILED) */
+  private String cancelStatus;
   private Boolean isOpen;
 
   private String comboType;
@@ -511,6 +515,22 @@ public class TradeOrder implements Serializable {
 
   public void setCanCancel(Boolean canCancel) {
     this.canCancel = canCancel;
+  }
+
+  public String getReplaceStatus() {
+    return replaceStatus;
+  }
+
+  public void setReplaceStatus(String replaceStatus) {
+    this.replaceStatus = replaceStatus;
+  }
+
+  public String getCancelStatus() {
+    return cancelStatus;
+  }
+
+  public void setCancelStatus(String cancelStatus) {
+    this.cancelStatus = cancelStatus;
   }
 
   public Boolean getIsOpen() {
