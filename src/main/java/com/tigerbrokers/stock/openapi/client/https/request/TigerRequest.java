@@ -2,66 +2,67 @@ package com.tigerbrokers.stock.openapi.client.https.request;
 
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 
 /**
- * 请求接口。
+ * request interface
  * Created by lijiawen on 2018/04/25.
  */
 public interface TigerRequest<T extends TigerResponse> {
 
   /**
-   * 获取API名称。
+   * get API method name
    *
-   * @return API名称
+   * @return API method name
    */
-  String getApiMethodName();
+  MethodName getApiMethodName();
 
   /**
-   * 设置当前接口的版本
+   * set API method version
    *
-   * @param apiVersion API版本
+   * @param apiVersion API method version
    */
   void setApiVersion(String apiVersion);
 
   /**
-   * 得到当前接口的版本
+   * get API method version
    *
-   * @return API版本
+   * @return API method version
    */
   String getApiVersion();
 
   /**
-   * 得到当前API的响应结果类型
+   * get response object's class
    *
-   * @return 响应类型
+   * @return response class
    */
   Class<T> getResponseClass();
 
   /**
-   * 设置请求时间
+   * set local request time
    *
-   * @param timestamp 请求时间
+   * @param timestamp request time
    */
   void setTimestamp(String timestamp);
 
   /**
-   * 得到请求时间
+   * get local request time
    *
-   * @return 请求时间
+   * @return request time
    */
   String getTimestamp();
 
   /**
-   * 设置请求业务参数
+   * set API request model parameter
    *
-   * @param apiModel 业务参数
+   * @param apiModel model parameter
    */
   void setApiModel(ApiModel apiModel);
 
   /**
-   * 得到请求业务参数
+   * get API request model parameter
    *
-   * @return 业务参数
+   * @return model parameter
    */
   ApiModel getApiModel();
 }

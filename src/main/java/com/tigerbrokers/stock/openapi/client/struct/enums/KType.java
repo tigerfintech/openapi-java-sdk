@@ -6,8 +6,8 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
  */
 public enum KType {
 
-  day("day"), week("week"), month("month"), year("year"), min1("1min"), min5("5min"),
-  min15("15min"), min30("30min"), min60("60min");
+  day("day"), week("week"), month("month"), year("year"), min1("1min"), min3("3min"),
+  min5("5min"), min15("15min"), min30("30min"), min60("60min"), min120("120min"), min240("240min");
 
   private String value;
 

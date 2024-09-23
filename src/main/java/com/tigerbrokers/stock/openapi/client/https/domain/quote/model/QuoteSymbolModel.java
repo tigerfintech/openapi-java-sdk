@@ -1,8 +1,11 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.quote.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
+
 import java.util.List;
 
 /**
@@ -14,10 +17,11 @@ public class QuoteSymbolModel extends ApiModel {
   private List<String> symbols;
   @JSONField(name = "include_hour_trading")
   private Boolean includeHourTrading;
-  @JSONField(name = "lang")
-  private Language lang;
+  @JSONField(name = "trade_session")
+  private TradeSession tradeSession;
 
   public QuoteSymbolModel() {
+    this.lang = ClientConfig.DEFAULT_CONFIG.getDefaultLanguage();
   }
 
   public QuoteSymbolModel(List<String> symbols) {
@@ -29,12 +33,22 @@ public class QuoteSymbolModel extends ApiModel {
   }
 
   public QuoteSymbolModel(List<String> symbols, Boolean includeHourTrading) {
-    this(symbols, includeHourTrading, Language.en_US);
+    this(symbols, includeHourTrading, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
   }
 
   public QuoteSymbolModel(List<String> symbols, Boolean includeHourTrading, Language lang) {
     this.symbols = symbols;
     this.includeHourTrading = includeHourTrading;
+    this.lang = lang;
+  }
+
+  public QuoteSymbolModel(List<String> symbols, TradeSession tradeSession) {
+    this(symbols, tradeSession, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
+  }
+
+  public QuoteSymbolModel(List<String> symbols, TradeSession tradeSession, Language lang) {
+    this.symbols = symbols;
+    this.tradeSession = tradeSession;
     this.lang = lang;
   }
 
@@ -52,13 +66,5 @@ public class QuoteSymbolModel extends ApiModel {
 
   public void setIncludeHourTrading(Boolean includeHourTrading) {
     this.includeHourTrading = includeHourTrading;
-  }
-
-  public Language getLang() {
-    return lang;
-  }
-
-  public void setLang(Language lang) {
-    this.lang = lang;
   }
 }

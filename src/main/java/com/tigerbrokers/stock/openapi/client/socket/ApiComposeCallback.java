@@ -18,17 +18,17 @@ public interface ApiComposeCallback extends SubscribeApiCallback {
    * @param errorCode errorCode
    * @param errorMsg errorMsg
    */
-  void connectionKickoff(int errorCode, String errorMsg);
+  void connectionKickout(int errorCode, String errorMsg);
 
   void connectionAck();
 
   /**
-   * @param serverSendInterval server保证发送心跳的最小间隔，0代表server不发送心跳
-   * @param serverReceiveInterval server希望收到client心跳的间隔，0表示server不希望收到client的心跳
+   * @param serverSendInterval The server guarantees the minimum interval for sending heartbeats, 0 means the server does not send heartbeats
+   * @param serverReceiveInterval The interval at which the server expects to receive client heartbeats, 0 means the server does not wish to receive client heartbeats
    */
   void connectionAck(int serverSendInterval, int serverReceiveInterval);
 
   void hearBeat(String heartBeatContent);
 
-  void serverHeartBeatTimeOut(String channelIdAsLongText);
+  void serverHeartBeatTimeOut(String channelId);
 }

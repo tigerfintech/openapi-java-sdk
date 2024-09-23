@@ -1,22 +1,22 @@
 package com.tigerbrokers.stock.openapi.client.https.request.contract;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.model.ContractModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.contract.ContractResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 
 /**
- * 作者：ltc
- * 时间：2019/05/29
+ * author：ltc
+ * date：2019/05/29
  */
 public class ContractRequest extends TigerCommonRequest implements TigerRequest<ContractResponse> {
 
   public ContractRequest() {
-    setApiMethodName(ApiServiceType.CONTRACT);
-    setApiVersion(V2_0);
+    setApiMethodName(MethodName.CONTRACT);
+    setApiVersion(V3_0);
   }
 
   public static ContractRequest newRequest(ContractModel contractModel) {

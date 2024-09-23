@@ -1,18 +1,24 @@
 package com.tigerbrokers.stock.openapi.client.util.builder;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.struct.TagValue;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AttachType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
 import com.tigerbrokers.stock.openapi.client.struct.param.OrderParameter;
 import com.tigerbrokers.stock.openapi.client.util.FastJsonPropertyFilter;
 
+import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,9 +108,38 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder tradingSessionType(TradeSession tradingSessionType) {
+    if (tradingSessionType != null) {
+      this.orderParameter.setTradingSessionType(tradingSessionType);
+    }
+    return this;
+  }
+
+  @Deprecated
   public TradeParamBuilder totalQuantity(Integer totalQuantity) {
     if (totalQuantity != null) {
+      this.orderParameter.setTotalQuantity(totalQuantity.longValue());
+    }
+    return this;
+  }
+
+  public TradeParamBuilder totalQuantity(Long totalQuantity) {
+    if (totalQuantity != null) {
       this.orderParameter.setTotalQuantity(totalQuantity);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder totalQuantityScale(Integer totalQuantityScale) {
+    if (totalQuantityScale != null) {
+      this.orderParameter.setTotalQuantityScale(totalQuantityScale);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder cashAmount(Double cashAmount) {
+    if (cashAmount != null) {
+      this.orderParameter.setCashAmount(cashAmount);
     }
     return this;
   }
@@ -126,6 +161,13 @@ public class TradeParamBuilder {
   public TradeParamBuilder timeInForce(TimeInForce timeInForce) {
     if (timeInForce != null) {
       this.orderParameter.setTimeInForce(timeInForce);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder expireTime(Long expireTime) {
+    if (expireTime != null) {
+      this.orderParameter.setExpireTime(expireTime);
     }
     return this;
   }
@@ -229,6 +271,13 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder userMark(String userMark) {
+    if (userMark != null) {
+      this.orderParameter.setUserMark(userMark);
+    }
+    return this;
+  }
+
   public TradeParamBuilder contract(ContractItem contract) {
     symbol(contract.getSymbol())
         .right(contract.getRight())
@@ -293,6 +342,13 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder setStopLossOrderType(OrderType stopLossOrderType) {
+    if (stopLossOrderType != null) {
+      this.orderParameter.setStopLossOrderType(stopLossOrderType);
+    }
+    return this;
+  }
+
   public TradeParamBuilder stopLossOrderId(Integer stopLossOrderId) {
     if (stopLossOrderId != null) {
       this.orderParameter.setStopLossOrderId(stopLossOrderId);
@@ -307,9 +363,30 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder setStopLossLimitPrice(Double stopLossLimitPrice) {
+    if (stopLossLimitPrice != null) {
+      this.orderParameter.setStopLossLimitPrice(stopLossLimitPrice);
+    }
+    return this;
+  }
+
   public TradeParamBuilder stopLossTif(TimeInForce stopLossTif) {
     if (stopLossTif != null) {
       this.orderParameter.setStopLossTif(stopLossTif);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder setStopLossTrailingPercent(Double stopLossTrailingPercent) {
+    if (stopLossTrailingPercent != null) {
+      this.orderParameter.setStopLossTrailingPercent(stopLossTrailingPercent);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder setStopLossTrailingAmount(Double stopLossTrailingAmount) {
+    if (stopLossTrailingAmount != null) {
+      this.orderParameter.setStopLossTrailingAmount(stopLossTrailingAmount);
     }
     return this;
   }
@@ -322,11 +399,27 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder lang(Language lang) {
+    if (lang != null) {
+      this.orderParameter.setLang(lang.name());
+    }
+    return this;
+  }
+
   public OrderParameter build() {
+    if (StringUtils.isEmpty(this.orderParameter.getAccount())) {
+      this.orderParameter.setAccount(ClientConfig.DEFAULT_CONFIG.defaultAccount);
+    }
+    if (StringUtils.isEmpty(this.orderParameter.getLang())) {
+      this.orderParameter.setLang(ClientConfig.DEFAULT_CONFIG.getDefaultLanguage().name());
+    }
+    if (StringUtils.isEmpty(this.orderParameter.getSecretKey())) {
+      this.orderParameter.setSecretKey(ClientConfig.DEFAULT_CONFIG.secretKey);
+    }
     return this.orderParameter;
   }
 
   public String buildJson() {
-    return JSONObject.toJSONString(orderParameter, FastJsonPropertyFilter.getPropertyFilter());
+    return JSONObject.toJSONString(build(), SerializerFeature.WriteEnumUsingToString);
   }
 }

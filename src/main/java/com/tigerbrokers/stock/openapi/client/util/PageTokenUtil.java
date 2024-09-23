@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.client.TigerHttpClient;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.item.FutureKlineBatchItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.item.FutureKlineItem;
@@ -26,7 +27,6 @@ public class PageTokenUtil {
   public static int DEFAULT_PAGE_SIZE = 1000;
   public static int DEFAULT_BATCH_TIME = 10;
   public static int MAX_TOTAL_SIZE = 10000;
-  public static TimeZoneId DEFAULT_ZONEID = TimeZoneId.NewYork;
   public static long DEFAULT_TIME_INTERVAL = 2000L;
   public static final KlinePoint RETURN_KLINE = new KlinePoint();
   public static final FutureKlineItem RETURN_FUTURE_KLINE = new FutureKlineItem();
@@ -44,7 +44,8 @@ public class PageTokenUtil {
   public static List<KlinePoint> getKlineByPage(String symbol, KType period,
       String beginTime, String endTime) throws TigerApiException {
     return getKlineByPage(symbol, period, beginTime, endTime,
-        DEFAULT_ZONEID, RightOption.br, DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE * DEFAULT_BATCH_TIME, DEFAULT_TIME_INTERVAL);
+        ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone(),
+        RightOption.br, DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE * DEFAULT_BATCH_TIME, DEFAULT_TIME_INTERVAL);
   }
 
   /**
@@ -59,7 +60,8 @@ public class PageTokenUtil {
   public static List<KlinePoint> getKlineByPage(String symbol, KType period,
       String beginTime, String endTime, int totalSize) throws TigerApiException {
     return getKlineByPage(symbol, period, beginTime, endTime,
-        DEFAULT_ZONEID, RightOption.br, DEFAULT_PAGE_SIZE, totalSize, DEFAULT_TIME_INTERVAL);
+        ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone(),
+        RightOption.br, DEFAULT_PAGE_SIZE, totalSize, DEFAULT_TIME_INTERVAL);
   }
 
   /**
@@ -93,7 +95,8 @@ public class PageTokenUtil {
   public static List<FutureKlineItem> getKlineByPage(String symbol, FutureKType period,
       String beginTime, String endTime) throws TigerApiException {
     return getKlineByPage(symbol, period, beginTime, endTime,
-        DEFAULT_ZONEID, DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE * DEFAULT_BATCH_TIME, DEFAULT_TIME_INTERVAL);
+        ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone(),
+        DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE * DEFAULT_BATCH_TIME, DEFAULT_TIME_INTERVAL);
   }
 
   /**
@@ -108,7 +111,8 @@ public class PageTokenUtil {
   public static List<FutureKlineItem> getKlineByPage(String symbol, FutureKType period,
       String beginTime, String endTime, int totalSize) throws TigerApiException {
     return getKlineByPage(symbol, period, beginTime, endTime,
-        DEFAULT_ZONEID, DEFAULT_PAGE_SIZE, totalSize, DEFAULT_TIME_INTERVAL);
+        ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone(),
+        DEFAULT_PAGE_SIZE, totalSize, DEFAULT_TIME_INTERVAL);
   }
 
   /**
@@ -131,7 +135,7 @@ public class PageTokenUtil {
 
   /**
    * get kline data by page, return the merge result
-   * @param t return type,only for FutureKlineItem(ApiServiceType.FUTURE_KLINE) and KlineItem(ApiServiceType.KLINE)
+   * @param t return type,only for FutureKlineItem(MethodName.FUTURE_KLINE) and KlineItem(MethodName.KLINE)
    * @param symbol symbol or future contract code
    * @param period kline tpye
    * @param beginTime begin time. format:"2022-04-25 00:00:00"
@@ -167,7 +171,7 @@ public class PageTokenUtil {
       pageSize = totalSize;
     }
     if (zoneId == null) {
-      zoneId = TimeZoneId.NewYork;
+      zoneId = ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone();
     }
     if (timeInterval < 1000) {
       timeInterval = DEFAULT_TIME_INTERVAL;

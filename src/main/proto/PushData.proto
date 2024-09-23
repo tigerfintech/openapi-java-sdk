@@ -1,0 +1,35 @@
+syntax = "proto3";
+import public "SocketCommon.proto";
+import public "OrderStatusData.proto";
+import public "PositionData.proto";
+import public "AssetData.proto";
+import public "QuoteData.proto";
+import public "QuoteDepthData.proto";
+import public "TradeTickData.proto";
+import public "OrderTransactionData.proto";
+import public "StockTopData.proto";
+import public "OptionTopData.proto";
+import public "KlineData.proto";
+import public "TickData.proto";
+
+package com.tigerbrokers.stock.openapi.client.socket.data.pb;
+
+option java_package = "com.tigerbrokers.stock.openapi.client.socket.data.pb";
+option java_multiple_files = true;
+
+message PushData {
+    SocketCommon.DataType dataType = 1;
+    oneof body {
+      QuoteData quoteData = 2;
+      QuoteDepthData quoteDepthData = 3;
+      TradeTickData tradeTickData = 4;
+      PositionData positionData = 5;
+      AssetData assetData = 6;
+      OrderStatusData orderStatusData = 7;
+      OrderTransactionData orderTransactionData = 8;
+      StockTopData stockTopData = 9;
+      OptionTopData optionTopData = 10;
+      KlineData klineData = 11;
+      TickData tickData = 12;
+  }
+}

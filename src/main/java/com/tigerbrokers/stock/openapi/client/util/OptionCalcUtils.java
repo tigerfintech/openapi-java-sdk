@@ -15,9 +15,17 @@ import com.tigerbrokers.stock.openapi.client.https.response.option.OptionBriefRe
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteMarketResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteRealTimeQuoteResponse;
 import com.tigerbrokers.stock.openapi.client.struct.OptionFundamentals;
+import com.tigerbrokers.stock.openapi.client.struct.OptionMetrics;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Right;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
-import java.text.NumberFormat;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ThreadFactory;
+
+import org.jquantlib.helper.BSMEuropeanDividendOptionHelper;
+import org.jquantlib.helper.FDAmericanDividendOptionHelper;
+import org.jquantlib.instruments.Option;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -32,7 +40,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 期权指标计算器
+ * Options Indicator Calculator
  */
 public class OptionCalcUtils {
 
@@ -40,16 +48,22 @@ public class OptionCalcUtils {
 
   private static double ACCURACY = 1.0e-6;
 
+  private static final String METRIC_PARAM_FORMAT = "rates=%s;expiry=%s;latestPrice=%s;target=%s;ask=%s;bid=%s;dividendAmount=%s";
+
   private static double n(double x) {
     return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-x * x / 2);
   }
 
   private static ExecutorService executorService = new ThreadPoolExecutor(4, 4,
-      0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(1024), (r) -> {
-    Thread t = Executors.defaultThreadFactory().newThread(r);
-    t.setDaemon(true);
-    return t;
-  }, new ThreadPoolExecutor.AbortPolicy());
+      0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(1024), new ThreadFactory() {
+    @Override
+    public Thread newThread(Runnable r) {
+      Thread t = Executors.defaultThreadFactory().newThread(r);
+      t.setDaemon(true);
+      return t;
+    }
+  }
+      , new ThreadPoolExecutor.AbortPolicy());
 
   private static double N(double z) {
     if (z > 6.0) {
@@ -95,7 +109,7 @@ public class OptionCalcUtils {
   }
 
   private static double optionPriceAmericanCallApproximatedBaw(double S, double X, double r, double b, double sigma,
-      double time) {
+                                                               double time) {
     double sigma_sqr = sigma * sigma;
     double time_sqrt = Math.sqrt(time);
     double nn = 2.0 * b / sigma_sqr;
@@ -142,7 +156,7 @@ public class OptionCalcUtils {
   }
 
   private static double optionPriceAmericanPutApproximatedBaw(double S, double X, double r, double b, double sigma,
-      double time) {
+                                                              double time) {
     double sigma_sqr = sigma * sigma;
     double time_sqrt = Math.sqrt(time);
     double M = 2.0 * r / sigma_sqr;
@@ -186,7 +200,7 @@ public class OptionCalcUtils {
   }
 
   /**
-   * 买入盈利概率
+   * Buy Profit Probability
    */
   private static double optionBuyCallProfitRate(double S, double K, double p, double r, double sigma, double time) {
     double time_sqrt = Math.sqrt(time);
@@ -196,7 +210,7 @@ public class OptionCalcUtils {
   }
 
   /**
-   * 买入盈利概率
+   * Buy Profit Probability
    */
   private static double optionBuyPutProfitRate(double S, double K, double p, double r, double sigma, double time) {
     double time_sqrt = Math.sqrt(time);
@@ -207,9 +221,9 @@ public class OptionCalcUtils {
   }
 
   /**
-   * 求call的隐含波动率
+   * Calculate the implied volatility of a call
    *
-   * @param target 目标价
+   * @param target target price
    * @param S 股票 价格
    * @param X 行权价格
    * @param r 国债利率
@@ -255,7 +269,7 @@ public class OptionCalcUtils {
   }
 
   /**
-   * 求put的隐含波动率
+   * Calculate the implied volatility of a put
    *
    * @param target 目标价
    * @param S 股票 价格
@@ -282,11 +296,11 @@ public class OptionCalcUtils {
     return sig;
   }
 
-  private static OptionResult.OptionIndex optionPricePartialsCallBlackScholes(double S,     // spot price
-      double K,     // Strike (exercise) price,
-      double r,     // interest rate
-      double sigma, // volatility
-      double time) {   // partial wrt r
+  private static OptionMetrics optionPricePartialsCallBlackScholes(double S,     // spot price
+                                                                   double K,     // Strike (exercise) price,
+                                                                   double r,     // interest rate
+                                                                   double sigma, // volatility
+                                                                   double time) {   // partial wrt r
     double time_sqrt = Math.sqrt(time);
     double d1 = (Math.log(S / K) + r * time) / (sigma * time_sqrt) + 0.5 * sigma * time_sqrt;
     double d2 = d1 - (sigma * time_sqrt);
@@ -295,13 +309,13 @@ public class OptionCalcUtils {
     double Theta = (-(S * sigma * n(d1)) / (2 * time_sqrt) - r * K * Math.exp(-r * time) * N(d2)) / 365f;
     double Vega = S * time_sqrt * n(d1) / 100f;
     double Rho = K * time * Math.exp(-r * time) * N(d2);
-    return new OptionResult.OptionIndex(Delta, Gamma, Theta, Vega, Rho);
+    return new OptionMetrics(Delta, Gamma, Theta, Vega, Rho);
   }
 
-  private static OptionResult.OptionIndex optionPricePartialsPutBlackScholes(double S, // spot price
-      double K, // Strike (exercise) price,
-      double r,  // interest rate
-      double sigma, double time) {    // partial wrt r
+  private static OptionMetrics optionPricePartialsPutBlackScholes(double S, // spot price
+                                                                  double K, // Strike (exercise) price,
+                                                                  double r,  // interest rate
+                                                                  double sigma, double time) {    // partial wrt r
     double time_sqrt = Math.sqrt(time);
     double d1 = (Math.log(S / K) + r * time) / (sigma * time_sqrt) + 0.5 * sigma * time_sqrt;
     double d2 = d1 - (sigma * time_sqrt);
@@ -310,7 +324,7 @@ public class OptionCalcUtils {
     double Theta = (-(S * sigma * n(d1)) / (2 * time_sqrt) + r * K * Math.exp(-r * time) * N(-d2)) / 365f;
     double Vega = S * time_sqrt * n(d1) / 100f;
     double Rho = -K * time * Math.exp(-r * time) * N(-d2);
-    return new OptionResult.OptionIndex(Delta, Gamma, Theta, Vega, Rho);
+    return new OptionMetrics(Delta, Gamma, Theta, Vega, Rho);
   }
 
   /**
@@ -359,11 +373,11 @@ public class OptionCalcUtils {
    * @param currentTime 当前时间（long类型），与expiryLong保持时区一致
    * @param isTrading 是否在正股交易时间
    */
-  private static OptionResult calcOptionIndex(double r, long expiryLong, long executeDateLong,
-      double latestPrice, double targetPrice, double dividendAmount, double strike, String type, long currentTime,
-      boolean isTrading) {
+  private static OptionFundamentals calcOptionIndex(double r, long expiryLong, long executeDateLong,
+                                                    double latestPrice, double targetPrice, double dividendAmount, double strike, String type, long currentTime,
+                                                    boolean isTrading) {
 
-    OptionResult result = new OptionResult();
+    OptionFundamentals result = new OptionFundamentals();
     double diff = ((expiryLong - currentTime) /
         (24.0f * TIME_MILLIS_IN_ONE_HOUR) + 1 + (isTrading ? 0 : 1)) / 365.0f;
     final boolean needDividend =
@@ -374,23 +388,29 @@ public class OptionCalcUtils {
       return null;
     }
     double sigma = 0;
-    if ("PUT".equalsIgnoreCase(type) && targetPrice > strike - latestPrice) {
+    OptionMetrics optionMetrics;
+    if (Right.PUT.name().equalsIgnoreCase(type) && targetPrice > strike - latestPrice) {
       result.setTimeValue(getTimeValuePut(strike, latestPrice, targetPrice));
       sigma = getVolatilityPut(targetPrice, latestPrice, strike, r, r, diff);
-      result.setIndex(optionPricePartialsPutBlackScholes(latestPrice, strike, r, sigma, diff));
-      result.setPremiumRate(calcPutPremiumRate(targetPrice, latestPrice, strike));
-      result.setProfitRate(optionBuyPutProfitRate(latestPrice, strike, targetPrice, r, sigma, diff));
-    } else if ("CALL".equalsIgnoreCase(type) && targetPrice > latestPrice - strike) {
+      optionMetrics = optionPricePartialsPutBlackScholes(latestPrice, strike, r, sigma, diff);
+      result.setPremiumRate(calcPutPremiumRate(targetPrice, latestPrice, strike) * 100);
+      result.setProfitRate(optionBuyPutProfitRate(latestPrice, strike, targetPrice, r, sigma, diff) * 100);
+    } else if (Right.CALL.name().equalsIgnoreCase(type) && targetPrice > latestPrice - strike) {
       result.setTimeValue(getTimeValueCall(strike, latestPrice, targetPrice));
       sigma = getVolatilityCall(targetPrice, latestPrice, strike, r, r, diff);
-      result.setPremiumRate(calcCallPremiumRate(targetPrice, latestPrice, strike));
-      result.setProfitRate(optionBuyCallProfitRate(latestPrice, strike, targetPrice, r, sigma, diff));
-      result.setIndex(optionPricePartialsCallBlackScholes(latestPrice, strike, r, sigma, diff));
+      result.setPremiumRate(calcCallPremiumRate(targetPrice, latestPrice, strike) * 100);
+      result.setProfitRate(optionBuyCallProfitRate(latestPrice, strike, targetPrice, r, sigma, diff) * 100);
+      optionMetrics = optionPricePartialsCallBlackScholes(latestPrice, strike, r, sigma, diff);
     } else {
-      result.setIndex(new OptionResult.OptionIndex(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN));
+      optionMetrics = new OptionMetrics(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
     }
-    result.setVolatility(sigma);
-    result.setLeverage(getLeverage(targetPrice, latestPrice, result.getIndex().getDelta()));
+    result.setDelta(optionMetrics.getDelta());
+    result.setGamma(optionMetrics.getGamma());
+    result.setTheta(optionMetrics.getTheta());
+    result.setVega(optionMetrics.getVega());
+    result.setRho(optionMetrics.getRho());
+    result.setVolatility(sigma * 100);
+    result.setLeverage(getLeverage(targetPrice, latestPrice, result.getDelta()));
     result.setInsideValue(getInsideValue(type, latestPrice, strike));
     return result;
   }
@@ -400,25 +420,45 @@ public class OptionCalcUtils {
   }
 
   /**
-   * 该方法封装了获取期权基本面信息的请求过程
+   * Get option fundamental information（include option greek values）
    *
    * @param client TigerHttpClient
-   * @param symbol 股票代码
+   * @param symbol Stock code
    * @param right CALL or PUT
-   * @param strike 行权价
-   * @param expiry 过期日（yyyy-MM-dd）
-   * @return 期权基本面信息
+   * @param strike strike price
+   * @param expiry Expiration date（yyyy-MM-dd）
+   * @return option fundamental information
    * @throws Exception runtime exception
    */
   public static OptionFundamentals getOptionFundamentals(TigerHttpClient client, String symbol, String right,
-      String strike, String expiry) throws Exception {
-    if (!DateUtils.isDateBeforeToday(expiry)) {
-      throw new RuntimeException("期权过期日无效");
+                                                         String strike, String expiry) throws Exception {
+    return getOptionFundamentals(client, symbol, right, strike, expiry, null);
+  }
+
+  /**
+   * Get option fundamental information（include option greek values）
+   *
+   * @param client TigerHttpClient
+   * @param symbol Stock code
+   * @param right CALL or PUT
+   * @param strike strike price
+   * @param expiry Expiration date（yyyy-MM-dd）
+   * @param underlyingSymbol underlying symbol（if null, If empty, defaults to the same value as 'symbol'）
+   * @return option fundamental information
+   * @throws Exception runtime exception
+   */
+  public static OptionFundamentals getOptionFundamentals(TigerHttpClient client, String symbol, String right,
+      String strike, String expiry, String underlyingSymbol) throws Exception {
+    if (DateUtils.isDateBeforeToday(expiry, TimeZoneId.NewYork)) {
+      throw new RuntimeException("Option expiration date cannot be earlier than the current date.");
+    }
+    if (StringUtils.isEmpty(underlyingSymbol)) {
+      underlyingSymbol = symbol;
     }
 
-    FutureTask<CorporateDividendItem> dividendTask = getCorporateDividendTask(client, symbol);
+    FutureTask<CorporateDividendItem> dividendTask = getCorporateDividendTask(client, underlyingSymbol);
     FutureTask<Boolean> marketStateTask = getMarketStateTask(client);
-    FutureTask<Double> latestPriceTask = getLatestPriceTask(client, symbol);
+    FutureTask<Double> latestPriceTask = getLatestPriceTask(client, underlyingSymbol);
     FutureTask<OptionBriefItem> optionBriefTask =
         getOptionBriefTask(client, symbol, right, strike, DateUtils.parseEpochMill(expiry, TimeZoneId.NewYork));
 
@@ -429,298 +469,198 @@ public class OptionCalcUtils {
     if (optionBriefItem.getBidPrice() == null) {
       optionBriefItem.setBidPrice(0D);
     }
-    if (optionBriefItem.getStrike() == null) {
-      throw new RuntimeException("无法获取期权摘要信息！");
-    }
     double target = (optionBriefItem.getAskPrice() + optionBriefItem.getBidPrice()) / 2;
+    if (optionBriefItem.getStrike() == null || target <= 0D) {
+      throw new RuntimeException("Unable to obtain option summary information.");
+    }
 
-    OptionResult result =
+    Double latestPrice = latestPriceTask.get();
+    Double dividendAmount = dividendTask.get().getAmount();
+
+    OptionFundamentals result =
         calcOptionIndex(optionBriefItem.getRatesBonds(), optionBriefItem.getExpiry(),
-            DateUtils.parseEpochMill(dividendTask.get().getExecuteDate()), latestPriceTask.get(), target,
-            dividendTask.get().getAmount(), Double.parseDouble(optionBriefItem.getStrike()), optionBriefItem.getRight(),
+            DateUtils.parseEpochMill(dividendTask.get().getExecuteDate()), latestPrice, target,
+                dividendAmount, Double.parseDouble(optionBriefItem.getStrike()), optionBriefItem.getRight(),
             System.currentTimeMillis(), marketStateTask.get());
+    result.setOpenInterest(optionBriefItem.getOpenInterest() == null ? 0 : optionBriefItem.getOpenInterest());
+    String volatility = null;
+    if (optionBriefItem.getVolatility() != null && optionBriefItem.getVolatility().contains("%")) {
+      volatility = optionBriefItem.getVolatility().replaceAll("%", "");
+    }
+    double historyVolatility = volatility == null || volatility.isEmpty() ? 0.0 : Double.parseDouble(volatility);
+    result.setHistoryVolatility(historyVolatility);
 
-    return result.toOptionFundamentals(optionBriefItem.getOpenInterest(), optionBriefItem.getVolatility());
+    result.setMetricParam(String.format(METRIC_PARAM_FORMAT,optionBriefItem.getRatesBonds(), optionBriefItem.getExpiry(),latestPrice ,target,optionBriefItem.getAskPrice(),optionBriefItem.getBidPrice(),dividendAmount));
+    return result;
   }
 
   private static FutureTask<CorporateDividendItem> getCorporateDividendTask(TigerHttpClient client, String symbol) {
-    FutureTask<CorporateDividendItem> corporateDividendTask = new FutureTask<>(() -> {
-      List<String> symbols = new ArrayList<>();
-      symbols.add(symbol);
-      Date date = Date.from(LocalDate.now().atStartOfDay(ZoneId.of(TimeZoneId.Shanghai.getZoneId())).toInstant());
-      CorporateDividendRequest request = CorporateDividendRequest.newRequest(symbols, Market.US, date, date);
-      CorporateDividendResponse corporateDividendResponse = client.execute(request);
-      if (corporateDividendResponse != null && corporateDividendResponse.isSuccess()) {
-        List<CorporateDividendItem> corporateDividendItems = corporateDividendResponse.getItems().get(symbol);
-        if (!isEmpty(corporateDividendItems)) {
-          return corporateDividendItems.get(0);
+    FutureTask<CorporateDividendItem> corporateDividendTask = new FutureTask<>(new Callable<CorporateDividendItem>() {
+      @Override
+      public CorporateDividendItem call() throws Exception {
+        List<String> symbols = new ArrayList<>();
+        symbols.add(symbol);
+        Date date = Date.from(LocalDate.now().atStartOfDay(ZoneId.of(TimeZoneId.Shanghai.getZoneId())).toInstant());
+        CorporateDividendRequest request = CorporateDividendRequest.newRequest(symbols, Market.US, date, date);
+        CorporateDividendResponse corporateDividendResponse = client.execute(request);
+        if (corporateDividendResponse != null && corporateDividendResponse.isSuccess()) {
+          List<CorporateDividendItem> corporateDividendItems = corporateDividendResponse.getItems().get(symbol);
+          if (!isEmpty(corporateDividendItems)) {
+            return corporateDividendItems.get(0);
+          }
         }
+        CorporateDividendItem item = new CorporateDividendItem();
+        item.setAmount(0D);
+        return item;
       }
-      CorporateDividendItem item = new CorporateDividendItem();
-      item.setAmount(0D);
-      return item;
     });
     executorService.execute(corporateDividendTask);
     return corporateDividendTask;
   }
 
   private static FutureTask<Boolean> getMarketStateTask(TigerHttpClient client) {
-    FutureTask<Boolean> marketItemTask = new FutureTask<>(() -> {
-      QuoteMarketResponse quoteMarketResponse = client.execute(QuoteMarketRequest.newRequest(Market.US));
-      if (quoteMarketResponse != null && quoteMarketResponse.isSuccess()) {
-        List<MarketItem> marketItems = quoteMarketResponse.getMarketItems();
-        if (!isEmpty(marketItems)) {
-          return "交易中".equals(marketItems.get(0).getMarketStatus());
+    FutureTask<Boolean> marketItemTask = new FutureTask<>(new Callable<Boolean>() {
+      @Override
+      public Boolean call() throws Exception {
+        QuoteMarketResponse quoteMarketResponse = client.execute(QuoteMarketRequest.newRequest(Market.US));
+        if (quoteMarketResponse != null && quoteMarketResponse.isSuccess()) {
+          List<MarketItem> marketItems = quoteMarketResponse.getMarketItems();
+          if (!isEmpty(marketItems)) {
+            return "TRADING".equals(marketItems.get(0).getStatus());
+          }
         }
+        return false;
       }
-      return false;
     });
     executorService.execute(marketItemTask);
     return marketItemTask;
   }
 
   private static FutureTask<Double> getLatestPriceTask(TigerHttpClient client, String symbol) {
-    FutureTask<Double> realTimeQuoteItemTask = new FutureTask<>(() -> {
-      QuoteRealTimeQuoteResponse quoteRealTimeQuoteResponse =
-          client.execute(QuoteRealTimeQuoteRequest.newRequest(Arrays.asList(symbol)));
-      if (quoteRealTimeQuoteResponse != null && quoteRealTimeQuoteResponse.isSuccess()) {
-        List<RealTimeQuoteItem> realTimeQuoteItems = quoteRealTimeQuoteResponse.getRealTimeQuoteItems();
-        if (!isEmpty(realTimeQuoteItems)) {
-          Double latestPrice = realTimeQuoteItems.get(0).getLatestPrice();
-          if (latestPrice == null) {
-            throw new RuntimeException("无法获取股票最新价格！");
+    FutureTask<Double> realTimeQuoteItemTask = new FutureTask<>(new Callable<Double>() {
+      @Override
+      public Double call() throws Exception {
+        QuoteRealTimeQuoteResponse quoteRealTimeQuoteResponse =
+            client.execute(QuoteRealTimeQuoteRequest.newRequest(Arrays.asList(symbol)));
+        if (quoteRealTimeQuoteResponse != null && quoteRealTimeQuoteResponse.isSuccess()) {
+          List<RealTimeQuoteItem> realTimeQuoteItems = quoteRealTimeQuoteResponse.getRealTimeQuoteItems();
+          if (!isEmpty(realTimeQuoteItems)) {
+            Double latestPrice = realTimeQuoteItems.get(0).getLatestPrice();
+            if (latestPrice == null) {
+              throw new RuntimeException("Failed to get the latest price of the stock.");
+            }
+            return latestPrice;
           }
-          return latestPrice;
         }
+        if (quoteRealTimeQuoteResponse == null) {
+          throw new RuntimeException("Failed to get the latest price of the stock.");
+        }
+        throw new RuntimeException("Get realtime-quotes return error description: " + quoteRealTimeQuoteResponse.getMessage());
       }
-      if (quoteRealTimeQuoteResponse == null) {
-        throw new RuntimeException("无法获取股票最新价格！");
-      }
-      throw new RuntimeException("实时行情返回：" + quoteRealTimeQuoteResponse.getMessage());
     });
     executorService.execute(realTimeQuoteItemTask);
     return realTimeQuoteItemTask;
   }
 
   private static FutureTask<OptionBriefItem> getOptionBriefTask(TigerHttpClient client, String symbol, String right,
-      String strike, long expiryDate) {
-    FutureTask<OptionBriefItem> optionBriefItemTask = new FutureTask<>(() -> {
-      OptionCommonModel model = new OptionCommonModel(symbol, right, strike, expiryDate);
-      OptionBriefResponse optionBriefResponse = client.execute(OptionBriefQueryRequest.of(model));
-      List<OptionBriefItem> briefItems;
-      if (optionBriefResponse != null && optionBriefResponse.isSuccess()) {
-        briefItems = optionBriefResponse.getOptionBriefItems();
-        if (!isEmpty(briefItems)) {
-          return briefItems.get(0);
+                                                                String strike, long expiryDate) {
+    FutureTask<OptionBriefItem> optionBriefItemTask = new FutureTask<>(new Callable<OptionBriefItem>() {
+      @Override
+      public OptionBriefItem call() throws Exception {
+        OptionCommonModel model = new OptionCommonModel(symbol, right, strike, expiryDate);
+        OptionBriefResponse optionBriefResponse = client.execute(OptionBriefQueryRequest.of(model));
+        List<OptionBriefItem> briefItems;
+        if (optionBriefResponse != null && optionBriefResponse.isSuccess()) {
+          briefItems = optionBriefResponse.getOptionBriefItems();
+          if (!isEmpty(briefItems)) {
+            return briefItems.get(0);
+          }
         }
+        if (optionBriefResponse == null) {
+          throw new RuntimeException("Unable to obtain option summary info.");
+        }
+        throw new RuntimeException("Obtain option brief summary info return error description:" + optionBriefResponse.getMessage());
       }
-      if (optionBriefResponse == null) {
-        throw new RuntimeException("无法获取期权摘要信息！");
-      }
-      throw new RuntimeException("期权摘要返回：" + optionBriefResponse.getMessage());
     });
     executorService.execute(optionBriefItemTask);
     return optionBriefItemTask;
   }
-}
 
- class OptionResult {
+  public static OptionFundamentals calcOptionIndex(Right optionType, double underlying, double strike, double riskFreeRate,
+                                                   double dividendRate, double impliedVolatility, LocalDate settlementDate, LocalDate expirationDate) {
 
-  OptionIndex index;
-  double timeValue;
-  double premiumRate;
-  double profitRate;
-  double volatility;
-  double leverage;
-  double insideValue;
+    FDAmericanDividendOptionHelper helper = new FDAmericanDividendOptionHelper(optionType == Right.CALL ? Option.Type.Call : Option.Type.Put, underlying, strike,
+        riskFreeRate, dividendRate, impliedVolatility,
+        new org.jquantlib.time.Date(settlementDate.getDayOfMonth(), settlementDate.getMonthValue(), settlementDate.getYear()),
+        new org.jquantlib.time.Date(expirationDate.getDayOfMonth(), expirationDate.getMonthValue(), expirationDate.getYear()),
+        new ArrayList<>(), new ArrayList<>());
 
-  public OptionIndex getIndex() {
-    return index;
-  }
-
-  public void setIndex(OptionIndex index) {
-    this.index = index;
-  }
-
-  public double getTimeValue() {
-    return timeValue;
-  }
-
-  public void setTimeValue(double timeValue) {
-    this.timeValue = timeValue;
-  }
-
-  public double getPremiumRate() {
-    return premiumRate;
-  }
-
-  public void setPremiumRate(double premiumRate) {
-    this.premiumRate = premiumRate;
-  }
-
-  public double getProfitRate() {
-    return profitRate;
-  }
-
-  public void setProfitRate(double profitRate) {
-    this.profitRate = profitRate;
-  }
-
-  public double getVolatility() {
-    return volatility;
-  }
-
-  public void setVolatility(double volatility) {
-    this.volatility = volatility;
-  }
-
-  public double getLeverage() {
-    return leverage;
-  }
-
-  public void setLeverage(double leverage) {
-    this.leverage = leverage;
-  }
-
-  public double getInsideValue() {
-    return insideValue;
-  }
-
-  public void setInsideValue(double insideValue) {
-    this.insideValue = insideValue;
-  }
-
-  public String getTimeValueString() {
-    return formatDoubleString(timeValue, 2);
-  }
-
-  public String getPremiumRateString() {
-    return doubleToPercentageString(premiumRate, 2);
-  }
-
-  public String getProfitRateString() {
-    return doubleToPercentageString(profitRate, 2);
-  }
-
-  public String getVolatilityString() {
-    return doubleToPercentageString(volatility, 2);
-  }
-
-  public String getLeverageString() {
-    return formatDoubleString(leverage, 2);
-  }
-
-  public String getInsideValueString() {
-    return formatDoubleString(insideValue, 2);
-  }
-
-  static class OptionIndex {
-
-    double Delta;
-    double Gamma;
-    double Theta;
-    double Vega;
-    double Rho;
-
-    public OptionIndex(double delta, double gamma, double theta, double vega, double rho) {
-      Delta = delta;
-      Gamma = gamma;
-      Theta = theta;
-      Vega = vega;
-      Rho = rho;
-    }
-
-    public String getDeltaString() {
-      return formatDoubleString(Delta, 3);
-    }
-
-    public String getGammaString() {
-      return formatDoubleString(Gamma, 3);
-    }
-
-    public String getThetaString() {
-      return formatDoubleString(Theta, 3);
-    }
-
-    public String getVegaString() {
-      return formatDoubleString(Vega, 3);
-    }
-
-    public String getRhoString() {
-      return formatDoubleString(Rho, 3);
-    }
-
-    public double getDelta() {
-      return Delta;
-    }
-
-    public void setDelta(double delta) {
-      Delta = delta;
-    }
-
-    public double getGamma() {
-      return Gamma;
-    }
-
-    public void setGamma(double gamma) {
-      Gamma = gamma;
-    }
-
-    public double getTheta() {
-      return Theta;
-    }
-
-    public void setTheta(double theta) {
-      Theta = theta;
-    }
-
-    public double getVega() {
-      return Vega;
-    }
-
-    public void setVega(double vega) {
-      Vega = vega;
-    }
-
-    public double getRho() {
-      return Rho;
-    }
-
-    public void setRho(double rho) {
-      Rho = rho;
-    }
-  }
-
-  private static String doubleToPercentageString(double src, int fractionDigits) {
-    NumberFormat nf = NumberFormat.getPercentInstance();
-    nf.setMinimumFractionDigits(fractionDigits);
-    nf.setMaximumFractionDigits(fractionDigits);
-    String res = nf.format(src);
-    return res;
-  }
-
-  private static String formatDoubleString(double src, int fractionDigits) {
-    NumberFormat nf = NumberFormat.getNumberInstance();
-    nf.setMinimumFractionDigits(fractionDigits);
-    nf.setMaximumFractionDigits(fractionDigits);
-    String res = nf.format(src);
-    return res;
-  }
-
-  public OptionFundamentals toOptionFundamentals(int openInterest, String volatility) {
+    OptionMetrics optionIndex = new OptionMetrics(helper.delta(), helper.gamma(), helper.theta(), helper.vega(), helper.rho());
     OptionFundamentals optionFundamentals = new OptionFundamentals();
-    optionFundamentals.setPremiumRate(getPremiumRateString());
-    optionFundamentals.setOpenInterest(openInterest + "");
-    optionFundamentals.setVolatility(getVolatilityString());
-    optionFundamentals.setHistoryVolatility(volatility);
-    optionFundamentals.setDelta(getIndex().getDeltaString());
-    optionFundamentals.setTheta(getIndex().getThetaString());
-    optionFundamentals.setGamma(getIndex().getGammaString());
-    optionFundamentals.setVega(getIndex().getVegaString());
-    optionFundamentals.setTimeValue(getTimeValueString());
-    optionFundamentals.setInsideValue(getInsideValueString());
-    optionFundamentals.setLeverage(getLeverageString());
-    optionFundamentals.setProfitRate(getProfitRateString());
+    optionFundamentals.setDelta(optionIndex.getDelta());
+    optionFundamentals.setGamma(optionIndex.getGamma());
+    optionFundamentals.setTheta(optionIndex.getTheta());
+    optionFundamentals.setVega(optionIndex.getVega());
+    optionFundamentals.setRho(optionIndex.getRho());
+    optionFundamentals.setPredictedValue(helper.NPV());
     return optionFundamentals;
   }
+
+  public static OptionFundamentals calcOptionIndex(Right optionType, double underlying, double strike, double riskFreeRate,
+                                                   double dividendRate, Double askPrice, Double bidPrice, LocalDate settlementDate, LocalDate expirationDate) {
+
+    FDAmericanDividendOptionHelper helper = new FDAmericanDividendOptionHelper(optionType == Right.CALL ? Option.Type.Call : Option.Type.Put, underlying, strike,
+            riskFreeRate, dividendRate,
+            new org.jquantlib.time.Date(settlementDate.getDayOfMonth(), settlementDate.getMonthValue(), settlementDate.getYear()),
+            new org.jquantlib.time.Date(expirationDate.getDayOfMonth(), expirationDate.getMonthValue(), expirationDate.getYear()));
+
+    double ivol = helper.impliedVolatility(calculateAvgPrice(askPrice,bidPrice));
+    helper.updateImpliedVolatility(ivol);
+
+    OptionMetrics optionIndex = new OptionMetrics(helper.delta(), helper.gamma(), helper.theta(), helper.vega(), helper.rho());
+    OptionFundamentals optionFundamentals = new OptionFundamentals();
+    optionFundamentals.setDelta(optionIndex.getDelta());
+    optionFundamentals.setGamma(optionIndex.getGamma());
+    optionFundamentals.setTheta(optionIndex.getTheta());
+    optionFundamentals.setVega(optionIndex.getVega());
+    optionFundamentals.setRho(optionIndex.getRho());
+    optionFundamentals.setPredictedValue(helper.NPV());
+    return optionFundamentals;
+  }
+
+  public static OptionFundamentals calcEuropeanOptionIndex(Right optionType, double underlying, double strike, double riskFreeRate,
+                                                   double dividendRate, Double askPrice, Double bidPrice, LocalDate settlementDate, LocalDate expirationDate) {
+
+    BSMEuropeanDividendOptionHelper helper = new BSMEuropeanDividendOptionHelper(optionType == Right.CALL ? Option.Type.Call : Option.Type.Put, underlying, strike,
+            riskFreeRate, dividendRate,
+            new org.jquantlib.time.Date(settlementDate.getDayOfMonth(), settlementDate.getMonthValue(), settlementDate.getYear()),
+            new org.jquantlib.time.Date(expirationDate.getDayOfMonth(), expirationDate.getMonthValue(), expirationDate.getYear()));
+
+    double ivol = helper.impliedVolatility(calculateAvgPrice(askPrice,bidPrice));
+    helper.updateImpliedVolatility(ivol);
+
+    OptionMetrics optionIndex = new OptionMetrics(helper.delta(), helper.gamma(), helper.theta(), helper.vega(), helper.rho());
+    OptionFundamentals optionFundamentals = new OptionFundamentals();
+    optionFundamentals.setDelta(optionIndex.getDelta());
+    optionFundamentals.setGamma(optionIndex.getGamma());
+    optionFundamentals.setTheta(optionIndex.getTheta());
+    optionFundamentals.setVega(optionIndex.getVega());
+    optionFundamentals.setRho(optionIndex.getRho());
+    optionFundamentals.setPredictedValue(helper.NPV());
+    return optionFundamentals;
+  }
+
+  public static double calculateAvgPrice(Double askPrice, Double bidPrice) {
+    double avgPrice;
+    if (askPrice == null && bidPrice == null) {
+      avgPrice = 0D;
+    } else if (askPrice != null && bidPrice != null) {
+      avgPrice = (askPrice + bidPrice) / 2;
+    } else {
+      avgPrice = askPrice == null ? bidPrice : askPrice;
+    }
+    return avgPrice;
+  }
+
 }
+

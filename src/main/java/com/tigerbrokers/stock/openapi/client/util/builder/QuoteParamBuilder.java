@@ -2,6 +2,8 @@ package com.tigerbrokers.stock.openapi.client.util.builder;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.struct.enums.KType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
@@ -94,7 +96,7 @@ public class QuoteParamBuilder {
   }
 
   public QuoteParamBuilder beginTime(String beginTime) {
-    return beginTime(beginTime, TimeZoneId.Shanghai);
+    return beginTime(beginTime, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
   }
 
   public QuoteParamBuilder beginTime(String beginTime, TimeZoneId zoneId) {
@@ -109,7 +111,7 @@ public class QuoteParamBuilder {
   }
 
   public QuoteParamBuilder endTime(String endTime) {
-    return endTime(endTime, TimeZoneId.Shanghai);
+    return endTime(endTime, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
   }
 
   public QuoteParamBuilder endTime(String endTime, TimeZoneId zoneId) {
@@ -195,10 +197,10 @@ public class QuoteParamBuilder {
   }
 
   public QuoteParameter build() {
-    return JSONObject.parseObject(JSON.toJSONString(paramMap), QuoteParameter.class);
+    return JSONObject.parseObject(JSON.toJSONString(paramMap, SerializerFeature.WriteEnumUsingToString), QuoteParameter.class);
   }
 
   public String buildJson() {
-    return JSONObject.toJSONString(paramMap);
+    return JSONObject.toJSONString(paramMap, SerializerFeature.WriteEnumUsingToString);
   }
 }

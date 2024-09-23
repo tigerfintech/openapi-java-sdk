@@ -1,11 +1,11 @@
 package com.tigerbrokers.stock.openapi.client.https.request.user;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.https.domain.user.model.UserLoginModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.user.UserLoginResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.GrantType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 
 /**
  * Description:
@@ -14,7 +14,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.GrantType;
 public class UserLoginRequest extends TigerCommonRequest implements TigerRequest<UserLoginResponse> {
 
   public UserLoginRequest() {
-    setApiMethodName(ApiServiceType.USER_LOGIN);
+    setApiMethodName(MethodName.USER_LOGIN);
   }
 
   public static UserLoginRequest newRequest(String userName, String password) {

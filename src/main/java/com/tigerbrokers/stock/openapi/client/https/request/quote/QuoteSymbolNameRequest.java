@@ -1,12 +1,13 @@
 package com.tigerbrokers.stock.openapi.client.https.request.quote;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteMarketModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteSymbolNameResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 
 /**
  * Description:
@@ -16,11 +17,11 @@ public class QuoteSymbolNameRequest extends TigerCommonRequest implements TigerR
 
   public QuoteSymbolNameRequest() {
     setApiVersion(V2_0);
-    setApiMethodName(ApiServiceType.ALL_SYMBOL_NAMES);
+    setApiMethodName(MethodName.ALL_SYMBOL_NAMES);
   }
 
   public static QuoteSymbolNameRequest newRequest(Market market) {
-    return newRequest(market, Language.en_US);
+    return newRequest(market, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
   }
 
   public static QuoteSymbolNameRequest newRequest(Market market, Language lang) {
@@ -28,6 +29,23 @@ public class QuoteSymbolNameRequest extends TigerCommonRequest implements TigerR
     QuoteMarketModel model = new QuoteMarketModel(market, lang);
     request.setApiModel(model);
     return request;
+  }
+
+  public QuoteMarketModel getApiModel() {
+    if (apiModel == null) {
+      apiModel = new QuoteMarketModel();
+    }
+    return (QuoteMarketModel)apiModel;
+  }
+
+  public QuoteSymbolNameRequest market(Market market) {
+    getApiModel().setMarket(market);
+    return this;
+  }
+
+  public QuoteSymbolNameRequest includeOTC(Boolean includeOTC) {
+    getApiModel().setIncludeOTC(includeOTC);
+    return this;
   }
 
   @Override

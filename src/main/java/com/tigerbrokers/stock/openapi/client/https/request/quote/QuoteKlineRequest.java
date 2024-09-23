@@ -1,11 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.https.request.quote;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.QuoteKlineModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteKlineResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.KType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.RightOption;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import java.util.List;
@@ -18,7 +19,7 @@ public class QuoteKlineRequest extends TigerCommonRequest implements TigerReques
 
   public QuoteKlineRequest() {
     setApiVersion(V2_0);
-    setApiMethodName(ApiServiceType.KLINE);
+    setApiMethodName(MethodName.KLINE);
   }
 
   public static QuoteKlineRequest newRequest(List<String> symbols, KType kType) {
@@ -37,7 +38,7 @@ public class QuoteKlineRequest extends TigerCommonRequest implements TigerReques
   }
 
   public static QuoteKlineRequest newRequest(List<String> symbols, KType kType, String beginTime, String endTime) {
-    return newRequest(symbols, kType, beginTime, endTime, TimeZoneId.NewYork);
+    return newRequest(symbols, kType, beginTime, endTime, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
   }
 
   public static QuoteKlineRequest newRequest(List<String> symbols, KType kType, String beginTime, String endTime,
@@ -52,22 +53,30 @@ public class QuoteKlineRequest extends TigerCommonRequest implements TigerReques
     return kType != null ? kType.getValue() : KType.day.getValue();
   }
 
+  public QuoteKlineModel getApiModel() {
+    if (apiModel == null) {
+      apiModel = new QuoteKlineModel();
+    }
+    return (QuoteKlineModel)apiModel;
+  }
+
   public QuoteKlineRequest withLimit(int limit) {
     if (limit > 0) {
-      if (apiModel instanceof QuoteKlineModel) {
-        QuoteKlineModel klineModel = (QuoteKlineModel) apiModel;
-        klineModel.setLimit(limit);
-      }
+      getApiModel().setLimit(limit);
     }
     return this;
   }
 
   public QuoteKlineRequest withRight(RightOption rightOption) {
     if (rightOption != null) {
-      if (apiModel instanceof QuoteKlineModel) {
-        QuoteKlineModel klineModel = (QuoteKlineModel) apiModel;
-        klineModel.setRight(rightOption);
-      }
+      getApiModel().setRight(rightOption);
+    }
+    return this;
+  }
+
+  public QuoteKlineRequest withRight(String rightOption) {
+    if (rightOption != null) {
+      getApiModel().setRight(rightOption);
     }
     return this;
   }
@@ -77,10 +86,7 @@ public class QuoteKlineRequest extends TigerCommonRequest implements TigerReques
    * @param pageToken
    */
   public void withPageToken(String pageToken) {
-    if (apiModel != null && apiModel instanceof QuoteKlineModel) {
-      QuoteKlineModel klineModel = (QuoteKlineModel) apiModel;
-      klineModel.setPageToken(pageToken);
-    }
+    getApiModel().setPageToken(pageToken);
   }
 
   @Override

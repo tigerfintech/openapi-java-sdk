@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.struct;
 
+import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import java.util.Objects;
 
 /**
@@ -37,5 +38,12 @@ public final class TagValue {
   public int hashCode() {
 
     return Objects.hash(tag, value);
+  }
+
+  public static TagValue buildTagValue(String tag, Object value) {
+    if (StringUtils.isEmpty(tag) || value == null) {
+      return null;
+    }
+    return new TagValue(tag, value.toString());
   }
 }

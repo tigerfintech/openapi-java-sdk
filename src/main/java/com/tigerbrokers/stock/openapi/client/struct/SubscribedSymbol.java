@@ -1,6 +1,5 @@
 package com.tigerbrokers.stock.openapi.client.struct;
 
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -9,16 +8,13 @@ import java.util.Set;
  */
 public class SubscribedSymbol {
 
-  public static final int MAX_SYMBOLS = 100;
-  public static final int MAX_ASK_BID_SYMBOLS = 100;
-
   /**
-   * 订阅限制数
+   * subscribed quote symbol limit
    */
   private int limit;
 
   /**
-   * 已订阅数
+   * subscribed quote symbol size
    */
   private int used;
 
@@ -26,20 +22,33 @@ public class SubscribedSymbol {
 
   private int askBidUsed;
 
+  private int tradeTickLimit;
+  private int tradeTickUsed;
+
+  private int klineLimit;
+  private int klineUsed;
+
   /**
-   * 订阅详情
+   * subscribed quote symbol's detail
    */
   Set<String> subscribedSymbols;
 
   /**
-   * 订阅深度数据
+   * subscribed depth-quote symbol's detail
    */
   Set<String> subscribedAskBidSymbols;
 
   /**
-   * 关注keys
+   * subscribed trade-tick symbol's detail
    */
-  Map<String, Set<String>> symbolFocusKeys;
+  Set<String> subscribedTradeTickSymbols;
+
+  /**
+   * subscribed kline symbol's detail
+   */
+  Set<String> subscribedKlineSymbols;
+
+  Set<String> subscribedMarketQuote;
 
   public int getLimit() {
     return limit;
@@ -89,11 +98,59 @@ public class SubscribedSymbol {
     this.subscribedSymbols = subscribedSymbols;
   }
 
-  public Map<String, Set<String>> getSymbolFocusKeys() {
-    return symbolFocusKeys;
+  public Set<String> getSubscribedMarketQuote() {
+    return subscribedMarketQuote;
   }
 
-  public void setSymbolFocusKeys(Map<String, Set<String>> symbolFocusKeys) {
-    this.symbolFocusKeys = symbolFocusKeys;
+  public void setSubscribedMarketQuote(Set<String> subscribedMarketQuote) {
+    this.subscribedMarketQuote = subscribedMarketQuote;
+  }
+
+  public int getTradeTickLimit() {
+    return tradeTickLimit;
+  }
+
+  public void setTradeTickLimit(int tradeTickLimit) {
+    this.tradeTickLimit = tradeTickLimit;
+  }
+
+  public int getTradeTickUsed() {
+    return tradeTickUsed;
+  }
+
+  public void setTradeTickUsed(int tradeTickUsed) {
+    this.tradeTickUsed = tradeTickUsed;
+  }
+
+  public Set<String> getSubscribedTradeTickSymbols() {
+    return subscribedTradeTickSymbols;
+  }
+
+  public void setSubscribedTradeTickSymbols(Set<String> subscribedTradeTickSymbols) {
+    this.subscribedTradeTickSymbols = subscribedTradeTickSymbols;
+  }
+
+  public int getKlineLimit() {
+    return klineLimit;
+  }
+
+  public void setKlineLimit(int klineLimit) {
+    this.klineLimit = klineLimit;
+  }
+
+  public int getKlineUsed() {
+    return klineUsed;
+  }
+
+  public void setKlineUsed(int klineUsed) {
+    this.klineUsed = klineUsed;
+  }
+
+  public Set<String> getSubscribedKlineSymbols() {
+    return subscribedKlineSymbols;
+  }
+
+  public void setSubscribedKlineSymbols(Set<String> subscribedKlineSymbols) {
+    this.subscribedKlineSymbols = subscribedKlineSymbols;
   }
 }

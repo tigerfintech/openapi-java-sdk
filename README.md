@@ -6,7 +6,7 @@
 
 * 直接管理交易：创建订单，修改或取消订单，以及检查订单状态
 * 查看帐户信息：例如余额和当前头寸
-* 查询行情变化：股票或期权的价格和其他信息
+* 查询行情变化：股票、期权、期货的价格和其他信息
 * 接收实时变动：获取订单变动，持仓变动以及行情变动等
 
 #### 交易类型
@@ -32,6 +32,10 @@
 使用maven地址时，可以查看maven仓库中依赖的上传时间，尽量使用最新版本来替换掉上面依赖中的 {latestVersion} 变量。
 
 
+#### API官网
+
+https://developer.itigerup.com/
+
 #### 文档地址
 
-https://openapi.itiger.com/docs
+https://quant.itigerup.com/openapi/zh/java/overview/introduction.html

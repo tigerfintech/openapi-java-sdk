@@ -2,8 +2,11 @@ package com.tigerbrokers.stock.openapi.client.https.domain.option.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
+import com.tigerbrokers.stock.openapi.client.struct.enums.SortDir;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
+import com.tigerbrokers.stock.openapi.client.util.StringUtils;
+import com.tigerbrokers.stock.openapi.client.util.SymbolUtil;
 import java.util.Date;
 
 /**
@@ -16,6 +19,12 @@ public class OptionKlineModel extends OptionCommonModel {
   private Long beginTime;
   @JSONField(name = "end_time")
   private Long endTime;
+  @JSONField(name = "period")
+  private String period;
+  private Integer limit;
+  /** sort directions  */
+  @JSONField(name = "sort_dir")
+  private SortDir sortDir;
 
   public OptionKlineModel() {
 
@@ -34,7 +43,9 @@ public class OptionKlineModel extends OptionCommonModel {
   }
 
   public void setBeginTime(String beginTime) {
-    setBeginTime(beginTime, TimeZoneId.NewYork);
+    TimeZoneId timeZoneId = StringUtils.isEmpty(this.symbol) ?
+        TimeZoneId.NewYork : SymbolUtil.getZoneIdBySymbol(this.symbol);
+    setBeginTime(beginTime, timeZoneId);
   }
 
   public void setBeginTime(String beginTime, TimeZoneId zoneId) {
@@ -53,7 +64,9 @@ public class OptionKlineModel extends OptionCommonModel {
   }
 
   public void setEndTime(String endTime) {
-    setEndTime(endTime, TimeZoneId.NewYork);
+    TimeZoneId timeZoneId = StringUtils.isEmpty(this.symbol) ?
+        TimeZoneId.NewYork : SymbolUtil.getZoneIdBySymbol(this.symbol);
+    setEndTime(endTime, timeZoneId);
   }
 
   public void setEndTime(String endTime, TimeZoneId zoneId) {
@@ -61,6 +74,30 @@ public class OptionKlineModel extends OptionCommonModel {
     if (date != null) {
       this.endTime = date.getTime();
     }
+  }
+
+  public String getPeriod() {
+    return period;
+  }
+
+  public void setPeriod(String period) {
+    this.period = period;
+  }
+
+  public Integer getLimit() {
+    return limit;
+  }
+
+  public void setLimit(Integer limit) {
+    this.limit = limit;
+  }
+
+  public SortDir getSortDir() {
+    return sortDir;
+  }
+
+  public void setSortDir(SortDir sortDir) {
+    this.sortDir = sortDir;
   }
 
   @Override
@@ -72,6 +109,8 @@ public class OptionKlineModel extends OptionCommonModel {
         ", right='" + right + '\'' +
         ", strike='" + strike + '\'' +
         ", expiry='" + expiry + '\'' +
+        ", period='" + period + '\'' +
+        ", sortDir='" + sortDir + '\'' +
         '}';
   }
 }

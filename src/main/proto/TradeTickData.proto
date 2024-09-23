@@ -1,0 +1,28 @@
+syntax = "proto3";
+package com.tigerbrokers.stock.openapi.client.socket.data.pb;
+
+option java_package = "com.tigerbrokers.stock.openapi.client.socket.data.pb";
+option java_multiple_files = true;
+
+message TradeTickData {
+  string symbol = 1;
+  string type = 2;                // buy/sell direction. Active buy(+); Active sell(-); Neutral transaction(*).Futures are not supported
+  string cond = 3;                // The trade condition for irregular transaction.(Futures are not supported)
+  int64 sn = 4;                   // serial number
+  int64 priceBase = 5;
+  int32 priceOffset = 6;
+  repeated int64 time = 7;        // The compressed transaction time is restored to the original time: time[i] = time[i] + time[i-1]
+  repeated int64 price = 8;       // The compressed transaction price is restored to the original price: price[i] = (priceBase + price[i]) / 10^priceOffset
+  repeated int64 volume = 9;      // volume
+  repeated string partCode = 10;  // The market participant reports the transaction，Usually a ~ z characters.(Futures are not supported)
+  string quoteLevel = 11;         // (Futures are not supported)
+  uint64 timestamp = 12;
+
+  string secType = 13; // STK Stocks, FUT Futures
+  repeated MergedVol mergedVols = 14; // Original number of merges(Only futures are supported)
+
+  message MergedVol {
+    int32 mergeTimes = 1; // Original number of merges
+    repeated int64 vol = 2; // original trading volume
+  }
+}

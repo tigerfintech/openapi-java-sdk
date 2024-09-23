@@ -20,6 +20,8 @@ public class KlinePoint implements Serializable {
 
   private Long volume;
 
+  private Double amount;
+
   public Double getOpen() {
     return open;
   }
@@ -68,6 +70,14 @@ public class KlinePoint implements Serializable {
     this.volume = volume;
   }
 
+  public Double getAmount() {
+    return amount;
+  }
+
+  public void setAmount(Double amount) {
+    this.amount = amount;
+  }
+
   @Override
   public String toString() {
     return "KlinePoint{" +
@@ -77,6 +87,7 @@ public class KlinePoint implements Serializable {
         ", low=" + low +
         ", time=" + time +
         ", volume=" + volume +
+        ", amount=" + amount +
         '}';
   }
 }

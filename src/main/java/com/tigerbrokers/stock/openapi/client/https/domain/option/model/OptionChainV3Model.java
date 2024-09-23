@@ -5,15 +5,16 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.option.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import java.util.List;
 
-public class OptionChainV3Model extends ApiModel {
+public class OptionChainV3Model extends OptionModel {
 
   @JSONField(name = "option_basic")
   private List<OptionChainModel> optionBasic;
   @JSONField(name = "option_filter")
   private OptionChainFilterModel optionFilter;
+  @JSONField(name = "return_greek_value")
+  private Boolean returnGreekValue;
 
   public List<OptionChainModel> getOptionBasic() {
     return optionBasic;
@@ -31,11 +32,21 @@ public class OptionChainV3Model extends ApiModel {
     this.optionFilter = optionFilter;
   }
 
+  public Boolean getReturnGreekValue() {
+    return returnGreekValue;
+  }
+
+  public void setReturnGreekValue(Boolean returnGreekValue) {
+    this.returnGreekValue = returnGreekValue;
+  }
+
   @Override
   public String toString() {
     return "OptionChainV2Model{" +
         "optionBasic=" + optionBasic +
+        ", market=" + market +
         ", optionFilter=" + optionFilter +
+        ", returnGreekValue=" + returnGreekValue +
         '}';
   }
 }

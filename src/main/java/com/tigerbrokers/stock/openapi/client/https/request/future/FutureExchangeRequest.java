@@ -1,12 +1,13 @@
 package com.tigerbrokers.stock.openapi.client.https.request.future;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureExchangeModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.future.FutureExchangeResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 
 /**
  * Description:
@@ -16,11 +17,11 @@ public class FutureExchangeRequest extends TigerCommonRequest implements TigerRe
 
   public FutureExchangeRequest() {
     setApiVersion(TigerApiConstants.DEFAULT_VERSION);
-    setApiMethodName(ApiServiceType.FUTURE_EXCHANGE);
+    setApiMethodName(MethodName.FUTURE_EXCHANGE);
   }
 
   public static FutureExchangeRequest newRequest(String secType) {
-    return newRequest(secType, Language.en_US);
+    return newRequest(secType, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
   }
 
   public static FutureExchangeRequest newRequest(String secType, Language lang) {

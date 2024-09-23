@@ -1,6 +1,5 @@
 package com.tigerbrokers.stock.openapi.client.https.request.financial;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.financial.model.CorporateActionModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
@@ -8,6 +7,7 @@ import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateDividendResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.CorporateActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import java.util.Date;
 import java.util.List;
 
@@ -18,7 +18,7 @@ import java.util.List;
 public class CorporateDividendRequest extends TigerCommonRequest implements TigerRequest<CorporateDividendResponse> {
 
   public CorporateDividendRequest() {
-    setApiMethodName(ApiServiceType.CORPORATE_ACTION);
+    setApiMethodName(MethodName.CORPORATE_ACTION);
     setApiVersion(TigerApiConstants.DEFAULT_VERSION);
   }
 

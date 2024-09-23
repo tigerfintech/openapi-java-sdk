@@ -1,154 +1,193 @@
 package com.tigerbrokers.stock.openapi.client.struct;
 
 /**
- * 期权基本面信息
- * 作者：ltc
- * 时间：2019/08/27
+ * Options Fundamentals Information
+ * author：ltc
+ * date：2019/08/27
  */
 public class OptionFundamentals {
 
   /**
    * delta
    */
-  String delta;
+  double delta;
   /**
    * gamma
    */
-  String gamma;
+  double gamma;
   /**
    * theta
    */
-  String theta;
+  double theta;
   /**
    * vega
    */
-  String vega;
+  double vega;
   /**
-   * 时间价值
+   * rho
    */
-  String timeValue;
-  /**
-   * 溢价率
-   */
-  String premiumRate;
-  /**
-   * 买入盈利率
-   */
-  String profitRate;
-  /**
-   * 隐含波动率
-   */
-  String volatility;
-  /**
-   * 杠杆率
-   */
-  String leverage;
-  /**
-   * 内在价值
-   */
-  String insideValue;
-  /**
-   * 历史波动率
-   */
-  String historyVolatility;
-  /**
-   * 未平合约数
-   */
-  String openInterest;
+  double rho;
 
-  public String getDelta() {
+  /**
+   * Option Predictive Value
+   */
+  double predictedValue;
+
+  /**
+   * option time value
+   */
+  double timeValue;
+  /**
+   * Premium rate
+   */
+  double premiumRate;
+  /**
+   * Profit rate
+   */
+  double profitRate;
+  /**
+   * implied volatility
+   */
+  double volatility;
+  /**
+   * leverage
+   */
+  double leverage;
+  /**
+   * inside value
+   */
+  double insideValue;
+  /**
+   * historical volatility
+   */
+  double historyVolatility;
+  /**
+   * open interest
+   */
+  double openInterest;
+
+  /**
+   * for debug and validate
+   */
+  String metricParam;
+
+  public double getDelta() {
     return delta;
   }
 
-  public void setDelta(String delta) {
+  public void setDelta(double delta) {
     this.delta = delta;
   }
 
-  public String getGamma() {
+  public double getGamma() {
     return gamma;
   }
 
-  public void setGamma(String gamma) {
+  public void setGamma(double gamma) {
     this.gamma = gamma;
   }
 
-  public String getTheta() {
+  public double getTheta() {
     return theta;
   }
 
-  public void setTheta(String theta) {
+  public void setTheta(double theta) {
     this.theta = theta;
   }
 
-  public String getVega() {
+  public double getVega() {
     return vega;
   }
 
-  public void setVega(String vega) {
+  public void setVega(double vega) {
     this.vega = vega;
   }
 
-  public String getTimeValue() {
+  public double getRho() {
+    return rho;
+  }
+
+  public void setRho(double rho) {
+    this.rho = rho;
+  }
+
+  public double getPredictedValue() {
+    return predictedValue;
+  }
+
+  public void setPredictedValue(double predictedValue) {
+    this.predictedValue = predictedValue;
+  }
+
+  public double getTimeValue() {
     return timeValue;
   }
 
-  public void setTimeValue(String timeValue) {
+  public void setTimeValue(double timeValue) {
     this.timeValue = timeValue;
   }
 
-  public String getPremiumRate() {
+  public double getPremiumRate() {
     return premiumRate;
   }
 
-  public void setPremiumRate(String premiumRate) {
+  public void setPremiumRate(double premiumRate) {
     this.premiumRate = premiumRate;
   }
 
-  public String getProfitRate() {
+  public double getProfitRate() {
     return profitRate;
   }
 
-  public void setProfitRate(String profitRate) {
+  public void setProfitRate(double profitRate) {
     this.profitRate = profitRate;
   }
 
-  public String getVolatility() {
+  public double getVolatility() {
     return volatility;
   }
 
-  public void setVolatility(String volatility) {
+  public void setVolatility(double volatility) {
     this.volatility = volatility;
   }
 
-  public String getLeverage() {
+  public double getLeverage() {
     return leverage;
   }
 
-  public void setLeverage(String leverage) {
+  public void setLeverage(double leverage) {
     this.leverage = leverage;
   }
 
-  public String getInsideValue() {
+  public double getInsideValue() {
     return insideValue;
   }
 
-  public void setInsideValue(String insideValue) {
+  public void setInsideValue(double insideValue) {
     this.insideValue = insideValue;
   }
 
-  public String getHistoryVolatility() {
+  public double getHistoryVolatility() {
     return historyVolatility;
   }
 
-  public void setHistoryVolatility(String historyVolatility) {
+  public void setHistoryVolatility(double historyVolatility) {
     this.historyVolatility = historyVolatility;
   }
 
-  public String getOpenInterest() {
+  public double getOpenInterest() {
     return openInterest;
   }
 
-  public void setOpenInterest(String openInterest) {
+  public void setOpenInterest(double openInterest) {
     this.openInterest = openInterest;
+  }
+
+  public String getMetricParam() {
+    return metricParam;
+  }
+
+  public void setMetricParam(String metricParam) {
+    this.metricParam = metricParam;
   }
 }

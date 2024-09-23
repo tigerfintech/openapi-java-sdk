@@ -14,6 +14,8 @@ import java.util.List;
  */
 public class FutureQuoteRequestValidator implements RequestValidator<ApiModel> {
 
+  private static final int MAX_LIMIT = 1000;
+
   @Override
   public void validate(ApiModel model) throws TigerApiException {
     if (model instanceof FutureTradingDateModel) {
@@ -27,15 +29,12 @@ public class FutureQuoteRequestValidator implements RequestValidator<ApiModel> {
       }
     } else if (model instanceof FutureTickModel) {
       FutureTickModel futureTickModel = (FutureTickModel) model;
-      List<String> contractCodes = futureTickModel.getContractCodes();
-      if (null == contractCodes || contractCodes.size() == 0) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "contract_codes");
+      String contractCode = futureTickModel.getContractCode();
+      if (null == contractCode) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "contract_code");
       }
-      if (null == futureTickModel.getBeginIndex()) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "begin_index");
-      }
-      if (null == futureTickModel.getEndIndex()) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "end_index");
+      if (futureTickModel.getLimit() <= 0 || futureTickModel.getLimit() > MAX_LIMIT) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_ERROR, "param 'limit' cannot be less than 0 or greater than " + MAX_LIMIT);
       }
     }
   }

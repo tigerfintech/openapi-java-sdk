@@ -2,7 +2,6 @@ package com.tigerbrokers.stock.openapi.client.https.domain.future.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
-import java.util.List;
 
 /**
  * Description:
@@ -10,47 +9,66 @@ import java.util.List;
  */
 public class FutureTickModel extends ApiModel {
 
-  @JSONField(name = "contract_codes")
-  private List<String> contractCodes;
+  @JSONField(name = "contract_code")
+  private String contractCode;
   @JSONField(name = "begin_index")
-  private Integer beginIndex;
+  private long beginIndex;
   @JSONField(name = "end_index")
-  private Integer endIndex;
+  private long endIndex;
+  private int limit;
+
+  private static final int DEFAULT_LIMIT = 200;
 
   public FutureTickModel() {
   }
 
-  public FutureTickModel(List<String> contractCodes) {
-    this.contractCodes = contractCodes;
+  public FutureTickModel(String contractCode) {
+    this.contractCode = contractCode;
   }
 
-  public FutureTickModel(List<String> contractCodes, Integer beginIndex, Integer endIndex) {
-    this.contractCodes = contractCodes;
+  public FutureTickModel(String contractCode, long beginIndex, long endIndex) {
+    this.contractCode = contractCode;
     this.beginIndex = beginIndex;
     this.endIndex = endIndex;
+    this.limit = DEFAULT_LIMIT;
   }
 
-  public List<String> getContractCodes() {
-    return contractCodes;
+  public FutureTickModel(String contractCode, long beginIndex, long endIndex,int limit) {
+    this.contractCode = contractCode;
+    this.beginIndex = beginIndex;
+    this.endIndex = endIndex;
+    this.limit = limit;
   }
 
-  public void setContractCodes(List<String> contractCodes) {
-    this.contractCodes = contractCodes;
+  public String getContractCode() {
+    return contractCode;
   }
 
-  public Integer getBeginIndex() {
+  public void setContractCode(String contractCode) {
+    this.contractCode = contractCode;
+  }
+
+  public long getBeginIndex() {
     return beginIndex;
   }
 
-  public void setBeginIndex(Integer beginIndex) {
+  public void setBeginIndex(long beginIndex) {
     this.beginIndex = beginIndex;
   }
 
-  public Integer getEndIndex() {
+  public long getEndIndex() {
     return endIndex;
   }
 
-  public void setEndIndex(Integer endIndex) {
+  public void setEndIndex(long endIndex) {
     this.endIndex = endIndex;
+  }
+
+  public int getLimit() {
+    return limit;
+  }
+
+  public void setLimit(int limit) {
+    this.limit = limit;
   }
 }

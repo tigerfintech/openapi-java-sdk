@@ -3,7 +3,9 @@ package com.tigerbrokers.stock.openapi.client.util;
 import com.alibaba.fastjson.JSON;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
+import com.tigerbrokers.stock.openapi.client.struct.enums.BizType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
+import com.tigerbrokers.stock.openapi.client.struct.enums.License;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Protocol;
 import io.netty.handler.ssl.OpenSsl;
 import io.netty.handler.ssl.SslProvider;
@@ -15,6 +17,7 @@ import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,8 +26,6 @@ import java.util.Set;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
-
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.DEFAULT_DOMAIN_KEY;
 
 /**
  * description: Created by ltc on 2021-04-08
@@ -68,7 +69,7 @@ public class NetworkUtil {
           if (item == null || item.length() == 0 || "0" .equals(item)) {
             continue;
           }
-          // ipv6可能忽略前导的0
+          // ipv6 may ignore the leading 0
           if (item.length() == 3 || item.length() == 1) {
             item = "0" + item;
           }
@@ -223,10 +224,10 @@ public class NetworkUtil {
     String port = "";
     if (protocol != Protocol.HTTP) {
       if (clientConfig.getEnv() == Env.PROD) {
-        port = protocol == Protocol.STOMP_WEBSOCKET ? TigerApiConstants.DEFAULT_PROD_STOMP_PORT
+        port = clientConfig.isSslSocket ? TigerApiConstants.DEFAULT_PROD_SOCKET_SSL_PORT
             : TigerApiConstants.DEFAULT_PROD_SOCKET_PORT;
       } else {
-        port = protocol == Protocol.STOMP_WEBSOCKET ? TigerApiConstants.DEFAULT_SANDBOX_STOMP_PORT
+        port = clientConfig.isSslSocket ? TigerApiConstants.DEFAULT_SANDBOX_SOCKET_SSL_PORT
             : TigerApiConstants.DEFAULT_SANDBOX_SOCKET_PORT;
       }
     }
@@ -237,55 +238,99 @@ public class NetworkUtil {
    * get http server address
    */
   public static String getHttpServerAddress(String originalAddress) {
-    return refreshAndGetServerAddress(Protocol.HTTP, originalAddress);
+    return getHttpServerAddress(null, originalAddress).get(BizType.COMMON);
+  }
+
+  public static Map<BizType, String> getHttpServerAddress(License license, String originalAddress) {
+    return refreshAndGetServerAddress(Protocol.HTTP, license, originalAddress);
   }
 
   public static String getServerAddress(String originalAddress) {
-    return refreshAndGetServerAddress(ClientConfig.DEFAULT_CONFIG.getSubscribeProtocol(), originalAddress);
+    return refreshAndGetServerAddress(ClientConfig.DEFAULT_CONFIG.isSslSocket ? Protocol.SECURE_SOCKET : Protocol.WEB_SOCKET,
+        null, originalAddress).get(BizType.SOCKET);
   }
 
-  private static String refreshAndGetServerAddress(Protocol protocol, String originalAddress) {
+  private static Map<BizType, String> refreshAndGetServerAddress(Protocol protocol, License license, String originalAddress) {
     ClientConfig clientConfig = ClientConfig.DEFAULT_CONFIG;
     Env env = clientConfig.getEnv();
-    String domainUrl = (env == Env.PROD ? TigerApiConstants.DEFAULT_PROD_DOMAIN_URL
-        : TigerApiConstants.DEFAULT_SANDBOX_DOMAIN_URL);
     String port = getDefaultPort(clientConfig, protocol);
-
-    String response = null;
+    String commonUrl = null;
+    String domainGardenResponse = null;
     List<Map<String, Object>> domainConfigList = Collections.emptyList();
     try {
-      String data = HttpUtils.get(TigerApiConstants.DOMAIN_GARDEN_ADDRESS);
-      Map<String, Object> domainConfigMap = JSON.parseObject(data, Map.class);
+      domainGardenResponse = HttpUtils.get(TigerApiConstants.DOMAIN_GARDEN_ADDRESS);
+      Map<String, Object> domainConfigMap = JSON.parseObject(domainGardenResponse, Map.class);
       if (domainConfigMap != null && domainConfigMap.get("items") != null) {
         domainConfigList = (List<Map<String, Object>>)domainConfigMap.get("items");
       }
     } catch (Throwable th) {
-      ApiLogger.error("domain config response error, data:{}", response);
+      ApiLogger.warn("domain garden return:{}, error:{}", domainGardenResponse, th.getMessage());
     }
     // if get domain config data failed and original address is not emtpy, return original address
-    if (domainConfigList.isEmpty() && !StringUtils.isEmpty(originalAddress)) {
-      return originalAddress;
+    if (domainConfigList.isEmpty()) {
+      final String addressUrl = StringUtils.isEmpty(originalAddress)
+          ? String.format(protocol.getUrlFormat(), getDefaultUrl(env), port) : originalAddress;
+      return new HashMap<BizType, String>() {{ put(protocol == Protocol.HTTP ? BizType.COMMON : BizType.SOCKET, addressUrl);}};
     }
 
+    Map<BizType, String> domainUrlMap = new HashMap<>();
     for (Map<String, Object> configMap : domainConfigList) {
-      Map<String, Object> dataMap;
       Object openapiConfig = configMap.get(env.getConfigFieldName());
       if (openapiConfig != null && openapiConfig instanceof Map) {
-        dataMap = (Map<String, Object>)openapiConfig;
-      } else {
-        continue;
-      }
-      for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
-        if (Protocol.STOMP_WEBSOCKET.getPortFieldName().equals(entry.getKey())
-            || Protocol.STOMP.getPortFieldName().equals(entry.getKey())) {
-          if (protocol.getPortFieldName().equals(entry.getKey())) {
-            port = entry.getValue().toString();
+        Map<String, Object> dataMap = (Map<String, Object>) openapiConfig;
+        for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
+          if (Protocol.WEB_SOCKET.getPortFieldName().equals(entry.getKey())
+              || Protocol.SECURE_SOCKET.getPortFieldName().equals(entry.getKey())) {
+            if (protocol.getPortFieldName().equals(entry.getKey())) {
+              port = entry.getValue().toString();
+            }
+            continue;
           }
-        } else if (DEFAULT_DOMAIN_KEY.equals(entry.getKey())) {
-          domainUrl = entry.getValue().toString().replace("https://", "");
+          String domainUrl = entry.getValue().toString().replace("https://", "");
+          BizType bizType = convertBizType(license, entry.getKey());
+          if (bizType != null) {
+            domainUrlMap.put(bizType, String.format(protocol.getUrlFormat(), domainUrl, port));
+          }
+          commonUrl = (commonUrl == null && bizType == BizType.COMMON) ? domainUrl : commonUrl;
         }
       }
     }
-    return String.format(protocol.getUrlFormat(), domainUrl, port);
+    if (commonUrl == null) {
+      commonUrl = getDefaultUrl(env);
+      domainUrlMap.put(BizType.COMMON, String.format(protocol.getUrlFormat(), commonUrl, port));
+    }
+    if (protocol != Protocol.HTTP) {
+      domainUrlMap.put(BizType.SOCKET, String.format(protocol.getUrlFormat(), commonUrl, port));
+    }
+    return domainUrlMap;
+  }
+
+  private static String getDefaultUrl(Env env) {
+    if (env == null) {
+      return TigerApiConstants.DEFAULT_PROD_DOMAIN_URL;
+    }
+    switch (env) {
+      case SANDBOX:
+        return TigerApiConstants.DEFAULT_SANDBOX_DOMAIN_URL;
+      case TEST:
+        return TigerApiConstants.DEFAULT_TEST_DOMAIN_URL;
+      default:
+        return TigerApiConstants.DEFAULT_PROD_DOMAIN_URL;
+    }
+  }
+
+  private static BizType convertBizType(License license, String key) {
+    if (BizType.COMMON.name().equals(key)) {
+      return BizType.COMMON;
+    } else if (license != null) {
+      if (license.name().equals(key)) {
+        return BizType.TRADE;
+      } else if (key.equals(license.name() + "-" + BizType.QUOTE.name())) {
+        return BizType.QUOTE;
+      } else if (key.equals(license.name() + "-" + BizType.PAPER.name())) {
+        return BizType.PAPER;
+      }
+    }
+    return null;
   }
 }

@@ -1,9 +1,14 @@
 package com.tigerbrokers.stock.openapi.client.util.builder;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
+import com.tigerbrokers.stock.openapi.client.struct.enums.OrderSortBy;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.SegmentType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 import java.util.Date;
@@ -24,6 +29,13 @@ public class AccountParamBuilder {
 
   public static AccountParamBuilder instance() {
     return new AccountParamBuilder();
+  }
+
+  public AccountParamBuilder lang(Language lang) {
+    if (lang != null) {
+      paramMap.put("lang", lang.name());
+    }
+    return this;
   }
 
   public AccountParamBuilder conid(String conid) {
@@ -132,7 +144,7 @@ public class AccountParamBuilder {
   }
 
   public AccountParamBuilder startDate(String startDate) {
-    return setTime("start_date", startDate, TimeZoneId.Shanghai);
+    return setTime("start_date", startDate, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
   }
 
   public AccountParamBuilder startDate(String startDate, TimeZoneId zoneId) {
@@ -147,7 +159,7 @@ public class AccountParamBuilder {
   }
 
   public AccountParamBuilder endDate(String endDate) {
-    return setTime("end_date", endDate, TimeZoneId.Shanghai);
+    return setTime("end_date", endDate, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
   }
 
   public AccountParamBuilder endDate(String endDate, TimeZoneId zoneId) {
@@ -179,6 +191,13 @@ public class AccountParamBuilder {
   public AccountParamBuilder secType(SecType secType) {
     if (secType != null) {
       paramMap.put("sec_type", secType.name());
+    }
+    return this;
+  }
+
+  public AccountParamBuilder segType(SegmentType segType) {
+    if (segType != null) {
+      paramMap.put("seg_type", segType.name());
     }
     return this;
   }
@@ -225,9 +244,42 @@ public class AccountParamBuilder {
     return this;
   }
 
+  public AccountParamBuilder pageToken(String pageToken) {
+    if (pageToken != null) {
+      paramMap.put("page_token", pageToken);
+    }
+    return this;
+  }
+
+  public AccountParamBuilder sortBy(OrderSortBy orderSortBy) {
+    if (orderSortBy != null) {
+      paramMap.put("sort_by", orderSortBy.name());
+    }
+    return this;
+  }
+
+  /**
+   * get request json content(set defalut account)
+   * @return
+   */
   public String buildJson() {
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.putAll(paramMap);
-    return jsonObject.toJSONString();
+    if (paramMap.get("account") == null) {
+      paramMap.put("account", ClientConfig.DEFAULT_CONFIG.defaultAccount);
+    }
+    return buildJsonWithoutDefaultAccount();
+  }
+
+  /**
+   * get request json content
+   * @return
+   */
+  public String buildJsonWithoutDefaultAccount() {
+    if (paramMap.get("lang") == null) {
+      paramMap.put("lang", ClientConfig.DEFAULT_CONFIG.getDefaultLanguage().name());
+    }
+    if (paramMap.get("secretKey") == null) {
+      paramMap.put("secretKey", ClientConfig.DEFAULT_CONFIG.secretKey);
+    }
+    return JSONObject.toJSONString(paramMap, SerializerFeature.WriteEnumUsingToString);
   }
 }

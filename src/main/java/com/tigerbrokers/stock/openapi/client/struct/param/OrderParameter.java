@@ -8,6 +8,8 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -59,7 +61,17 @@ public class OrderParameter implements Serializable {
    * 订单数量
    */
   @JSONField(name = "total_quantity")
-  private Integer totalQuantity;
+  private Long totalQuantity;
+  /**
+   * 下单数量的偏移量
+   */
+  @JSONField(name = "total_quantity_scale")
+  private Integer totalQuantityScale;
+  /**
+   * order cash amount
+   */
+  @JSONField(name = "cash_amount")
+  private Double cashAmount;
   /**
    * 有效时间
    * DAY：当日有效
@@ -69,6 +81,13 @@ public class OrderParameter implements Serializable {
    */
   @JSONField(name = "time_in_force")
   private TimeInForce timeInForce;
+
+  /**
+   * GTD order's expire time
+   */
+  @JSONField(name = "expire_time")
+  private Long expireTime;
+
   /**
    * 订单类型
    */
@@ -108,6 +127,11 @@ public class OrderParameter implements Serializable {
   @JSONField(name = "outside_rth")
   private Boolean outsideRth;
   /**
+   * set place overnight order in the US market. value: OverNight
+   */
+  @JSONField(name = "trading_session_type")
+  private TradeSession tradingSessionType;
+  /**
    * 市场
    */
   private String market;
@@ -146,6 +170,8 @@ public class OrderParameter implements Serializable {
   private List<TagValue> algoParams;
 
   private String source;
+  @JSONField(name = "user_mark")
+  private String userMark;
 
   /**
    * 附加订单类型：
@@ -170,15 +196,31 @@ public class OrderParameter implements Serializable {
   /**
    * 止损订单
    */
+  @JSONField(name = "stop_loss_order_type")
+  private OrderType stopLossOrderType;
   @JSONField(name = "stop_loss_orderId")
   private Integer stopLossOrderId;
   @JSONField(name = "stop_loss_price")
   private Double stopLossPrice;
+  @JSONField(name = "stop_loss_limit_price")
+  private Double stopLossLimitPrice;
   @JSONField(name = "stop_loss_tif")
   private TimeInForce stopLossTif;
+  /**
+   * attached trailing stop loss order's trailing percent
+   */
+  @JSONField(name = "stop_loss_trailing_percent")
+  private Double stopLossTrailingPercent;
+  /**
+   * attached trailing stop loss order's trailing amount
+   */
+  @JSONField(name = "stop_loss_trailing_amount")
+  private Double stopLossTrailingAmount;
 
   @JSONField(name = "oca_orders")
   private List<OrderParameter> ocaOrders;
+
+  private String lang;
 
   public Long getId() {
     return id;
@@ -236,12 +278,28 @@ public class OrderParameter implements Serializable {
     this.currency = currency;
   }
 
-  public Integer getTotalQuantity() {
+  public Long getTotalQuantity() {
     return totalQuantity;
   }
 
-  public void setTotalQuantity(Integer totalQuantity) {
+  public void setTotalQuantity(Long totalQuantity) {
     this.totalQuantity = totalQuantity;
+  }
+
+  public Integer getTotalQuantityScale() {
+    return totalQuantityScale;
+  }
+
+  public void setTotalQuantityScale(Integer totalQuantityScale) {
+    this.totalQuantityScale = totalQuantityScale;
+  }
+
+  public Double getCashAmount() {
+    return cashAmount;
+  }
+
+  public void setCashAmount(Double cashAmount) {
+    this.cashAmount = cashAmount;
   }
 
   public TimeInForce getTimeInForce() {
@@ -250,6 +308,14 @@ public class OrderParameter implements Serializable {
 
   public void setTimeInForce(TimeInForce timeInForce) {
     this.timeInForce = timeInForce;
+  }
+
+  public Long getExpireTime() {
+    return expireTime;
+  }
+
+  public void setExpireTime(Long expireTime) {
+    this.expireTime = expireTime;
   }
 
   public Double getLimitPrice() {
@@ -290,6 +356,14 @@ public class OrderParameter implements Serializable {
 
   public void setOutsideRth(Boolean outsideRth) {
     this.outsideRth = outsideRth;
+  }
+
+  public TradeSession getTradingSessionType() {
+    return tradingSessionType;
+  }
+
+  public void setTradingSessionType(TradeSession tradingSessionType) {
+    this.tradingSessionType = tradingSessionType;
   }
 
   public OrderType getOrderType() {
@@ -396,6 +470,14 @@ public class OrderParameter implements Serializable {
     this.source = source;
   }
 
+  public String getUserMark() {
+    return userMark;
+  }
+
+  public void setUserMark(String userMark) {
+    this.userMark = userMark;
+  }
+
   public void setAttachType(AttachType attachType) {
     this.attachType = attachType;
   }
@@ -460,6 +542,38 @@ public class OrderParameter implements Serializable {
     return stopLossTif;
   }
 
+  public OrderType getStopLossOrderType() {
+    return stopLossOrderType;
+  }
+
+  public void setStopLossOrderType(OrderType stopLossOrderType) {
+    this.stopLossOrderType = stopLossOrderType;
+  }
+
+  public Double getStopLossLimitPrice() {
+    return stopLossLimitPrice;
+  }
+
+  public void setStopLossLimitPrice(Double stopLossLimitPrice) {
+    this.stopLossLimitPrice = stopLossLimitPrice;
+  }
+
+  public Double getStopLossTrailingPercent() {
+    return stopLossTrailingPercent;
+  }
+
+  public void setStopLossTrailingPercent(Double stopLossTrailingPercent) {
+    this.stopLossTrailingPercent = stopLossTrailingPercent;
+  }
+
+  public Double getStopLossTrailingAmount() {
+    return stopLossTrailingAmount;
+  }
+
+  public void setStopLossTrailingAmount(Double stopLossTrailingAmount) {
+    this.stopLossTrailingAmount = stopLossTrailingAmount;
+  }
+
   public String getSecretKey() {
     return secretKey;
   }
@@ -476,6 +590,14 @@ public class OrderParameter implements Serializable {
     this.ocaOrders = ocaOrders;
   }
 
+  public String getLang() {
+    return lang;
+  }
+
+  public void setLang(String lang) {
+    this.lang = lang;
+  }
+
   @Override
   public String toString() {
     return "OrderParameter{" +
@@ -488,13 +610,17 @@ public class OrderParameter implements Serializable {
         ", action=" + action +
         ", currency=" + currency +
         ", totalQuantity=" + totalQuantity +
+        ", totalQuantityScale=" + totalQuantityScale +
+        ", cashAmount=" + cashAmount +
         ", timeInForce=" + timeInForce +
+        ", expireTime=" + expireTime +
         ", orderType=" + orderType +
         ", limitPrice=" + limitPrice +
         ", auxPrice=" + auxPrice +
         ", adjustLimit=" + adjustLimit +
         ", trailingPercent=" + trailingPercent +
         ", outsideRth=" + outsideRth +
+        ", tradingSessionType=" + tradingSessionType +
         ", market='" + market + '\'' +
         ", exchange='" + exchange + '\'' +
         ", expiry='" + expiry + '\'' +
@@ -507,14 +633,19 @@ public class OrderParameter implements Serializable {
         ", algoStrategy='" + algoStrategy + '\'' +
         ", algoParams=" + algoParams +
         ", source='" + source + '\'' +
+        ", userMark=" + userMark +
         ", attachType=" + attachType +
         ", profitTakerOrderId=" + profitTakerOrderId +
         ", profitTakerPrice=" + profitTakerPrice +
         ", profitTakerTif=" + profitTakerTif +
         ", profitTakerRth=" + profitTakerRth +
+        ", stopLossOrderType=" + stopLossOrderType +
         ", stopLossOrderId=" + stopLossOrderId +
         ", stopLossPrice=" + stopLossPrice +
+        ", stopLossLimitPrice=" + stopLossLimitPrice +
         ", stopLossTif=" + stopLossTif +
+        ", stopLossTrailingPercent=" + stopLossTrailingPercent +
+        ", stopLossTrailingAmount=" + stopLossTrailingAmount +
         '}';
   }
 }

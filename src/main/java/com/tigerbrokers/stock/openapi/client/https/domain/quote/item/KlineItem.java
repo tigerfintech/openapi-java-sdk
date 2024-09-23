@@ -10,12 +10,12 @@ import java.util.List;
 public class KlineItem extends ApiModel {
 
   /**
-   * 股票代码
+   * stock code
    */
   private String symbol;
 
   /**
-   * K线周期
+   * Kline period
    */
   private String period;
 
@@ -25,7 +25,7 @@ public class KlineItem extends ApiModel {
   private String nextPageToken;
 
   /**
-   * K线数组
+   * Kline data list
    */
   private List<KlinePoint> items;
 

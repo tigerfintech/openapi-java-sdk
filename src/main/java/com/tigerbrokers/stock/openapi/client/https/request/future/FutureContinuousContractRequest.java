@@ -1,12 +1,13 @@
 package com.tigerbrokers.stock.openapi.client.https.request.future;
 
-import com.tigerbrokers.stock.openapi.client.constant.ApiServiceType;
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.model.FutureContinuousContractModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.future.FutureContractResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 
 /**
  * Description:
@@ -17,11 +18,11 @@ public class FutureContinuousContractRequest extends TigerCommonRequest
 
   public FutureContinuousContractRequest() {
     setApiVersion(TigerApiConstants.DEFAULT_VERSION);
-    setApiMethodName(ApiServiceType.FUTURE_CONTINUOUS_CONTRACTS);
+    setApiMethodName(MethodName.FUTURE_CONTINUOUS_CONTRACTS);
   }
 
   public static FutureContinuousContractRequest newRequest(String type) {
-    return newRequest(type, Language.en_US);
+    return newRequest(type, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
   }
 
   public static FutureContinuousContractRequest newRequest(String type, Language lang) {
