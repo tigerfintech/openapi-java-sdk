@@ -151,7 +151,7 @@ public class TigerHttpClient implements TigerClient {
     if (null == ClientConfig.DEFAULT_CONFIG.license) {
       try {
         Map<BizType, String> urlMap = NetworkUtil.getHttpServerAddress(null, this.serverUrl);
-        this.serverUrl = urlMap.get(BizType.COMMON);
+        this.serverUrl = StringUtils.defaultIfEmpty(urlMap.get(BizType.COMMON), this.serverUrl);
         UserLicenseRequest request = UserLicenseRequest.newRequest();
         UserLicenseResponse response = execute(request);
         if (response.isSuccess() && response.getLicenseItem() != null) {
@@ -197,9 +197,9 @@ public class TigerHttpClient implements TigerClient {
       String newQuoteServerUrl = urlMap.get(BizType.QUOTE) == null ? newServerUrl : urlMap.get(BizType.QUOTE);
       String newPaperServerUrl = urlMap.get(BizType.PAPER) == null ? newServerUrl : urlMap.get(BizType.PAPER);
 
-      this.serverUrl = newServerUrl;
-      this.quoteServerUrl = newQuoteServerUrl;
-      this.paperServerUrl = newPaperServerUrl;
+      this.serverUrl = StringUtils.defaultIfEmpty(newServerUrl, this.serverUrl);
+      this.quoteServerUrl = StringUtils.defaultIfEmpty(newQuoteServerUrl, this.quoteServerUrl);
+      this.paperServerUrl = StringUtils.defaultIfEmpty(newPaperServerUrl, this.paperServerUrl);
     } catch (Throwable t) {
       ApiLogger.error("refresh serverUrl error", t);
     }
