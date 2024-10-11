@@ -238,7 +238,7 @@ public class NetworkUtil {
    * get http server address
    */
   public static String getHttpServerAddress(String originalAddress) {
-    return getHttpServerAddress(null, originalAddress).get(BizType.COMMON);
+    return StringUtils.defaultIfEmpty(getHttpServerAddress(null, originalAddress).get(BizType.COMMON), originalAddress);
   }
 
   public static Map<BizType, String> getHttpServerAddress(License license, String originalAddress) {
@@ -246,8 +246,8 @@ public class NetworkUtil {
   }
 
   public static String getServerAddress(String originalAddress) {
-    return refreshAndGetServerAddress(ClientConfig.DEFAULT_CONFIG.isSslSocket ? Protocol.SECURE_SOCKET : Protocol.WEB_SOCKET,
-        null, originalAddress).get(BizType.SOCKET);
+    return StringUtils.defaultIfEmpty(refreshAndGetServerAddress(ClientConfig.DEFAULT_CONFIG.isSslSocket ? Protocol.SECURE_SOCKET : Protocol.WEB_SOCKET,
+        null, originalAddress).get(BizType.SOCKET), originalAddress);
   }
 
   private static Map<BizType, String> refreshAndGetServerAddress(Protocol protocol, License license, String originalAddress) {
@@ -297,10 +297,12 @@ public class NetworkUtil {
     }
     if (commonUrl == null) {
       commonUrl = getDefaultUrl(env, protocol);
-      domainUrlMap.put(BizType.COMMON, String.format(protocol.getUrlFormat(), commonUrl, port));
     }
-    if (protocol != Protocol.HTTP) {
-      domainUrlMap.put(BizType.SOCKET, String.format(protocol.getUrlFormat(), commonUrl, port));
+    if (!StringUtils.isEmpty(commonUrl)) {
+      domainUrlMap.put(BizType.COMMON, String.format(protocol.getUrlFormat(), commonUrl, port));
+      if (protocol != Protocol.HTTP) {
+        domainUrlMap.put(BizType.SOCKET, String.format(protocol.getUrlFormat(), commonUrl, port));
+      }
     }
     return domainUrlMap;
   }
@@ -313,7 +315,7 @@ public class NetworkUtil {
       case SANDBOX:
         return TigerApiConstants.DEFAULT_SANDBOX_DOMAIN_URL;
       case TEST:
-        return Protocol.HTTP == protocol ? TigerApiConstants.DEFAULT_TEST_DOMAIN_URL : TigerApiConstants.API_TEST_SOCKET_DOMAIN_URL;
+        return null;
       default:
         return TigerApiConstants.DEFAULT_PROD_DOMAIN_URL;
     }
