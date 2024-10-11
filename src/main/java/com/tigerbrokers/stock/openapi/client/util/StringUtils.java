@@ -21,6 +21,10 @@ public abstract class StringUtils {
     return true;
   }
 
+  public static String defaultIfEmpty(String str, String defaultStr) {
+    return isEmpty(str) ? defaultStr : str;
+  }
+
   public static boolean areNotEmpty(String... values) {
     boolean result = true;
     if (values == null || values.length == 0) {

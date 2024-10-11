@@ -238,7 +238,7 @@ public class NetworkUtil {
    * get http server address
    */
   public static String getHttpServerAddress(String originalAddress) {
-    return getHttpServerAddress(null, originalAddress).get(BizType.COMMON);
+    return StringUtils.defaultIfEmpty(getHttpServerAddress(null, originalAddress).get(BizType.COMMON), originalAddress);
   }
 
   public static Map<BizType, String> getHttpServerAddress(License license, String originalAddress) {
@@ -246,8 +246,8 @@ public class NetworkUtil {
   }
 
   public static String getServerAddress(String originalAddress) {
-    return refreshAndGetServerAddress(ClientConfig.DEFAULT_CONFIG.isSslSocket ? Protocol.SECURE_SOCKET : Protocol.WEB_SOCKET,
-        null, originalAddress).get(BizType.SOCKET);
+    return StringUtils.defaultIfEmpty(refreshAndGetServerAddress(ClientConfig.DEFAULT_CONFIG.isSslSocket ? Protocol.SECURE_SOCKET : Protocol.WEB_SOCKET,
+        null, originalAddress).get(BizType.SOCKET), originalAddress);
   }
 
   private static Map<BizType, String> refreshAndGetServerAddress(Protocol protocol, License license, String originalAddress) {
@@ -269,7 +269,7 @@ public class NetworkUtil {
     // if get domain config data failed and original address is not emtpy, return original address
     if (domainConfigList.isEmpty()) {
       final String addressUrl = StringUtils.isEmpty(originalAddress)
-          ? String.format(protocol.getUrlFormat(), getDefaultUrl(env), port) : originalAddress;
+          ? String.format(protocol.getUrlFormat(), getDefaultUrl(env, protocol), port) : originalAddress;
       return new HashMap<BizType, String>() {{ put(protocol == Protocol.HTTP ? BizType.COMMON : BizType.SOCKET, addressUrl);}};
     }
 
@@ -296,16 +296,18 @@ public class NetworkUtil {
       }
     }
     if (commonUrl == null) {
-      commonUrl = getDefaultUrl(env);
-      domainUrlMap.put(BizType.COMMON, String.format(protocol.getUrlFormat(), commonUrl, port));
+      commonUrl = getDefaultUrl(env, protocol);
     }
-    if (protocol != Protocol.HTTP) {
-      domainUrlMap.put(BizType.SOCKET, String.format(protocol.getUrlFormat(), commonUrl, port));
+    if (!StringUtils.isEmpty(commonUrl)) {
+      domainUrlMap.put(BizType.COMMON, String.format(protocol.getUrlFormat(), commonUrl, port));
+      if (protocol != Protocol.HTTP) {
+        domainUrlMap.put(BizType.SOCKET, String.format(protocol.getUrlFormat(), commonUrl, port));
+      }
     }
     return domainUrlMap;
   }
 
-  private static String getDefaultUrl(Env env) {
+  private static String getDefaultUrl(Env env, Protocol protocol) {
     if (env == null) {
       return TigerApiConstants.DEFAULT_PROD_DOMAIN_URL;
     }
@@ -313,7 +315,7 @@ public class NetworkUtil {
       case SANDBOX:
         return TigerApiConstants.DEFAULT_SANDBOX_DOMAIN_URL;
       case TEST:
-        return TigerApiConstants.DEFAULT_TEST_DOMAIN_URL;
+        return null;
       default:
         return TigerApiConstants.DEFAULT_PROD_DOMAIN_URL;
     }
