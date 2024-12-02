@@ -82,7 +82,7 @@ public class QuoteKlineRequest extends TigerCommonRequest implements TigerReques
   }
 
   public QuoteKlineRequest hourTrading(Boolean isHourTrading) {
-    getApiModel().setHourTrading(isHourTrading);
+    getApiModel().setOnlyHourTrading(isHourTrading);
     return this;
   }
 
