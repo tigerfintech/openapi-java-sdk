@@ -24,6 +24,8 @@ public class QuoteKlineModel extends QuoteSymbolModel {
   private Integer limit;
   @JSONField(name = "page_token")
   private String pageToken;
+  @JSONField(name = "is_hour_trading")
+  private Boolean isHourTrading;
 
   public QuoteKlineModel() {
 
@@ -131,5 +133,13 @@ public class QuoteKlineModel extends QuoteSymbolModel {
    */
   public void setPageToken(String pageToken) {
     this.pageToken = pageToken;
+  }
+
+  public Boolean getHourTrading() {
+    return isHourTrading;
+  }
+
+  public void setHourTrading(Boolean hourTrading) {
+    isHourTrading = hourTrading;
   }
 }
