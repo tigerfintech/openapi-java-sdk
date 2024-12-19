@@ -17,8 +17,6 @@ public class QuoteTradeTickModel extends QuoteSymbolModel {
   @JSONField(name = "end_index")
   private Long endIndex;
   private Integer limit;
-  @JSONField(name = "trade_session")
-  private TradeSession tradeSession;
 
   public QuoteTradeTickModel() {
     this.lang = ClientConfig.DEFAULT_CONFIG.getDefaultLanguage();
@@ -66,13 +64,5 @@ public class QuoteTradeTickModel extends QuoteSymbolModel {
 
   public void setLimit(Integer limit) {
     this.limit = limit;
-  }
-
-  public TradeSession getTradeSession() {
-    return tradeSession;
-  }
-
-  public void setTradeSession(TradeSession tradeSession) {
-    this.tradeSession = tradeSession;
   }
 }

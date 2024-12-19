@@ -9,6 +9,8 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.KType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.RightOption;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
+
 import java.util.List;
 
 /**
@@ -81,9 +83,8 @@ public class QuoteKlineRequest extends TigerCommonRequest implements TigerReques
     return this;
   }
 
-  public QuoteKlineRequest hourTrading(Boolean isHourTrading) {
-    getApiModel().setOnlyHourTrading(isHourTrading);
-    return this;
+  public void setTradeSession(TradeSession tradeSession) {
+    getApiModel().setTradeSession(tradeSession);
   }
 
   /**
