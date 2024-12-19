@@ -1,9 +1,11 @@
 package com.tigerbrokers.stock.openapi.client.https.response.quote;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.tigerbrokers.stock.openapi.client.https.domain.quote.item.StockFundamental;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.item.StockFundamentalItem;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -13,13 +15,13 @@ import java.util.List;
 public class QuoteStockFundamentalResponse extends TigerResponse {
 
   @JSONField(name = "data")
-  private List<StockFundamentalItem> stockFundamentalItems;
+  private StockFundamental data;
 
-  public List<StockFundamentalItem> getStockFundamentalItems() {
-    return stockFundamentalItems;
+  public void setData(StockFundamental data) {
+    this.data = data;
   }
 
-  public void setStockFundamentalItems(List<StockFundamentalItem> stockFundamentalItems) {
-    this.stockFundamentalItems = stockFundamentalItems;
+  public List<StockFundamentalItem> getStockFundamentalItems() {
+    return data == null ? Collections.emptyList() : data.getItems();
   }
 }
