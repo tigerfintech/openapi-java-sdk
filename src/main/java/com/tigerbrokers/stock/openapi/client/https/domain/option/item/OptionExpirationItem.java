@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.option.item;
 
+import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import java.util.List;
 
@@ -13,6 +14,7 @@ public class OptionExpirationItem extends ApiModel {
   private List<String> dates;
   private List<Long> timestamps;
   private List<String> periodTags;
+  private List<String> optionSymbols;
   private Integer count;
 
   public String getSymbol() {
@@ -47,6 +49,14 @@ public class OptionExpirationItem extends ApiModel {
     this.periodTags = periodTags;
   }
 
+  public List<String> getOptionSymbols() {
+    return optionSymbols;
+  }
+
+  public void setOptionSymbols(List<String> optionSymbols) {
+    this.optionSymbols = optionSymbols;
+  }
+
   public Integer getCount() {
     return count;
   }
@@ -61,6 +71,8 @@ public class OptionExpirationItem extends ApiModel {
         "symbol='" + symbol + '\'' +
         ", dates=" + dates +
         ", timestamps=" + timestamps +
+        ", periodTags=" + JSONObject.toJSONString(periodTags) +
+        ", optionSymbols=" + JSONObject.toJSONString(optionSymbols) +
         ", count=" + count +
         '}';
   }

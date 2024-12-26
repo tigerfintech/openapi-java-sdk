@@ -34,6 +34,7 @@ public enum MethodName {
   SEGMENT_FUND_HISTORY("segment_fund_history", MethodType.TRADE),
   SEGMENT_FUND_AVAILABLE("segment_fund_available", MethodType.TRADE),
   ESTIMATE_TRADABLE_QUANTITY("estimate_tradable_quantity", MethodType.TRADE),
+  TRANSFER_FUND("transfer_fund", MethodType.TRADE),
 
   /**
    * contract
@@ -103,7 +104,7 @@ public enum MethodName {
   FUTURE_HISTORY_MAIN_CONTRACT("future_history_main_contract", MethodType.QUOTE),
 
   /**
-   * fundmental data
+   * fundamental data
    */
   FINANCIAL_DAILY("financial_daily", MethodType.QUOTE),
   FINANCIAL_REPORT("financial_report", MethodType.QUOTE),
@@ -113,6 +114,7 @@ public enum MethodName {
   STOCK_INDUSTRY("stock_industry", MethodType.QUOTE),
   FINANCIAL_CURRENCY("financial_currency", MethodType.QUOTE),
   FINANCIAL_EXCHANGE_RATE("financial_exchange_rate", MethodType.QUOTE),
+  STOCK_FUNDAMENTAL("stock_fundamental", MethodType.QUOTE),
 
   /**
    * fund quote

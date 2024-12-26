@@ -230,6 +230,18 @@ public class AccountParamBuilder {
     return this;
   }
 
+  /**
+   * only for QuerySingleOrderRequest
+   * @param isShowCharges
+   * @return
+   */
+  public AccountParamBuilder isShowCharges(Boolean isShowCharges) {
+    if (isShowCharges != null) {
+      paramMap.put("show_charges", isShowCharges);
+    }
+    return this;
+  }
+
   public AccountParamBuilder parentId(Integer parentId) {
     if (parentId != null) {
       paramMap.put("parent_id", parentId);

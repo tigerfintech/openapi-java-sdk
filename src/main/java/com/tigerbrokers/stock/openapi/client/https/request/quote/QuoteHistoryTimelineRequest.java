@@ -9,6 +9,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.RightOption;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
 import com.tigerbrokers.stock.openapi.client.util.DateUtils;
 import java.util.List;
 
@@ -61,6 +62,14 @@ public class QuoteHistoryTimelineRequest extends TigerCommonRequest implements T
     QuoteHistoryTimelineModel timelimeModel = (QuoteHistoryTimelineModel) apiModel;
     timelimeModel.setRight(rightOption);
     return this;
+  }
+
+  public QuoteHistoryTimelineModel getApiModel() {
+    return (QuoteHistoryTimelineModel)apiModel;
+  }
+
+  public void setTradeSession(TradeSession tradeSession) {
+    getApiModel().setTradeSession(tradeSession);
   }
 
   @Override
