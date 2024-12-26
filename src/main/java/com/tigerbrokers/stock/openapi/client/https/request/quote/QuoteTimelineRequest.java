@@ -115,6 +115,14 @@ public class QuoteTimelineRequest extends TigerCommonRequest implements TigerReq
     return request;
   }
 
+  public QuoteTimelineModel getApiModel() {
+    return (QuoteTimelineModel)apiModel;
+  }
+
+  public void setTradeSession(TradeSession tradeSession) {
+    getApiModel().setTradeSession(tradeSession);
+  }
+
   @Override
   public Class<QuoteTimelineResponse> getResponseClass() {
     return QuoteTimelineResponse.class;
