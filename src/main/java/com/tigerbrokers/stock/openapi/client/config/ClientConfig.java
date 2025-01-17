@@ -101,7 +101,7 @@ public class ClientConfig {
    */
   public boolean useFullTick = false;
 
-  private ClientConfig() {
+  public ClientConfig() {
   }
 
   public TimeZoneId getDefaultTimeZone() {
