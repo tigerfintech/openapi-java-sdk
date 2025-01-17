@@ -236,6 +236,6 @@ public class ApiCallbackDecoderUtils {
   }
 
   private static String buildMsgSuffix(ChannelHandlerContext ctx, WebSocketClient wcClient) {
-    return new StringBuilder().append("[channel:").append(ctx.channel()).append(", tigerId:").append(wcClient == null ? "" : wcClient.getClientConfig().tigerId).append(']').toString();
+    return new StringBuilder().append("[channel:").append(ctx.channel().id().asShortText()).append(", tigerId:").append(wcClient == null ? "" : wcClient.getClientConfig().tigerId).append(']').toString();
   }
 }
