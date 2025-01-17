@@ -101,7 +101,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private static final int CLIENT_SEND_INTERVAL_MIN = 10000;
   private static final int CLIENT_RECEIVE_INTERVAL_MIN = 10000;
 
-  private WebSocketClient() {
+  public WebSocketClient() {
   }
 
   private static class SingletonInner {
@@ -134,7 +134,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     ConfigFileUtil.loadConfigFile(clientConfig);
     this.clientConfig = clientConfig;
     if (StringUtils.isEmpty(url)) {
-      this.url = NetworkUtil.getServerAddress(null);
+      this.url = NetworkUtil.getServerAddress(clientConfig, null);
     } else {
       this.url = url;
     }
@@ -142,7 +142,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
       this.sslProvider = clientConfig.getSslProvider();
     }
     if (this.authentication == null) {
-      ApiAuthentication authentication = ApiAuthentication.build(clientConfig.tigerId, clientConfig.privateKey);
+      ApiAuthentication authentication = ApiAuthentication.build(clientConfig);
       if (!StringUtils.isEmpty(clientConfig.version)) {
         authentication.setVersion(clientConfig.version);
       }
@@ -322,7 +322,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   private InetSocketAddress getNewServerAddress() {
     if (clientConfig != null) {
-      String newUrl = NetworkUtil.getServerAddress(this.url);
+      String newUrl = NetworkUtil.getServerAddress(this.clientConfig, this.url);
       if (!this.url.equals(newUrl)) {
         InetSocketAddress address = getSocketAddress(newUrl);
         if (address != null) {

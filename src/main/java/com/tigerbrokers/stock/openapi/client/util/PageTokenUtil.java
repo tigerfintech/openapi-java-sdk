@@ -148,6 +148,11 @@ public class PageTokenUtil {
    * @throws TigerApiException
    */
   public static <T> List<T> getKlineByPage(T t, String symbol, String period,
+                                           String beginTime, String endTime, TimeZoneId zoneId,
+                                           RightOption right, int pageSize, int totalSize, long timeInterval) throws TigerApiException {
+    return getKlineByPage(TigerHttpClient.getInstance(), t, symbol, period, beginTime, endTime, zoneId, right, pageSize, totalSize, timeInterval);
+  }
+  public static <T> List<T> getKlineByPage(TigerHttpClient tigerClient, T t, String symbol, String period,
       String beginTime, String endTime, TimeZoneId zoneId,
       RightOption right, int pageSize, int totalSize, long timeInterval) throws TigerApiException {
 
@@ -171,7 +176,7 @@ public class PageTokenUtil {
       pageSize = totalSize;
     }
     if (zoneId == null) {
-      zoneId = ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone();
+      zoneId = tigerClient.getClientConfig().getDefaultTimeZone();
     }
     if (timeInterval < 1000) {
       timeInterval = DEFAULT_TIME_INTERVAL;
@@ -191,7 +196,7 @@ public class PageTokenUtil {
       request.withRight(right == null ? RightOption.br : right);
 
       do {
-        QuoteKlineResponse response = TigerHttpClient.getInstance().execute(request);
+        QuoteKlineResponse response = tigerClient.execute(request);
         if (!response.isSuccess()) {
           throw new TigerApiException(response.getMessage());
         }
@@ -232,7 +237,7 @@ public class PageTokenUtil {
       FutureKlineRequest request = FutureKlineRequest.newRequest(symbols, kType,
               beginDate.getTime(), endDate.getTime(), pageSize);
       do {
-        FutureKlineResponse response = TigerHttpClient.getInstance().execute(request);
+        FutureKlineResponse response = tigerClient.execute(request);
         if (!response.isSuccess()) {
           throw new TigerApiException(response.getMessage());
         }

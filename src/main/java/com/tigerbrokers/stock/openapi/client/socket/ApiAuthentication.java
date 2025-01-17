@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.TigerSignature;
@@ -11,12 +12,18 @@ import com.tigerbrokers.stock.openapi.client.util.builder.HeaderBuilder;
  */
 public class ApiAuthentication {
 
+  private ClientConfig clientConfig;
   private String tigerId;
   private String sign;
   private String version = HeaderBuilder.DEFAULT_VERSION;
 
-  public ApiAuthentication(String tigerId) {
-    this.tigerId = tigerId;
+  public ApiAuthentication(ClientConfig clientConfig) {
+    this.clientConfig = clientConfig;
+    this.tigerId = clientConfig.tigerId;
+  }
+
+  public ClientConfig getClientConfig() {
+    return clientConfig;
   }
 
   public String getTigerId() {
@@ -39,14 +46,18 @@ public class ApiAuthentication {
     this.version = version;
   }
 
-  public static ApiAuthentication build(String tigerId, String privateKey) {
-    return build(tigerId, privateKey, HeaderBuilder.DEFAULT_VERSION);
+  public static ApiAuthentication build(ClientConfig clientConfig) {
+    return build(clientConfig, clientConfig.privateKey, HeaderBuilder.DEFAULT_VERSION);
   }
 
-  public static ApiAuthentication build(String tigerId, String privateKey, String version) {
-    ApiAuthentication authentication = new ApiAuthentication(tigerId);
+  public static ApiAuthentication build(ClientConfig clientConfig, String privateKey) {
+    return build(clientConfig, privateKey, HeaderBuilder.DEFAULT_VERSION);
+  }
+
+  public static ApiAuthentication build(ClientConfig clientConfig, String privateKey, String version) {
+    ApiAuthentication authentication = new ApiAuthentication(clientConfig);
     try {
-      String sign = TigerSignature.rsaSign(tigerId, privateKey, TigerApiConstants.UTF_8);
+      String sign = TigerSignature.rsaSign(clientConfig.tigerId, privateKey, TigerApiConstants.UTF_8);
       authentication.setSign(sign);
       authentication.setVersion(version);
     } catch (Exception e) {
