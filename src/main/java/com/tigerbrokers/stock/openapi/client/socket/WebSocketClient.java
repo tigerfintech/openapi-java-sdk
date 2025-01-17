@@ -43,7 +43,9 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
@@ -89,6 +91,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private AtomicInteger reconnectCount = new AtomicInteger(0);
   private AtomicBoolean reconnectErrorLogFlag = new AtomicBoolean(false);
 
+  private static final Map<Channel, WebSocketClient> channelClientMap = new ConcurrentHashMap<>();
   private static final int CONNECT_TIMEOUT = 5000;
   private static final int OP_TIMEOUT = 5000;
   private static final long SHUTDOWN_TIMEOUT = 1000 * 60 * 15;
@@ -114,6 +117,17 @@ public class WebSocketClient implements SubscribeAsyncApi {
    */
   public static WebSocketClient getInstance() {
     return SingletonInner.singleton;
+  }
+
+  public static WebSocketClient getWcClientByChannel(Channel channel) {
+    if (channel == null) {
+      return null;
+    }
+    return channelClientMap.get(channel);
+  }
+
+  public ClientConfig getClientConfig() {
+    return clientConfig;
   }
 
   /**
@@ -296,12 +310,15 @@ public class WebSocketClient implements SubscribeAsyncApi {
           if (oldChannel != null && oldChannel.isActive()) {
             ApiLogger.info("close old netty channel:{} , create new netty channel:{} ", oldChannel, newChannel);
             oldChannel.close();
+            channelClientMap.remove(oldChannel);
           }
         } finally {
           this.channel = newChannel;
+          channelClientMap.put(newChannel, this);
           connectCountDown.await(OP_TIMEOUT, TimeUnit.MILLISECONDS);
           if (connectCountDown.getCount() > 0) {
             this.channel.close();
+            channelClientMap.remove(newChannel);
           }
         }
       } else if (future.cause() != null) {
@@ -376,6 +393,9 @@ public class WebSocketClient implements SubscribeAsyncApi {
     closeConnect(true);
   }
 
+  public void closeConnect() {
+    closeConnect(false);
+  }
   /**
    * close the connection
    * @sendDisconnectCommand true:send disconnect command
@@ -388,6 +408,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     try {
       if (channel != null) {
         channel.close();
+        channelClientMap.remove(this.channel);
       }
       channel = null;
     } catch (Throwable e) {
