@@ -39,7 +39,7 @@ public class ApiCallbackDecoderUtils {
     switch (frame.command()) {
       case CONNECTED:
         WebSocketClient wcClient = WebSocketClient.getWcClientByChannel(ctx.channel());
-        ApiLogger.info("connect token validation success:{}, channel:{}, tigerId:{}", frame, ctx.channel(), wcClient == null ? "" : wcClient.getClientConfig().tigerId);
+        ApiLogger.info("connect token validation success:{}, {}", frame, buildMsgSuffix(ctx, wcClient));
         if (null != wcClient) {
           wcClient.connectCountDown();
         }
@@ -137,8 +137,8 @@ public class ApiCallbackDecoderUtils {
     switch (response.getCommand()) {
       case CONNECTED:
         WebSocketClient wcClient = WebSocketClient.getWcClientByChannel(ctx.channel());
-        ApiLogger.info("connect token validation success:{}, channel:{}, tigerId:{}",
-            ProtoMessageUtil.toJson(response), ctx.channel(), wcClient == null ? "" : wcClient.getClientConfig().tigerId);
+        ApiLogger.info("connect token validation success:{}, {}",
+            ProtoMessageUtil.toJson(response),  buildMsgSuffix(ctx, wcClient));
         if (null != wcClient) {
           wcClient.connectCountDown();
         }
