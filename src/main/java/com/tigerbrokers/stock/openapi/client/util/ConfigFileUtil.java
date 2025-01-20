@@ -39,6 +39,7 @@ public class ConfigFileUtil {
   private static final String CONFIG_FILE_ACCOUNT = "account";
   private static final String CONFIG_FILE_LICENSE = "license";
   private static final String CONFIG_FILE_ENV = "env";
+  private static final String CONFIG_FILE_SECRET_KEY = "secret_key";
   public static final String TOKEN_FILE_TOKEN = "token";
 
   private static final Set<String> configFileKeys = new HashSet<>();
@@ -48,6 +49,7 @@ public class ConfigFileUtil {
     configFileKeys.add(CONFIG_FILE_ACCOUNT);
     configFileKeys.add(CONFIG_FILE_LICENSE);
     configFileKeys.add(CONFIG_FILE_ENV);
+    configFileKeys.add(CONFIG_FILE_SECRET_KEY);
   }
 
   private ConfigFileUtil() {}
@@ -96,6 +98,12 @@ public class ConfigFileUtil {
           break;
         case CONFIG_FILE_ACCOUNT:
           clientConfig.defaultAccount = entry.getValue();
+          break;
+        case CONFIG_FILE_SECRET_KEY:
+          String secretKey = entry.getValue();
+          if (!StringUtils.isEmpty(secretKey)) {
+            clientConfig.secretKey = secretKey;
+          }
           break;
         case CONFIG_FILE_LICENSE:
           License license = License.getLicense(entry.getValue());
