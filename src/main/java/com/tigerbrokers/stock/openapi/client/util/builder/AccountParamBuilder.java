@@ -295,8 +295,8 @@ public class AccountParamBuilder {
     if (paramMap.get("lang") == null) {
       paramMap.put("lang", clientConfig.getDefaultLanguage().name());
     }
-    if (paramMap.get("secretKey") == null) {
-      paramMap.put("secretKey", clientConfig.secretKey);
+    if (paramMap.get("secret_key") == null) {
+      paramMap.put("secret_key", clientConfig.secretKey);
     }
     return JSONObject.toJSONString(paramMap, SerializerFeature.WriteEnumUsingToString);
   }
