@@ -74,7 +74,7 @@ public class ClientConfig {
   /**
    * whether to automatically refresh token
    */
-  public boolean isAutoRefreshToken = true;
+  public boolean isAutoRefreshToken = false;
 
   /**
    * default time zone
