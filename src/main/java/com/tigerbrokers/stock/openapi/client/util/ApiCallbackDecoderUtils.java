@@ -226,7 +226,7 @@ public class ApiCallbackDecoderUtils {
         } catch (Throwable th) {
           // ignore...
         }
-        decoder.getCallback().error(response.getId(), response.getCode(), response.getMsg() + userInfo);
+        decoder.getCallback().error(response.getId(), response.getCode(), response.getMsg() + " " + userInfo);
       } else if (response.getMsg() != null) {
         decoder.getCallback().error(response.getMsg() + " " + userInfo);
       } else {
