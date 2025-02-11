@@ -213,7 +213,7 @@ public class ApiCallbackDecoderUtils {
           if (response.getCode() == TigerApiCode.CONNECTION_KICK_OUT_ERROR.getCode()) {
             StringBuilder msgBuilder = new StringBuilder(response.getMsg() == null
                 ? TigerApiCode.CONNECTION_KICK_OUT_ERROR.getMessage() : response.getMsg());
-            msgBuilder.append(userInfo);
+            msgBuilder.append(" ").append(userInfo);
             ApiLogger.info(msgBuilder.toString());
             // close the connection(Do not send disconnect command)
             if (null != wcClient) {
@@ -228,9 +228,9 @@ public class ApiCallbackDecoderUtils {
         }
         decoder.getCallback().error(response.getId(), response.getCode(), response.getMsg() + userInfo);
       } else if (response.getMsg() != null) {
-        decoder.getCallback().error(response.getMsg() + userInfo);
+        decoder.getCallback().error(response.getMsg() + " " + userInfo);
       } else {
-        decoder.getCallback().error("unknown error" + userInfo);
+        decoder.getCallback().error("unknown error. " + userInfo);
       }
     }
   }
