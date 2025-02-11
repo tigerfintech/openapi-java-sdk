@@ -37,7 +37,7 @@ public class ProtoSocketHandler extends SimpleChannelInboundHandler<Response> {
   public void channelActive(ChannelHandlerContext ctx) throws Exception {
     Request connect = ProtoMessageUtil.buildConnectMessage(authentication.getTigerId(), authentication.getSign(),
         authentication.getVersion(), this.clientSendInterval == 0 ? 0 : this.clientSendInterval + HEART_BEAT_SPAN,
-        this.clientReceiveInterval == 0 ? 0 : this.clientReceiveInterval - HEART_BEAT_SPAN);
+        this.clientReceiveInterval == 0 ? 0 : this.clientReceiveInterval - HEART_BEAT_SPAN, authentication.getClientConfig().useFullTick);
     ApiLogger.info("netty channel active. channel:{}, preparing to send connect token:{}",
         ctx.channel().id().asShortText(), ProtoMessageUtil.toJson(connect.getConnect()));
     ctx.writeAndFlush(connect).addListener(new ChannelFutureListener() {

@@ -1,7 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.util.builder;
 
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
@@ -16,7 +15,6 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
 import com.tigerbrokers.stock.openapi.client.struct.param.OrderParameter;
-import com.tigerbrokers.stock.openapi.client.util.FastJsonPropertyFilter;
 
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import java.util.ArrayList;
@@ -407,19 +405,30 @@ public class TradeParamBuilder {
   }
 
   public OrderParameter build() {
-    if (StringUtils.isEmpty(this.orderParameter.getAccount())) {
-      this.orderParameter.setAccount(ClientConfig.DEFAULT_CONFIG.defaultAccount);
+    return build(ClientConfig.DEFAULT_CONFIG);
+  }
+
+  public OrderParameter build(ClientConfig clientConfig) {
+    if (clientConfig == null) {
+      return this.orderParameter;
     }
-    if (StringUtils.isEmpty(this.orderParameter.getLang())) {
-      this.orderParameter.setLang(ClientConfig.DEFAULT_CONFIG.getDefaultLanguage().name());
+    if (StringUtils.isEmpty(this.orderParameter.getAccount())) {
+      this.orderParameter.setAccount(clientConfig.defaultAccount);
+    }
+    if (StringUtils.isEmpty(this.orderParameter.getLang()) && clientConfig.getDefaultLanguage() != null) {
+      this.orderParameter.setLang(clientConfig.getDefaultLanguage().name());
     }
     if (StringUtils.isEmpty(this.orderParameter.getSecretKey())) {
-      this.orderParameter.setSecretKey(ClientConfig.DEFAULT_CONFIG.secretKey);
+      this.orderParameter.setSecretKey(clientConfig.secretKey);
     }
     return this.orderParameter;
   }
 
   public String buildJson() {
-    return JSONObject.toJSONString(build(), SerializerFeature.WriteEnumUsingToString);
+    return buildJson(ClientConfig.DEFAULT_CONFIG);
+  }
+
+  public String buildJson(ClientConfig clientConfig) {
+    return JSONObject.toJSONString(build(clientConfig), SerializerFeature.WriteEnumUsingToString);
   }
 }
