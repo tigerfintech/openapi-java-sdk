@@ -70,6 +70,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private ClientConfig clientConfig;
   private SslProvider sslProvider = null;
   private String url;
+  private boolean isFixedServerUrl = false;
 
   private boolean isProtobuf = true;
   private ApiAuthentication authentication;
@@ -141,16 +142,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   public WebSocketClient clientConfig(ClientConfig clientConfig) {
-    return clientConfig(clientConfig, null);
-  }
-
-  public WebSocketClient clientConfig(ClientConfig clientConfig, String url) {
     ConfigFileUtil.loadConfigFile(clientConfig);
     this.clientConfig = clientConfig;
-    if (StringUtils.isEmpty(url)) {
+    if (!this.isFixedServerUrl || StringUtils.isEmpty(url)) {
       this.url = NetworkUtil.getServerAddress(clientConfig, null);
-    } else {
-      this.url = url;
     }
     if (this.sslProvider == null && clientConfig.getSslProvider() != null) {
       this.sslProvider = clientConfig.getSslProvider();
@@ -163,6 +158,15 @@ public class WebSocketClient implements SubscribeAsyncApi {
       this.authentication = authentication;
     }
     return this;
+  }
+
+  /**
+   * only for inner test
+   * @param fixedSocketUrl
+   */
+  public void useFixedSocketUrl(String fixedSocketUrl) {
+    this.url = fixedSocketUrl;
+    this.isFixedServerUrl = true;
   }
 
   public WebSocketClient apiComposeCallback(final ApiComposeCallback apiComposeCallback) {
@@ -338,7 +342,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   private InetSocketAddress getNewServerAddress() {
-    if (clientConfig != null) {
+    if (clientConfig != null && !this.isFixedServerUrl) {
       String newUrl = NetworkUtil.getServerAddress(this.clientConfig, this.url);
       if (!this.url.equals(newUrl)) {
         InetSocketAddress address = getSocketAddress(newUrl);
