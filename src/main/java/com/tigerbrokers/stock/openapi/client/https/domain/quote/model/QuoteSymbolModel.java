@@ -67,4 +67,12 @@ public class QuoteSymbolModel extends ApiModel {
   public void setIncludeHourTrading(Boolean includeHourTrading) {
     this.includeHourTrading = includeHourTrading;
   }
+
+  public TradeSession getTradeSession() {
+    return tradeSession;
+  }
+
+  public void setTradeSession(TradeSession tradeSession) {
+    this.tradeSession = tradeSession;
+  }
 }

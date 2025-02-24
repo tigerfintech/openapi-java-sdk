@@ -55,6 +55,13 @@ public class TradeOrder implements Serializable {
   private Double realizedPnl;
   private String remark;
   private String triggerStatus;
+  /** charge details */
+  private List<Charge> charges;
+  /** commission discount amount. only for single order query */
+  private Double commissionDiscountAmount;
+  private Integer orderDiscount;
+  /** order discount amount. only for single order query */
+  private Double orderDiscountAmount;
 
   private Boolean liquidation;
   private Long openTime;
@@ -82,6 +89,10 @@ public class TradeOrder implements Serializable {
 
   private Boolean canModify;
   private Boolean canCancel;
+  /** order replace status(NONE, RECEIVED, REPLACED, FAILED) */
+  private String replaceStatus;
+  /** order cancel status(NONE, RECEIVED, FAILED) */
+  private String cancelStatus;
   private Boolean isOpen;
 
   private String comboType;
@@ -513,6 +524,22 @@ public class TradeOrder implements Serializable {
     this.canCancel = canCancel;
   }
 
+  public String getReplaceStatus() {
+    return replaceStatus;
+  }
+
+  public void setReplaceStatus(String replaceStatus) {
+    this.replaceStatus = replaceStatus;
+  }
+
+  public String getCancelStatus() {
+    return cancelStatus;
+  }
+
+  public void setCancelStatus(String cancelStatus) {
+    this.cancelStatus = cancelStatus;
+  }
+
   public Boolean getIsOpen() {
     return isOpen;
   }
@@ -591,5 +618,37 @@ public class TradeOrder implements Serializable {
 
   public void setAttrList(List<String> attrList) {
     this.attrList = attrList;
+  }
+
+  public List<Charge> getCharges() {
+    return charges;
+  }
+
+  public void setCharges(List<Charge> charges) {
+    this.charges = charges;
+  }
+
+  public Double getCommissionDiscountAmount() {
+    return commissionDiscountAmount;
+  }
+
+  public void setCommissionDiscountAmount(Double commissionDiscountAmount) {
+    this.commissionDiscountAmount = commissionDiscountAmount;
+  }
+
+  public Integer getOrderDiscount() {
+    return orderDiscount;
+  }
+
+  public void setOrderDiscount(Integer orderDiscount) {
+    this.orderDiscount = orderDiscount;
+  }
+
+  public Double getOrderDiscountAmount() {
+    return orderDiscountAmount;
+  }
+
+  public void setOrderDiscountAmount(Double orderDiscountAmount) {
+    this.orderDiscountAmount = orderDiscountAmount;
   }
 }
