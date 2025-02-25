@@ -3,7 +3,6 @@ package com.tigerbrokers.stock.openapi.client.https.validator;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AttachType;
-import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
@@ -38,13 +37,7 @@ public class PlaceOrderRequestValidator implements RequestValidator<TradeOrderMo
     if (model.getOrderType() == null) {
       throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "order_type");
     }
-    if (SecType.FUND == model.getSecType()) {
-      if (model.getCashAmount() == null) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "cash_amount");
-      } else if (model.getCashAmount() <= 0) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "cash_amount");
-      }
-    } else {
+    if (SecType.FUND != model.getSecType()) {
       if (model.getTotalQuantity() == null) {
         throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "total_quantity");
       } else if (model.getTotalQuantity() <= 0) {
@@ -66,18 +59,6 @@ public class PlaceOrderRequestValidator implements RequestValidator<TradeOrderMo
     if (model.getOrderType() == OrderType.STP || model.getOrderType() == OrderType.STP_LMT) {
       if (model.getAuxPrice() == null) {
         throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "aux_price");
-      }
-    }
-
-    if (model.getSecType() == SecType.CASH) {
-      if (!model.getSymbol().contains(".") && model.getCurrency() == null) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "currency");
-      }
-    } else if (model.getCurrency() == Currency.HKD
-        && (model.getSecType() == SecType.WAR || model.getSecType() == SecType.IOPT)) {
-      if (!StringUtils.isEmpty(model.getLocalSymbol()) && !LOCAL_SYMBOL_PATTERN.matcher(
-          model.getLocalSymbol()).matches()) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "local_symbol");
       }
     }
 

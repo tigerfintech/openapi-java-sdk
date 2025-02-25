@@ -96,7 +96,11 @@ public class ApiCallbackDecoder {
         }
         break;
       case TradeTick:
-        callback.tradeTickChange(TradeTickUtil.convert(pushData.getTradeTickData()));
+        if (pushData.hasTickData()) {
+          callback.fullTickChange(pushData.getTickData());
+        } else {
+          callback.tradeTickChange(TradeTickUtil.convert(pushData.getTradeTickData()));
+        }
         break;
       case QuoteDepth:
         callback.depthQuoteChange(pushData.getQuoteDepthData());
@@ -118,6 +122,9 @@ public class ApiCallbackDecoder {
         break;
       case OptionTop:
         callback.optionTopPush(pushData.getOptionTopData());
+        break;
+      case Kline:
+        callback.klineChange(pushData.getKlineData());
         break;
       default:
         ApiLogger.info("push data cannot be processed. {}", ProtoMessageUtil.toJson(msg));

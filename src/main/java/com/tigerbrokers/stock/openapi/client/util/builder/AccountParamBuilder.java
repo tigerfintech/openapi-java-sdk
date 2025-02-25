@@ -230,6 +230,18 @@ public class AccountParamBuilder {
     return this;
   }
 
+  /**
+   * only for QuerySingleOrderRequest
+   * @param isShowCharges
+   * @return
+   */
+  public AccountParamBuilder isShowCharges(Boolean isShowCharges) {
+    if (isShowCharges != null) {
+      paramMap.put("show_charges", isShowCharges);
+    }
+    return this;
+  }
+
   public AccountParamBuilder parentId(Integer parentId) {
     if (parentId != null) {
       paramMap.put("parent_id", parentId);
@@ -263,13 +275,13 @@ public class AccountParamBuilder {
    * @return
    */
   public String buildJson() {
+    return buildJson(ClientConfig.DEFAULT_CONFIG);
+  }
+  public String buildJson(ClientConfig clientConfig) {
     if (paramMap.get("account") == null) {
-      paramMap.put("account", ClientConfig.DEFAULT_CONFIG.defaultAccount);
+      paramMap.put("account", clientConfig.defaultAccount);
     }
-    if (paramMap.get("lang") == null) {
-      paramMap.put("lang", ClientConfig.DEFAULT_CONFIG.getDefaultLanguage().name());
-    }
-    return JSONObject.toJSONString(paramMap, SerializerFeature.WriteEnumUsingToString);
+    return buildJsonWithoutDefaultAccount(clientConfig);
   }
 
   /**
@@ -277,8 +289,14 @@ public class AccountParamBuilder {
    * @return
    */
   public String buildJsonWithoutDefaultAccount() {
+    return buildJsonWithoutDefaultAccount(ClientConfig.DEFAULT_CONFIG);
+  }
+  public String buildJsonWithoutDefaultAccount(ClientConfig clientConfig) {
     if (paramMap.get("lang") == null) {
-      paramMap.put("lang", ClientConfig.DEFAULT_CONFIG.getDefaultLanguage().name());
+      paramMap.put("lang", clientConfig.getDefaultLanguage().name());
+    }
+    if (paramMap.get("secret_key") == null) {
+      paramMap.put("secret_key", clientConfig.secretKey);
     }
     return JSONObject.toJSONString(paramMap, SerializerFeature.WriteEnumUsingToString);
   }

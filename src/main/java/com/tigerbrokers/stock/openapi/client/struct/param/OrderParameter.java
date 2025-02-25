@@ -8,6 +8,8 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -59,7 +61,12 @@ public class OrderParameter implements Serializable {
    * 订单数量
    */
   @JSONField(name = "total_quantity")
-  private Integer totalQuantity;
+  private Long totalQuantity;
+  /**
+   * 下单数量的偏移量
+   */
+  @JSONField(name = "total_quantity_scale")
+  private Integer totalQuantityScale;
   /**
    * order cash amount
    */
@@ -119,6 +126,11 @@ public class OrderParameter implements Serializable {
    */
   @JSONField(name = "outside_rth")
   private Boolean outsideRth;
+  /**
+   * set place overnight order in the US market. value: OverNight
+   */
+  @JSONField(name = "trading_session_type")
+  private TradeSession tradingSessionType;
   /**
    * 市场
    */
@@ -266,12 +278,20 @@ public class OrderParameter implements Serializable {
     this.currency = currency;
   }
 
-  public Integer getTotalQuantity() {
+  public Long getTotalQuantity() {
     return totalQuantity;
   }
 
-  public void setTotalQuantity(Integer totalQuantity) {
+  public void setTotalQuantity(Long totalQuantity) {
     this.totalQuantity = totalQuantity;
+  }
+
+  public Integer getTotalQuantityScale() {
+    return totalQuantityScale;
+  }
+
+  public void setTotalQuantityScale(Integer totalQuantityScale) {
+    this.totalQuantityScale = totalQuantityScale;
   }
 
   public Double getCashAmount() {
@@ -336,6 +356,14 @@ public class OrderParameter implements Serializable {
 
   public void setOutsideRth(Boolean outsideRth) {
     this.outsideRth = outsideRth;
+  }
+
+  public TradeSession getTradingSessionType() {
+    return tradingSessionType;
+  }
+
+  public void setTradingSessionType(TradeSession tradingSessionType) {
+    this.tradingSessionType = tradingSessionType;
   }
 
   public OrderType getOrderType() {
@@ -582,6 +610,7 @@ public class OrderParameter implements Serializable {
         ", action=" + action +
         ", currency=" + currency +
         ", totalQuantity=" + totalQuantity +
+        ", totalQuantityScale=" + totalQuantityScale +
         ", cashAmount=" + cashAmount +
         ", timeInForce=" + timeInForce +
         ", expireTime=" + expireTime +
@@ -591,6 +620,7 @@ public class OrderParameter implements Serializable {
         ", adjustLimit=" + adjustLimit +
         ", trailingPercent=" + trailingPercent +
         ", outsideRth=" + outsideRth +
+        ", tradingSessionType=" + tradingSessionType +
         ", market='" + market + '\'' +
         ", exchange='" + exchange + '\'' +
         ", expiry='" + expiry + '\'' +

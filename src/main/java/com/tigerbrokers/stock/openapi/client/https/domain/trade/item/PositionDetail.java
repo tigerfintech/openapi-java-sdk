@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.trade.item;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author bean
@@ -12,17 +13,24 @@ public class PositionDetail implements Serializable {
   private String account;
   private long position;
   private int positionScale;
+  private Double positionQty;
+  private Double salableQty;
   private Double averageCost;
   private Double averageCostByAverage;
+  private Double averageCostOfCarry;
   private Double marketValue;
   private Double latestPrice;
+  private Boolean isLevel0Price;
   private Double realizedPnl;
   private Double realizedPnlByAverage;
   private Double unrealizedPnl;
   private Double unrealizedPnlByAverage;
   private Double unrealizedPnlPercent;
   private Double unrealizedPnlPercentByAverage;
-
+  private Double unrealizedPnlByCostOfCarry;
+  private Double unrealizedPnlPercentByCostOfCarry;
+  // please use 'salableQty' instead of 'salable'
+  @Deprecated
   private Integer salable;
   private String secType;
   private String market;
@@ -34,6 +42,20 @@ public class PositionDetail implements Serializable {
   private String right;
   private Double multiplier;
   private Long updateTimestamp;
+  /** maintenance margin percent */
+  private Double mmPercent;
+  /** maintenance margin value */
+  private Double mmValue;
+  /** today's profit and loss */
+  private Double todayPnl;
+  /** today's profit and loss percent */
+  private Double todayPnlPercent;
+  /** Fund only, yesterday's profit and loss */
+  private Double yesterdayPnl;
+  /** The closing price on the last trading day (pre-adjusted for stock rights) */
+  private Double lastClosePrice;
+  /** contract categories */
+  private List<String> categories;
 
   public String getAccount() {
     return account;
@@ -225,5 +247,109 @@ public class PositionDetail implements Serializable {
 
   public void setUpdateTimestamp(Long updateTimestamp) {
     this.updateTimestamp = updateTimestamp;
+  }
+
+  public Double getMmPercent() {
+    return mmPercent;
+  }
+
+  public void setMmPercent(Double mmPercent) {
+    this.mmPercent = mmPercent;
+  }
+
+  public Double getMmValue() {
+    return mmValue;
+  }
+
+  public void setMmValue(Double mmValue) {
+    this.mmValue = mmValue;
+  }
+
+  public Double getPositionQty() {
+    return positionQty;
+  }
+
+  public void setPositionQty(Double positionQty) {
+    this.positionQty = positionQty;
+  }
+
+  public Double getSalableQty() {
+    return salableQty;
+  }
+
+  public void setSalableQty(Double salableQty) {
+    this.salableQty = salableQty;
+  }
+
+  public Double getAverageCostOfCarry() {
+    return averageCostOfCarry;
+  }
+
+  public void setAverageCostOfCarry(Double averageCostOfCarry) {
+    this.averageCostOfCarry = averageCostOfCarry;
+  }
+
+  public Boolean getLevel0Price() {
+    return isLevel0Price;
+  }
+
+  public void setLevel0Price(Boolean level0Price) {
+    isLevel0Price = level0Price;
+  }
+
+  public Double getUnrealizedPnlByCostOfCarry() {
+    return unrealizedPnlByCostOfCarry;
+  }
+
+  public void setUnrealizedPnlByCostOfCarry(Double unrealizedPnlByCostOfCarry) {
+    this.unrealizedPnlByCostOfCarry = unrealizedPnlByCostOfCarry;
+  }
+
+  public Double getUnrealizedPnlPercentByCostOfCarry() {
+    return unrealizedPnlPercentByCostOfCarry;
+  }
+
+  public void setUnrealizedPnlPercentByCostOfCarry(Double unrealizedPnlPercentByCostOfCarry) {
+    this.unrealizedPnlPercentByCostOfCarry = unrealizedPnlPercentByCostOfCarry;
+  }
+
+  public Double getTodayPnl() {
+    return todayPnl;
+  }
+
+  public void setTodayPnl(Double todayPnl) {
+    this.todayPnl = todayPnl;
+  }
+
+  public Double getTodayPnlPercent() {
+    return todayPnlPercent;
+  }
+
+  public void setTodayPnlPercent(Double todayPnlPercent) {
+    this.todayPnlPercent = todayPnlPercent;
+  }
+
+  public Double getYesterdayPnl() {
+    return yesterdayPnl;
+  }
+
+  public void setYesterdayPnl(Double yesterdayPnl) {
+    this.yesterdayPnl = yesterdayPnl;
+  }
+
+  public Double getLastClosePrice() {
+    return lastClosePrice;
+  }
+
+  public void setLastClosePrice(Double lastClosePrice) {
+    this.lastClosePrice = lastClosePrice;
+  }
+
+  public List<String> getCategories() {
+    return categories;
+  }
+
+  public void setCategories(List<String> categories) {
+    this.categories = categories;
   }
 }

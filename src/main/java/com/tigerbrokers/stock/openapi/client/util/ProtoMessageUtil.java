@@ -41,7 +41,7 @@ public class ProtoMessageUtil {
    * @return StompFrame
    */
   public static Request buildConnectMessage(String tigerId, String sign, String version,
-      int sendInterval, int receiveInterval) {
+      int sendInterval, int receiveInterval, boolean useFullTick) {
     if (sendInterval < 0 || receiveInterval < 0) {
       throw new RuntimeException("sendInterval < 0 or receiveInterval < 0");
     }
@@ -53,6 +53,7 @@ public class ProtoMessageUtil {
         .setSdkVersion(SdkVersionUtils.getSdkVersion())
         .setTigerId(tigerId)
         .setSign(sign)
+        .setUseFullTick(useFullTick)
         .setSendInterval(sendInterval).setReceiveInterval(receiveInterval);
 
     builder.setConnect(conBuild.build());

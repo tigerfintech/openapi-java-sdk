@@ -118,6 +118,22 @@ public interface SubscribeAsyncApi {
   String cancelSubscribeDepthQuote(Set<String> symbols);
 
   /**
+   * subscribe bar data
+   *
+   * @param symbols symbol list
+   * @return string id
+   */
+  String subscribeKline(Set<String> symbols);
+
+  /**
+   * cancel subscribe bar data
+   *
+   * @param symbols symbol list
+   * @return string id
+   */
+  String cancelSubscribeKline(Set<String> symbols);
+
+  /**
    * subscribe quote-data of the specified market
    * @param market Market
    * @param subject QuoteSubject

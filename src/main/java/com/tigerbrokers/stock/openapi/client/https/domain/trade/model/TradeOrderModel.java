@@ -12,6 +12,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +58,12 @@ public class TradeOrderModel extends ApiModel {
    * total quantity
    */
   @JSONField(name = "total_quantity")
-  private Integer totalQuantity;
+  private Long totalQuantity;
+  /**
+   * total quantity scale
+   */
+  @JSONField(name = "total_quantity_scale")
+  private Integer totalQuantityScale;
   /**
    * order validity time range
    * DAY：valid for the day
@@ -113,6 +119,11 @@ public class TradeOrderModel extends ApiModel {
    */
   @JSONField(name = "outside_rth")
   private Boolean outsideRth = Boolean.TRUE;
+  /**
+   * set place overnight order in the US market. value: OverNight
+   */
+  @JSONField(name = "trading_session_type")
+  private TradeSession tradingSessionType;
   /**
    * market
    */
@@ -283,12 +294,20 @@ public class TradeOrderModel extends ApiModel {
     this.currency = currency;
   }
 
-  public Integer getTotalQuantity() {
+  public Long getTotalQuantity() {
     return totalQuantity;
   }
 
-  public void setTotalQuantity(Integer totalQuantity) {
+  public void setTotalQuantity(Long totalQuantity) {
     this.totalQuantity = totalQuantity;
+  }
+
+  public Integer getTotalQuantityScale() {
+    return totalQuantityScale;
+  }
+
+  public void setTotalQuantityScale(Integer totalQuantityScale) {
+    this.totalQuantityScale = totalQuantityScale;
   }
 
   public TimeInForce getTimeInForce() {
@@ -353,6 +372,14 @@ public class TradeOrderModel extends ApiModel {
 
   public void setOutsideRth(Boolean outsideRth) {
     this.outsideRth = outsideRth;
+  }
+
+  public TradeSession getTradingSessionType() {
+    return tradingSessionType;
+  }
+
+  public void setTradingSessionType(TradeSession tradingSessionType) {
+    this.tradingSessionType = tradingSessionType;
   }
 
   public String getMarket() {
@@ -610,6 +637,7 @@ public class TradeOrderModel extends ApiModel {
         ", action=" + action +
         ", currency=" + currency +
         ", totalQuantity=" + totalQuantity +
+        ", totalQuantityScale=" + totalQuantityScale +
         ", timeInForce=" + timeInForce +
         ", orderType=" + orderType +
         ", limitPrice=" + limitPrice +
@@ -617,6 +645,7 @@ public class TradeOrderModel extends ApiModel {
         ", adjustLimit=" + adjustLimit +
         ", trailingPercent=" + trailingPercent +
         ", outsideRth=" + outsideRth +
+        ", tradingSessionType=" + tradingSessionType +
         ", market='" + market + '\'' +
         ", exchange='" + exchange + '\'' +
         ", expiry='" + expiry + '\'' +

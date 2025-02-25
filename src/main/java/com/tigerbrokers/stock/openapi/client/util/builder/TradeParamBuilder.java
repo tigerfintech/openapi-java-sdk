@@ -1,7 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.util.builder;
 
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
@@ -14,8 +13,8 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
 import com.tigerbrokers.stock.openapi.client.struct.param.OrderParameter;
-import com.tigerbrokers.stock.openapi.client.util.FastJsonPropertyFilter;
 
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import java.util.ArrayList;
@@ -107,9 +106,31 @@ public class TradeParamBuilder {
     return this;
   }
 
+  public TradeParamBuilder tradingSessionType(TradeSession tradingSessionType) {
+    if (tradingSessionType != null) {
+      this.orderParameter.setTradingSessionType(tradingSessionType);
+    }
+    return this;
+  }
+
+  @Deprecated
   public TradeParamBuilder totalQuantity(Integer totalQuantity) {
     if (totalQuantity != null) {
+      this.orderParameter.setTotalQuantity(totalQuantity.longValue());
+    }
+    return this;
+  }
+
+  public TradeParamBuilder totalQuantity(Long totalQuantity) {
+    if (totalQuantity != null) {
       this.orderParameter.setTotalQuantity(totalQuantity);
+    }
+    return this;
+  }
+
+  public TradeParamBuilder totalQuantityScale(Integer totalQuantityScale) {
+    if (totalQuantityScale != null) {
+      this.orderParameter.setTotalQuantityScale(totalQuantityScale);
     }
     return this;
   }
@@ -384,17 +405,30 @@ public class TradeParamBuilder {
   }
 
   public OrderParameter build() {
-    if (StringUtils.isEmpty(this.orderParameter.getAccount())) {
-      this.orderParameter.setAccount(ClientConfig.DEFAULT_CONFIG.defaultAccount);
+    return build(ClientConfig.DEFAULT_CONFIG);
+  }
+
+  public OrderParameter build(ClientConfig clientConfig) {
+    if (clientConfig == null) {
+      return this.orderParameter;
     }
-    if (StringUtils.isEmpty(this.orderParameter.getLang())) {
-      this.orderParameter.setLang(ClientConfig.DEFAULT_CONFIG.getDefaultLanguage().name());
+    if (StringUtils.isEmpty(this.orderParameter.getAccount())) {
+      this.orderParameter.setAccount(clientConfig.defaultAccount);
+    }
+    if (StringUtils.isEmpty(this.orderParameter.getLang()) && clientConfig.getDefaultLanguage() != null) {
+      this.orderParameter.setLang(clientConfig.getDefaultLanguage().name());
+    }
+    if (StringUtils.isEmpty(this.orderParameter.getSecretKey())) {
+      this.orderParameter.setSecretKey(clientConfig.secretKey);
     }
     return this.orderParameter;
   }
 
   public String buildJson() {
-    return JSONObject.toJSONString(build(), FastJsonPropertyFilter.getPropertyFilter(),
-        SerializerFeature.WriteEnumUsingToString);
+    return buildJson(ClientConfig.DEFAULT_CONFIG);
+  }
+
+  public String buildJson(ClientConfig clientConfig) {
+    return JSONObject.toJSONString(build(clientConfig), SerializerFeature.WriteEnumUsingToString);
   }
 }
