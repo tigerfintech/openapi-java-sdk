@@ -10,17 +10,17 @@ import java.util.List;
 public class ContractItem extends ApiModel {
 
   /**
-   * 对应的正股股票代码
+   * stock code
    */
   private String symbol;
 
   /**
-   * 合约类型（WAR：涡轮、IOPT：牛熊证）
+   * contract type（WAR：warrant、IOPT：callable bull bear contract）
    */
   private String secType;
 
   /**
-   * 合约数据列表
+   * quote contract list
    */
   private List<QuoteContract> items;
 

@@ -36,12 +36,12 @@ public class ProtoMessageUtil {
    * @param tigerId tigerId
    * @param sign sign
    * @param version version
-   * @param sendInterval client能保证发送心跳的最小间隔，0代表采用服务端配置
-   * @param receiveInterval client希望收到server心跳的间隔，0代表采用服务端配置
+   * @param sendInterval The client can guarantee the minimum interval for sending heartbeats, 0 means adopting server configuration
+   * @param receiveInterval The interval at which the client expects to receive the heartbeat from the server, 0 means the server configuration is used
    * @return StompFrame
    */
   public static Request buildConnectMessage(String tigerId, String sign, String version,
-      int sendInterval, int receiveInterval) {
+      int sendInterval, int receiveInterval, boolean useFullTick) {
     if (sendInterval < 0 || receiveInterval < 0) {
       throw new RuntimeException("sendInterval < 0 or receiveInterval < 0");
     }
@@ -53,6 +53,7 @@ public class ProtoMessageUtil {
         .setSdkVersion(SdkVersionUtils.getSdkVersion())
         .setTigerId(tigerId)
         .setSign(sign)
+        .setUseFullTick(useFullTick)
         .setSendInterval(sendInterval).setReceiveInterval(receiveInterval);
 
     builder.setConnect(conBuild.build());
@@ -115,7 +116,7 @@ public class ProtoMessageUtil {
     return builder.build();
   }
 
-  public static Request buildSubscribeMessage(Market market, QuoteSubject subject) {
+  public static Request buildSubscribeMessage(Market market, QuoteSubject subject, Set<String> indicatorNames) {
     Request.Builder builder = Request.newBuilder();
     builder.setCommand(SocketCommon.Command.SUBSCRIBE)
         .setId(increment.addAndGet(1));
@@ -123,6 +124,9 @@ public class ProtoMessageUtil {
     Request.Subscribe.Builder subBuild = Request.Subscribe.newBuilder();
     subBuild.setDataType(SocketCommon.DataType.valueOf(subject.name()));
     subBuild.setMarket(market.name());
+    if (indicatorNames != null) {
+      subBuild.setSymbols(HeaderBuilder.join(indicatorNames));
+    }
 
     builder.setSubscribe(subBuild.build());
     return builder.build();
@@ -147,13 +151,15 @@ public class ProtoMessageUtil {
 
     Request.Subscribe.Builder subBuild = Request.Subscribe.newBuilder();
     subBuild.setDataType(SocketCommon.DataType.valueOf(subject.name()));
-    subBuild.setSymbols(HeaderBuilder.join(symbols));
+    if (symbols != null) {
+      subBuild.setSymbols(HeaderBuilder.join(symbols));
+    }
 
     builder.setSubscribe(subBuild.build());
     return builder.build();
   }
 
-  public static Request buildUnSubscribeMessage(Market market, QuoteSubject subject) {
+  public static Request buildUnSubscribeMessage(Market market, QuoteSubject subject, Set<String> symbols) {
     Request.Builder builder = Request.newBuilder();
     builder.setCommand(SocketCommon.Command.UNSUBSCRIBE)
         .setId(increment.addAndGet(1));
@@ -161,6 +167,9 @@ public class ProtoMessageUtil {
     Request.Subscribe.Builder subBuild = Request.Subscribe.newBuilder();
     subBuild.setDataType(SocketCommon.DataType.valueOf(subject.name()));
     subBuild.setMarket(market.name());
+    if (symbols != null) {
+      subBuild.setSymbols(HeaderBuilder.join(symbols));
+    }
 
     builder.setSubscribe(subBuild.build());
     return builder.build();

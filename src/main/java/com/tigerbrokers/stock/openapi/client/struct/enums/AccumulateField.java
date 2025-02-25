@@ -10,57 +10,57 @@ import java.util.Set;
  * @date 2022/10/27
  */
 public enum AccumulateField {
-    /** 涨跌幅*（精确到小数点后 3 位，超出部分会被舍弃）例如填写 [0.005,0.01] 值区间  */
+    /** Change rate* (accurate to 3 decimal places, excess parts will be discarded) For example, fill in the [0.005, 0.01] value range */
     AccumulateField_ChangeRate(1, "changeRate"),
-    /** 涨跌额*（精确到小数点后 3 位，超出部分会被舍弃）例如填写 [0.005,0.01] 值区间 */
+    /** Change value* (accurate to 3 decimal places, excess parts will be discarded) For example, fill in the [0.005, 0.01] value range */
     AccumulateField_ChangeValue(2, "changeVal"),
-    /** 总负债增长率 */
+    /** Total liabilities growth rate */
     AccumulateField_TotalLiabilities_Ratio_Annual(3, "totalLiabilitiesRatio"),
-    /** 净资产增长率 */
+    /** Net asset growth rate */
     AccumulateField_TotalCommonEquity_Ratio_Annual(4, "totalCommonEquityRatio"),
-    /** 每股收益同比增长率 */
+    /** Year-on-year growth rate of earnings per share */
     AccumulateField_BasicEps_Ratio_Annual(5, "basicEpsRatio"),
-    /** 净利润同比增长率 */
+    /** Year-on-year growth rate of net profit */
     AccumulateField_NetIncome_Ratio_Annual(6, "netIncomeRatio"),
-    /** 营业利润同比增长率 */
+    /** Year-on-year growth rate of operating profit */
     AccumulateField_OperatingIncome_Ratio_Annual(7, "opeIncomeratio"),
-    /** 每股收益 */
+    /** Earnings per share */
     AccumulateField_Eps(8, "eps"),
-    /** 每股净资产 */
+    /** Net asset per share */
     AccumulateField_NetAsset_PerShare(9, "bookValueshare"),
-    /** 净利润 */
+    /** Net profit */
     AccumulateField_Net_Income(10, "netIncome"),
-    /** 营业利润 */
+    /** Operating profit */
     AccumulateField_Operating_Income(11, "operatingIncome"),
-    /** 营业收入 */
+    /** Operating revenue */
     AccumulateField_Total_Revenue(12, "total_revenue"),
-    /** ROE = 资产回报率 */
+    /** ROE = Return on equity */
     AccumulateField_ROE(13, "ROE"),
-    /** ROA =净资产收益率 */
+    /** ROA = Return on assets */
     AccumulateField_ROA(14, "ROA"),
-    /** 毛利率 */
+    /** Gross profit rate */
     AccumulateField_GrossProfitRate(17, "grossMargin"),
-    /** 净利率* */
+    /** Net profit margin */
     AccumulateField_NetProfitRate(18, "netIncomeMargin"),
-    /** 总资产* */
+    /** Total assets */
     AccumulateField_TotalAssets(19, "totalAssets"),
-    /** 流动比率 */
+    /** Current ratio */
     AccumulateField_CurrentRatio(20, "currentRatio"),
-    /** 速动比率 */
+    /** Quick ratio */
     AccumulateField_QuickRatio(21, "quickRatio"),
-    /** 经营现金流同比率 */
+    /** Year-on-year growth rate of operating cash flow */
     AccumulateField_CashFromOpsRatio(22, "cash4OpsRatio"),
-    /** 投资现金流 */
+    /** Cash flow from investing */
     AccumulateField_CashFromInvesting(23, "cash4Invest"),
-    /** 筹资现金流 */
+    /** Cash flow from financing */
     AccumulateField_CashFromFinancing(24, "cash4Finance"),
-    /** 资产负债率 */
+    /** Debt to asset ratio */
     AccumulateField_TotalLiabilitiesToTotalAssets(25, "allLiabAndAssets"),
-    /** 净资产收益率ROE同比增长率  （T期ROE-T-1期ROE）/T-1期ROE *100%*/
+    /** Year-on-year growth rate of net income return on equity (T period ROE-T-1 period ROE) / T-1 period ROE * 100% */
     AccumulateField_ROE_yearOnYear_Ratio(27, "netIncomeYearOnYearRatio"),
-    /** 营业利润占比 */
+    /** Operating profit ratio */
     AccumulateField_Operating_Profits_Ratio(28, "OperatingProfitsRatio"),
-    /** 经营现金流  */
+    /** Operating cash flow */
     AccumulateField_CashFromOpsVal(29, "cash4OpsVal"),
     ;
 

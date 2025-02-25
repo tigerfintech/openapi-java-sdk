@@ -1,6 +1,5 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
-import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import java.net.ConnectException;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.AUTHORIZATION;
 
 /**
- * Web 工具类
+ * Web Util Class
  */
 public class HttpUtils {
 
@@ -40,10 +39,10 @@ public class HttpUtils {
       .retryOnConnectionFailure(true)
       .build();
 
-  public static String post(String url, String json) throws Exception {
-    return post(url, json, 0);
+  public static String post(String url, String json, String token) throws Exception {
+    return post(url, json, token, 0);
   }
-  public static String post(String url, String json, int retryCount) throws Exception {
+  public static String post(String url, String json, String token, int retryCount) throws Exception {
     if (url == null || json == null) {
       throw new RuntimeException("request url or json param cannot be null");
     }
@@ -51,8 +50,8 @@ public class HttpUtils {
     okhttp3.Request.Builder builder = new okhttp3.Request.Builder()
         .url(url)
         .post(body);
-    if (!StringUtils.isEmpty(ClientConfig.DEFAULT_CONFIG.token)) {
-      builder.header(AUTHORIZATION, ClientConfig.DEFAULT_CONFIG.token);
+    if (!StringUtils.isEmpty(token)) {
+      builder.header(AUTHORIZATION, token);
     }
     okhttp3.Request request = builder.build();
     int requstCount = 0;
@@ -100,15 +99,15 @@ public class HttpUtils {
     }
   }
 
-  public static String get(String url) throws Exception {
+  public static String get(String url, String token) throws Exception {
     if (url == null) {
       throw new RuntimeException("request url param cannot be null");
     }
     try {
       okhttp3.Request.Builder builder = new okhttp3.Request.Builder()
           .url(url);
-      if (!StringUtils.isEmpty(ClientConfig.DEFAULT_CONFIG.token)) {
-        builder.header(AUTHORIZATION, ClientConfig.DEFAULT_CONFIG.token);
+      if (!StringUtils.isEmpty(token)) {
+        builder.header(AUTHORIZATION, token);
       }
       okhttp3.Request request = builder.build();
 

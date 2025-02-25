@@ -56,12 +56,17 @@ public class PrimeAssetItem extends ApiModel {
         private Double maintainMargin;
         private Double overnightMargin;
         private Double unrealizedPL;
+        private Double unrealizedPLByCostOfCarry;
         private Double realizedPL;
+        private Double totalTodayPL;
         private Double excessLiquidation;
         private Double overnightLiquidation;
         private Double buyingPower;
         private Double leverage;
+        private Double lockedFunds;
+        private Double uncollected;
         private List<CurrencyAssets> currencyAssets;
+        private List<String> consolidatedSegTypes;
 
         public String getCapability() {
             return capability;
@@ -215,6 +220,46 @@ public class PrimeAssetItem extends ApiModel {
             this.currencyAssets = currencyAssets;
         }
 
+        public List<String> getConsolidatedSegTypes() {
+            return consolidatedSegTypes;
+        }
+
+        public void setConsolidatedSegTypes(List<String> consolidatedSegTypes) {
+            this.consolidatedSegTypes = consolidatedSegTypes;
+        }
+
+        public Double getUnrealizedPLByCostOfCarry() {
+            return unrealizedPLByCostOfCarry;
+        }
+
+        public void setUnrealizedPLByCostOfCarry(Double unrealizedPLByCostOfCarry) {
+            this.unrealizedPLByCostOfCarry = unrealizedPLByCostOfCarry;
+        }
+
+        public Double getTotalTodayPL() {
+            return totalTodayPL;
+        }
+
+        public void setTotalTodayPL(Double totalTodayPL) {
+            this.totalTodayPL = totalTodayPL;
+        }
+
+        public Double getLockedFunds() {
+            return lockedFunds;
+        }
+
+        public void setLockedFunds(Double lockedFunds) {
+            this.lockedFunds = lockedFunds;
+        }
+
+        public Double getUncollected() {
+            return uncollected;
+        }
+
+        public void setUncollected(Double uncollected) {
+            this.uncollected = uncollected;
+        }
+
         public CurrencyAssets getAssetByCurrency(Currency currency) {
             if (currency == Currency.ALL) {
                 return null;
@@ -240,6 +285,7 @@ public class PrimeAssetItem extends ApiModel {
         private Double stockMarketValue;
         private Double optionMarketValue;
         private Double futuresMarketValue;
+        private Double fundMarketValue;
         private Double unrealizedPL;
         private Double realizedPL;
 
@@ -297,6 +343,14 @@ public class PrimeAssetItem extends ApiModel {
 
         public void setFuturesMarketValue(Double futuresMarketValue) {
             this.futuresMarketValue = futuresMarketValue;
+        }
+
+        public Double getFundMarketValue() {
+            return fundMarketValue;
+        }
+
+        public void setFundMarketValue(Double fundMarketValue) {
+            this.fundMarketValue = fundMarketValue;
         }
 
         public Double getUnrealizedPL() {

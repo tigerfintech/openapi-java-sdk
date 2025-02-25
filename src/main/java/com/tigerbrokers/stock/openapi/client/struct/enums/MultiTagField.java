@@ -6,54 +6,54 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Description: 多标签筛选字段
+ * Description: Multi-tag filter field
  *
  * @author kevin
  * @date 2022/10/27
  */
 public enum MultiTagField {
-    /** 所属行业 */
+    /** Industry */
     MultiTagField_Industry(1, "industry"),
-    /** 所属概念 */
+    /** Concept */
     MultiTagField_Concept(2, "concept"),
-    /** 是否为otc股票.1=是，0=否 */
+    /** OTC stock. 1=yes, 0=no */
     MultiTagField_isOTC(3, "isOTC"),
     MultiTagField_StockCode(4, "symbol"),
-    /** 股票类型 stock or etf ;股票类型,非0表示该股票是ETF,1表示不带杠杆的etf,2表示2倍杠杆etf,3表示3倍etf杠杆,负值表示反向的ETF */
+    /** Stock type: stock or etf; non-zero value indicates ETF, 1 indicates non-leveraged ETF, 2 indicates 2x leveraged ETF, 3 indicates 3x leveraged ETF, negative value indicates inverse ETF */
     MultiTagField_Type(5, "type"),
-    /** 成交量异常.1=是，0=否 ;当日实时成交量> 5* 最近一年的平均成交量 */
+    /** Volume spike. 1=yes, 0=no; real-time volume > 5 * average volume of the past year */
     MultiTagField_Volume_Spike(6, "volSpike"),
-    /** 破净股票；市净率PB<1 */
+    /** Net broken stock; PB ratio < 1 */
     MultiTagField_Net_Broken(7, "netBroken"),
-    /** 破发股票 ； 最新价<发行价 */
+    /** Broken issue stock; latest price < issue price */
     MultiTagField_Issue_Price_Broken(8, "issuePriceBroken"),
-    /** 跟踪指数/资产 - ETF */
+    /** Tracking index/asset - ETF */
     MultiTagField_PrimaryBenchmark(9, "primaryBenchmark"),
-    /** 发行人 - ETF */
+    /** Issuer - ETF */
     MultiTagField_Issuer(10, "issuer"),
-    /** 托管人 - ETF */
+    /** Custodian - ETF */
     MultiTagField_Custodian(11, "custodian"),
-    /** 分红频率 - ETF */
+    /** Distribution frequency - ETF */
     MultiTagField_DistributionFrequency(12, "distributionFrequency"),
-    /** 是否支持期权 - ETF ; 1=是，0=否 */
+    /** Options available - ETF; 1=yes, 0=no */
     MultiTagField_OptionsAvailable(13, "optionsAvailable"),
-    /** 今日创历史新高 - ETF 1=是，0=否 */
+    /** Today's historical high - ETF; 1=yes, 0=no */
     MultiTagField_Today_HistoryHigh(14, "todayHistoryHigh"),
-    /** 今日创历史新低 - ETF 1=是，0=否 */
+    /** Today's historical low - ETF; 1=yes, 0=no */
     MultiTagField_Today_HistoryLow(15, "todayHistoryLow"),
-    /** 股票包 */
+    /** Stock package */
     MultiTagField_Stock_Package(16, "StockPkg"),
-    /** 52周最高 0 否 1是* */
+    /** 52-week high flag; 0=no, 1=yes */
     MultiTagField_Week52HighFlag(17, "week52HighFlag"),
-    /** 52周最低 0 否 1是 */
+    /** 52-week low flag; 0=no, 1=yes */
     MultiTagField_Week52LowFlag(18, "week52LowFlag"),
-    /** 交易币种 ,需要具体币种 */
+    /** Trading currency; specific currency required */
     MultiTagField_TradeCurrency(19, "tradeCurrency"),
-    /** ETF类型 ，需要具体类型 */
+    /** ETF type; specific type required */
     MultiTagField_ETF_TYPE(20, "etfType"),
-    /** 股票市场，这里支持多个市场 ，需要具体类型 QotMarket股票市场,传递里面的value值 */
+    /** Stock market; multiple markets supported; specific type required QotMarket stock market, pass the value inside */
     MultiTagField_Market_Name(21, "marketName"),
-    /** 一级行业级别  需要传递具体sectorId */
+    /** First-level industry level; specific sectorId required */
     MultiTagField_One_Sectors_Level(22, "oneSectorsLevel"),
     ;
 

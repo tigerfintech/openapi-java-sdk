@@ -96,7 +96,7 @@ public class ForexTradeOrderRequest extends TigerCommonRequest implements TigerR
     return this;
   }
 
-  public ForexTradeOrderRequest externalId(Long externalId) {
+  public ForexTradeOrderRequest externalId(String externalId) {
     ForexTradeOrderModel model = (ForexTradeOrderModel) getApiModel();
     model.setExternalId(externalId);
     return this;

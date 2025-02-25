@@ -6,6 +6,7 @@ import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
+import com.tigerbrokers.stock.openapi.client.struct.Indicator;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
@@ -39,11 +40,12 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import io.netty.util.internal.ConcurrentSet;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
@@ -73,7 +75,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private ApiAuthentication authentication;
   private ApiComposeCallback apiComposeCallback;
   private final Set<Subject> subscribeList = new CopyOnWriteArraySet<>();
-  private final Set<String> subscribeSymbols = new ConcurrentSet<>();
   private volatile CountDownLatch connectCountDown = new CountDownLatch(1);
 
   private EventLoopGroup group = null;
@@ -90,6 +91,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private AtomicInteger reconnectCount = new AtomicInteger(0);
   private AtomicBoolean reconnectErrorLogFlag = new AtomicBoolean(false);
 
+  private static final Map<Channel, WebSocketClient> channelClientMap = new ConcurrentHashMap<>();
   private static final int CONNECT_TIMEOUT = 5000;
   private static final int OP_TIMEOUT = 5000;
   private static final long SHUTDOWN_TIMEOUT = 1000 * 60 * 15;
@@ -97,12 +99,12 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private static final long RECONNECT_DELAY_TIME = 3 * 1000;
   private static final long RECONNECT_INTERVAL_TIME = 10 * 1000;
 
-  private int clientSendInterval = 30000;
-  private int clientReceiveInterval = 30000;
+  private int clientSendInterval = 10000;
+  private int clientReceiveInterval = 10000;
   private static final int CLIENT_SEND_INTERVAL_MIN = 10000;
   private static final int CLIENT_RECEIVE_INTERVAL_MIN = 10000;
 
-  private WebSocketClient() {
+  public WebSocketClient() {
   }
 
   private static class SingletonInner {
@@ -117,6 +119,17 @@ public class WebSocketClient implements SubscribeAsyncApi {
     return SingletonInner.singleton;
   }
 
+  public static WebSocketClient getWcClientByChannel(Channel channel) {
+    if (channel == null) {
+      return null;
+    }
+    return channelClientMap.get(channel);
+  }
+
+  public ClientConfig getClientConfig() {
+    return clientConfig;
+  }
+
   /**
    * set SslProvider
    * @param sslProvider
@@ -128,14 +141,22 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   public WebSocketClient clientConfig(ClientConfig clientConfig) {
+    return clientConfig(clientConfig, null);
+  }
+
+  public WebSocketClient clientConfig(ClientConfig clientConfig, String url) {
     ConfigFileUtil.loadConfigFile(clientConfig);
     this.clientConfig = clientConfig;
-    this.url = NetworkUtil.getServerAddress(null);
+    if (StringUtils.isEmpty(url)) {
+      this.url = NetworkUtil.getServerAddress(clientConfig, null);
+    } else {
+      this.url = url;
+    }
     if (this.sslProvider == null && clientConfig.getSslProvider() != null) {
       this.sslProvider = clientConfig.getSslProvider();
     }
     if (this.authentication == null) {
-      ApiAuthentication authentication = ApiAuthentication.build(clientConfig.tigerId, clientConfig.privateKey);
+      ApiAuthentication authentication = ApiAuthentication.build(clientConfig);
       if (!StringUtils.isEmpty(clientConfig.version)) {
         authentication.setVersion(clientConfig.version);
       }
@@ -200,10 +221,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
         throw new RuntimeException("supported protocols is empty.");
       }
       sslCtx = SslContextBuilder.forClient()
-              .protocols(protocols)
-              .trustManager(InsecureTrustManagerFactory.INSTANCE)
-              .sslProvider(provider)
-              .build();
+          .protocols(protocols)
+          .trustManager(InsecureTrustManagerFactory.INSTANCE)
+          .sslProvider(provider)
+          .build();
     }
 
     bootstrap.group(group).option(ChannelOption.TCP_NODELAY, true)
@@ -289,12 +310,15 @@ public class WebSocketClient implements SubscribeAsyncApi {
           if (oldChannel != null && oldChannel.isActive()) {
             ApiLogger.info("close old netty channel:{} , create new netty channel:{} ", oldChannel, newChannel);
             oldChannel.close();
+            channelClientMap.remove(oldChannel);
           }
         } finally {
           this.channel = newChannel;
+          channelClientMap.put(newChannel, this);
           connectCountDown.await(OP_TIMEOUT, TimeUnit.MILLISECONDS);
           if (connectCountDown.getCount() > 0) {
             this.channel.close();
+            channelClientMap.remove(newChannel);
           }
         }
       } else if (future.cause() != null) {
@@ -315,7 +339,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   private InetSocketAddress getNewServerAddress() {
     if (clientConfig != null) {
-      String newUrl = NetworkUtil.getServerAddress(this.url);
+      String newUrl = NetworkUtil.getServerAddress(this.clientConfig, this.url);
       if (!this.url.equals(newUrl)) {
         InetSocketAddress address = getSocketAddress(newUrl);
         if (address != null) {
@@ -369,6 +393,9 @@ public class WebSocketClient implements SubscribeAsyncApi {
     closeConnect(true);
   }
 
+  public void closeConnect() {
+    closeConnect(false);
+  }
   /**
    * close the connection
    * @sendDisconnectCommand true:send disconnect command
@@ -381,6 +408,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
     try {
       if (channel != null) {
         channel.close();
+        channelClientMap.remove(this.channel);
       }
       channel = null;
     } catch (Throwable e) {
@@ -580,6 +608,16 @@ public class WebSocketClient implements SubscribeAsyncApi {
     return cancelSubscribeQuote(symbols, QuoteSubject.QuoteDepth);
   }
 
+  @Override
+  public String subscribeKline(Set<String> symbols) {
+    return subscribeQuote(symbols, QuoteSubject.Kline);
+  }
+
+  @Override
+  public String cancelSubscribeKline(Set<String> symbols) {
+    return cancelSubscribeQuote(symbols, QuoteSubject.Kline);
+  }
+
   private String subscribeQuote(Set<String> symbols, QuoteSubject subject) {
     if (!isConnected()) {
       notConnect();
@@ -595,7 +633,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
       returnStr = ((StompFrame)subscribeData).headers().getAsString(StompHeaders.ID);
     }
     channel.writeAndFlush(subscribeData);
-    subscribeSymbols.addAll(symbols);
     ApiLogger.info("send subscribe [{}] message, symbols:{}", subject, symbols);
 
     return returnStr;
@@ -616,7 +653,6 @@ public class WebSocketClient implements SubscribeAsyncApi {
       returnStr = ((StompFrame)unsubscribeData).headers().getAsString(StompHeaders.ID);
     }
     channel.writeAndFlush(unsubscribeData);
-    subscribeSymbols.removeAll(symbols);
     ApiLogger.info("send cancel subscribe [{}] message, symbols:{}.", subject, symbols);
 
     return returnStr;
@@ -624,32 +660,54 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   @Override
   public String subscribeMarketQuote(Market market, QuoteSubject subject) {
-    if (!isConnected()) {
-      notConnect();
-      return null;
-    }
-    if (this.isProtobuf) {
-      Request subscribeData = ProtoMessageUtil.buildSubscribeMessage(market, subject);
-      channel.writeAndFlush(subscribeData);
-      ApiLogger.info("send subscribe [{}] message, market:{}", subject, market);
-      return String.valueOf(subscribeData.getId());
-    }
-    return null;
+    return subscribeMarketData(market, subject, null);
   }
 
   @Override
   public String cancelSubscribeMarketQuote(Market market, QuoteSubject subject) {
+    return cancelSubscribeMarketData(market, subject, null);
+  }
+
+  @Override
+  public String subscribeStockTop(Market market, Set<Indicator> indicators) {
+    return subscribeMarketData(market, QuoteSubject.StockTop, Indicator.getValues(indicators));
+  }
+
+  @Override
+  public String cancelSubscribeStockTop(Market market, Set<Indicator> indicators) {
+    return cancelSubscribeMarketData(market, QuoteSubject.StockTop, Indicator.getValues(indicators));
+  }
+
+  @Override
+  public String subscribeOptionTop(Market market, Set<Indicator> indicators) {
+    return subscribeMarketData(market, QuoteSubject.OptionTop, Indicator.getValues(indicators));
+  }
+
+  @Override
+  public String cancelSubscribeOptionTop(Market market, Set<Indicator> indicators) {
+    return cancelSubscribeMarketData(market, QuoteSubject.OptionTop, Indicator.getValues(indicators));
+  }
+
+  private String subscribeMarketData(Market market, QuoteSubject subject, Set<String> indicatorNames) {
     if (!isConnected()) {
       notConnect();
       return null;
     }
-    if (this.isProtobuf) {
-      Request subscribeData = ProtoMessageUtil.buildUnSubscribeMessage(market, subject);
-      channel.writeAndFlush(subscribeData);
-      ApiLogger.info("send cancel subscribe [{}] message, market:{}", subject, market);
-      return String.valueOf(subscribeData.getId());
+    Request subscribeData = ProtoMessageUtil.buildSubscribeMessage(market, subject, indicatorNames);
+    channel.writeAndFlush(subscribeData);
+    ApiLogger.info("send subscribe [{}] message, market:{}", subject, market);
+    return String.valueOf(subscribeData.getId());
+  }
+
+  private String cancelSubscribeMarketData(Market market, QuoteSubject subject, Set<String> indicatorNames) {
+    if (!isConnected()) {
+      notConnect();
+      return null;
     }
-    return null;
+    Request subscribeData = ProtoMessageUtil.buildUnSubscribeMessage(market, subject, indicatorNames);
+    channel.writeAndFlush(subscribeData);
+    ApiLogger.info("send cancel subscribe [{}] message, market:{}", subject, market);
+    return String.valueOf(subscribeData.getId());
   }
 
   @Override

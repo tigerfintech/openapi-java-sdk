@@ -73,10 +73,7 @@ public class DateUtils {
         .withZone(ZoneId.of(zoneId.getZoneId()));
     LocalDate expiryDate = LocalDate.parse(date, formatter);
     LocalDate now = LocalDate.now(ZoneId.of(zoneId.getZoneId()));
-    if (now.compareTo(expiryDate) > 0) {
-      return false;
-    }
-    return true;
+    return now.compareTo(expiryDate) > 0;
   }
 
   /**
@@ -147,6 +144,10 @@ public class DateUtils {
    * @return
    */
   public static String printSystemDate() {
-    return printDate(System.currentTimeMillis(), ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
+    return printSystemDate(null);
+  }
+
+  public static String printSystemDate(TimeZoneId timeZoneId) {
+    return printDate(System.currentTimeMillis(), timeZoneId);
   }
 }

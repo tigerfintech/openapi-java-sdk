@@ -1,10 +1,9 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.contract.item;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.fund.item.FundContractItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.future.item.FutureContractItem;
 import com.tigerbrokers.stock.openapi.client.struct.OptionSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
@@ -25,6 +24,7 @@ public class ContractItem extends ApiModel {
   private Double strike;
   private String right;
   private Double multiplier;
+  private Double lotSize;
   private String exchange;
   private String market;
   private String primaryExchange;
@@ -133,6 +133,14 @@ public class ContractItem extends ApiModel {
 
   public void setMultiplier(Double multiplier) {
     this.multiplier = multiplier;
+  }
+
+  public Double getLotSize() {
+    return lotSize;
+  }
+
+  public void setLotSize(Double lotSize) {
+    this.lotSize = lotSize;
   }
 
   public String getExchange() {
@@ -408,6 +416,7 @@ public class ContractItem extends ApiModel {
             ", strike=" + strike +
             ", right='" + right + '\'' +
             ", multiplier=" + multiplier +
+            ", lotSize=" + lotSize +
             ", exchange='" + exchange + '\'' +
             ", market='" + market + '\'' +
             ", primaryExchange='" + primaryExchange + '\'' +
@@ -456,6 +465,15 @@ public class ContractItem extends ApiModel {
     contractItem.setCurrency(futureContractItem.getCurrency());
     contractItem.setTradeable(futureContractItem.isTrade());
     contractItem.setContinuous(futureContractItem.isContinuous());
+    return contractItem;
+  }
+
+  public static ContractItem convert(FundContractItem fundContractItem) {
+    ContractItem contractItem = new ContractItem();
+    contractItem.setSecType(SecType.FUND.name());
+    contractItem.setSymbol(fundContractItem.getSymbol());
+    contractItem.setMarket(fundContractItem.getMarket());
+    contractItem.setCurrency(fundContractItem.getCurrency());
     return contractItem;
   }
 
@@ -536,27 +554,11 @@ public class ContractItem extends ApiModel {
     return contractItem;
   }
 
-  public static ContractItem convertFromJson(String data) {
-    if (data.startsWith("{\"items\":")) {
-      data = data.substring("{\"items\":".length(), data.length() - 1);
-      List<ContractItem> items = JSON.parseObject(data, new TypeReference<List<ContractItem>>() {
-      });
-      if (items == null || items.size() == 0) {
-        return new ContractItem();
-      }
-      return items.get(0);
-    } else {
-      return JSON.parseObject(data, ContractItem.class);
-    }
-  }
-
-  public static List<ContractItem> convertFromJsonV2(String data) {
-    if (data.startsWith("{\"items\":")) {
-      data = data.substring("{\"items\":" .length(), data.length() - 1);
-      List<ContractItem> items = JSON.parseObject(data, new TypeReference<List<ContractItem>>() {
-      });
-      return items;
-    }
-    return null;
+  public static ContractItem buildFundContract(String symbol, String currency) {
+    ContractItem contractItem = new ContractItem();
+    contractItem.setSecType(SecType.FUND.name());
+    contractItem.setSymbol(symbol);
+    contractItem.setCurrency(currency);
+    return contractItem;
   }
 }

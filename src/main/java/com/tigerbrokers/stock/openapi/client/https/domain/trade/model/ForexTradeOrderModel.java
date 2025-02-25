@@ -25,7 +25,7 @@ public class ForexTradeOrderModel extends ApiModel {
   @JSONField(name = "seg_type")
   private SegmentType segType;
   @JSONField(name = "external_id")
-  private Long externalId;
+  private String externalId;
 
   /**
    * order validity time range, forex order only support 'DAY' and 'GTC', default is 'DAY'
@@ -87,11 +87,11 @@ public class ForexTradeOrderModel extends ApiModel {
     this.segType = segType;
   }
 
-  public Long getExternalId() {
+  public String getExternalId() {
     return externalId;
   }
 
-  public void setExternalId(Long externalId) {
+  public void setExternalId(String externalId) {
     this.externalId = externalId;
   }
 

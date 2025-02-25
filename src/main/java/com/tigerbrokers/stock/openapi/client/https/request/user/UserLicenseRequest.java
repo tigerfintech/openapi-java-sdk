@@ -17,6 +17,7 @@ public class UserLicenseRequest extends TigerCommonRequest implements TigerReque
 
   public static UserLicenseRequest newRequest() {
     UserLicenseRequest request = new UserLicenseRequest();
+    request.setBizContent("{}");
     return request;
   }
 

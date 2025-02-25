@@ -34,6 +34,7 @@ public enum MethodName {
   SEGMENT_FUND_HISTORY("segment_fund_history", MethodType.TRADE),
   SEGMENT_FUND_AVAILABLE("segment_fund_available", MethodType.TRADE),
   ESTIMATE_TRADABLE_QUANTITY("estimate_tradable_quantity", MethodType.TRADE),
+  TRANSFER_FUND("transfer_fund", MethodType.TRADE),
 
   /**
    * contract
@@ -44,6 +45,7 @@ public enum MethodName {
   /**
    * quote
    */
+  KLINE_QUOTA("kline_quota", MethodType.QUOTE),
   MARKET_STATE("market_state", MethodType.QUOTE),
   ALL_SYMBOLS("all_symbols", MethodType.QUOTE),
   ALL_SYMBOL_NAMES("all_symbol_names", MethodType.QUOTE),
@@ -77,6 +79,8 @@ public enum MethodName {
   OPTION_BRIEF("option_brief", MethodType.QUOTE),
   OPTION_KLINE("option_kline", MethodType.QUOTE),
   OPTION_TRADE_TICK("option_trade_tick", MethodType.QUOTE),
+  OPTION_DEPTH("option_depth", MethodType.QUOTE),
+  ALL_HK_OPTION_SYMBOLS("all_hk_option_symbols", MethodType.QUOTE),
 
   /**
    * warrant,cbbc
@@ -97,9 +101,10 @@ public enum MethodName {
   FUTURE_REAL_TIME_QUOTE("future_real_time_quote", MethodType.QUOTE),
   FUTURE_TICK("future_tick", MethodType.QUOTE),
   FUTURE_TRADING_DATE("future_trading_date", MethodType.QUOTE),
+  FUTURE_HISTORY_MAIN_CONTRACT("future_history_main_contract", MethodType.QUOTE),
 
   /**
-   * fundmental data
+   * fundamental data
    */
   FINANCIAL_DAILY("financial_daily", MethodType.QUOTE),
   FINANCIAL_REPORT("financial_report", MethodType.QUOTE),
@@ -107,6 +112,17 @@ public enum MethodName {
   INDUSTRY_LIST("industry_list", MethodType.QUOTE),
   INDUSTRY_STOCKS("industry_stocks", MethodType.QUOTE),
   STOCK_INDUSTRY("stock_industry", MethodType.QUOTE),
+  FINANCIAL_CURRENCY("financial_currency", MethodType.QUOTE),
+  FINANCIAL_EXCHANGE_RATE("financial_exchange_rate", MethodType.QUOTE),
+  STOCK_FUNDAMENTAL("stock_fundamental", MethodType.QUOTE),
+
+  /**
+   * fund quote
+   */
+  FUND_ALL_SYMBOLS("fund_all_symbols", MethodType.QUOTE),
+  FUND_CONTRACTS("fund_contracts", MethodType.QUOTE),
+  FUND_QUOTE("fund_quote", MethodType.QUOTE),
+  FUND_HISTORY_QUOTE("fund_history_quote", MethodType.QUOTE),
 
   /**
    * grab quote

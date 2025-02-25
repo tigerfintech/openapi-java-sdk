@@ -6,6 +6,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionExp
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.option.OptionExpirationResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import java.util.List;
 
@@ -25,8 +26,18 @@ public class OptionExpirationQueryRequest extends TigerCommonRequest implements 
   }
 
   public OptionExpirationQueryRequest(List<String> symbols) {
+    this(symbols, Market.US);
+  }
+
+  public OptionExpirationQueryRequest(List<String> symbols, Market market) {
     this();
     optionExpirationModel.setSymbols(symbols);
+    optionExpirationModel.setMarket(market);
+  }
+
+  public OptionExpirationQueryRequest market(Market market) {
+    optionExpirationModel.setMarket(market);
+    return this;
   }
 
   public static OptionExpirationQueryRequest of(List<String> symbols) {

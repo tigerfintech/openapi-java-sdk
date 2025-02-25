@@ -4,6 +4,8 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
+
 import java.util.List;
 
 /**
@@ -15,6 +17,8 @@ public class QuoteSymbolModel extends ApiModel {
   private List<String> symbols;
   @JSONField(name = "include_hour_trading")
   private Boolean includeHourTrading;
+  @JSONField(name = "trade_session")
+  private TradeSession tradeSession;
 
   public QuoteSymbolModel() {
     this.lang = ClientConfig.DEFAULT_CONFIG.getDefaultLanguage();
@@ -38,6 +42,16 @@ public class QuoteSymbolModel extends ApiModel {
     this.lang = lang;
   }
 
+  public QuoteSymbolModel(List<String> symbols, TradeSession tradeSession) {
+    this(symbols, tradeSession, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
+  }
+
+  public QuoteSymbolModel(List<String> symbols, TradeSession tradeSession, Language lang) {
+    this.symbols = symbols;
+    this.tradeSession = tradeSession;
+    this.lang = lang;
+  }
+
   public List<String> getSymbols() {
     return symbols;
   }
@@ -52,5 +66,13 @@ public class QuoteSymbolModel extends ApiModel {
 
   public void setIncludeHourTrading(Boolean includeHourTrading) {
     this.includeHourTrading = includeHourTrading;
+  }
+
+  public TradeSession getTradeSession() {
+    return tradeSession;
+  }
+
+  public void setTradeSession(TradeSession tradeSession) {
+    this.tradeSession = tradeSession;
   }
 }

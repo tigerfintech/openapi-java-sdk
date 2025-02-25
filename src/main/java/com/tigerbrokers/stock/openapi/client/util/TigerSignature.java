@@ -28,10 +28,10 @@ public class TigerSignature {
   private static final String PRIVATE_KEY_END = "-----END PRIVATE KEY-----";
 
   /**
-   * 获取签名内容
+   * Get Content to sign
    *
-   * @param request 签名字段
-   * @return 签名字符串
+   * @param request request parameters
+   * @return signed string
    */
   public static String getSignContent(Map<String, Object> request) {
     StringBuilder content = new StringBuilder();
@@ -56,12 +56,12 @@ public class TigerSignature {
   }
 
   /**
-   * 使用私钥签名
+   * Sign with private key
    *
-   * @param content 待签参数
-   * @param privateKey 私钥
-   * @param charset 字符集，如UTF-8, GBK, GB2312
-   * @return 签名后的内容
+   * @param content raw content
+   * @param privateKey private key
+   * @param charset charset, such as UTF-8, GBK, GB2312
+   * @return signed content
    */
   public static String rsaSign(String content, String privateKey, String charset) {
     if (privateKey.startsWith("-")) {

@@ -32,6 +32,9 @@ message SocketCommon {
     Position = 7;
     OrderStatus = 8;
     OrderTransaction = 9;
+    StockTop = 10;
+    OptionTop = 11;
+    Kline = 12;
   }
 
   enum QuoteType {

@@ -1,7 +1,10 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.trade.model;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.ContractLeg;
 import com.tigerbrokers.stock.openapi.client.struct.TagValue;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AttachType;
@@ -9,6 +12,9 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class TradeOrderModel extends ApiModel {
@@ -52,7 +58,12 @@ public class TradeOrderModel extends ApiModel {
    * total quantity
    */
   @JSONField(name = "total_quantity")
-  private Integer totalQuantity;
+  private Long totalQuantity;
+  /**
+   * total quantity scale
+   */
+  @JSONField(name = "total_quantity_scale")
+  private Integer totalQuantityScale;
   /**
    * order validity time range
    * DAY：valid for the day
@@ -108,6 +119,11 @@ public class TradeOrderModel extends ApiModel {
    */
   @JSONField(name = "outside_rth")
   private Boolean outsideRth = Boolean.TRUE;
+  /**
+   * set place overnight order in the US market. value: OverNight
+   */
+  @JSONField(name = "trading_session_type")
+  private TradeSession tradingSessionType;
   /**
    * market
    */
@@ -195,6 +211,22 @@ public class TradeOrderModel extends ApiModel {
   @JSONField(name = "stop_loss_trailing_amount")
   private Double stopLossTrailingAmount;
 
+  /**
+   * Multi Order's type: COVERED,PROTECTIVE,VERTICAL,STRADDLE,STRANGLE,CALENDAR,DIAGONAL,SYNTHETIC,CUSTOM
+   */
+  @JSONField(name = "combo_type")
+  private String comboType;
+
+  @JSONField(name = "contract_legs")
+  private List<ContractLeg> contractLegs;
+
+  @JSONField(name = "oca_orders")
+  private List<TradeOrderModel> ocaOrders;
+
+  /** Order by amount (such as general fund subscription) */
+  @JSONField(name = "cash_amount")
+  private Double cashAmount;
+
   public TradeOrderModel() {
   }
 
@@ -262,12 +294,20 @@ public class TradeOrderModel extends ApiModel {
     this.currency = currency;
   }
 
-  public Integer getTotalQuantity() {
+  public Long getTotalQuantity() {
     return totalQuantity;
   }
 
-  public void setTotalQuantity(Integer totalQuantity) {
+  public void setTotalQuantity(Long totalQuantity) {
     this.totalQuantity = totalQuantity;
+  }
+
+  public Integer getTotalQuantityScale() {
+    return totalQuantityScale;
+  }
+
+  public void setTotalQuantityScale(Integer totalQuantityScale) {
+    this.totalQuantityScale = totalQuantityScale;
   }
 
   public TimeInForce getTimeInForce() {
@@ -332,6 +372,14 @@ public class TradeOrderModel extends ApiModel {
 
   public void setOutsideRth(Boolean outsideRth) {
     this.outsideRth = outsideRth;
+  }
+
+  public TradeSession getTradingSessionType() {
+    return tradingSessionType;
+  }
+
+  public void setTradingSessionType(TradeSession tradingSessionType) {
+    this.tradingSessionType = tradingSessionType;
   }
 
   public String getMarket() {
@@ -420,6 +468,16 @@ public class TradeOrderModel extends ApiModel {
 
   public void setAlgoParams(List<TagValue> algoParams) {
     this.algoParams = algoParams;
+  }
+
+  public void addAlgoParam(TagValue algoParam) {
+    if (algoParam == null) {
+      return;
+    }
+    if (this.algoParams == null) {
+      this.algoParams = new ArrayList<>();
+    }
+    this.algoParams.add(algoParam);
   }
 
   public String getSource() {
@@ -534,6 +592,39 @@ public class TradeOrderModel extends ApiModel {
     this.stopLossTrailingAmount = stopLossTrailingAmount;
   }
 
+  public String getComboType() {
+    return comboType;
+  }
+
+  public void setComboType(String comboType) {
+    this.comboType = comboType;
+  }
+
+  public List<ContractLeg> getContractLegs() {
+    return contractLegs;
+  }
+
+  public void setContractLegs(
+      List<ContractLeg> contractLegs) {
+    this.contractLegs = contractLegs;
+  }
+
+  public List<TradeOrderModel> getOcaOrders() {
+    return ocaOrders;
+  }
+
+  public void setOcaOrders(List<TradeOrderModel> ocaOrders) {
+    this.ocaOrders = ocaOrders;
+  }
+
+  public Double getCashAmount() {
+    return cashAmount;
+  }
+
+  public void setCashAmount(Double cashAmount) {
+    this.cashAmount = cashAmount;
+  }
+
   @Override
   public String toString() {
     return "TradeOrderModel{" +
@@ -546,6 +637,7 @@ public class TradeOrderModel extends ApiModel {
         ", action=" + action +
         ", currency=" + currency +
         ", totalQuantity=" + totalQuantity +
+        ", totalQuantityScale=" + totalQuantityScale +
         ", timeInForce=" + timeInForce +
         ", orderType=" + orderType +
         ", limitPrice=" + limitPrice +
@@ -553,6 +645,7 @@ public class TradeOrderModel extends ApiModel {
         ", adjustLimit=" + adjustLimit +
         ", trailingPercent=" + trailingPercent +
         ", outsideRth=" + outsideRth +
+        ", tradingSessionType=" + tradingSessionType +
         ", market='" + market + '\'' +
         ", exchange='" + exchange + '\'' +
         ", expiry='" + expiry + '\'' +
@@ -577,6 +670,9 @@ public class TradeOrderModel extends ApiModel {
         ", stopLossTif=" + stopLossTif +
         ", stopLossTrailingPercent=" + stopLossTrailingPercent +
         ", stopLossTrailingAmount=" + stopLossTrailingAmount +
+        ", comboType=" + comboType +
+        ", cashAmount=" + cashAmount +
+        ", ocaOrders=" + ocaOrders == null ? "" : JSONObject.toJSONString(ocaOrders, SerializerFeature.WriteEnumUsingToString) +
         '}';
   }
 }

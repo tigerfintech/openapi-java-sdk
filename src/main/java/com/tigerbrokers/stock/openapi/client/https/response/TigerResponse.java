@@ -4,7 +4,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import java.io.Serializable;
 
 /**
- * API基础响应信息。
+ * API basic response information
  */
 public class TigerResponse implements Serializable {
 

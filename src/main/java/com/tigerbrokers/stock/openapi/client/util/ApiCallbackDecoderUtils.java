@@ -24,7 +24,6 @@ import static io.netty.handler.codec.stomp.StompHeaders.HEART_BEAT;
 /**
  * @author  zhaolei
  * @since  2018/12/20
- * 描述
  */
 public class ApiCallbackDecoderUtils {
 
@@ -39,8 +38,11 @@ public class ApiCallbackDecoderUtils {
 
     switch (frame.command()) {
       case CONNECTED:
-        ApiLogger.info("connect token validation success:{}", frame);
-        WebSocketClient.getInstance().connectCountDown();
+        WebSocketClient wcClient = WebSocketClient.getWcClientByChannel(ctx.channel());
+        ApiLogger.info("connect token validation success:{}, {}", frame, buildMsgSuffix(ctx, wcClient));
+        if (null != wcClient) {
+          wcClient.connectCountDown();
+        }
         if (decoder.getCallback() != null) {
           // set stomp version
           HeaderBuilder.setUseVersion(frame.headers().getAsString(VERSION));
@@ -63,7 +65,7 @@ public class ApiCallbackDecoderUtils {
 
                   ctx.channel()
                       .pipeline()
-                      .addAfter(IDLE_STATE_HANDLER, IDLE_TRIGGER_HANDLER, new IdleTriggerHandler(decoder));
+                      .addAfter(IDLE_STATE_HANDLER, IDLE_TRIGGER_HANDLER, new IdleTriggerHandler(wcClient, decoder));
                 }
               }
               decoder.getCallback().connectionAck(serverSendInterval, serverReceiveInterval);
@@ -81,29 +83,35 @@ public class ApiCallbackDecoderUtils {
       case RECEIPT:
         break;
       case ERROR:
+        WebSocketClient client = WebSocketClient.getWcClientByChannel(ctx.channel());
+        String userInfo = buildMsgSuffix(ctx, client);
         if (decoder.getCallback() != null) {
           if (frame != null && frame.content() != null) {
             String content = frame.content().toString(Charset.defaultCharset());
             try {
               JSONObject jsonObject = JSONObject.parseObject(content);
               if (jsonObject.getIntValue("code") == TigerApiCode.CONNECTION_KICK_OUT_ERROR.getCode()) {
-                ApiLogger.info(content);
-                // close the connection(Do not send disconnect command)
-                WebSocketClient.getInstance().closeConnect(false);
                 String errMessage = jsonObject.getString("message");
+                StringBuilder msgBuilder = new StringBuilder(StringUtils.isEmpty(errMessage)
+                    ? TigerApiCode.CONNECTION_KICK_OUT_ERROR.getMessage() : errMessage);
+                msgBuilder.append(userInfo);
+                ApiLogger.info(msgBuilder.toString());
+                // close the connection(Do not send disconnect command)
+                if (null != client) {
+                  client.closeConnect();
+                }
                 // callback
-                decoder.getCallback().connectionKickout(TigerApiCode.CONNECTION_KICK_OUT_ERROR.getCode(),
-                    errMessage == null ? TigerApiCode.CONNECTION_KICK_OUT_ERROR.getMessage() : errMessage);
+                decoder.getCallback().connectionKickout(TigerApiCode.CONNECTION_KICK_OUT_ERROR.getCode(), msgBuilder.toString());
                 return;
               }
             } catch (Throwable th) {
               // ignore...
             }
-            decoder.getCallback().error(content);
+            decoder.getCallback().error(content + userInfo);
           } else if (frame != null) {
-            decoder.getCallback().error(JSONObject.toJSONString(frame, SerializerFeature.WriteEnumUsingToString));
+            decoder.getCallback().error(JSONObject.toJSONString(frame, SerializerFeature.WriteEnumUsingToString) + userInfo);
           } else {
-            decoder.getCallback().error("unknown error");
+            decoder.getCallback().error("unknown error" + userInfo);
           }
         }
         break;
@@ -128,8 +136,12 @@ public class ApiCallbackDecoderUtils {
 
     switch (response.getCommand()) {
       case CONNECTED:
-        ApiLogger.info("connect token validation success:{}", ProtoMessageUtil.toJson(response));
-        WebSocketClient.getInstance().connectCountDown();
+        WebSocketClient wcClient = WebSocketClient.getWcClientByChannel(ctx.channel());
+        ApiLogger.info("connect token validation success:{}, {}",
+            ProtoMessageUtil.toJson(response),  buildMsgSuffix(ctx, wcClient));
+        if (null != wcClient) {
+          wcClient.connectCountDown();
+        }
         receiveConnected(ctx, decoder, response.getMsg());
         break;
       case HEARTBEAT:
@@ -139,7 +151,7 @@ public class ApiCallbackDecoderUtils {
         decoder.handle(response);
         break;
       case ERROR:
-        processError(decoder, response);
+        processError(ctx, decoder, response);
         break;
       case DISCONNECT:
         if (decoder.getCallback() != null) {
@@ -179,7 +191,7 @@ public class ApiCallbackDecoderUtils {
 
               ctx.channel()
                   .pipeline()
-                  .addAfter(IDLE_STATE_HANDLER, IDLE_TRIGGER_HANDLER, new IdleTriggerHandler(decoder));
+                  .addAfter(IDLE_STATE_HANDLER, IDLE_TRIGGER_HANDLER, new IdleTriggerHandler(WebSocketClient.getWcClientByChannel(ctx.channel()), decoder));
             }
           }
           decoder.getCallback().connectionAck(serverSendInterval, serverReceiveInterval);
@@ -192,29 +204,38 @@ public class ApiCallbackDecoderUtils {
     }
   }
 
-  public static void processError(ApiCallbackDecoder decoder, Response response) {
+  public static void processError(ChannelHandlerContext ctx, ApiCallbackDecoder decoder, Response response) {
+    WebSocketClient wcClient = WebSocketClient.getWcClientByChannel(ctx.channel());
+    String userInfo = buildMsgSuffix(ctx, wcClient);
     if (decoder.getCallback() != null) {
       if (response.getCode() > 0) {
         try {
           if (response.getCode() == TigerApiCode.CONNECTION_KICK_OUT_ERROR.getCode()) {
-            String errMessage = response.getMsg() == null
-                ? TigerApiCode.CONNECTION_KICK_OUT_ERROR.getMessage() : response.getMsg();
-            ApiLogger.info(errMessage);
+            StringBuilder msgBuilder = new StringBuilder(response.getMsg() == null
+                ? TigerApiCode.CONNECTION_KICK_OUT_ERROR.getMessage() : response.getMsg());
+            msgBuilder.append(" ").append(userInfo);
+            ApiLogger.info(msgBuilder.toString());
             // close the connection(Do not send disconnect command)
-            WebSocketClient.getInstance().closeConnect(false);
+            if (null != wcClient) {
+              wcClient.closeConnect();
+            }
             // callback
-            decoder.getCallback().connectionKickout(response.getCode(), errMessage);
+            decoder.getCallback().connectionKickout(response.getCode(), msgBuilder.toString());
             return;
           }
         } catch (Throwable th) {
           // ignore...
         }
-        decoder.getCallback().error(response.getId(), response.getCode(), response.getMsg());
+        decoder.getCallback().error(response.getId(), response.getCode(), response.getMsg() + " " + userInfo);
       } else if (response.getMsg() != null) {
-        decoder.getCallback().error(response.getMsg());
+        decoder.getCallback().error(response.getMsg() + " " + userInfo);
       } else {
-        decoder.getCallback().error("unknown error");
+        decoder.getCallback().error("unknown error. " + userInfo);
       }
     }
+  }
+
+  private static String buildMsgSuffix(ChannelHandlerContext ctx, WebSocketClient wcClient) {
+    return new StringBuilder().append("[channel:").append(ctx.channel().id().asShortText()).append(", tigerId:").append(wcClient == null ? "" : wcClient.getClientConfig().tigerId).append(']').toString();
   }
 }
