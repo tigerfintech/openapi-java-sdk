@@ -15,9 +15,11 @@ import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.H
  * @since  2019/3/13
  */
 public class IdleTriggerHandler extends ChannelInboundHandlerAdapter {
+  private WebSocketClient wsClient;
   private ApiCallbackDecoder apiCallbackDecoder = null;
 
-  public IdleTriggerHandler(ApiCallbackDecoder decoder) {
+  public IdleTriggerHandler(WebSocketClient wsClient, ApiCallbackDecoder decoder) {
+    this.wsClient = wsClient;
     this.apiCallbackDecoder = decoder;
   }
 
@@ -26,7 +28,7 @@ public class IdleTriggerHandler extends ChannelInboundHandlerAdapter {
     if (evt instanceof IdleStateEvent) {
       IdleState state = ((IdleStateEvent) evt).state();
       if (IdleState.WRITER_IDLE == state) {
-        if (WebSocketClient.getInstance().isUseProtobuf()) {
+        if (this.wsClient.isUseProtobuf()) {
           ctx.channel().writeAndFlush(ProtoMessageUtil.buildHeartBeatMessage());
         } else {
           ctx.channel().writeAndFlush(StompMessageUtil.buildCommonSendMessage(HEART_BEAT));

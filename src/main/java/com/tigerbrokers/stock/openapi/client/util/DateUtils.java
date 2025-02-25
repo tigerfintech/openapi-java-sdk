@@ -144,6 +144,10 @@ public class DateUtils {
    * @return
    */
   public static String printSystemDate() {
-    return printDate(System.currentTimeMillis(), ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
+    return printSystemDate(null);
+  }
+
+  public static String printSystemDate(TimeZoneId timeZoneId) {
+    return printDate(System.currentTimeMillis(), timeZoneId);
   }
 }

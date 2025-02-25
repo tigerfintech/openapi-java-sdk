@@ -15,9 +15,11 @@ import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.T
 public class TokenFileWatched implements FileWatchedListener {
 
   private final ClientConfig clientConfig;
+  private final TokenManager tokenManager;
 
-  public TokenFileWatched(ClientConfig clientConfig) {
+  public TokenFileWatched(ClientConfig clientConfig, TokenManager tokenManager) {
     this.clientConfig = clientConfig;
+    this.tokenManager = tokenManager;
   }
 
   @Override
@@ -26,7 +28,7 @@ public class TokenFileWatched implements FileWatchedListener {
     if (!TOKEN_FILENAME.equals(fileName)) {
       return;
     }
-    boolean load = TokenManager.getInstance().loadTokenFile(clientConfig);
+    boolean load = tokenManager.loadTokenFile(clientConfig);
     ApiLogger.info("{} is created, reload token {}", fileName, load ? "success" : "fail");
 
   }
@@ -37,7 +39,7 @@ public class TokenFileWatched implements FileWatchedListener {
     if (!TOKEN_FILENAME.equals(fileName)) {
       return;
     }
-    boolean load = TokenManager.getInstance().loadTokenFile(clientConfig);
+    boolean load = tokenManager.loadTokenFile(clientConfig);
     ApiLogger.info("{} is modifed, reload token {}", fileName, load ? "success" : "fail");
   }
 

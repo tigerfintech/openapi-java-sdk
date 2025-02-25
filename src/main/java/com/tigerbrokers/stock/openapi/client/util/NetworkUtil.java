@@ -237,28 +237,27 @@ public class NetworkUtil {
   /**
    * get http server address
    */
-  public static String getHttpServerAddress(String originalAddress) {
-    return StringUtils.defaultIfEmpty(getHttpServerAddress(null, originalAddress).get(BizType.COMMON), originalAddress);
+  public static String getHttpServerAddress(ClientConfig clientConfig, String originalAddress) {
+    return StringUtils.defaultIfEmpty(getHttpServerAddress(clientConfig, null, originalAddress).get(BizType.COMMON), originalAddress);
   }
 
-  public static Map<BizType, String> getHttpServerAddress(License license, String originalAddress) {
-    return refreshAndGetServerAddress(Protocol.HTTP, license, originalAddress);
+  public static Map<BizType, String> getHttpServerAddress(ClientConfig clientConfig, License license, String originalAddress) {
+    return refreshAndGetServerAddress(clientConfig, Protocol.HTTP, license, originalAddress);
   }
 
-  public static String getServerAddress(String originalAddress) {
-    return StringUtils.defaultIfEmpty(refreshAndGetServerAddress(ClientConfig.DEFAULT_CONFIG.isSslSocket ? Protocol.SECURE_SOCKET : Protocol.WEB_SOCKET,
+  public static String getServerAddress(ClientConfig clientConfig, String originalAddress) {
+    return StringUtils.defaultIfEmpty(refreshAndGetServerAddress(clientConfig, clientConfig.isSslSocket ? Protocol.SECURE_SOCKET : Protocol.WEB_SOCKET,
         null, originalAddress).get(BizType.SOCKET), originalAddress);
   }
 
-  private static Map<BizType, String> refreshAndGetServerAddress(Protocol protocol, License license, String originalAddress) {
-    ClientConfig clientConfig = ClientConfig.DEFAULT_CONFIG;
+  private static Map<BizType, String> refreshAndGetServerAddress(ClientConfig clientConfig, Protocol protocol, License license, String originalAddress) {
     Env env = clientConfig.getEnv();
     String port = getDefaultPort(clientConfig, protocol);
     String commonUrl = null;
     String domainGardenResponse = null;
     List<Map<String, Object>> domainConfigList = Collections.emptyList();
     try {
-      domainGardenResponse = HttpUtils.get(TigerApiConstants.DOMAIN_GARDEN_ADDRESS);
+      domainGardenResponse = HttpUtils.get(TigerApiConstants.DOMAIN_GARDEN_ADDRESS, clientConfig.token);
       Map<String, Object> domainConfigMap = JSON.parseObject(domainGardenResponse, Map.class);
       if (domainConfigMap != null && domainConfigMap.get("items") != null) {
         domainConfigList = (List<Map<String, Object>>)domainConfigMap.get("items");

@@ -31,20 +31,17 @@ import static com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil.TOKEN_FI
  * @date 2023/2/10 6:03 PM
  */
 public class TokenManager {
-  private static final TokenManager tokenManager = new TokenManager();
+  private final TigerHttpClient tigerHttpClient;
 
   // refresh every 5 days by default
   private final int defaultRefreshIntervalDays = 5;
   private long refreshIntervalMs = TimeUnit.DAYS.toMillis(defaultRefreshIntervalDays);
   private ScheduledThreadPoolExecutor executorService;
-  private ClientConfig clientConfig;
   private final List<RefreshTokenCallback> callbackList = new ArrayList<>();
   private final RefreshTokenCallback defaultCallback = new DefaultRefreshTokenCallback();
 
-  private TokenManager() {}
-
-  public static TokenManager getInstance() {
-    return tokenManager;
+  public TokenManager(TigerHttpClient client) {
+    this.tigerHttpClient = client;
   }
 
   public void destroy() {
@@ -54,11 +51,11 @@ public class TokenManager {
     callbackList.clear();
   }
 
-  public void init(ClientConfig config) {
+  public void init() {
+    ClientConfig config = this.tigerHttpClient.getClientConfig();
     if (config == null) {
       return;
     }
-    this.clientConfig = config;
     register(defaultCallback);
     loadTokenFile(config);
     addTokenFileWatch(config);
@@ -79,14 +76,14 @@ public class TokenManager {
     if (config.refreshTokenIntervalDays > 0) {
       refreshIntervalMs = TimeUnit.DAYS.toMillis(config.refreshTokenIntervalDays);
     }
-    long tokenCreateTime = ConfigFileUtil.tryGetCreateTime(clientConfig.token);
+    long tokenCreateTime = ConfigFileUtil.tryGetCreateTime(config.token);
     long initialDelay = tokenCreateTime + refreshIntervalMs - System.currentTimeMillis();
     if (initialDelay <= 0) {
       refreshToken();
-      tokenCreateTime = ConfigFileUtil.tryGetCreateTime(clientConfig.token);
+      tokenCreateTime = ConfigFileUtil.tryGetCreateTime(config.token);
       initialDelay = tokenCreateTime + refreshIntervalMs - System.currentTimeMillis();
     }
-    initialDelay = getDelayTime(clientConfig.refreshTokenTime, initialDelay);
+    initialDelay = getDelayTime(config.refreshTokenTime, initialDelay);
 
     executorService.scheduleWithFixedDelay(new Runnable() {
       @Override
@@ -94,7 +91,7 @@ public class TokenManager {
         refreshToken();
       }
     }, initialDelay, refreshIntervalMs, TimeUnit.MILLISECONDS);
-    if (!StringUtils.isEmpty(clientConfig.token)) {
+    if (!StringUtils.isEmpty(config.token)) {
       ApiLogger.info("init auto refresh token task success");
     }
   }
@@ -118,6 +115,7 @@ public class TokenManager {
   }
 
   private void refreshToken() {
+    ClientConfig clientConfig = this.tigerHttpClient.getClientConfig();
     if (StringUtils.isEmpty(clientConfig.token) && !loadTokenFile(clientConfig)) {
       return;
     }
@@ -137,7 +135,7 @@ public class TokenManager {
     String oldToken = clientConfig.token;
     do {
       try {
-        UserTokenResponse response = TigerHttpClient.getInstance().execute(request);
+        UserTokenResponse response = this.tigerHttpClient.execute(request);
         if (response.isSuccess()) {
           ApiLogger.info("refreshToken success. return:" + JSONObject.toJSONString(response.getUserToken()));
           for (RefreshTokenCallback callback : callbackList) {
@@ -178,7 +176,7 @@ public class TokenManager {
     if (StringUtils.isEmpty(time)) {
       return -1;
     }
-    TimeZoneId timeZoneId = ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone();
+    TimeZoneId timeZoneId = this.tigerHttpClient.getClientConfig().getDefaultTimeZone();
     Long timestamp = DateUtils.getTimestamp(
         DateUtils.printDate(baseTimestamp, timeZoneId) + " " + time, timeZoneId);
     return timestamp == null ? -1 : timestamp;
@@ -216,7 +214,7 @@ public class TokenManager {
       // if token file exists, add listener
       if (ConfigFileUtil.checkFile(config.configFilePath, TOKEN_FILENAME, false)) {
         Path configFilePath = Paths.get(config.configFilePath);
-        FileWatchedListener tokenFileListener = new TokenFileWatched(config);
+        FileWatchedListener tokenFileListener = new TokenFileWatched(config, this);
         FileWatchedService fileWatchedService = new FileWatchedService(configFilePath, tokenFileListener);
         new Thread() {
           @Override
