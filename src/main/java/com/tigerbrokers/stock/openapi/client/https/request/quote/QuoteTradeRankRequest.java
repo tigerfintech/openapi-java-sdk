@@ -13,7 +13,7 @@ public class QuoteTradeRankRequest extends TigerCommonRequest implements TigerRe
 
     public QuoteTradeRankRequest() {
         setApiVersion(V2_0);
-        setApiMethodName(MethodName.QUOTE_TRADE_RANK);
+        setApiMethodName(MethodName.TRADE_RANK);
     }
 
     public static QuoteTradeRankRequest newRequest(Market market) {

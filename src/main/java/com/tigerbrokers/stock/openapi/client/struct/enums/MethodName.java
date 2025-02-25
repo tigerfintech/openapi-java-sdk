@@ -143,7 +143,7 @@ public enum MethodName {
   /**
    * trade rank
    */
-  QUOTE_TRADE_RANK("quote_trade_rank", MethodType.QUOTE),
+  TRADE_RANK("trade_rank", MethodType.QUOTE),
   ;
 
   private String value;
