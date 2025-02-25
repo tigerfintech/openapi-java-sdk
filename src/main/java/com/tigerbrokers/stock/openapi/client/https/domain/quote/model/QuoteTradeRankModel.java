@@ -6,8 +6,6 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 
 public class QuoteTradeRankModel extends ApiModel {
     private Market market;
-    private Integer page;
-    private Integer pageSize;
 
     public QuoteTradeRankModel() {
     }
@@ -23,21 +21,5 @@ public class QuoteTradeRankModel extends ApiModel {
 
     public void setMarket(Market market) {
         this.market = market;
-    }
-
-    public Integer getPage() {
-        return page;
-    }
-
-    public void setPage(Integer page) {
-        this.page = page;
-    }
-
-    public Integer getPageSize() {
-        return pageSize;
-    }
-
-    public void setPageSize(Integer pageSize) {
-        this.pageSize = pageSize;
     }
 } 
