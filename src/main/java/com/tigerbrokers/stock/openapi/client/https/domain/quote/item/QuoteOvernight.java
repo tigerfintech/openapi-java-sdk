@@ -1,0 +1,88 @@
+package com.tigerbrokers.stock.openapi.client.https.domain.quote.item;
+
+import java.io.Serializable;
+
+/**
+ * Description:
+ * Created by bean on 2025/02/28.
+ */
+public class QuoteOvernight implements Serializable {
+
+  /**
+   * symbol
+   */
+  private String symbol;
+
+  /**
+   * latest price
+   */
+  private Double latestPrice;
+
+  protected Double preClose;
+
+  private Long volume;
+
+  private Double amount;
+
+  private Long timestamp;
+
+  public String getSymbol() {
+    return symbol;
+  }
+
+  public void setSymbol(String symbol) {
+    this.symbol = symbol;
+  }
+
+  public Double getLatestPrice() {
+    return latestPrice;
+  }
+
+  public void setLatestPrice(Double latestPrice) {
+    this.latestPrice = latestPrice;
+  }
+
+  public Double getPreClose() {
+    return preClose;
+  }
+
+  public void setPreClose(Double preClose) {
+    this.preClose = preClose;
+  }
+
+  public Long getVolume() {
+    return volume;
+  }
+
+  public void setVolume(Long volume) {
+    this.volume = volume;
+  }
+
+  public Double getAmount() {
+    return amount;
+  }
+
+  public void setAmount(Double amount) {
+    this.amount = amount;
+  }
+
+  public Long getTimestamp() {
+    return timestamp;
+  }
+
+  public void setTimestamp(Long timestamp) {
+    this.timestamp = timestamp;
+  }
+
+  @Override
+  public String toString() {
+    return "QuoteOvernight{" +
+        "symbol='" + symbol + '\'' +
+        ", latestPrice=" + latestPrice +
+        ", preClose=" + preClose +
+        ", amount=" + amount +
+        ", volume=" + volume +
+        ", timestamp=" + timestamp +
+        '}';
+  }
+}
