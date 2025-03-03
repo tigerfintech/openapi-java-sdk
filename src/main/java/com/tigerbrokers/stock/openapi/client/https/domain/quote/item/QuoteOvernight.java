@@ -18,6 +18,11 @@ public class QuoteOvernight implements Serializable {
    */
   private Double latestPrice;
 
+  private Double askPrice;
+  private Long askSize;
+  private Double bidPrice;
+  private Long bidSize;
+
   protected Double preClose;
 
   private Long volume;
@@ -40,6 +45,38 @@ public class QuoteOvernight implements Serializable {
 
   public void setLatestPrice(Double latestPrice) {
     this.latestPrice = latestPrice;
+  }
+
+  public Double getAskPrice() {
+    return askPrice;
+  }
+
+  public void setAskPrice(Double askPrice) {
+    this.askPrice = askPrice;
+  }
+
+  public Long getAskSize() {
+    return askSize;
+  }
+
+  public void setAskSize(Long askSize) {
+    this.askSize = askSize;
+  }
+
+  public Double getBidPrice() {
+    return bidPrice;
+  }
+
+  public void setBidPrice(Double bidPrice) {
+    this.bidPrice = bidPrice;
+  }
+
+  public Long getBidSize() {
+    return bidSize;
+  }
+
+  public void setBidSize(Long bidSize) {
+    this.bidSize = bidSize;
   }
 
   public Double getPreClose() {
@@ -79,6 +116,10 @@ public class QuoteOvernight implements Serializable {
     return "QuoteOvernight{" +
         "symbol='" + symbol + '\'' +
         ", latestPrice=" + latestPrice +
+        ", askPrice=" + askPrice +
+        ", askSize=" + askSize +
+        ", bidPrice=" + bidPrice +
+        ", bidSize=" + bidSize +
         ", preClose=" + preClose +
         ", amount=" + amount +
         ", volume=" + volume +
