@@ -62,6 +62,7 @@ public class ContractItem extends ApiModel {
   private String discountedTimeZoneCode;
   private String discountedStartAt;
   private String discountedEndAt;
+  private Boolean supportOvernightTrading;
 
   public Integer getContractId() {
     return contractId;
@@ -402,6 +403,14 @@ public class ContractItem extends ApiModel {
 
   public void setDiscountedEndAt(String discountedEndAt) {
     this.discountedEndAt = discountedEndAt;
+  }
+
+  public Boolean getSupportOvernightTrading() {
+    return supportOvernightTrading;
+  }
+
+  public void setSupportOvernightTrading(Boolean supportOvernightTrading) {
+    this.supportOvernightTrading = supportOvernightTrading;
   }
 
   @Override
