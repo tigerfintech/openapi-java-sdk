@@ -21,6 +21,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradingSessionType;
 import com.tigerbrokers.stock.openapi.client.util.AccountUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 
@@ -704,7 +705,16 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     return this;
   }
 
+  // compatible
   public TradeOrderRequest setTradingSessionType(TradeSession tradingSessionType) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    if (TradeSession.OverNight == tradingSessionType) {
+      model.setTradingSessionType(TradingSessionType.OVERNIGHT);
+    }
+    return this;
+  }
+
+  public TradeOrderRequest setTradingSessionType(TradingSessionType tradingSessionType) {
     TradeOrderModel model = (TradeOrderModel) getApiModel();
     model.setTradingSessionType(tradingSessionType);
     return this;
