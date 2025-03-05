@@ -70,6 +70,7 @@ public class TigerHttpClient implements TigerClient {
   private String accountType;
   private String deviceId;
   private int failRetryCounts = TigerApiConstants.DEFAULT_FAIL_RETRY_COUNT;
+  private boolean isCustomServerUrl = false;
 
   private static final String ONLINE_PUBLIC_KEY =
       "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDNF3G8SoEcCZh2rshUbayDgLLrj6rKgzNMxDL2HSnKcB0+GPOsndqSv+a4IBu9+I3fyBp5hkyMMG2+AXugd9pMpy6VxJxlNjhX1MYbNTZJUT4nudki4uh+LMOkIBHOceGNXjgB+cXqmlUnjlqha/HgboeHSnSgpM3dKSJQlIOsDwIDAQAB";
@@ -145,6 +146,17 @@ public class TigerHttpClient implements TigerClient {
     }
   }
 
+  /**
+   * only for inner test
+   * @param customServerUrl
+   */
+  public void useCustomServerUrl(String customServerUrl) {
+    this.serverUrl = customServerUrl;
+    this.paperServerUrl = customServerUrl;
+    this.quoteServerUrl = customServerUrl;
+    this.isCustomServerUrl = true;
+  }
+
   public void destroy() {
     if (this.tokenManager != null) {
       this.tokenManager.destroy();
@@ -205,6 +217,9 @@ public class TigerHttpClient implements TigerClient {
 
   private void refreshUrl() {
     try {
+      if (this.isCustomServerUrl) {
+        return;
+      }
       Map<BizType, String> urlMap = NetworkUtil.getHttpServerAddress(this.clientConfig, this.clientConfig.license, this.serverUrl);
       String newServerUrl = urlMap.get(BizType.TRADE);
       if (newServerUrl == null) {
