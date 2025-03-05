@@ -107,7 +107,8 @@ public class TradeParamBuilder {
     return this;
   }
 
-  // compatible
+  // compatible, please use tradingSessionType(TradingSessionType tradingSessionType)
+  @Deprecated
   public TradeParamBuilder tradingSessionType(TradeSession tradingSessionType) {
     if (tradingSessionType != null && TradeSession.OverNight == tradingSessionType) {
       this.orderParameter.setTradingSessionType(TradingSessionType.OVERNIGHT);

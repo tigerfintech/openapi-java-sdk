@@ -705,7 +705,8 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
     return this;
   }
 
-  // compatible
+  // compatible, please use setTradingSessionType(TradingSessionType tradingSessionType)
+  @Deprecated
   public TradeOrderRequest setTradingSessionType(TradeSession tradingSessionType) {
     TradeOrderModel model = (TradeOrderModel) getApiModel();
     if (TradeSession.OverNight == tradingSessionType) {
