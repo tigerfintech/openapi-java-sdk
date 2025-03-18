@@ -40,35 +40,35 @@ public class NetworkUtilTest {
   public void testGetServerAddress() {
 
     try (MockedStatic<HttpUtils> theMock = Mockito.mockStatic(HttpUtils.class)) {
-      theMock.when(() -> HttpUtils.get(anyString())).thenReturn(domainConfigJson);
-      // theMock.when(HttpUtils::get).thenReturn(cgplayJson);
       ClientConfig config = ClientConfig.DEFAULT_CONFIG;
+      theMock.when(() -> HttpUtils.get(anyString(), config.token)).thenReturn(domainConfigJson);
+      // theMock.when(HttpUtils::get).thenReturn(cgplayJson);
 
       // prod
       config.setEnv(Env.PROD);
       config.isSslSocket = false;
       System.out.println("\r\nenv:" + config.getEnv()
           + ", isSslSocket:" + config.isSslSocket);
-      System.out.println(NetworkUtil.getHttpServerAddress(null));
-      Assert.assertEquals("https://openapi.tigerfintech.com/gateway", NetworkUtil.getHttpServerAddress(null));
-      System.out.println(NetworkUtil.getServerAddress(null));
-      Assert.assertEquals("wss://openapi.tigerfintech.com:9887/stomp", NetworkUtil.getServerAddress(null));
+      System.out.println(NetworkUtil.getHttpServerAddress(config, null));
+      Assert.assertEquals("https://openapi.tigerfintech.com/gateway", NetworkUtil.getHttpServerAddress(config, null));
+      System.out.println(NetworkUtil.getServerAddress(config, null));
+      Assert.assertEquals("wss://openapi.tigerfintech.com:9887/stomp", NetworkUtil.getServerAddress(config, null));
       config.isSslSocket = true;
-      System.out.println(NetworkUtil.getServerAddress(null));
-      Assert.assertEquals("wss://openapi.tigerfintech.com:9883", NetworkUtil.getServerAddress(null));
+      System.out.println(NetworkUtil.getServerAddress(config, null));
+      Assert.assertEquals("wss://openapi.tigerfintech.com:9883", NetworkUtil.getServerAddress(config, null));
 
       // SANDBOX
       config.setEnv(Env.SANDBOX);
       config.isSslSocket = false;
       System.out.println("\r\nenv:" + config.getEnv()
           + ", isSslSocket:" + config.isSslSocket);
-      System.out.println(NetworkUtil.getHttpServerAddress(null));
-      Assert.assertEquals("https://openapi-sandbox.tigerfintech.com/gateway", NetworkUtil.getHttpServerAddress(null));
-      System.out.println(NetworkUtil.getServerAddress(null));
-      Assert.assertEquals("wss://openapi-sandbox.tigerfintech.com:9889/stomp", NetworkUtil.getServerAddress(null));
+      System.out.println(NetworkUtil.getHttpServerAddress(config, null));
+      Assert.assertEquals("https://openapi-sandbox.tigerfintech.com/gateway", NetworkUtil.getHttpServerAddress(config, null));
+      System.out.println(NetworkUtil.getServerAddress(config, null));
+      Assert.assertEquals("wss://openapi-sandbox.tigerfintech.com:9889/stomp", NetworkUtil.getServerAddress(config, null));
       config.isSslSocket = true;
-      System.out.println(NetworkUtil.getServerAddress(null));
-      Assert.assertEquals("wss://openapi-sandbox.tigerfintech.com:9885", NetworkUtil.getServerAddress(null));
+      System.out.println(NetworkUtil.getServerAddress(config, null));
+      Assert.assertEquals("wss://openapi-sandbox.tigerfintech.com:9885", NetworkUtil.getServerAddress(config, null));
 
     }
   }
@@ -91,28 +91,28 @@ public class NetworkUtilTest {
         + "}]}";
 
     try (MockedStatic<HttpUtils> theMock = Mockito.mockStatic(HttpUtils.class)) {
-      theMock.when(() -> HttpUtils.get(anyString())).thenReturn(domainConfigJson02);
-      // theMock.when(HttpUtils::get).thenReturn(cgplayJson);
       ClientConfig config = ClientConfig.DEFAULT_CONFIG;
+      theMock.when(() -> HttpUtils.get(anyString(), config.token)).thenReturn(domainConfigJson02);
+      // theMock.when(HttpUtils::get).thenReturn(cgplayJson);
 
       // prod
       config.setEnv(Env.PROD);
       config.isSslSocket = false;
       System.out.println("\r\nenv:" + config.getEnv()
           + ", isSslSocket:" + config.isSslSocket);
-      System.out.println(NetworkUtil.getHttpServerAddress(null));
-      Assert.assertEquals("https://openapi.tigerfintech.com/gateway", NetworkUtil.getHttpServerAddress(null));
-      System.out.println(NetworkUtil.getServerAddress(null));
-      Assert.assertEquals("wss://openapi.tigerfintech.com:9887/stomp", NetworkUtil.getServerAddress(null));
+      System.out.println(NetworkUtil.getHttpServerAddress(config, null));
+      Assert.assertEquals("https://openapi.tigerfintech.com/gateway", NetworkUtil.getHttpServerAddress(config, null));
+      System.out.println(NetworkUtil.getServerAddress(config, null));
+      Assert.assertEquals("wss://openapi.tigerfintech.com:9887/stomp", NetworkUtil.getServerAddress(config, null));
 
       config.isSslSocket = true;
-      System.out.println(NetworkUtil.getServerAddress(null));
-      Assert.assertEquals("wss://openapi.tigerfintech.com:9883", NetworkUtil.getServerAddress(null));
+      System.out.println(NetworkUtil.getServerAddress(config, null));
+      Assert.assertEquals("wss://openapi.tigerfintech.com:9883", NetworkUtil.getServerAddress(config, null));
 
       System.out.println("===========");
       config.license = License.TBNZ;
       // assert url
-      Map<BizType, String> urlMap = NetworkUtil.getHttpServerAddress(config.license, null);
+      Map<BizType, String> urlMap = NetworkUtil.getHttpServerAddress(config, config.license, null);
       System.out.println(urlMap.get(BizType.COMMON));
       Assert.assertEquals("https://openapi.tigerfintech.com/gateway",
           urlMap.get(BizType.COMMON));
@@ -143,28 +143,28 @@ public class NetworkUtilTest {
         + "}]}";
 
     try (MockedStatic<HttpUtils> theMock = Mockito.mockStatic(HttpUtils.class)) {
-      theMock.when(() -> HttpUtils.get(anyString())).thenReturn(domainConfigJson03);
-      // theMock.when(HttpUtils::get).thenReturn(cgplayJson);
       ClientConfig config = ClientConfig.DEFAULT_CONFIG;
+      theMock.when(() -> HttpUtils.get(anyString(), config.token)).thenReturn(domainConfigJson03);
+      // theMock.when(HttpUtils::get).thenReturn(cgplayJson);
 
       // prod
       config.setEnv(Env.PROD);
       config.isSslSocket = false;
       System.out.println("\r\nenv:" + config.getEnv()
           + ", isSslSocket:" + config.isSslSocket);
-      System.out.println(NetworkUtil.getHttpServerAddress(null));
-      Assert.assertEquals("https://openapi.tigerfintech.com/gateway", NetworkUtil.getHttpServerAddress(null));
-      System.out.println(NetworkUtil.getServerAddress(null));
-      Assert.assertEquals("wss://openapi.tigerfintech.com:9887/stomp", NetworkUtil.getServerAddress(null));
+      System.out.println(NetworkUtil.getHttpServerAddress(config, null));
+      Assert.assertEquals("https://openapi.tigerfintech.com/gateway", NetworkUtil.getHttpServerAddress(config, null));
+      System.out.println(NetworkUtil.getServerAddress(config, null));
+      Assert.assertEquals("wss://openapi.tigerfintech.com:9887/stomp", NetworkUtil.getServerAddress(config, null));
 
       config.isSslSocket = true;
-      System.out.println(NetworkUtil.getServerAddress(null));
-      Assert.assertEquals("wss://openapi.tigerfintech.com:9883", NetworkUtil.getServerAddress(null));
+      System.out.println(NetworkUtil.getServerAddress(config, null));
+      Assert.assertEquals("wss://openapi.tigerfintech.com:9883", NetworkUtil.getServerAddress(config, null));
 
       System.out.println("===========");
       config.license = License.TBSG;
       // assert url
-      Map<BizType, String> urlMap = NetworkUtil.getHttpServerAddress(config.license, null);
+      Map<BizType, String> urlMap = NetworkUtil.getHttpServerAddress(config, config.license, null);
       System.out.println(urlMap.get(BizType.COMMON));
       Assert.assertEquals("https://openapi.tigerfintech.com/gateway",
           urlMap.get(BizType.COMMON));

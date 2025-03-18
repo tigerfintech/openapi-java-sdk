@@ -24,4 +24,6 @@ public abstract class ApiModel implements Serializable {
   public String getAccount() {
     return null;
   }
+  public void setAccount(String account) {
+  }
 }

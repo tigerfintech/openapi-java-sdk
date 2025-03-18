@@ -24,6 +24,7 @@ public class ContractItem extends ApiModel {
   private Double strike;
   private String right;
   private Double multiplier;
+  private Double lotSize;
   private String exchange;
   private String market;
   private String primaryExchange;
@@ -132,6 +133,14 @@ public class ContractItem extends ApiModel {
 
   public void setMultiplier(Double multiplier) {
     this.multiplier = multiplier;
+  }
+
+  public Double getLotSize() {
+    return lotSize;
+  }
+
+  public void setLotSize(Double lotSize) {
+    this.lotSize = lotSize;
   }
 
   public String getExchange() {
@@ -407,6 +416,7 @@ public class ContractItem extends ApiModel {
             ", strike=" + strike +
             ", right='" + right + '\'' +
             ", multiplier=" + multiplier +
+            ", lotSize=" + lotSize +
             ", exchange='" + exchange + '\'' +
             ", market='" + market + '\'' +
             ", primaryExchange='" + primaryExchange + '\'' +

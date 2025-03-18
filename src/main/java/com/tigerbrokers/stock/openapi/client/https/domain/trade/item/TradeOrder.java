@@ -85,7 +85,7 @@ public class TradeOrder implements Serializable {
   private OrderStatus status;
 
   private String source;
-  private Double discount;
+  private Integer discount;
 
   private Boolean canModify;
   private Boolean canCancel;
@@ -500,11 +500,11 @@ public class TradeOrder implements Serializable {
     this.source = source;
   }
 
-  public Double getDiscount() {
+  public Integer getDiscount() {
     return discount;
   }
 
-  public void setDiscount(Double discount) {
+  public void setDiscount(Integer discount) {
     this.discount = discount;
   }
 

@@ -8,7 +8,6 @@ import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
-import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
@@ -58,6 +57,8 @@ import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.V
 
 public class TigerHttpClient implements TigerClient {
 
+  private ClientConfig clientConfig;
+  private TokenManager tokenManager;
   private String serverUrl;
   private String quoteServerUrl;
   private String paperServerUrl;
@@ -86,7 +87,7 @@ public class TigerHttpClient implements TigerClient {
     Security.setProperty("jdk.certpath.disabledAlgorithms", "");
   }
 
-  private TigerHttpClient() {
+  public TigerHttpClient() {
   }
 
   private static class SingletonInner {
@@ -102,12 +103,14 @@ public class TigerHttpClient implements TigerClient {
   }
 
   public TigerHttpClient clientConfig(ClientConfig clientConfig) {
+    this.clientConfig = clientConfig;
     ConfigFileUtil.loadConfigFile(clientConfig);
     init(clientConfig.tigerId, clientConfig.privateKey);
     if (clientConfig.failRetryCounts <= TigerApiConstants.MAX_FAIL_RETRY_COUNT) {
       this.failRetryCounts = Math.max(clientConfig.failRetryCounts, 0);
     }
-    TokenManager.getInstance().init(clientConfig);
+    this.tokenManager = new TokenManager(this);
+    this.tokenManager.init();
     initDomainRefreshTask();
     if (clientConfig.isAutoGrabPermission) {
       TigerHttpRequest request = new TigerHttpRequest(MethodName.GRAB_QUOTE_PERMISSION);
@@ -128,7 +131,7 @@ public class TigerHttpClient implements TigerClient {
     }
     this.tigerId = tigerId;
     this.privateKey = privateKey;
-    if (ClientConfig.DEFAULT_CONFIG.getEnv() == Env.PROD) {
+    if (this.clientConfig.getEnv() == Env.PROD) {
       this.tigerPublicKey = ONLINE_PUBLIC_KEY;
     } else {
       this.tigerPublicKey = SANDBOX_PUBLIC_KEY;
@@ -142,21 +145,34 @@ public class TigerHttpClient implements TigerClient {
     }
   }
 
+  public void destroy() {
+    if (this.tokenManager != null) {
+      this.tokenManager.destroy();
+    }
+    if (domainExecutorService != null && !domainExecutorService.isShutdown()) {
+      domainExecutorService.shutdown();
+    }
+  }
+
   public TigerHttpClient accessToken(String accessToken) {
     this.accessToken = accessToken;
     return this;
   }
 
+  public ClientConfig getClientConfig() {
+    return clientConfig;
+  }
+
   private void initLicense() {
-    if (null == ClientConfig.DEFAULT_CONFIG.license) {
+    if (null == this.clientConfig.license) {
       try {
-        Map<BizType, String> urlMap = NetworkUtil.getHttpServerAddress(null, this.serverUrl);
+        Map<BizType, String> urlMap = NetworkUtil.getHttpServerAddress(this.clientConfig,null, this.serverUrl);
         this.serverUrl = StringUtils.defaultIfEmpty(urlMap.get(BizType.COMMON), this.serverUrl);
         UserLicenseRequest request = UserLicenseRequest.newRequest();
         UserLicenseResponse response = execute(request);
         if (response.isSuccess() && response.getLicenseItem() != null) {
           ApiLogger.debug("license:{}", JSON.toJSONString(response.getLicenseItem(), SerializerFeature.WriteEnumUsingToString));
-          ClientConfig.DEFAULT_CONFIG.license = License.valueOf(response.getLicenseItem().getLicense());
+          this.clientConfig.license = License.valueOf(response.getLicenseItem().getLicense());
         }
       } catch (Exception e) {
         ApiLogger.debug("get license fail. tigerId:{}", tigerId);
@@ -189,7 +205,7 @@ public class TigerHttpClient implements TigerClient {
 
   private void refreshUrl() {
     try {
-      Map<BizType, String> urlMap = NetworkUtil.getHttpServerAddress(ClientConfig.DEFAULT_CONFIG.license, this.serverUrl);
+      Map<BizType, String> urlMap = NetworkUtil.getHttpServerAddress(this.clientConfig, this.clientConfig.license, this.serverUrl);
       String newServerUrl = urlMap.get(BizType.TRADE);
       if (newServerUrl == null) {
         newServerUrl = urlMap.get(BizType.COMMON);
@@ -231,18 +247,34 @@ public class TigerHttpClient implements TigerClient {
     return accountType;
   }
 
+  private void setDefaultAccountIfAbsent(TigerRequest request) {
+    if (request instanceof TigerHttpRequest) {
+      return;
+    }
+    // TigerCommonRequest
+    MethodType methodType = request.getApiMethodName().getType();
+    if (MethodType.TRADE == methodType && MethodName.ACCOUNTS != request.getApiMethodName()) {
+      ApiModel apiModel = request.getApiModel();
+      if (apiModel != null && StringUtils.isEmpty(apiModel.getAccount())
+          && !StringUtils.isEmpty(this.clientConfig.defaultAccount)) {
+        apiModel.setAccount(this.clientConfig.defaultAccount);
+      }
+    }
+  }
+
   @Override
   public <T extends TigerResponse> T execute(TigerRequest<T> request) {
     T response;
     String param = null;
     String data = null;
     try {
+      setDefaultAccountIfAbsent(request);
       validate(request);
       // after successful verification（string enumeration values may be reset）, generate JSON data
       param = JSONObject.toJSONString(buildParams(request), SerializerFeature.WriteEnumUsingToString);
       ApiLogger.debug("request param:{}", param);
 
-      data = HttpUtils.post(getServerUrl(request), param,
+      data = HttpUtils.post(getServerUrl(request), param, this.clientConfig.token,
           MethodName.PLACE_ORDER == request.getApiMethodName() ? 0 : failRetryCounts);
 
       ApiLogger.debug("response result:{}", data);
@@ -344,9 +376,9 @@ public class TigerHttpClient implements TigerClient {
   private void setDefaultSecretKey(ApiModel apiModel, MethodName methodName) {
     if (methodName != null && methodName.getType() == MethodType.TRADE
         && !StringUtils.isEmpty(apiModel.getAccount())
-        && !StringUtils.isEmpty(ClientConfig.DEFAULT_CONFIG.secretKey)) {
+        && !StringUtils.isEmpty(this.clientConfig.secretKey)) {
       // set default secretKey
-      ReflectionUtil.checkAndSetDefaultValue(apiModel, "secretKey", "setSecretKey", ClientConfig.DEFAULT_CONFIG.secretKey);
+      ReflectionUtil.checkAndSetDefaultValue(apiModel, "secretKey", "setSecretKey", this.clientConfig.secretKey);
     }
   }
 
