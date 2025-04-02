@@ -19,7 +19,7 @@ public class AggregateAssetItem extends ApiModel {
     private Double intradayRiskRatio;
     private Double grossPositionValue;
     private Double optionMarketValue;
-    private Double futuresMarketValue;
+    private Double stockMarketValue;
     private Double cashAvailableForTrade;
     private Double availableCash;
     private Double lockedFunds;
@@ -116,12 +116,12 @@ public class AggregateAssetItem extends ApiModel {
         this.optionMarketValue = optionMarketValue;
     }
 
-    public Double getFuturesMarketValue() {
-        return futuresMarketValue;
+    public Double getStockMarketValue() {
+        return stockMarketValue;
     }
 
-    public void setFuturesMarketValue(Double futuresMarketValue) {
-        this.futuresMarketValue = futuresMarketValue;
+    public void setStockMarketValue(Double stockMarketValue) {
+        this.stockMarketValue = stockMarketValue;
     }
 
     public Double getCashAvailableForTrade() {
