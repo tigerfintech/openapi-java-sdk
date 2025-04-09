@@ -35,6 +35,8 @@ public enum MethodName {
   SEGMENT_FUND_AVAILABLE("segment_fund_available", MethodType.TRADE),
   ESTIMATE_TRADABLE_QUANTITY("estimate_tradable_quantity", MethodType.TRADE),
   TRANSFER_FUND("transfer_fund", MethodType.TRADE),
+  AGGREGATE_ASSETS("aggregate_assets", MethodType.TRADE),
+
 
   /**
    * contract
