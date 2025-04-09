@@ -45,8 +45,10 @@ public enum StockField {
     /** total market value * MarketVal shares * current price */
     StockField_MarketValue(17, "marketValue"),
     /** Pre-market price rise and fall (curPrice-pre-market left close) self-calculated latest price-close / close */
+    @Deprecated
     StockField_preHourTradingChangeRate(18, "preHourTradingChangeRate"),
     /** Calculate the after-hours rise and fall by yourself */
+    @Deprecated
     StockField_postHourTradingChangeRate(19, "postHourTradingChangeRate"),
     /** Earnings per share rolling price-earnings ratio TTM=last 12 months Last Twelve Month Get eps through hermes */
     StockField_ttm_Eps(20, "ttmEps"),
@@ -126,6 +128,26 @@ public enum StockField {
     StockField_ETF_HoldingCount(62, "etfHoldingCount"),
     /** Net income without cycle */
     StockField_Net_Income(63, "netIncomeVal"),
+    /** The current rise and fall */
+    StockField_current_ChangeVal(64, "curChangeVal"),
+    /** Price update timestamp */
+    StockField_Timestamp(65, "Timestamp"),
+    /** Total OI */
+    StockField_totalOI(66, "totalOI"),
+    /** Put-call OI ratio */
+    StockField_putCallOiRatio(67, "putCallOiRatio"),
+    /** Put-call volume ratio */
+    StockField_putCallVolRatio(68, "putCallVolRatio"),
+    /** Total volume */
+    StockField_totalVol(69, "totalVol"),
+    /** Implied volatility */
+    StockField_ivRatio(70, "ivRatio"),
+    /** Implied volatility percentile */
+    StockField_ivPercentile(71, "ivPercentile"),
+    /** Historical volatility */
+    StockField_hvRatio(72, "hvRatio"),
+    /** Historical volatility percentile */
+    StockField_hvPercentile(73, "hvPercentile")
     ;
 
     @Getter
