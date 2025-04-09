@@ -8,7 +8,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
-import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradingSessionType;
 
 import java.io.Serializable;
 import java.util.List;
@@ -130,7 +130,7 @@ public class OrderParameter implements Serializable {
    * set place overnight order in the US market. value: OverNight
    */
   @JSONField(name = "trading_session_type")
-  private TradeSession tradingSessionType;
+  private TradingSessionType tradingSessionType;
   /**
    * 市场
    */
@@ -358,11 +358,11 @@ public class OrderParameter implements Serializable {
     this.outsideRth = outsideRth;
   }
 
-  public TradeSession getTradingSessionType() {
+  public TradingSessionType getTradingSessionType() {
     return tradingSessionType;
   }
 
-  public void setTradingSessionType(TradeSession tradingSessionType) {
+  public void setTradingSessionType(TradingSessionType tradingSessionType) {
     this.tradingSessionType = tradingSessionType;
   }
 
