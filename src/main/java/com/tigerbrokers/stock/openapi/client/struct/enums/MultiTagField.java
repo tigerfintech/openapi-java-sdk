@@ -55,6 +55,10 @@ public enum MultiTagField {
     MultiTagField_Market_Name(21, "marketName"),
     /** First-level industry level; specific sectorId required */
     MultiTagField_One_Sectors_Level(22, "oneSectorsLevel"),
+    /** Financial report time */
+    MultiTagField_Earning_Time(23, "earnTime"),
+    /** Contra */
+    MultiTagField_isContra(24, "contra"),
     ;
 
     @Getter

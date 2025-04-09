@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.util.builder;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
+import com.tigerbrokers.stock.openapi.client.struct.enums.AssetQuoteType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
@@ -266,6 +267,14 @@ public class AccountParamBuilder {
   public AccountParamBuilder sortBy(OrderSortBy orderSortBy) {
     if (orderSortBy != null) {
       paramMap.put("sort_by", orderSortBy.name());
+    }
+    return this;
+  }
+
+  /** only for position query */
+  public AccountParamBuilder assetQuoteType(AssetQuoteType assetQuoteType) {
+    if (assetQuoteType != null) {
+      paramMap.put("asset_quote_type", assetQuoteType.name());
     }
     return this;
   }
