@@ -14,6 +14,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradingSessionType;
 import com.tigerbrokers.stock.openapi.client.struct.param.OrderParameter;
 
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
@@ -106,10 +107,17 @@ public class TradeParamBuilder {
     return this;
   }
 
+  // compatible, please use tradingSessionType(TradingSessionType tradingSessionType)
+  @Deprecated
   public TradeParamBuilder tradingSessionType(TradeSession tradingSessionType) {
-    if (tradingSessionType != null) {
-      this.orderParameter.setTradingSessionType(tradingSessionType);
+    if (tradingSessionType != null && TradeSession.OverNight == tradingSessionType) {
+      this.orderParameter.setTradingSessionType(TradingSessionType.OVERNIGHT);
     }
+    return this;
+  }
+
+  public TradeParamBuilder tradingSessionType(TradingSessionType tradingSessionType) {
+    this.orderParameter.setTradingSessionType(tradingSessionType);
     return this;
   }
 
