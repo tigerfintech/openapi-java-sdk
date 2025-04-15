@@ -17,26 +17,22 @@ public class AggregateAssetModel extends ApiModel {
     @JSONField(name = "seg_type")
     private String segType;
 
-    public AggregateAssetModel(String account) {
+    public AggregateAssetModel(String account, String segType) {
         this.account = account;
-    }
-
-    public AggregateAssetModel(String account, String secretKey) {
-        this.account = account;
-        this.secretKey = secretKey;
-    }
-
-    public AggregateAssetModel(String account, String baseCurrency, String secretKey) {
-        this.account = account;
-        this.baseCurrency = baseCurrency;
-        this.secretKey = secretKey;
-    }
-
-    public AggregateAssetModel(String account, String baseCurrency, String secretKey, String segType) {
-        this.account = account;
-        this.baseCurrency = baseCurrency;
-        this.secretKey = secretKey;
         this.segType = segType;
+    }
+
+    public AggregateAssetModel(String account, String segType, String secretKey) {
+        this.account = account;
+        this.segType = segType;
+        this.secretKey = secretKey;
+    }
+
+    public AggregateAssetModel(String account, String segType, String baseCurrency, String secretKey) {
+        this.account = account;
+        this.segType = segType;
+        this.baseCurrency = baseCurrency;
+        this.secretKey = secretKey;
     }
 
     @Override

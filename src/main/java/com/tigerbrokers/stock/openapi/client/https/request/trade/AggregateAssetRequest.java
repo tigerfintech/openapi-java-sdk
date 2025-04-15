@@ -23,30 +23,24 @@ public class AggregateAssetRequest extends TigerCommonRequest implements TigerRe
         setApiMethodName(MethodName.AGGREGATE_ASSETS);
     }
 
-    public static AggregateAssetRequest buildPrimeAssetRequest(String account) {
-        AggregateAssetRequest primeAssetRequest = new AggregateAssetRequest();
-        primeAssetRequest.setApiModel(new PrimeAssetModel(account));
-        return primeAssetRequest;
+    public static AggregateAssetRequest buildAggregateAssetRequest(String account, String segType) {
+        AggregateAssetRequest request = new AggregateAssetRequest();
+        request.setApiModel(new AggregateAssetModel(account, segType));
+        return request;
     }
 
-    public static AggregateAssetRequest buildPrimeAssetRequest(String account, String secretKey) {
-        AggregateAssetRequest primeAssetRequest = new AggregateAssetRequest();
-        primeAssetRequest.setApiModel(new PrimeAssetModel(account, secretKey));
-        return primeAssetRequest;
+    public static AggregateAssetRequest buildAggregateAssetRequest(String account, String segType, String secretKey) {
+        AggregateAssetRequest request = new AggregateAssetRequest();
+        request.setApiModel(new AggregateAssetModel(account, segType, secretKey));
+        return request;
     }
 
-    public static AggregateAssetRequest buildPrimeAssetRequest(String account, Currency baseCurrency) {
-        AggregateAssetRequest primeAssetRequest = new AggregateAssetRequest();
-        PrimeAssetModel primeAssetModel = new PrimeAssetModel(account);
-        primeAssetModel.setBaseCurrency(baseCurrency.name());
-        primeAssetRequest.setApiModel(primeAssetModel);
-        return primeAssetRequest;
-    }
-
-    public static AggregateAssetRequest buildPrimeAssetRequest(String account, Currency baseCurrency, String secretKey) {
-        AggregateAssetRequest primeAssetRequest = new AggregateAssetRequest();
-        primeAssetRequest.setApiModel(new PrimeAssetModel(account, baseCurrency.name(), secretKey));
-        return primeAssetRequest;
+    public static AggregateAssetRequest buildAggregateAssetRequest(String account, String segType, String secretKey, Currency baseCurrency) {
+        AggregateAssetRequest request = new AggregateAssetRequest();
+        AggregateAssetModel model = new AggregateAssetModel(account, segType, baseCurrency.name(), secretKey);
+        model.setBaseCurrency(baseCurrency.name());
+        request.setApiModel(model);
+        return request;
     }
 
     public AggregateAssetModel getApiModel() {
