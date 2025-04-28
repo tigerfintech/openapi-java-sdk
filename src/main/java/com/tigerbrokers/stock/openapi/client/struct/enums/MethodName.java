@@ -36,6 +36,7 @@ public enum MethodName {
   ESTIMATE_TRADABLE_QUANTITY("estimate_tradable_quantity", MethodType.TRADE),
   TRANSFER_FUND("transfer_fund", MethodType.TRADE),
   AGGREGATE_ASSETS("aggregate_assets", MethodType.TRADE),
+  FUND_DETAILS("fund_details", MethodType.TRADE),
 
 
   /**
