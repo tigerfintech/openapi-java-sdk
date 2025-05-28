@@ -41,7 +41,7 @@ public class SymbolUtil {
   }
 
   public static boolean isUsStockSymbol(String symbol) {
-    if (symbol == null || symbol.isEmpty()) {
+    if (symbol == null || symbol.isEmpty() || symbol.endsWith(MARKET_POSTFIX_HK)) {
       return false;
     }
     if (CHAR_SYMBOL_PATTERN.matcher(symbol).matches()) {
