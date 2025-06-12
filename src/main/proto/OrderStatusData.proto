@@ -49,4 +49,5 @@ message OrderStatusData {
   double filledCashAmount = 40;
   double gst = 41; // Goods and Services Tax(TBSG only)
   repeated string attrList = 42;
+  string timeInForce = 43;
 }
