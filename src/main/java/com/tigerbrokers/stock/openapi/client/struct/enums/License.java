@@ -5,7 +5,7 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
  * Created by bean on 2022/09/09.
  */
 public enum License {
-  TBNZ, TBSG, TBHK, TBAU;
+  TBNZ, TBSG, TBHK, TBAU, TBUS;
 
   public static License getLicense(String name) {
     if (name == null || name.isEmpty()) {

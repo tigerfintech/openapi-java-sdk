@@ -1,5 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.util;
 
+import static com.tigerbrokers.stock.openapi.client.struct.enums.License.TBUS;
+
 import com.alibaba.fastjson.JSON;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
@@ -220,18 +222,23 @@ public class NetworkUtil {
     return localSupportedProtocols;
   }
 
-  private static String getDefaultPort(ClientConfig clientConfig, Protocol protocol) {
-    String port = "";
-    if (protocol != Protocol.HTTP) {
-      if (clientConfig.getEnv() == Env.PROD) {
-        port = clientConfig.isSslSocket ? TigerApiConstants.DEFAULT_PROD_SOCKET_SSL_PORT
-            : TigerApiConstants.DEFAULT_PROD_SOCKET_PORT;
-      } else {
-        port = clientConfig.isSslSocket ? TigerApiConstants.DEFAULT_SANDBOX_SOCKET_SSL_PORT
-            : TigerApiConstants.DEFAULT_SANDBOX_SOCKET_PORT;
-      }
+  private static String getDefaultPort(ClientConfig clientConfig, License license, Protocol protocol) {
+    if (protocol == Protocol.HTTP) {
+      return "";
     }
-    return port;
+    boolean isUSLicense = license == TBUS;
+    boolean isProdEnv = clientConfig.getEnv() == Env.PROD;
+    boolean useSSL = clientConfig.isSslSocket;
+    if (isProdEnv) {
+      return useSSL
+          ? (isUSLicense ? TigerApiConstants.DEFAULT_PROD_US_SOCKET_SSL_PORT
+              : TigerApiConstants.DEFAULT_PROD_SOCKET_SSL_PORT)
+          : (isUSLicense ? TigerApiConstants.DEFAULT_PROD_US_SOCKET_PORT
+              : TigerApiConstants.DEFAULT_PROD_SOCKET_PORT);
+    }
+    return useSSL
+        ? TigerApiConstants.DEFAULT_SANDBOX_SOCKET_SSL_PORT
+        : TigerApiConstants.DEFAULT_SANDBOX_SOCKET_PORT;
   }
 
   /**
@@ -247,17 +254,25 @@ public class NetworkUtil {
 
   public static String getServerAddress(ClientConfig clientConfig, String originalAddress) {
     return StringUtils.defaultIfEmpty(refreshAndGetServerAddress(clientConfig, clientConfig.isSslSocket ? Protocol.SECURE_SOCKET : Protocol.WEB_SOCKET,
-        null, originalAddress).get(BizType.SOCKET), originalAddress);
+        clientConfig.license, originalAddress).get(BizType.SOCKET), originalAddress);
+  }
+
+  private static String getDomainGardenUrl(License license) {
+    String domainGardenUrl = TigerApiConstants.DOMAIN_GARDEN_ADDRESS;
+    if (license == TBUS) {
+      domainGardenUrl += "?appName=tradeup";
+    }
+    return domainGardenUrl;
   }
 
   private static Map<BizType, String> refreshAndGetServerAddress(ClientConfig clientConfig, Protocol protocol, License license, String originalAddress) {
     Env env = clientConfig.getEnv();
-    String port = getDefaultPort(clientConfig, protocol);
+    String port = getDefaultPort(clientConfig, license, protocol);
     String commonUrl = null;
     String domainGardenResponse = null;
     List<Map<String, Object>> domainConfigList = Collections.emptyList();
     try {
-      domainGardenResponse = HttpUtils.get(TigerApiConstants.DOMAIN_GARDEN_ADDRESS, clientConfig.token);
+      domainGardenResponse = HttpUtils.get(getDomainGardenUrl(license), clientConfig.token);
       Map<String, Object> domainConfigMap = JSON.parseObject(domainGardenResponse, Map.class);
       if (domainConfigMap != null && domainConfigMap.get("items") != null) {
         domainConfigList = (List<Map<String, Object>>)domainConfigMap.get("items");
@@ -268,7 +283,7 @@ public class NetworkUtil {
     // if get domain config data failed and original address is not emtpy, return original address
     if (domainConfigList.isEmpty()) {
       final String addressUrl = StringUtils.isEmpty(originalAddress)
-          ? String.format(protocol.getUrlFormat(), getDefaultUrl(env, protocol), port) : originalAddress;
+          ? String.format(protocol.getUrlFormat(), getDefaultUrl(env, license, protocol), port) : originalAddress;
       return new HashMap<BizType, String>() {{ put(protocol == Protocol.HTTP ? BizType.COMMON : BizType.SOCKET, addressUrl);}};
     }
 
@@ -295,7 +310,7 @@ public class NetworkUtil {
       }
     }
     if (commonUrl == null) {
-      commonUrl = getDefaultUrl(env, protocol);
+      commonUrl = getDefaultUrl(env, license, protocol);
     }
     if (!StringUtils.isEmpty(commonUrl)) {
       domainUrlMap.put(BizType.COMMON, String.format(protocol.getUrlFormat(), commonUrl, port));
@@ -306,7 +321,7 @@ public class NetworkUtil {
     return domainUrlMap;
   }
 
-  private static String getDefaultUrl(Env env, Protocol protocol) {
+  private static String getDefaultUrl(Env env, License license, Protocol protocol) {
     if (env == null) {
       return TigerApiConstants.DEFAULT_PROD_DOMAIN_URL;
     }
@@ -316,7 +331,8 @@ public class NetworkUtil {
       case TEST:
         return null;
       default:
-        return TigerApiConstants.DEFAULT_PROD_DOMAIN_URL;
+        return license == TBUS ? TigerApiConstants.DEFAULT_PROD_US_DOMAIN_URL
+            : TigerApiConstants.DEFAULT_PROD_DOMAIN_URL;
     }
   }
 

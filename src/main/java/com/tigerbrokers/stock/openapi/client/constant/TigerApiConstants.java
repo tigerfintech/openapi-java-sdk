@@ -63,14 +63,18 @@ public class TigerApiConstants {
   public static final String TOKEN_FILENAME = "tiger_openapi_token.properties";
 
   public static final String API_ONLINE_DOMAIN_URL = "openapi.tigerfintech.com";
+  public static final String API_ONLINE_US_DOMAIN_URL = "openapi.tradeup.com";
   public static final String API_SANDBOX_DOMAIN_URL = "openapi-sandbox.tigerfintech.com";
 
   public static final String DEFAULT_PROD_DOMAIN_URL = API_ONLINE_DOMAIN_URL;
+  public static final String DEFAULT_PROD_US_DOMAIN_URL = API_ONLINE_US_DOMAIN_URL;
   public static final String DEFAULT_SANDBOX_DOMAIN_URL = API_SANDBOX_DOMAIN_URL;
-  public static final String DOMAIN_GARDEN_ADDRESS = "https://cg.play-analytics.com/";
+  public static final String DOMAIN_GARDEN_ADDRESS = "https://cg.play-analytics.com";
 
   public static final String DEFAULT_PROD_SOCKET_PORT = "9887";
   public static final String DEFAULT_PROD_SOCKET_SSL_PORT = "9883";
+  public static final String DEFAULT_PROD_US_SOCKET_PORT = "9987";
+  public static final String DEFAULT_PROD_US_SOCKET_SSL_PORT = "9983";
   public static final String DEFAULT_SANDBOX_SOCKET_PORT = "9889";
   public static final String DEFAULT_SANDBOX_SOCKET_SSL_PORT = "9885";
   public static final int DEFAULT_FAIL_RETRY_COUNT = 2;
