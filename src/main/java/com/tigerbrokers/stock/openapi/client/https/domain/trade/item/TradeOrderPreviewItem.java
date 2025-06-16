@@ -29,6 +29,8 @@ public class TradeOrderPreviewItem extends ApiModel {
   private Double overnightLiquidation;
   private Double gst;
 
+  private String message;
+
   @Override
   public String getAccount() {
     return account;
@@ -189,5 +191,13 @@ public class TradeOrderPreviewItem extends ApiModel {
 
   public void setGst(Double gst) {
     this.gst = gst;
+  }
+
+  public String getMessage() {
+    return message;
+  }
+
+  public void setMessage(String message) {
+    this.message = message;
   }
 }
