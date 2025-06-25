@@ -17,6 +17,8 @@ public class QuotaItem extends ApiModel {
 
   private List<String> details;
 
+  private List<SymbolDetail> symbolDetails;
+
   public int getRemain() {
     return remain;
   }
@@ -49,4 +51,33 @@ public class QuotaItem extends ApiModel {
     this.details = details;
   }
 
+  public List<SymbolDetail> getSymbolDetails() {
+    return symbolDetails;
+  }
+
+  public void setSymbolDetails(List<SymbolDetail> symbolDetails) {
+    this.symbolDetails = symbolDetails;
+  }
+
+  public static class SymbolDetail {
+
+    private String code;
+    private String lastRequestTimestamp;
+
+    public String getCode() {
+      return code;
+    }
+
+    public void setCode(String code) {
+      this.code = code;
+    }
+
+    public String getLastRequestTimestamp() {
+      return lastRequestTimestamp;
+    }
+
+    public void setLastRequestTimestamp(String lastRequestTimestamp) {
+      this.lastRequestTimestamp = lastRequestTimestamp;
+    }
+  }
 }
