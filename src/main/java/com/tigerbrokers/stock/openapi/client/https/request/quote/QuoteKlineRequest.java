@@ -62,6 +62,14 @@ public class QuoteKlineRequest extends TigerCommonRequest implements TigerReques
     return (QuoteKlineModel)apiModel;
   }
 
+  /**
+   * Date format pattern: "yyyyMMdd" (e.g., "20250616").
+   */
+  public QuoteKlineRequest withDate(String date) {
+    getApiModel().setDate(date);
+    return this;
+  }
+
   public QuoteKlineRequest withLimit(int limit) {
     if (limit > 0) {
       getApiModel().setLimit(limit);
