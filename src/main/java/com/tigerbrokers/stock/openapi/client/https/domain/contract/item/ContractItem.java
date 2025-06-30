@@ -64,6 +64,8 @@ public class ContractItem extends ApiModel {
   private String discountedEndAt;
   private Boolean supportOvernightTrading;
 
+  private Boolean supportFractionalShare;
+
   public Integer getContractId() {
     return contractId;
   }
@@ -411,6 +413,14 @@ public class ContractItem extends ApiModel {
 
   public void setSupportOvernightTrading(Boolean supportOvernightTrading) {
     this.supportOvernightTrading = supportOvernightTrading;
+  }
+
+  public Boolean getSupportFractionalShare() {
+    return supportFractionalShare;
+  }
+
+  public void setSupportFractionalShare(Boolean supportFractionalShare) {
+    this.supportFractionalShare = supportFractionalShare;
   }
 
   @Override
