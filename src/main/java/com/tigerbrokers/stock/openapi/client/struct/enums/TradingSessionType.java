@@ -8,5 +8,8 @@ public enum TradingSessionType {
   PRE_RTH_POST,
   OVERNIGHT,
   RTH,
-  FULL
+  FULL,
+  HK_AUC,
+  HK_CTS,
+  HK_AUC_CTS
 }
