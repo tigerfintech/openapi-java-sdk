@@ -18,6 +18,7 @@ public class FutureRealTimeItem extends ApiModel {
   private Long bidSize;
   private Long askSize;
   private Long openInterest;
+  private Long openInterestChange;
   private Long volume;
   private BigDecimal open;
   private BigDecimal high;
@@ -98,6 +99,14 @@ public class FutureRealTimeItem extends ApiModel {
     this.openInterest = openInterest;
   }
 
+  public Long getOpenInterestChange() {
+    return openInterestChange;
+  }
+
+  public void setOpenInterestChange(Long openInterestChange) {
+    this.openInterestChange = openInterestChange;
+  }
+
   public Long getVolume() {
     return volume;
   }
@@ -165,6 +174,7 @@ public class FutureRealTimeItem extends ApiModel {
         ", bidSize=" + bidSize +
         ", askSize=" + askSize +
         ", openInterest=" + openInterest +
+        ", openInterestChange=" + openInterestChange +
         ", volume=" + volume +
         ", open=" + open +
         ", high=" + high +
