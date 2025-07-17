@@ -182,7 +182,7 @@ public class FutureContractItem extends ApiModel {
         ", contractMonth='" + contractMonth + '\'' +
         ", exchangeCode='" + exchangeCode + '\'' +
         ", exchange='" + exchange + '\'' +
-        ", multiplier=" + (multiplier == null ? multiplier : multiplier.stripTrailingZeros().toPlainString()) +
+        ", multiplier=" + multiplier +
         ", minTick=" + minTick +
         ", lastTradingDate='" + lastTradingDate + '\'' +
         ", firstNoticeDate='" + firstNoticeDate + '\'' +
@@ -190,6 +190,9 @@ public class FutureContractItem extends ApiModel {
         ", currency='" + currency + '\'' +
         ", continuous=" + continuous +
         ", trade=" + trade +
+        ", productWorth='" + productWorth + '\'' +
+        ", deliveryMode='" + deliveryMode + '\'' +
+        ", productType='" + productType + '\'' +
         '}';
   }
 }
