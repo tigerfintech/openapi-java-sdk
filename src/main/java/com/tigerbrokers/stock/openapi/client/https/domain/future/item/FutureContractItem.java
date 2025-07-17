@@ -24,6 +24,9 @@ public class FutureContractItem extends ApiModel {
   private String currency;
   private boolean continuous;
   private boolean trade;
+  private String productWorth;
+  private String deliveryMode;
+  private String productType;
 
   public String getType() {
     return type;
@@ -145,6 +148,30 @@ public class FutureContractItem extends ApiModel {
     this.trade = trade;
   }
 
+  public String getProductWorth() {
+    return productWorth;
+  }
+
+  public void setProductWorth(String productWorth) {
+    this.productWorth = productWorth;
+  }
+
+  public String getDeliveryMode() {
+    return deliveryMode;
+  }
+
+  public void setDeliveryMode(String deliveryMode) {
+    this.deliveryMode = deliveryMode;
+  }
+
+  public String getProductType() {
+    return productType;
+  }
+
+  public void setProductType(String productType) {
+    this.productType = productType;
+  }
+
   @Override
   public String toString() {
     return "FutureContractItem{" +
@@ -155,7 +182,7 @@ public class FutureContractItem extends ApiModel {
         ", contractMonth='" + contractMonth + '\'' +
         ", exchangeCode='" + exchangeCode + '\'' +
         ", exchange='" + exchange + '\'' +
-        ", multiplier=" + (multiplier == null ? multiplier : multiplier.stripTrailingZeros().toPlainString()) +
+        ", multiplier=" + multiplier +
         ", minTick=" + minTick +
         ", lastTradingDate='" + lastTradingDate + '\'' +
         ", firstNoticeDate='" + firstNoticeDate + '\'' +
@@ -163,6 +190,9 @@ public class FutureContractItem extends ApiModel {
         ", currency='" + currency + '\'' +
         ", continuous=" + continuous +
         ", trade=" + trade +
+        ", productWorth='" + productWorth + '\'' +
+        ", deliveryMode='" + deliveryMode + '\'' +
+        ", productType='" + productType + '\'' +
         '}';
   }
 }
