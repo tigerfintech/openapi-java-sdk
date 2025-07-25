@@ -19,6 +19,8 @@ public class MarketScannerBatchItem extends ApiModel {
     private int totalCount;
     /** 每页条数 */
     private int pageSize;
+    /** 游标ID，用于基于游标的分页查询，客户端在获取下一页时应将此值作为请求参数传入 */
+    private String cursorId;
     /** 返回的股票数据列表 */
     private List<MarketScannerItem> items;
 
@@ -52,6 +54,14 @@ public class MarketScannerBatchItem extends ApiModel {
 
     public void setPageSize(int pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public String getCursorId() {
+        return cursorId;
+    }
+
+    public void setCursorId(String cursorId) {
+        this.cursorId = cursorId;
     }
 
     public List<MarketScannerItem> getItems() {
