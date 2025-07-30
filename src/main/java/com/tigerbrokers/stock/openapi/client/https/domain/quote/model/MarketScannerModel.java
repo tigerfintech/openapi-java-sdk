@@ -27,15 +27,27 @@ public class MarketScannerModel extends ApiModel {
     private int page;
     @JSONField(name = "page_size")
     private int pageSize;
+    @JSONField(name = "cursor_id")
+    private String cursorId;
 
     public MarketScannerModel() {
     }
 
     public MarketScannerModel(Market market, List<BaseFilter> baseFilterList,
                               List<AccumulateFilter> accumulateFilterList, List<FinancialFilter> financialFilterList,
-                              List<MultiTagsRelationFilter> multiTagsFilterList, SortFieldData sortFieldData, int page, int pageSize) {
+                              List<MultiTagsRelationFilter> multiTagsFilterList, SortFieldData sortFieldData,
+                              int page, int pageSize) {
+        this(market, baseFilterList, accumulateFilterList, financialFilterList, multiTagsFilterList, sortFieldData,
+                page, pageSize, null);
+    }
+
+    public MarketScannerModel(Market market, List<BaseFilter> baseFilterList,
+                              List<AccumulateFilter> accumulateFilterList, List<FinancialFilter> financialFilterList,
+                              List<MultiTagsRelationFilter> multiTagsFilterList, SortFieldData sortFieldData,
+                              int page, int pageSize, String cursorId) {
         this.page = page;
         this.pageSize = pageSize;
+        this.cursorId = cursorId;
         this.market = market;
         this.baseFilterList = baseFilterList;
         this.accumulateFilterList = accumulateFilterList;
@@ -58,6 +70,14 @@ public class MarketScannerModel extends ApiModel {
 
     public void setPageSize(int pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public String getCursorId() {
+        return cursorId;
+    }
+
+    public void setCursorId(String cursorId) {
+        this.cursorId = cursorId;
     }
 
     public Market getMarket() {
