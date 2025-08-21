@@ -59,8 +59,14 @@ public class QuoteHistoryTimelineRequest extends TigerCommonRequest implements T
   }
 
   public QuoteHistoryTimelineRequest withRight(RightOption rightOption) {
-    QuoteHistoryTimelineModel timelimeModel = (QuoteHistoryTimelineModel) apiModel;
-    timelimeModel.setRight(rightOption);
+    QuoteHistoryTimelineModel timelineModel = (QuoteHistoryTimelineModel) apiModel;
+    timelineModel.setRight(rightOption);
+    return this;
+  }
+
+  public QuoteHistoryTimelineRequest withTradeSession(TradeSession tradeSession) {
+    QuoteHistoryTimelineModel timelineModel = (QuoteHistoryTimelineModel) apiModel;
+    timelineModel.setTradeSession(tradeSession);
     return this;
   }
 

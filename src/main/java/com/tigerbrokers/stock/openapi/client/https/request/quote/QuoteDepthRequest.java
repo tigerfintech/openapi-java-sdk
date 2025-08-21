@@ -5,6 +5,7 @@ import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteDepthResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
 import java.util.List;
 
 /**
@@ -19,8 +20,13 @@ public class QuoteDepthRequest extends TigerCommonRequest implements TigerReques
   }
 
   public static QuoteDepthRequest newRequest(List<String> symbols, String market) {
+    return newRequest(symbols, market, null);
+  }
+
+  public static QuoteDepthRequest newRequest(List<String> symbols, String market,
+      TradeSession tradeSession) {
     QuoteDepthRequest request = new QuoteDepthRequest();
-    QuoteDepthModel quoteDepthModel = new QuoteDepthModel(symbols, market);
+    QuoteDepthModel quoteDepthModel = new QuoteDepthModel(symbols, market, tradeSession);
     request.setApiModel(quoteDepthModel);
     return request;
   }

@@ -1,7 +1,9 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.quote.model;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.RightOption;
+import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
 import java.util.List;
 
 /**
@@ -12,7 +14,6 @@ public class QuoteHistoryTimelineModel extends QuoteSymbolModel {
 
   /** yyyyMMdd */
   private String date;
-
   private RightOption right;
 
   public QuoteHistoryTimelineModel(List<String> symbols, String date) {
