@@ -38,6 +38,11 @@ public class TimelineItem extends ApiModel {
    */
   private TimelineRange afterHours;
 
+  /**
+   * 夜盘交易分时数据（仅美股）
+   */
+  private TimelineRange overnight;
+
   public String getSymbol() {
     return symbol;
   }
@@ -86,6 +91,15 @@ public class TimelineItem extends ApiModel {
     this.afterHours = afterHours;
   }
 
+  public TimelineRange getOvernight() {
+    return overnight;
+  }
+
+  public void setOvernight(
+      TimelineRange overnight) {
+    this.overnight = overnight;
+  }
+
   @Override
   public String toString() {
     return "TimelineItem{" +
@@ -95,6 +109,7 @@ public class TimelineItem extends ApiModel {
         ", intraday=" + intraday +
         ", preMarket=" + preMarket +
         ", afterHours=" + afterHours +
+        ", overnight=" + overnight +
         '}';
   }
 }

@@ -108,6 +108,7 @@ public enum MethodName {
   FUTURE_TICK("future_tick", MethodType.QUOTE),
   FUTURE_TRADING_DATE("future_trading_date", MethodType.QUOTE),
   FUTURE_HISTORY_MAIN_CONTRACT("future_history_main_contract", MethodType.QUOTE),
+  FUTURE_DEPTH("future_depth", MethodType.QUOTE),
 
   /**
    * fundamental data
