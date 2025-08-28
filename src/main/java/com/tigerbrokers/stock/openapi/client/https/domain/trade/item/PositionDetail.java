@@ -57,6 +57,10 @@ public class PositionDetail implements Serializable {
   /** contract categories */
   private List<String> categories;
 
+  private String name;
+
+  private String underlyingContractName;
+
   public String getAccount() {
     return account;
   }
@@ -352,4 +356,21 @@ public class PositionDetail implements Serializable {
   public void setCategories(List<String> categories) {
     this.categories = categories;
   }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getUnderlyingContractName() {
+    return underlyingContractName;
+  }
+
+  public void setUnderlyingContractName(String underlyingContractName) {
+    this.underlyingContractName = underlyingContractName;
+  }
+
 }
