@@ -48,8 +48,6 @@ public class PrimeAssetItem extends ApiModel {
         private String currency;
         private Double cashBalance;
         private Double cashAvailableForTrade;
-        @Deprecated
-        private Double cashAvailableForWithdrawal;
         private Double grossPositionValue;
         private Double equityWithLoan;
         private Double netLiquidation;
@@ -108,17 +106,6 @@ public class PrimeAssetItem extends ApiModel {
         public void setCashAvailableForTrade(Double cashAvailableForTrade) {
             this.cashAvailableForTrade = cashAvailableForTrade;
         }
-
-        @Deprecated
-        public Double getCashAvailableForWithdrawal() {
-            return cashAvailableForWithdrawal;
-        }
-
-        @Deprecated
-        public void setCashAvailableForWithdrawal(Double cashAvailableForWithdrawal) {
-            this.cashAvailableForWithdrawal = cashAvailableForWithdrawal;
-        }
-
         public Double getGrossPositionValue() {
             return grossPositionValue;
         }
@@ -285,21 +272,6 @@ public class PrimeAssetItem extends ApiModel {
         private Double cashBalance;
         private Double cashAvailableForTrade;
 
-        @Deprecated
-        private Double grossPositionValue;
-        @Deprecated
-        private Double stockMarketValue;
-        @Deprecated
-        private Double optionMarketValue;
-        @Deprecated
-        private Double futuresMarketValue;
-        @Deprecated
-        private Double fundMarketValue;
-        @Deprecated
-        private Double unrealizedPL;
-        @Deprecated
-        private Double realizedPL;
-
         public String getCurrency() {
             return currency;
         }
@@ -322,62 +294,6 @@ public class PrimeAssetItem extends ApiModel {
 
         public void setCashAvailableForTrade(Double cashAvailableForTrade) {
             this.cashAvailableForTrade = cashAvailableForTrade;
-        }
-        @Deprecated
-        public Double getGrossPositionValue() {
-            return grossPositionValue;
-        }
-        @Deprecated
-        public void setGrossPositionValue(Double grossPositionValue) {
-            this.grossPositionValue = grossPositionValue;
-        }
-        @Deprecated
-        public Double getStockMarketValue() {
-            return stockMarketValue;
-        }
-        @Deprecated
-        public void setStockMarketValue(Double stockMarketValue) {
-            this.stockMarketValue = stockMarketValue;
-        }
-        @Deprecated
-        public Double getOptionMarketValue() {
-            return optionMarketValue;
-        }
-        @Deprecated
-        public void setOptionMarketValue(Double optionMarketValue) {
-            this.optionMarketValue = optionMarketValue;
-        }
-        @Deprecated
-        public Double getFuturesMarketValue() {
-            return futuresMarketValue;
-        }
-        @Deprecated
-        public void setFuturesMarketValue(Double futuresMarketValue) {
-            this.futuresMarketValue = futuresMarketValue;
-        }
-        @Deprecated
-        public Double getFundMarketValue() {
-            return fundMarketValue;
-        }
-        @Deprecated
-        public void setFundMarketValue(Double fundMarketValue) {
-            this.fundMarketValue = fundMarketValue;
-        }
-        @Deprecated
-        public Double getUnrealizedPL() {
-            return unrealizedPL;
-        }
-        @Deprecated
-        public void setUnrealizedPL(Double unrealizedPL) {
-            this.unrealizedPL = unrealizedPL;
-        }
-        @Deprecated
-        public Double getRealizedPL() {
-            return realizedPL;
-        }
-        @Deprecated
-        public void setRealizedPL(Double realizedPL) {
-            this.realizedPL = realizedPL;
         }
     }
 }
