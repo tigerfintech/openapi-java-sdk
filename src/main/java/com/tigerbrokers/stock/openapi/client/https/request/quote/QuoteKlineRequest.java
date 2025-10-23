@@ -44,9 +44,23 @@ public class QuoteKlineRequest extends TigerCommonRequest implements TigerReques
   }
 
   public static QuoteKlineRequest newRequest(List<String> symbols, KType kType, String beginTime, String endTime,
+                                             Boolean withFundamental) {
+    return newRequest(symbols, kType, beginTime, endTime, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone(), withFundamental);
+  }
+
+  public static QuoteKlineRequest newRequest(List<String> symbols, KType kType, String beginTime, String endTime,
       TimeZoneId zoneId) {
     QuoteKlineRequest request = new QuoteKlineRequest();
     QuoteKlineModel model = new QuoteKlineModel(symbols, getKType(kType), beginTime, endTime, zoneId);
+    request.setApiModel(model);
+    return request;
+  }
+
+  public static QuoteKlineRequest newRequest(List<String> symbols, KType kType, String beginTime, String endTime,
+                                             TimeZoneId zoneId, Boolean withFundamental) {
+    QuoteKlineRequest request = new QuoteKlineRequest();
+    QuoteKlineModel model = new QuoteKlineModel(symbols, getKType(kType), beginTime, endTime, zoneId);
+    model.setWithFundamental(withFundamental);
     request.setApiModel(model);
     return request;
   }
@@ -101,6 +115,11 @@ public class QuoteKlineRequest extends TigerCommonRequest implements TigerReques
    */
   public void withPageToken(String pageToken) {
     getApiModel().setPageToken(pageToken);
+  }
+
+  public QuoteKlineRequest withFundamental(Boolean withFundamental) {
+    getApiModel().setWithFundamental(withFundamental);
+    return this;
   }
 
   @Override
