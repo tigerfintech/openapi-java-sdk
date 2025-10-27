@@ -8,82 +8,82 @@ import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 public class StockFundamentalItem extends ApiModel {
 
   /**
-   * 股票代码
+   * Stock symbol
    */
   private String symbol;
 
   /**
-   * 净资产收益率
+   * Rate of return
    */
   private Double roe;
 
   /**
-   * 资产收益率
+   * Price-to-book ratio
    */
   private Double roa;
 
   /**
-   * 市净率
+   * Price-to-book ratio
    */
   private Double pbRate;
 
   /**
-   * 市销率
+   * Price-to-sales ratio
    */
   private Double psRate;
 
   /**
-   * 股息收益率TTM
+   * Divide rate
    */
   private Double divideRate;
 
   /**
-   * 52周最高
+   * 52-week high
    */
   private Double week52High;
 
   /**
-   * 52周最低
+   * 52-week low
    */
   private Double week52Low;
 
   /**
-   * 每股收益(TTM)
+   * Earnings per share (TTM)
    */
   private Double ttmEps;
 
   /**
-   * 每股静态收益(LYR)
+   * Earnings per share (LYR, last year)
    */
   private Double lyrEps;
 
   /**
-   * 量比
+   * Volume ratio
    */
   private Double volumeRatio;
 
   /**
-   * 换手率
+   * Turnover rate
    */
   private Double turnoverRate;
 
   /**
-   * 市盈率(TTM)
+   * Price-to-earnings ratio (TTM)
    */
   private Double ttmPeRate;
 
   /**
-   * 市盈率(LYR)
+   * Price-to-earnings ratio (LYR, last year)
    */
   private Double lyrPeRate;
 
   /**
-   * 总市值
+   * Total market capitalization
    */
   private Double marketCap;
 
   /**
-   * 流通市值
+   * Free-float market capitalization
    */
   private Double floatMarketCap;
 
