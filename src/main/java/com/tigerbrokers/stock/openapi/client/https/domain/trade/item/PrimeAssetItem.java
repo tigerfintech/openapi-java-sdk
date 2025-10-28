@@ -48,7 +48,6 @@ public class PrimeAssetItem extends ApiModel {
         private String currency;
         private Double cashBalance;
         private Double cashAvailableForTrade;
-        private Double cashAvailableForWithdrawal;
         private Double grossPositionValue;
         private Double equityWithLoan;
         private Double netLiquidation;
@@ -107,15 +106,6 @@ public class PrimeAssetItem extends ApiModel {
         public void setCashAvailableForTrade(Double cashAvailableForTrade) {
             this.cashAvailableForTrade = cashAvailableForTrade;
         }
-
-        public Double getCashAvailableForWithdrawal() {
-            return cashAvailableForWithdrawal;
-        }
-
-        public void setCashAvailableForWithdrawal(Double cashAvailableForWithdrawal) {
-            this.cashAvailableForWithdrawal = cashAvailableForWithdrawal;
-        }
-
         public Double getGrossPositionValue() {
             return grossPositionValue;
         }
@@ -281,13 +271,6 @@ public class PrimeAssetItem extends ApiModel {
         private String currency;
         private Double cashBalance;
         private Double cashAvailableForTrade;
-        private Double grossPositionValue;
-        private Double stockMarketValue;
-        private Double optionMarketValue;
-        private Double futuresMarketValue;
-        private Double fundMarketValue;
-        private Double unrealizedPL;
-        private Double realizedPL;
 
         public String getCurrency() {
             return currency;
@@ -311,62 +294,6 @@ public class PrimeAssetItem extends ApiModel {
 
         public void setCashAvailableForTrade(Double cashAvailableForTrade) {
             this.cashAvailableForTrade = cashAvailableForTrade;
-        }
-
-        public Double getGrossPositionValue() {
-            return grossPositionValue;
-        }
-
-        public void setGrossPositionValue(Double grossPositionValue) {
-            this.grossPositionValue = grossPositionValue;
-        }
-
-        public Double getStockMarketValue() {
-            return stockMarketValue;
-        }
-
-        public void setStockMarketValue(Double stockMarketValue) {
-            this.stockMarketValue = stockMarketValue;
-        }
-
-        public Double getOptionMarketValue() {
-            return optionMarketValue;
-        }
-
-        public void setOptionMarketValue(Double optionMarketValue) {
-            this.optionMarketValue = optionMarketValue;
-        }
-
-        public Double getFuturesMarketValue() {
-            return futuresMarketValue;
-        }
-
-        public void setFuturesMarketValue(Double futuresMarketValue) {
-            this.futuresMarketValue = futuresMarketValue;
-        }
-
-        public Double getFundMarketValue() {
-            return fundMarketValue;
-        }
-
-        public void setFundMarketValue(Double fundMarketValue) {
-            this.fundMarketValue = fundMarketValue;
-        }
-
-        public Double getUnrealizedPL() {
-            return unrealizedPL;
-        }
-
-        public void setUnrealizedPL(Double unrealizedPL) {
-            this.unrealizedPL = unrealizedPL;
-        }
-
-        public Double getRealizedPL() {
-            return realizedPL;
-        }
-
-        public void setRealizedPL(Double realizedPL) {
-            this.realizedPL = realizedPL;
         }
     }
 }
