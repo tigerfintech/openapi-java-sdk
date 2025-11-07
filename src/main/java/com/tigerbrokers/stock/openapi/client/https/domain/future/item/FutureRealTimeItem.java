@@ -26,6 +26,7 @@ public class FutureRealTimeItem extends ApiModel {
   private BigDecimal settlement;
   private BigDecimal limitUp;
   private BigDecimal limitDown;
+  private BigDecimal avgPrice;
 
   public String getContractCode() {
     return contractCode;
@@ -163,10 +164,19 @@ public class FutureRealTimeItem extends ApiModel {
     this.limitDown = limitDown;
   }
 
+  public BigDecimal getAvgPrice() {
+    return avgPrice;
+  }
+
+  public void setAvgPrice(BigDecimal avgPrice) {
+    this.avgPrice = avgPrice;
+  }
+
   @Override
   public String toString() {
     return "FutureRealTimeItem{" +
-        "latestPrice=" + latestPrice +
+        "contractCode='" + contractCode + '\'' +
+        ", latestPrice=" + latestPrice +
         ", latestSize=" + latestSize +
         ", latestTime=" + latestTime +
         ", bidPrice=" + bidPrice +
@@ -182,6 +192,7 @@ public class FutureRealTimeItem extends ApiModel {
         ", settlement=" + settlement +
         ", limitUp=" + limitUp +
         ", limitDown=" + limitDown +
+        ", avgPrice=" + avgPrice +
         '}';
   }
 }
