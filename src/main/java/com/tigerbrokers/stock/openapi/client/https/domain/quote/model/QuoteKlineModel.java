@@ -25,6 +25,8 @@ public class QuoteKlineModel extends QuoteSymbolModel {
   private Integer limit;
   @JSONField(name = "page_token")
   private String pageToken;
+  @JSONField(name = "with_fundamental")
+  private Boolean withFundamental;
 
   public QuoteKlineModel() {
 
@@ -140,5 +142,13 @@ public class QuoteKlineModel extends QuoteSymbolModel {
    */
   public void setPageToken(String pageToken) {
     this.pageToken = pageToken;
+  }
+
+  public Boolean getWithFundamental() {
+    return withFundamental;
+  }
+
+  public void setWithFundamental(Boolean withFundamental) {
+    this.withFundamental = withFundamental;
   }
 }

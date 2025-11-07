@@ -22,6 +22,10 @@ public class KlinePoint implements Serializable {
 
   private Double amount;
 
+  private Double turnoverRate;
+  private Double ttmPe;
+  private Double lyrPe;
+
   public Double getOpen() {
     return open;
   }
@@ -78,6 +82,30 @@ public class KlinePoint implements Serializable {
     this.amount = amount;
   }
 
+  public Double getTurnoverRate() {
+    return turnoverRate;
+  }
+
+  public void setTurnoverRate(Double turnoverRate) {
+    this.turnoverRate = turnoverRate;
+  }
+
+  public Double getTtmPe() {
+    return ttmPe;
+  }
+
+  public void setTtmPe(Double ttmPe) {
+    this.ttmPe = ttmPe;
+  }
+
+  public Double getLyrPe() {
+    return lyrPe;
+  }
+
+  public void setLyrPe(Double lyrPe) {
+    this.lyrPe = lyrPe;
+  }
+
   @Override
   public String toString() {
     return "KlinePoint{" +
@@ -88,6 +116,9 @@ public class KlinePoint implements Serializable {
         ", time=" + time +
         ", volume=" + volume +
         ", amount=" + amount +
+        ", turnoverRate=" + turnoverRate +
+        ", ttmPe=" + ttmPe +
+        ", lyrPe=" + lyrPe +
         '}';
   }
 }
