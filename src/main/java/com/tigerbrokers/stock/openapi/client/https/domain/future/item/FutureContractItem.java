@@ -27,6 +27,9 @@ public class FutureContractItem extends ApiModel {
   private String productWorth;
   private String deliveryMode;
   private String productType;
+  private String productScale;
+  private Long lastTradingTimestamp;
+  private String timeZone;
 
   public String getType() {
     return type;
@@ -172,6 +175,30 @@ public class FutureContractItem extends ApiModel {
     this.productType = productType;
   }
 
+  public String getProductScale() {
+    return productScale;
+  }
+
+  public void setProductScale(String productScale) {
+    this.productScale = productScale;
+  }
+
+  public Long getLastTradingTimestamp() {
+    return lastTradingTimestamp;
+  }
+
+  public void setLastTradingTimestamp(Long lastTradingTimestamp) {
+    this.lastTradingTimestamp = lastTradingTimestamp;
+  }
+
+  public String getTimeZone() {
+    return timeZone;
+  }
+
+  public void setTimeZone(String timeZone) {
+    this.timeZone = timeZone;
+  }
+
   @Override
   public String toString() {
     return "FutureContractItem{" +
@@ -193,6 +220,9 @@ public class FutureContractItem extends ApiModel {
         ", productWorth='" + productWorth + '\'' +
         ", deliveryMode='" + deliveryMode + '\'' +
         ", productType='" + productType + '\'' +
+        ", productScale='" + productScale + '\'' +
+        ", lastTradingTimestamp=" + lastTradingTimestamp +
+        ", timeZone='" + timeZone + '\'' +
         '}';
   }
 }
