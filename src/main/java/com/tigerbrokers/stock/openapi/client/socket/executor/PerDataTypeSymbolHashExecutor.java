@@ -7,8 +7,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -27,6 +29,10 @@ public class PerDataTypeSymbolHashExecutor implements MessageCallbackExecutor {
       DataType.QuoteDepth,
       DataType.TradeTick,
       DataType.Kline
+  );
+  private static final Set<DataType> ORDER_DATA_TYPES = EnumSet.of(
+      DataType.OrderStatus,
+      DataType.OrderTransaction
   );
 
   private final ConcurrentMap<DataType, ExecutorGroup> executorGroups = new ConcurrentHashMap<>();
@@ -63,7 +69,7 @@ public class PerDataTypeSymbolHashExecutor implements MessageCallbackExecutor {
       return new SymbolHashGroup("tiger-" + dataType.name().toLowerCase(), symbolThreadCount,
           queueCapacity);
     }
-    return new SingleThreadGroup("tiger-" + dataType.name().toLowerCase(), queueCapacity);
+    return new SingleThreadGroup(dataType, "tiger-" + dataType.name().toLowerCase(), queueCapacity);
   }
 
   @Override
@@ -97,7 +103,12 @@ public class PerDataTypeSymbolHashExecutor implements MessageCallbackExecutor {
 
     private final ExecutorService executor;
 
-    SingleThreadGroup(String threadName, int queueCapacity) {
+    SingleThreadGroup(DataType dataType, String threadName, int queueCapacity) {
+      RejectedExecutionHandler handler = new ThreadPoolExecutor.DiscardOldestPolicy();
+      if (ORDER_DATA_TYPES.contains(dataType)) {
+        handler = new CallerRunsPolicy();
+      }
+
       this.executor = new ThreadPoolExecutor(
           1,
           1,
@@ -105,7 +116,7 @@ public class PerDataTypeSymbolHashExecutor implements MessageCallbackExecutor {
           TimeUnit.MILLISECONDS,
           new LinkedBlockingQueue<>(queueCapacity),
           buildThreadFactory(threadName + "-worker"),
-          new ThreadPoolExecutor.DiscardOldestPolicy()
+          handler
       );
     }
 

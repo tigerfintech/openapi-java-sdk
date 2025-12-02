@@ -1,11 +1,15 @@
 package com.tigerbrokers.stock.openapi.client.socket.executor;
 
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.SocketCommon.DataType;
+import java.util.EnumSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -20,6 +24,11 @@ public class PerDataTypeSingleThreadExecutor implements MessageCallbackExecutor 
 
   private final Map<DataType, ExecutorService> threadPools = new ConcurrentHashMap<>();
   private final AtomicBoolean running = new AtomicBoolean(true);
+
+  private static final Set<DataType> ORDER_DATA_TYPES = EnumSet.of(
+      DataType.OrderStatus,
+      DataType.OrderTransaction
+  );
 
   private final int capacity;
 
@@ -49,6 +58,10 @@ public class PerDataTypeSingleThreadExecutor implements MessageCallbackExecutor 
   }
 
   ExecutorService createSingleThreadExecutor(DataType dataType) {
+    RejectedExecutionHandler handler = new ThreadPoolExecutor.DiscardOldestPolicy();
+    if (ORDER_DATA_TYPES.contains(dataType)) {
+      handler = new CallerRunsPolicy();
+    }
     return new ThreadPoolExecutor(
         1,
         1,
@@ -60,7 +73,7 @@ public class PerDataTypeSingleThreadExecutor implements MessageCallbackExecutor 
           t.setDaemon(true);
           return t;
         },
-        new ThreadPoolExecutor.DiscardOldestPolicy()
+        handler
     );
   }
 
