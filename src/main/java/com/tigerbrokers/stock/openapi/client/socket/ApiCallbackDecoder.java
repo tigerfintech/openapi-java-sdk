@@ -30,18 +30,16 @@ import java.util.concurrent.RejectedExecutionException;
  */
 public class ApiCallbackDecoder {
 
-  private static final MessageCallbackExecutor DEFAULT_EXECUTOR = new PerDataTypeSingleThreadExecutor();
-
   private final ApiComposeCallback callback;
   private final MessageCallbackExecutor executor;
 
   public ApiCallbackDecoder(ApiComposeCallback callback) {
-    this(callback, DEFAULT_EXECUTOR);
+    this(callback, null);
   }
 
   public ApiCallbackDecoder(ApiComposeCallback callback, MessageCallbackExecutor executor) {
     this.callback = callback;
-    this.executor = (executor != null) ? executor : DEFAULT_EXECUTOR;
+    this.executor = (executor != null) ? executor : new PerDataTypeSingleThreadExecutor();
   }
 
   public synchronized void handle(Response msg) {
