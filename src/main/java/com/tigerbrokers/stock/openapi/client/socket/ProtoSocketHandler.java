@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
+import com.tigerbrokers.stock.openapi.client.socket.executor.MessageCallbackExecutor;
 import com.tigerbrokers.stock.openapi.client.util.ApiCallbackDecoderUtils;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.ProtoMessageUtil;
@@ -25,10 +26,10 @@ public class ProtoSocketHandler extends SimpleChannelInboundHandler<Response> {
     this.decoder = new ApiCallbackDecoder(callback);
   }
 
-  public ProtoSocketHandler(ApiAuthentication authentication, ApiComposeCallback callback, int sendInterval,
-      int receiveInterval) {
+  public ProtoSocketHandler(ApiAuthentication authentication, ApiComposeCallback callback,
+      MessageCallbackExecutor executor, int sendInterval, int receiveInterval) {
     this.authentication = authentication;
-    this.decoder = new ApiCallbackDecoder(callback);
+    this.decoder = new ApiCallbackDecoder(callback, executor);
     this.clientSendInterval = sendInterval;
     this.clientReceiveInterval = receiveInterval;
   }

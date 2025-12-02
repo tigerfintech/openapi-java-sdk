@@ -5,6 +5,7 @@ import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
+import com.tigerbrokers.stock.openapi.client.socket.executor.MessageCallbackExecutor;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
 import com.tigerbrokers.stock.openapi.client.struct.Indicator;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
@@ -75,6 +76,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private boolean isProtobuf = true;
   private ApiAuthentication authentication;
   private ApiComposeCallback apiComposeCallback;
+  private MessageCallbackExecutor executor;
   private final Set<Subject> subscribeList = new CopyOnWriteArraySet<>();
   private volatile CountDownLatch connectCountDown = new CountDownLatch(1);
 
@@ -174,6 +176,16 @@ public class WebSocketClient implements SubscribeAsyncApi {
     return this;
   }
 
+  /**
+   * Sets a custom message callback executor.
+   * <p>The SDK does not manage the lifecycle of the provided executor, so callers
+   * must shut it down themselves if they pass in thread pools or other resources.</p>
+   */
+  public WebSocketClient executor(MessageCallbackExecutor executor) {
+    this.executor = executor;
+    return this;
+  }
+
   public WebSocketClient clientHeartBeatData(final ClientHeartBeatData clientHeartBeatData) {
     if (clientHeartBeatData != null) {
       if (clientHeartBeatData.getSendInterval() >= 0) {
@@ -248,7 +260,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
             }
             if (isProtobuf) {
               final ProtoSocketHandler handler =
-                  new ProtoSocketHandler(authentication, apiComposeCallback, clientSendInterval, clientReceiveInterval);
+                  new ProtoSocketHandler(authentication, apiComposeCallback, executor, clientSendInterval, clientReceiveInterval);
               p.addLast(SOCKET_DECODER, new ProtobufVarint32FrameDecoder());
               p.addLast(new ProtobufDecoder(Response.getDefaultInstance()));
               p.addLast(new ProtobufVarint32LengthFieldPrepender());
