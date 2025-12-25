@@ -124,10 +124,8 @@ public class PositionTransferDetailItem {
 
   public static class TransferDetail {
 
-    private Long id;
     private Long transferId;
     private String direction;
-    private Long contractId;
     private String symbol;
     private String formattedSymbol;
     private String market;
@@ -136,14 +134,6 @@ public class PositionTransferDetailItem {
     private String message;
     private Long updatedAt;
     private Long createdAt;
-
-    public Long getId() {
-      return id;
-    }
-
-    public void setId(Long id) {
-      this.id = id;
-    }
 
     public Long getTransferId() {
       return transferId;
@@ -159,14 +149,6 @@ public class PositionTransferDetailItem {
 
     public void setDirection(String direction) {
       this.direction = direction;
-    }
-
-    public Long getContractId() {
-      return contractId;
-    }
-
-    public void setContractId(Long contractId) {
-      this.contractId = contractId;
     }
 
     public String getSymbol() {
