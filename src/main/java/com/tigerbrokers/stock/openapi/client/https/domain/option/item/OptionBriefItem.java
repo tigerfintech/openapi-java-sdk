@@ -29,6 +29,12 @@ public class OptionBriefItem extends ApiModel {
   private String volatility;
   private Long expiry;
   protected Double ratesBonds;
+  private Double midPrice;
+  private Long midTimestamp;
+  private Double markPrice;
+  private Long markTimestamp;
+  private Double preMarkPrice;
+  private Double sellingReturn;
   private Long timestamp;
   private String latestTime;
 
@@ -192,6 +198,54 @@ public class OptionBriefItem extends ApiModel {
     this.ratesBonds = ratesBonds;
   }
 
+  public Double getMidPrice() {
+    return midPrice;
+  }
+
+  public void setMidPrice(Double midPrice) {
+    this.midPrice = midPrice;
+  }
+
+  public Long getMidTimestamp() {
+    return midTimestamp;
+  }
+
+  public void setMidTimestamp(Long midTimestamp) {
+    this.midTimestamp = midTimestamp;
+  }
+
+  public Double getMarkPrice() {
+    return markPrice;
+  }
+
+  public void setMarkPrice(Double markPrice) {
+    this.markPrice = markPrice;
+  }
+
+  public Long getMarkTimestamp() {
+    return markTimestamp;
+  }
+
+  public void setMarkTimestamp(Long markTimestamp) {
+    this.markTimestamp = markTimestamp;
+  }
+
+  public Double getPreMarkPrice() {
+    return preMarkPrice;
+  }
+
+  public void setPreMarkPrice(Double preMarkPrice) {
+    this.preMarkPrice = preMarkPrice;
+  }
+
+  public Double getSellingReturn() {
+    return sellingReturn;
+  }
+
+  public void setSellingReturn(Double sellingReturn) {
+    this.sellingReturn = sellingReturn;
+  }
+
   public Long getTimestamp() {
     return timestamp;
   }
@@ -234,8 +288,14 @@ public class OptionBriefItem extends ApiModel {
         ", volatility='" + volatility + '\'' +
         ", expiry=" + expiry +
         ", ratesBonds=" + ratesBonds +
+        ", midPrice=" + midPrice +
+        ", midTimestamp=" + midTimestamp +
+        ", markPrice=" + markPrice +
+        ", markTimestamp=" + markTimestamp +
+        ", preMarkPrice=" + preMarkPrice +
+        ", sellingReturn=" + sellingReturn +
         ", timestamp=" + timestamp +
-        ", latestTime=" + getLatestTime() +
+        ", latestTime='" + latestTime + '\'' +
         '}';
   }
 }
