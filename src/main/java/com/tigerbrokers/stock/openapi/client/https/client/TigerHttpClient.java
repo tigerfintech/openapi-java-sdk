@@ -41,7 +41,6 @@ import com.tigerbrokers.stock.openapi.client.util.AccountUtil;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
 import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
-import com.tigerbrokers.stock.openapi.client.util.MethodSecretKeyUtil;
 import com.tigerbrokers.stock.openapi.client.util.NetworkUtil;
 import com.tigerbrokers.stock.openapi.client.util.ReflectionUtil;
 import com.tigerbrokers.stock.openapi.client.util.SdkVersionUtils;
@@ -395,10 +394,6 @@ public class TigerHttpClient implements TigerClient {
         && !StringUtils.isEmpty(this.clientConfig.secretKey)) {
       // set default secretKey
       ReflectionUtil.checkAndSetDefaultValue(apiModel, "secretKey", "setSecretKey", this.clientConfig.secretKey);
-    }
-    if (MethodSecretKeyUtil.needSecretKey(methodName)) {
-      ReflectionUtil.checkAndSetDefaultValue(apiModel, "secretKey",
-          "setSecretKey", this.clientConfig.secretKey);
     }
   }
 

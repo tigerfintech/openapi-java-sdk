@@ -23,6 +23,12 @@ public class PositionTransferModel extends ApiModel {
     this.market = market;
   }
 
+
+  @Override
+  public String getAccount() {
+    return fromAccount;
+  }
+
   public String getFromAccount() {
     return fromAccount;
   }

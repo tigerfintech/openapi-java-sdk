@@ -16,6 +16,11 @@ public class PositionTransferDetailModel extends ApiModel {
     this.accountId = accountId;
   }
 
+  @Override
+  public String getAccount() {
+    return accountId;
+  }
+
   public Long getId() {
     return id;
   }

@@ -27,6 +27,11 @@ public class PositionTransferRecordsModel extends ApiModel {
     this.symbol = symbol;
   }
 
+  @Override
+  public String getAccount() {
+    return accountId;
+  }
+
   public String getAccountId() {
     return accountId;
   }
