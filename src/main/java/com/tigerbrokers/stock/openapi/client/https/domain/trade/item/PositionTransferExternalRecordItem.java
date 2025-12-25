@@ -26,8 +26,8 @@ public class PositionTransferExternalRecordItem {
   private String side;
   private String market;
   private String userName;
-  private String transferHin;
-  private String fullPortfolio;
+  private Boolean transferHin;
+  private Boolean fullPortfolio;
 
   public Long getId() {
     return id;
@@ -206,19 +206,19 @@ public class PositionTransferExternalRecordItem {
     this.userName = userName;
   }
 
-  public String getTransferHin() {
+  public Boolean getTransferHin() {
     return transferHin;
   }
 
-  public void setTransferHin(String transferHin) {
+  public void setTransferHin(Boolean transferHin) {
     this.transferHin = transferHin;
   }
 
-  public String getFullPortfolio() {
+  public Boolean getFullPortfolio() {
     return fullPortfolio;
   }
 
-  public void setFullPortfolio(String fullPortfolio) {
+  public void setFullPortfolio(Boolean fullPortfolio) {
     this.fullPortfolio = fullPortfolio;
   }
 
