@@ -12,7 +12,6 @@ public class PositionTransferModel extends ApiModel {
   private String toAccount;
   private List<Transfer> transfers;
   private String market;
-  private String comment;
   @JSONField(name = "secret_key")
   private String secretKey;
 
@@ -55,14 +54,6 @@ public class PositionTransferModel extends ApiModel {
 
   public void setMarket(String market) {
     this.market = market;
-  }
-
-  public String getComment() {
-    return comment;
-  }
-
-  public void setComment(String comment) {
-    this.comment = comment;
   }
 
   public String getSecretKey() {

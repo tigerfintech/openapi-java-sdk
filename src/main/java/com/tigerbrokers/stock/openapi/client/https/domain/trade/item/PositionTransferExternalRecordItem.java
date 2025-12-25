@@ -24,7 +24,6 @@ public class PositionTransferExternalRecordItem {
   private Long createdAt;
   private Long updatedAt;
   private String side;
-  private Long institutionId;
   private String market;
   private String userName;
   private String transferHin;
@@ -189,14 +188,6 @@ public class PositionTransferExternalRecordItem {
 
   public void setSide(String side) {
     this.side = side;
-  }
-
-  public Long getInstitutionId() {
-    return institutionId;
-  }
-
-  public void setInstitutionId(Long institutionId) {
-    this.institutionId = institutionId;
   }
 
   public String getMarket() {
