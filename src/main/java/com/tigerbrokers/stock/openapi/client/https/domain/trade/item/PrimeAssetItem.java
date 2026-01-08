@@ -271,6 +271,7 @@ public class PrimeAssetItem extends ApiModel {
         private String currency;
         private Double cashBalance;
         private Double cashAvailableForTrade;
+        private Double forexRate;
 
         public String getCurrency() {
             return currency;
@@ -294,6 +295,14 @@ public class PrimeAssetItem extends ApiModel {
 
         public void setCashAvailableForTrade(Double cashAvailableForTrade) {
             this.cashAvailableForTrade = cashAvailableForTrade;
+        }
+
+        public Double getForexRate() {
+            return forexRate;
+        }
+
+        public void setForexRate(Double forexRate) {
+            this.forexRate = forexRate;
         }
     }
 }
