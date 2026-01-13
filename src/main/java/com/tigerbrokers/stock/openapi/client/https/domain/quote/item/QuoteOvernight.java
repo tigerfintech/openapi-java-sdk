@@ -29,6 +29,12 @@ public class QuoteOvernight implements Serializable {
 
   private Double amount;
 
+  private Double change;
+
+  private Double changeRate;
+
+  private Double amplitude;
+
   private Long timestamp;
 
   public String getSymbol() {
@@ -103,6 +109,30 @@ public class QuoteOvernight implements Serializable {
     this.amount = amount;
   }
 
+  public Double getChange() {
+    return change;
+  }
+
+  public void setChange(Double change) {
+    this.change = change;
+  }
+
+  public Double getChangeRate() {
+    return changeRate;
+  }
+
+  public void setChangeRate(Double changeRate) {
+    this.changeRate = changeRate;
+  }
+
+  public Double getAmplitude() {
+    return amplitude;
+  }
+
+  public void setAmplitude(Double amplitude) {
+    this.amplitude = amplitude;
+  }
+
   public Long getTimestamp() {
     return timestamp;
   }
@@ -121,8 +151,11 @@ public class QuoteOvernight implements Serializable {
         ", bidPrice=" + bidPrice +
         ", bidSize=" + bidSize +
         ", preClose=" + preClose +
-        ", amount=" + amount +
         ", volume=" + volume +
+        ", amount=" + amount +
+        ", change=" + change +
+        ", changeRate=" + changeRate +
+        ", amplitude=" + amplitude +
         ", timestamp=" + timestamp +
         '}';
   }
