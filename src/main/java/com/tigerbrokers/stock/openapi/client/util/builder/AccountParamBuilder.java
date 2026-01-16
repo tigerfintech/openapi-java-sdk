@@ -148,6 +148,10 @@ public class AccountParamBuilder {
     return setTime("start_date", startDate, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
   }
 
+  public AccountParamBuilder sinceDate(String sinceDate) {
+    return setDate("since_date", sinceDate);
+  }
+
   public AccountParamBuilder startDate(String startDate, TimeZoneId zoneId) {
     return setTime("start_date", startDate, zoneId);
   }
@@ -167,10 +171,21 @@ public class AccountParamBuilder {
     return setTime("end_date", endDate, zoneId);
   }
 
+  public AccountParamBuilder toDate(String toDate) {
+    return setDate("to_date", toDate);
+  }
+
   public AccountParamBuilder setTime(String key, String time, TimeZoneId zoneId) {
     Date date = DateUtils.getZoneDate(time, zoneId);
     if (date != null) {
       paramMap.put(key, date.getTime());
+    }
+    return this;
+  }
+
+  private AccountParamBuilder setDate(String key, String date) {
+    if (date != null) {
+      paramMap.put(key, date);
     }
     return this;
   }

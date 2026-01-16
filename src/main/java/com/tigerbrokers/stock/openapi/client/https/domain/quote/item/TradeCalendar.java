@@ -18,6 +18,16 @@ public class TradeCalendar extends ApiModel {
    */
   private String type;
 
+  /**
+   * market open time, e.g. HH:mm:ss
+   */
+  private String openTime;
+
+  /**
+   * market close time, e.g. HH:mm:ss
+   */
+  private String closeTime;
+
   public String getDate() {
     return date;
   }
@@ -34,11 +44,29 @@ public class TradeCalendar extends ApiModel {
     this.type = type;
   }
 
+  public String getOpenTime() {
+    return openTime;
+  }
+
+  public void setOpenTime(String openTime) {
+    this.openTime = openTime;
+  }
+
+  public String getCloseTime() {
+    return closeTime;
+  }
+
+  public void setCloseTime(String closeTime) {
+    this.closeTime = closeTime;
+  }
+
   @Override
   public String toString() {
     return "TradeCalendar{" +
         "date='" + date + '\'' +
         ", type='" + type + '\'' +
+        ", openTime='" + openTime + '\'' +
+        ", closeTime='" + closeTime + '\'' +
         '}';
   }
 }
