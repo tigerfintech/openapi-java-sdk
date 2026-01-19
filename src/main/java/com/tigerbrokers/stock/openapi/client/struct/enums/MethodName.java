@@ -37,7 +37,10 @@ public enum MethodName {
   TRANSFER_FUND("transfer_fund", MethodType.TRADE),
   AGGREGATE_ASSETS("aggregate_assets", MethodType.TRADE),
   FUND_DETAILS("fund_details", MethodType.TRADE),
-
+  POSITION_TRANSFER("position_transfer", MethodType.TRADE),
+  POSITION_TRANSFER_RECORDS("position_transfer_records", MethodType.TRADE),
+  POSITION_TRANSFER_DETAIL("position_transfer_detail", MethodType.TRADE),
+  POSITION_TRANSFER_EXTERNAL_RECORDS("position_transfer_external_records", MethodType.TRADE),
 
   /**
    * contract

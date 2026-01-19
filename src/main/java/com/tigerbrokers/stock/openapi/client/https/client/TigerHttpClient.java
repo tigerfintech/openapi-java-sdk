@@ -1,5 +1,19 @@
 package com.tigerbrokers.stock.openapi.client.https.client;
 
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCESS_TOKEN;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCOUNT_TYPE;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.BIZ_CONTENT;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.CHARSET;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.DEVICE_ID;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.METHOD;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SDK_VERSION;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN_TYPE;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TIGER_ID;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TIMESTAMP;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TRADE_TOKEN;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.VERSION;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
@@ -40,20 +54,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCESS_TOKEN;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCOUNT_TYPE;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.BIZ_CONTENT;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.CHARSET;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.DEVICE_ID;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.METHOD;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SDK_VERSION;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN_TYPE;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TIGER_ID;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TIMESTAMP;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TRADE_TOKEN;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.VERSION;
 
 public class TigerHttpClient implements TigerClient {
 
