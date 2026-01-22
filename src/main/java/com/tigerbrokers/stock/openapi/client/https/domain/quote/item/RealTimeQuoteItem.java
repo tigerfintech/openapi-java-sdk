@@ -80,6 +80,12 @@ public class RealTimeQuoteItem extends ApiModel {
    */
   private StockStatus status;
 
+  private Double change;
+
+  private Double changeRate;
+
+  private Double amplitude;
+
   private HourTrading hourTrading;
 
   public String getSymbol() {
@@ -194,6 +200,30 @@ public class RealTimeQuoteItem extends ApiModel {
     this.status = status;
   }
 
+  public Double getChange() {
+    return change;
+  }
+
+  public void setChange(Double change) {
+    this.change = change;
+  }
+
+  public Double getChangeRate() {
+    return changeRate;
+  }
+
+  public void setChangeRate(Double changeRate) {
+    this.changeRate = changeRate;
+  }
+
+  public Double getAmplitude() {
+    return amplitude;
+  }
+
+  public void setAmplitude(Double amplitude) {
+    this.amplitude = amplitude;
+  }
+
   public HourTrading getHourTrading() {
     return hourTrading;
   }
@@ -219,6 +249,9 @@ public class RealTimeQuoteItem extends ApiModel {
         ", bidSize=" + bidSize +
         ", volume=" + volume +
         ", status=" + status +
+        ", change=" + change +
+        ", changeRate=" + changeRate +
+        ", amplitude=" + amplitude +
         ", hourTrading=" + hourTrading +
         '}';
   }
