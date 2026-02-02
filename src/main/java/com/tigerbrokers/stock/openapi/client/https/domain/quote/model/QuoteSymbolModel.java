@@ -19,6 +19,8 @@ public class QuoteSymbolModel extends ApiModel {
   private Boolean includeHourTrading;
   @JSONField(name = "trade_session")
   private TradeSession tradeSession;
+  @JSONField(name = "sec_type")
+  private String secType;
 
   public QuoteSymbolModel() {
     this.lang = ClientConfig.DEFAULT_CONFIG.getDefaultLanguage();
@@ -74,5 +76,13 @@ public class QuoteSymbolModel extends ApiModel {
 
   public void setTradeSession(TradeSession tradeSession) {
     this.tradeSession = tradeSession;
+  }
+
+  public String getSecType() {
+    return secType;
+  }
+
+  public void setSecType(String secType) {
+    this.secType = secType;
   }
 }

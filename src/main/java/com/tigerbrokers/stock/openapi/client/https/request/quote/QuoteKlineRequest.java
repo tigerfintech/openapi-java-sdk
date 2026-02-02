@@ -8,6 +8,7 @@ import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteKlineResp
 import com.tigerbrokers.stock.openapi.client.struct.enums.KType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.RightOption;
+import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
 
@@ -119,6 +120,13 @@ public class QuoteKlineRequest extends TigerCommonRequest implements TigerReques
 
   public QuoteKlineRequest withFundamental(Boolean withFundamental) {
     getApiModel().setWithFundamental(withFundamental);
+    return this;
+  }
+
+  public QuoteKlineRequest withSecType(SecType secType) {
+    if (secType != null) {
+      getApiModel().setSecType(secType.name());
+    }
     return this;
   }
 

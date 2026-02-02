@@ -7,6 +7,7 @@ import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteRealTimeQuoteResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
+import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import java.util.List;
 
 /**
@@ -24,6 +25,10 @@ public class QuoteRealTimeQuoteRequest extends TigerCommonRequest implements Tig
     return newRequest(symbols, false);
   }
 
+  public static QuoteRealTimeQuoteRequest newCcRequest(List<String> symbols) {
+    return newRequest(symbols, false).withSecType(SecType.CC);
+  }
+
   public static QuoteRealTimeQuoteRequest newRequest(List<String> symbols, boolean includeHourTrading) {
     return newRequest(symbols, includeHourTrading, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage());
   }
@@ -33,6 +38,13 @@ public class QuoteRealTimeQuoteRequest extends TigerCommonRequest implements Tig
     QuoteSymbolModel model = new QuoteSymbolModel(symbols, includeHourTrading, lang);
     request.setApiModel(model);
     return request;
+  }
+
+  public QuoteRealTimeQuoteRequest withSecType(SecType secType) {
+    if (secType != null) {
+      ((QuoteSymbolModel)getApiModel()).setSecType(secType.name());
+    }
+    return this;
   }
 
   @Override

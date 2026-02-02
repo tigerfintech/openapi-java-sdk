@@ -75,6 +75,20 @@ public class RealTimeQuoteItem extends ApiModel {
   private Long volume;
 
   /**
+   * 成交量（支持小数，用于数字货币）
+   * 数字货币的成交量可能包含小数部分，使用此字段获取精确值
+   * 例如：volumeDouble = 123.456
+   */
+  private Double volumeDouble;
+
+  /**
+   * 成交量小数位数（用于精确计算）
+   * 客户端可以通过 volume / 10^volumeScale 计算出精确的volume值
+   * 例如：volume = 123456, volumeScale = 3, 则实际volume = 123456 / 1000 = 123.456
+   */
+  private Integer volumeScale;
+
+  /**
    * 个股状态：
    * 0: 正常 3: 停牌 4: 退市 7: 新股 8: 变更
    */
@@ -192,6 +206,22 @@ public class RealTimeQuoteItem extends ApiModel {
     this.volume = volume;
   }
 
+  public Double getVolumeDouble() {
+    return volumeDouble;
+  }
+
+  public void setVolumeDouble(Double volumeDouble) {
+    this.volumeDouble = volumeDouble;
+  }
+
+  public Integer getVolumeScale() {
+    return volumeScale;
+  }
+
+  public void setVolumeScale(Integer volumeScale) {
+    this.volumeScale = volumeScale;
+  }
+
   public StockStatus getStatus() {
     return status;
   }
@@ -248,6 +278,8 @@ public class RealTimeQuoteItem extends ApiModel {
         ", bidPrice=" + bidPrice +
         ", bidSize=" + bidSize +
         ", volume=" + volume +
+        ", volumeDouble=" + volumeDouble +
+        ", volumeScale=" + volumeScale +
         ", status=" + status +
         ", change=" + change +
         ", changeRate=" + changeRate +

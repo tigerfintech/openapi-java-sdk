@@ -20,6 +20,10 @@ public class KlinePoint implements Serializable {
 
   private Long volume;
 
+  private Double volumeDouble;
+
+  private Integer volumeScale;
+
   private Double amount;
 
   private Double turnoverRate;
@@ -74,6 +78,22 @@ public class KlinePoint implements Serializable {
     this.volume = volume;
   }
 
+  public Double getVolumeDouble() {
+    return volumeDouble;
+  }
+
+  public void setVolumeDouble(Double volumeDouble) {
+    this.volumeDouble = volumeDouble;
+  }
+
+  public Integer getVolumeScale() {
+    return volumeScale;
+  }
+
+  public void setVolumeScale(Integer volumeScale) {
+    this.volumeScale = volumeScale;
+  }
+
   public Double getAmount() {
     return amount;
   }
@@ -115,6 +135,8 @@ public class KlinePoint implements Serializable {
         ", low=" + low +
         ", time=" + time +
         ", volume=" + volume +
+        ", volumeDouble=" + volumeDouble +
+        ", volumeScale=" + volumeScale +
         ", amount=" + amount +
         ", turnoverRate=" + turnoverRate +
         ", ttmPe=" + ttmPe +
