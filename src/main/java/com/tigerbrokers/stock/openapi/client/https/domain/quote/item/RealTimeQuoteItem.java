@@ -77,9 +77,9 @@ public class RealTimeQuoteItem extends ApiModel {
   /**
    * 成交量（支持小数，用于数字货币）
    * 数字货币的成交量可能包含小数部分，使用此字段获取精确值
-   * 例如：volumeDouble = 123.456
+   * 例如：volumeDecimal = 123.456
    */
-  private Double volumeDouble;
+  private Double volumeDecimal;
 
   /**
    * 成交量小数位数（用于精确计算）
@@ -206,12 +206,12 @@ public class RealTimeQuoteItem extends ApiModel {
     this.volume = volume;
   }
 
-  public Double getVolumeDouble() {
-    return volumeDouble;
+  public Double getVolumeDecimal() {
+    return volumeDecimal;
   }
 
-  public void setVolumeDouble(Double volumeDouble) {
-    this.volumeDouble = volumeDouble;
+  public void setVolumeDecimal(Double volumeDecimal) {
+    this.volumeDecimal = volumeDecimal;
   }
 
   public Integer getVolumeScale() {
@@ -278,7 +278,7 @@ public class RealTimeQuoteItem extends ApiModel {
         ", bidPrice=" + bidPrice +
         ", bidSize=" + bidSize +
         ", volume=" + volume +
-        ", volumeDouble=" + volumeDouble +
+        ", volumeDecimal=" + volumeDecimal +
         ", volumeScale=" + volumeScale +
         ", status=" + status +
         ", change=" + change +
