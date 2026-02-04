@@ -18,8 +18,6 @@ public class TimelinePoint implements Serializable {
 
   private Double volumeDecimal;
 
-  private Integer volumeScale;
-
   public Double getPrice() {
     return price;
   }
@@ -60,14 +58,6 @@ public class TimelinePoint implements Serializable {
     this.volumeDecimal = volumeDecimal;
   }
 
-  public Integer getVolumeScale() {
-    return volumeScale;
-  }
-
-  public void setVolumeScale(Integer volumeScale) {
-    this.volumeScale = volumeScale;
-  }
-
   @Override
   public String toString() {
     return "TimelinePoint{" +
@@ -76,7 +66,6 @@ public class TimelinePoint implements Serializable {
         ", time=" + time +
         ", volume=" + volume +
         ", volumeDecimal=" + volumeDecimal +
-        ", volumeScale=" + volumeScale +
         '}';
   }
 }

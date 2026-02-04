@@ -82,13 +82,6 @@ public class RealTimeQuoteItem extends ApiModel {
   private Double volumeDecimal;
 
   /**
-   * 成交量小数位数（用于精确计算）
-   * 客户端可以通过 volume / 10^volumeScale 计算出精确的volume值
-   * 例如：volume = 123456, volumeScale = 3, 则实际volume = 123456 / 1000 = 123.456
-   */
-  private Integer volumeScale;
-
-  /**
    * 个股状态：
    * 0: 正常 3: 停牌 4: 退市 7: 新股 8: 变更
    */
@@ -214,14 +207,6 @@ public class RealTimeQuoteItem extends ApiModel {
     this.volumeDecimal = volumeDecimal;
   }
 
-  public Integer getVolumeScale() {
-    return volumeScale;
-  }
-
-  public void setVolumeScale(Integer volumeScale) {
-    this.volumeScale = volumeScale;
-  }
-
   public StockStatus getStatus() {
     return status;
   }
@@ -279,7 +264,6 @@ public class RealTimeQuoteItem extends ApiModel {
         ", bidSize=" + bidSize +
         ", volume=" + volume +
         ", volumeDecimal=" + volumeDecimal +
-        ", volumeScale=" + volumeScale +
         ", status=" + status +
         ", change=" + change +
         ", changeRate=" + changeRate +
