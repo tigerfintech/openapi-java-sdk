@@ -75,4 +75,8 @@ public class ContractModel extends BaseContractModel {
   public static ContractModel getFutureModel(String symbol) {
     return new ContractModel(symbol, SecType.FUT.name());
   }
+
+  public static ContractModel getCcModel(String symbol) {
+    return new ContractModel(symbol, SecType.CC.name());
+  }
 }
