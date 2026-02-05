@@ -89,6 +89,7 @@ public enum MethodName {
   OPTION_TRADE_TICK("option_trade_tick", MethodType.QUOTE),
   OPTION_DEPTH("option_depth", MethodType.QUOTE),
   OPTION_TIMELINE("option_timeline", MethodType.QUOTE),
+  OPTION_ANALYSIS("option_analysis", MethodType.QUOTE),
   ALL_HK_OPTION_SYMBOLS("all_hk_option_symbols", MethodType.QUOTE),
 
   /**
