@@ -9,12 +9,14 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.PackageName;
+import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 
 /**
  * Description:
  * Created by lijiawen on 2018/12/25.
  */
-public class QuoteSymbolRequest extends TigerCommonRequest implements TigerRequest<QuoteSymbolResponse> {
+public class QuoteSymbolRequest extends TigerCommonRequest implements
+    TigerRequest<QuoteSymbolResponse> {
 
   public QuoteSymbolRequest() {
     setApiVersion(V2_0);
@@ -39,11 +41,16 @@ public class QuoteSymbolRequest extends TigerCommonRequest implements TigerReque
     return request;
   }
 
+  public static QuoteSymbolRequest newCcRequest() {
+    return newRequest(Market.US, ClientConfig.DEFAULT_CONFIG.getDefaultLanguage()).secType(
+        SecType.CC);
+  }
+
   public QuoteMarketModel getApiModel() {
     if (apiModel == null) {
       apiModel = new QuoteMarketModel();
     }
-    return (QuoteMarketModel)apiModel;
+    return (QuoteMarketModel) apiModel;
   }
 
   public QuoteSymbolRequest packageName(PackageName packageName) {
@@ -53,6 +60,13 @@ public class QuoteSymbolRequest extends TigerCommonRequest implements TigerReque
 
   public QuoteSymbolRequest market(Market market) {
     getApiModel().setMarket(market);
+    return this;
+  }
+
+  public QuoteSymbolRequest secType(SecType secType) {
+    if (secType != null) {
+      getApiModel().setSecType(secType.name());
+    }
     return this;
   }
 

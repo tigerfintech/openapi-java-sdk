@@ -40,6 +40,9 @@ public interface SubscribeApiCallback {
   void futureChange(QuoteBasicData data);
   void futureAskBidChange(QuoteBBOData data);
 
+  void ccChange(QuoteBasicData data);
+  void ccAskBidChange(QuoteBBOData data);
+
   void depthQuoteChange(QuoteDepthData data);
 
   void klineChange(KlineData data);

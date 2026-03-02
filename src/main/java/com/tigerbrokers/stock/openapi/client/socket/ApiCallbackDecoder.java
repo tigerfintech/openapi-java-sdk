@@ -158,6 +158,20 @@ public class ApiCallbackDecoder {
         final KlineData klineData = pushData.getKlineData();
         executeCallback(() -> callback.klineChange(klineData), dataType, klineData.getSymbol());
         break;
+      case Cc:
+        basicData = QuoteDataUtil.convertToBasicData(pushData.getQuoteData());
+        if (null != basicData) {
+          final QuoteBasicData finalBasicData = basicData;
+          executeCallback(() -> callback.ccChange(finalBasicData), dataType,
+              finalBasicData.getSymbol());
+        }
+        bboData = QuoteDataUtil.convertToAskBidData(pushData.getQuoteData());
+        if (null != bboData) {
+          final QuoteBBOData finalBboData = bboData;
+          executeCallback(() -> callback.ccAskBidChange(finalBboData), dataType,
+              finalBboData.getSymbol());
+        }
+        break;
       default:
         ApiLogger.info("push data cannot be processed. {}", ProtoMessageUtil.toJson(msg));
     }

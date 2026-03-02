@@ -29,6 +29,11 @@ public class QuoteTimelineRequest extends TigerCommonRequest implements TigerReq
     return newRequest(symbols, beginTime, TradeSession.Regular, TimeLineType.day);
   }
 
+  public static QuoteTimelineRequest newCcRequest(List<String> symbols, Long beginTime) {
+    return newRequest(symbols, beginTime, TradeSession.Regular, TimeLineType.day).withSecType(
+        SecType.CC);
+  }
+
   @Deprecated
   public static QuoteTimelineRequest newRequest(List<String> symbols, Long beginTime, boolean includeHourTrading) {
     return newRequest(symbols, beginTime, includeHourTrading ? TradeSession.All : TradeSession.Regular, TimeLineType.day,
@@ -121,6 +126,13 @@ public class QuoteTimelineRequest extends TigerCommonRequest implements TigerReq
 
   public void setTradeSession(TradeSession tradeSession) {
     getApiModel().setTradeSession(tradeSession);
+  }
+
+  public QuoteTimelineRequest withSecType(SecType secType) {
+    if (secType != null) {
+      getApiModel().setSecType(secType.name());
+    }
+    return this;
   }
 
   @Override

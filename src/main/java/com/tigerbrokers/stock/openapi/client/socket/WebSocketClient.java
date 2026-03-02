@@ -634,6 +634,16 @@ public class WebSocketClient implements SubscribeAsyncApi {
     return cancelSubscribeQuote(symbols, QuoteSubject.Kline);
   }
 
+  @Override
+  public String subscribeCc(Set<String> symbols) {
+    return subscribeQuote(symbols, QuoteSubject.Cc);
+  }
+
+  @Override
+  public String cancelSubscribeCc(Set<String> symbols) {
+    return cancelSubscribeQuote(symbols, QuoteSubject.Cc);
+  }
+
   private String subscribeQuote(Set<String> symbols, QuoteSubject subject) {
     if (!isConnected()) {
       notConnect();

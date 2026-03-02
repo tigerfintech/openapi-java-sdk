@@ -62,6 +62,7 @@ public class QuoteDataUtil {
     builder.setLatestTime(quoteData.getLatestTime());
     builder.setPreClose(quoteData.getPreClose());
     builder.setVolume(quoteData.getVolume());
+    builder.setVolumeDecimal(quoteData.getVolumeDecimal());
     if (quoteData.hasAmount()) {
       builder.setAmount(quoteData.getAmount());
     }

@@ -17,6 +17,8 @@ public class QuoteMarketModel extends ApiModel {
   private PackageName packageName;
   @JSONField(name = "include_otc")
   private Boolean includeOTC;
+  @JSONField(name = "sec_type")
+  private String secType;
 
   public QuoteMarketModel() {
   }
@@ -64,5 +66,13 @@ public class QuoteMarketModel extends ApiModel {
 
   public void setIncludeOTC(Boolean includeOTC) {
     this.includeOTC = includeOTC;
+  }
+
+  public String getSecType() {
+    return secType;
+  }
+
+  public void setSecType(String secType) {
+    this.secType = secType;
   }
 }

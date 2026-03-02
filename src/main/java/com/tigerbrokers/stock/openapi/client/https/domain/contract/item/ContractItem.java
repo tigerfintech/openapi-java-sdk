@@ -580,4 +580,12 @@ public class ContractItem extends ApiModel {
     contractItem.setCurrency(currency);
     return contractItem;
   }
+
+  public static ContractItem buildCcContract(String symbol, String currency) {
+    ContractItem contractItem = new ContractItem();
+    contractItem.setSecType(SecType.CC.name());
+    contractItem.setSymbol(symbol);
+    contractItem.setCurrency(currency);
+    return contractItem;
+  }
 }

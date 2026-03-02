@@ -181,6 +181,11 @@ public interface SubscribeAsyncApi {
    */
   public String cancelSubscribeOptionTop(Market market, Set<Indicator> indicators);
 
+
+  public String subscribeCc(Set<String> symbols);
+
+  public String cancelSubscribeCc(Set<String> symbols);
+
   /**
    * query subscribed symbol list
    *
