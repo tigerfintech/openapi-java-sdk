@@ -52,6 +52,27 @@ public class OptionAnalysisRequest extends TigerCommonRequest implements TigerRe
     return new OptionAnalysisRequest(items, market);
   }
 
+  public static OptionAnalysisRequest of(String symbol, String period, Boolean requireVolatilityList) {
+    return of(symbol, period, requireVolatilityList, Market.US);
+  }
+
+  public static OptionAnalysisRequest of(String symbol, String period, Boolean requireVolatilityList, Market market) {
+    List<OptionAnalysisModel> items = new ArrayList<>();
+    items.add(new OptionAnalysisModel(symbol, period, requireVolatilityList));
+    return new OptionAnalysisRequest(items, market);
+  }
+
+  public static OptionAnalysisRequest of(String symbol, OptionAnalysisPeriod period, Boolean requireVolatilityList) {
+    return of(symbol, period, requireVolatilityList, Market.US);
+  }
+
+  public static OptionAnalysisRequest of(String symbol, OptionAnalysisPeriod period, Boolean requireVolatilityList,
+      Market market) {
+    List<OptionAnalysisModel> items = new ArrayList<>();
+    items.add(new OptionAnalysisModel(symbol, period, requireVolatilityList));
+    return new OptionAnalysisRequest(items, market);
+  }
+
   public OptionAnalysisRequest market(Market market) {
     OptionAnalysisRequestModel model = (OptionAnalysisRequestModel) getApiModel();
     if (model != null) {

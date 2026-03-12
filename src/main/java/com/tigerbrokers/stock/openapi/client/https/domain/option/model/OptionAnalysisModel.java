@@ -10,6 +10,7 @@ public class OptionAnalysisModel extends ApiModel {
 
   private String symbol;
   private String period;
+  private Boolean requireVolatilityList;
 
   public OptionAnalysisModel() {
   }
@@ -22,6 +23,18 @@ public class OptionAnalysisModel extends ApiModel {
   public OptionAnalysisModel(String symbol, OptionAnalysisPeriod period) {
     this.symbol = symbol;
     this.period = period.getValue();
+  }
+
+  public OptionAnalysisModel(String symbol, String period, Boolean requireVolatilityList) {
+    this.symbol = symbol;
+    this.period = period;
+    this.requireVolatilityList = requireVolatilityList;
+  }
+
+  public OptionAnalysisModel(String symbol, OptionAnalysisPeriod period, Boolean requireVolatilityList) {
+    this.symbol = symbol;
+    this.period = period.getValue();
+    this.requireVolatilityList = requireVolatilityList;
   }
   public String getSymbol() {
     return symbol;
@@ -43,11 +56,20 @@ public class OptionAnalysisModel extends ApiModel {
     this.period = period.getValue();
   }
 
+  public Boolean getRequireVolatilityList() {
+    return requireVolatilityList;
+  }
+
+  public void setRequireVolatilityList(Boolean requireVolatilityList) {
+    this.requireVolatilityList = requireVolatilityList;
+  }
+
   @Override
   public String toString() {
     return "OptionAnalysisModel{" +
         "symbol='" + symbol + '\'' +
         ", period='" + period + '\'' +
+        ", requireVolatilityList=" + requireVolatilityList +
         '}';
   }
 }
