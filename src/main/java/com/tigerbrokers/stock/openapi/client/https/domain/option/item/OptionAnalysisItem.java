@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.option.item;
 
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import java.util.List;
 
 /**
  * Description: Option analysis response item
@@ -13,6 +14,7 @@ public class OptionAnalysisItem extends ApiModel {
   private Double ivHisVRatio;
   private Double callPutRatio;
   private ImpliedVolMetric impliedVolMetric;
+  private List<VolatilityItem> volatilityList;
 
   public String getSymbol() {
     return symbol;
@@ -62,6 +64,14 @@ public class OptionAnalysisItem extends ApiModel {
     this.impliedVolMetric = impliedVolMetric;
   }
 
+  public List<VolatilityItem> getVolatilityList() {
+    return volatilityList;
+  }
+
+  public void setVolatilityList(List<VolatilityItem> volatilityList) {
+    this.volatilityList = volatilityList;
+  }
+
   @Override
   public String toString() {
     return "OptionAnalysisItem{" +
@@ -71,6 +81,7 @@ public class OptionAnalysisItem extends ApiModel {
         ", ivHisVRatio=" + ivHisVRatio +
         ", callPutRatio=" + callPutRatio +
         ", impliedVolMetric=" + impliedVolMetric +
+        ", volatilityList=" + volatilityList +
         '}';
   }
 }
