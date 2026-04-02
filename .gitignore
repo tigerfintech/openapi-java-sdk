@@ -22,3 +22,6 @@ target/
 #some local files
 .idea/
 .DS_Store
+
+CLAUDE.md
+.claude/
