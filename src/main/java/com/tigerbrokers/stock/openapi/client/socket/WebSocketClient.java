@@ -5,6 +5,7 @@ import com.tigerbrokers.stock.openapi.client.constant.ReqProtocolType;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
+import com.tigerbrokers.stock.openapi.client.socket.executor.MessageCallbackExecutor;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
 import com.tigerbrokers.stock.openapi.client.struct.Indicator;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
@@ -70,10 +71,12 @@ public class WebSocketClient implements SubscribeAsyncApi {
   private ClientConfig clientConfig;
   private SslProvider sslProvider = null;
   private String url;
+  private boolean isCustomServerUrl = false;
 
   private boolean isProtobuf = true;
   private ApiAuthentication authentication;
   private ApiComposeCallback apiComposeCallback;
+  private MessageCallbackExecutor executor;
   private final Set<Subject> subscribeList = new CopyOnWriteArraySet<>();
   private volatile CountDownLatch connectCountDown = new CountDownLatch(1);
 
@@ -141,16 +144,10 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   public WebSocketClient clientConfig(ClientConfig clientConfig) {
-    return clientConfig(clientConfig, null);
-  }
-
-  public WebSocketClient clientConfig(ClientConfig clientConfig, String url) {
     ConfigFileUtil.loadConfigFile(clientConfig);
     this.clientConfig = clientConfig;
-    if (StringUtils.isEmpty(url)) {
+    if (!this.isCustomServerUrl || StringUtils.isEmpty(url)) {
       this.url = NetworkUtil.getServerAddress(clientConfig, null);
-    } else {
-      this.url = url;
     }
     if (this.sslProvider == null && clientConfig.getSslProvider() != null) {
       this.sslProvider = clientConfig.getSslProvider();
@@ -165,8 +162,27 @@ public class WebSocketClient implements SubscribeAsyncApi {
     return this;
   }
 
+  /**
+   * only for inner test
+   * @param customSocketUrl
+   */
+  public void useFixedSocketUrl(String customSocketUrl) {
+    this.url = customSocketUrl;
+    this.isCustomServerUrl = true;
+  }
+
   public WebSocketClient apiComposeCallback(final ApiComposeCallback apiComposeCallback) {
     this.apiComposeCallback = apiComposeCallback;
+    return this;
+  }
+
+  /**
+   * Sets a custom message callback executor.
+   * <p>The SDK does not manage the lifecycle of the provided executor, so callers
+   * must shut it down themselves if they pass in thread pools or other resources.</p>
+   */
+  public WebSocketClient executor(MessageCallbackExecutor executor) {
+    this.executor = executor;
     return this;
   }
 
@@ -244,7 +260,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
             }
             if (isProtobuf) {
               final ProtoSocketHandler handler =
-                  new ProtoSocketHandler(authentication, apiComposeCallback, clientSendInterval, clientReceiveInterval);
+                  new ProtoSocketHandler(authentication, apiComposeCallback, executor, clientSendInterval, clientReceiveInterval);
               p.addLast(SOCKET_DECODER, new ProtobufVarint32FrameDecoder());
               p.addLast(new ProtobufDecoder(Response.getDefaultInstance()));
               p.addLast(new ProtobufVarint32LengthFieldPrepender());
@@ -338,7 +354,7 @@ public class WebSocketClient implements SubscribeAsyncApi {
   }
 
   private InetSocketAddress getNewServerAddress() {
-    if (clientConfig != null) {
+    if (clientConfig != null && !this.isCustomServerUrl) {
       String newUrl = NetworkUtil.getServerAddress(this.clientConfig, this.url);
       if (!this.url.equals(newUrl)) {
         InetSocketAddress address = getSocketAddress(newUrl);
@@ -616,6 +632,16 @@ public class WebSocketClient implements SubscribeAsyncApi {
   @Override
   public String cancelSubscribeKline(Set<String> symbols) {
     return cancelSubscribeQuote(symbols, QuoteSubject.Kline);
+  }
+
+  @Override
+  public String subscribeCc(Set<String> symbols) {
+    return subscribeQuote(symbols, QuoteSubject.Cc);
+  }
+
+  @Override
+  public String cancelSubscribeCc(Set<String> symbols) {
+    return cancelSubscribeQuote(symbols, QuoteSubject.Cc);
   }
 
   private String subscribeQuote(Set<String> symbols, QuoteSubject subject) {

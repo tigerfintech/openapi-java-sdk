@@ -6,7 +6,14 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
  */
 public enum StockStatus {
 
-  UNKNOWN(-1D, "未知"), NORMAL(0D, "正常"), HALTED(3.0D, "停牌"), DELIST(4.0D, "退市"), NEW(7.0D, "新股"), ALTER(8.0D, "变更");
+  UNKNOWN(-1D, "未知"),
+  NORMAL(0D, "正常"),
+  HALTED(3.0D, "停牌"),
+  DELIST(4.0D, "退市"),
+  NEW(7.0D, "新股"),
+  ALTER(8.0D, "变更"),
+  CIRCUIT_BREAKER(10.0D, "熔断"),
+  ST(20.0D, "特别处理");
 
   private Double value;
 

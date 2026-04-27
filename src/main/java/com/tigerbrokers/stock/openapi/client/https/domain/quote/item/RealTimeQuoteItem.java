@@ -75,10 +75,23 @@ public class RealTimeQuoteItem extends ApiModel {
   private Long volume;
 
   /**
+   * 成交量（支持小数，用于数字货币）
+   * 数字货币的成交量可能包含小数部分，使用此字段获取精确值
+   * 例如：volumeDecimal = 123.456
+   */
+  private Double volumeDecimal;
+
+  /**
    * 个股状态：
    * 0: 正常 3: 停牌 4: 退市 7: 新股 8: 变更
    */
   private StockStatus status;
+
+  private Double change;
+
+  private Double changeRate;
+
+  private Double amplitude;
 
   private HourTrading hourTrading;
 
@@ -186,12 +199,44 @@ public class RealTimeQuoteItem extends ApiModel {
     this.volume = volume;
   }
 
+  public Double getVolumeDecimal() {
+    return volumeDecimal;
+  }
+
+  public void setVolumeDecimal(Double volumeDecimal) {
+    this.volumeDecimal = volumeDecimal;
+  }
+
   public StockStatus getStatus() {
     return status;
   }
 
   public void setStatus(StockStatus status) {
     this.status = status;
+  }
+
+  public Double getChange() {
+    return change;
+  }
+
+  public void setChange(Double change) {
+    this.change = change;
+  }
+
+  public Double getChangeRate() {
+    return changeRate;
+  }
+
+  public void setChangeRate(Double changeRate) {
+    this.changeRate = changeRate;
+  }
+
+  public Double getAmplitude() {
+    return amplitude;
+  }
+
+  public void setAmplitude(Double amplitude) {
+    this.amplitude = amplitude;
   }
 
   public HourTrading getHourTrading() {
@@ -218,7 +263,11 @@ public class RealTimeQuoteItem extends ApiModel {
         ", bidPrice=" + bidPrice +
         ", bidSize=" + bidSize +
         ", volume=" + volume +
+        ", volumeDecimal=" + volumeDecimal +
         ", status=" + status +
+        ", change=" + change +
+        ", changeRate=" + changeRate +
+        ", amplitude=" + amplitude +
         ", hourTrading=" + hourTrading +
         '}';
   }

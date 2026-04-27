@@ -21,6 +21,12 @@ public class HourTrading implements Serializable {
 
   private Long volume;
 
+  private Double change;
+
+  private Double changeRate;
+
+  private Double amplitude;
+
   private Long timestamp;
 
   public String getTag() {
@@ -63,6 +69,30 @@ public class HourTrading implements Serializable {
     this.volume = volume;
   }
 
+  public Double getChange() {
+    return change;
+  }
+
+  public void setChange(Double change) {
+    this.change = change;
+  }
+
+  public Double getChangeRate() {
+    return changeRate;
+  }
+
+  public void setChangeRate(Double changeRate) {
+    this.changeRate = changeRate;
+  }
+
+  public Double getAmplitude() {
+    return amplitude;
+  }
+
+  public void setAmplitude(Double amplitude) {
+    this.amplitude = amplitude;
+  }
+
   public Long getTimestamp() {
     return timestamp;
   }
@@ -79,6 +109,9 @@ public class HourTrading implements Serializable {
         ", preClose=" + preClose +
         ", latestTime='" + latestTime + '\'' +
         ", volume=" + volume +
+        ", change=" + change +
+        ", changeRate=" + changeRate +
+        ", amplitude=" + amplitude +
         ", timestamp=" + timestamp +
         '}';
   }

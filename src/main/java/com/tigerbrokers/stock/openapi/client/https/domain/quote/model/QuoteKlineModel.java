@@ -21,9 +21,12 @@ public class QuoteKlineModel extends QuoteSymbolModel {
   private Long beginTime;
   @JSONField(name = "end_time")
   private Long endTime;
+  private String date;
   private Integer limit;
   @JSONField(name = "page_token")
   private String pageToken;
+  @JSONField(name = "with_fundamental")
+  private Boolean withFundamental;
 
   public QuoteKlineModel() {
 
@@ -113,6 +116,14 @@ public class QuoteKlineModel extends QuoteSymbolModel {
     }
   }
 
+  public String getDate() {
+    return date;
+  }
+
+  public void setDate(String date) {
+    this.date = date;
+  }
+
   public Integer getLimit() {
     return limit;
   }
@@ -131,5 +142,13 @@ public class QuoteKlineModel extends QuoteSymbolModel {
    */
   public void setPageToken(String pageToken) {
     this.pageToken = pageToken;
+  }
+
+  public Boolean getWithFundamental() {
+    return withFundamental;
+  }
+
+  public void setWithFundamental(Boolean withFundamental) {
+    this.withFundamental = withFundamental;
   }
 }

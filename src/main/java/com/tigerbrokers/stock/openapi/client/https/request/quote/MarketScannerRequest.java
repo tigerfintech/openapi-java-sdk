@@ -25,9 +25,18 @@ public class MarketScannerRequest  extends TigerCommonRequest implements TigerRe
                                                   List<FinancialFilter> financialFilterList,
                                                   List<MultiTagsRelationFilter> multiTagsRelationFilterList, SortFieldData sortFieldData,
                                                   int page, int pageSize) {
+        return newRequest(market, baseFilterList, accumulateFilterList, financialFilterList,
+                multiTagsRelationFilterList, sortFieldData, page, pageSize, null);
+    }
+
+    public static MarketScannerRequest newRequest(Market market, List<BaseFilter> baseFilterList,
+                                                  List<AccumulateFilter> accumulateFilterList,
+                                                  List<FinancialFilter> financialFilterList,
+                                                  List<MultiTagsRelationFilter> multiTagsRelationFilterList, SortFieldData sortFieldData,
+                                                  int page, int pageSize, String cursorId) {
         MarketScannerRequest marketScannerRequest = new MarketScannerRequest();
         MarketScannerModel marketScannerModel = new MarketScannerModel(market, baseFilterList, accumulateFilterList,
-                financialFilterList, multiTagsRelationFilterList, sortFieldData, page, pageSize);
+                financialFilterList, multiTagsRelationFilterList, sortFieldData, page, pageSize, cursorId);
         marketScannerRequest.setApiModel(marketScannerModel);
         return marketScannerRequest;
     }

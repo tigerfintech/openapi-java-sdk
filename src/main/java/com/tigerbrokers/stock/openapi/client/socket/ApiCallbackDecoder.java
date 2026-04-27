@@ -1,33 +1,45 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.ERROR_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_CANCEL_SUBSCRIBE_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUBSCRIBE_END;
+import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUB_SYMBOLS_END;
+
 import com.alibaba.fastjson.JSONObject;
+import com.tigerbrokers.stock.openapi.client.socket.data.TradeTick;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.KlineData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.PushData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteBBOData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteBasicData;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.QuoteDepthData;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.SocketCommon;
+import com.tigerbrokers.stock.openapi.client.socket.data.pb.TickData;
+import com.tigerbrokers.stock.openapi.client.socket.executor.MessageCallbackExecutor;
+import com.tigerbrokers.stock.openapi.client.socket.executor.PerDataTypeSingleThreadExecutor;
 import com.tigerbrokers.stock.openapi.client.struct.SubscribedSymbol;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.ProtoMessageUtil;
 import com.tigerbrokers.stock.openapi.client.util.QuoteDataUtil;
 import com.tigerbrokers.stock.openapi.client.util.StringUtils;
 import com.tigerbrokers.stock.openapi.client.util.TradeTickUtil;
-
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.ERROR_END;
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_CANCEL_SUBSCRIBE_END;
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUBSCRIBE_END;
-import static com.tigerbrokers.stock.openapi.client.constant.RspProtocolType.GET_SUB_SYMBOLS_END;
+import java.util.concurrent.RejectedExecutionException;
 
 /**
- * Description:
- * Created by lijiawen on 2018/05/23.
+ * Description: Created by lijiawen on 2018/05/23.
  */
 public class ApiCallbackDecoder {
 
-  private ApiComposeCallback callback;
+  private final ApiComposeCallback callback;
+  private final MessageCallbackExecutor executor;
 
   public ApiCallbackDecoder(ApiComposeCallback callback) {
+    this(callback, null);
+  }
+
+  public ApiCallbackDecoder(ApiComposeCallback callback, MessageCallbackExecutor executor) {
     this.callback = callback;
+    this.executor = (executor != null) ? executor : new PerDataTypeSingleThreadExecutor();
   }
 
   public synchronized void handle(Response msg) {
@@ -68,66 +80,112 @@ public class ApiCallbackDecoder {
       case Quote:
         basicData = QuoteDataUtil.convertToBasicData(pushData.getQuoteData());
         if (null != basicData) {
-          callback.quoteChange(basicData);
+          final QuoteBasicData finalBasicData = basicData;
+          executeCallback(() -> callback.quoteChange(finalBasicData), dataType,
+              finalBasicData.getSymbol());
         }
         bboData = QuoteDataUtil.convertToAskBidData(pushData.getQuoteData());
         if (null != bboData) {
-          callback.quoteAskBidChange(bboData);
+          final QuoteBBOData finalBboData = bboData;
+          executeCallback(() -> callback.quoteAskBidChange(finalBboData), dataType,
+              finalBboData.getSymbol());
         }
         break;
       case Option:
         basicData = QuoteDataUtil.convertToBasicData(pushData.getQuoteData());
         if (null != basicData) {
-          callback.optionChange(basicData);
+          final QuoteBasicData finalBasicData = basicData;
+          executeCallback(() -> callback.optionChange(finalBasicData), dataType,
+              finalBasicData.getSymbol());
         }
         bboData = QuoteDataUtil.convertToAskBidData(pushData.getQuoteData());
         if (null != bboData) {
-          callback.optionAskBidChange(bboData);
+          final QuoteBBOData finalBboData = bboData;
+          executeCallback(() -> callback.optionAskBidChange(finalBboData), dataType,
+              finalBboData.getSymbol());
         }
         break;
       case Future:
         basicData = QuoteDataUtil.convertToBasicData(pushData.getQuoteData());
         if (null != basicData) {
-          callback.futureChange(basicData);
+          final QuoteBasicData finalBasicData = basicData;
+          executeCallback(() -> callback.futureChange(finalBasicData), dataType,
+              finalBasicData.getSymbol());
         }
         bboData = QuoteDataUtil.convertToAskBidData(pushData.getQuoteData());
         if (null != bboData) {
-          callback.futureAskBidChange(bboData);
+          final QuoteBBOData finalBboData = bboData;
+          executeCallback(() -> callback.futureAskBidChange(finalBboData), dataType,
+              finalBboData.getSymbol());
         }
         break;
       case TradeTick:
         if (pushData.hasTickData()) {
-          callback.fullTickChange(pushData.getTickData());
+          TickData tickData = pushData.getTickData();
+          executeCallback(() -> callback.fullTickChange(tickData), dataType, tickData.getSymbol());
         } else {
-          callback.tradeTickChange(TradeTickUtil.convert(pushData.getTradeTickData()));
+          TradeTick tickData = TradeTickUtil.convert(pushData.getTradeTickData());
+          executeCallback(() -> callback.tradeTickChange(tickData), dataType,
+              tickData.getSymbol());
         }
         break;
       case QuoteDepth:
-        callback.depthQuoteChange(pushData.getQuoteDepthData());
+        QuoteDepthData quoteDepthData = pushData.getQuoteDepthData();
+        executeCallback(() -> callback.depthQuoteChange(quoteDepthData), dataType,
+            quoteDepthData.getSymbol());
         break;
       case Asset:
-        callback.assetChange(pushData.getAssetData());
+        executeCallback(() -> callback.assetChange(pushData.getAssetData()), dataType, null);
         break;
       case Position:
-        callback.positionChange(pushData.getPositionData());
+        executeCallback(() -> callback.positionChange(pushData.getPositionData()), dataType, null);
         break;
       case OrderStatus:
-        callback.orderStatusChange(pushData.getOrderStatusData());
+        executeCallback(() -> callback.orderStatusChange(pushData.getOrderStatusData()), dataType,
+            null);
         break;
       case OrderTransaction:
-        callback.orderTransactionChange(pushData.getOrderTransactionData());
+        executeCallback(() -> callback.orderTransactionChange(pushData.getOrderTransactionData()),
+            dataType, null);
         break;
       case StockTop:
-        callback.stockTopPush(pushData.getStockTopData());
+        executeCallback(() -> callback.stockTopPush(pushData.getStockTopData()), dataType, null);
         break;
       case OptionTop:
-        callback.optionTopPush(pushData.getOptionTopData());
+        executeCallback(() -> callback.optionTopPush(pushData.getOptionTopData()), dataType, null);
         break;
       case Kline:
-        callback.klineChange(pushData.getKlineData());
+        final KlineData klineData = pushData.getKlineData();
+        executeCallback(() -> callback.klineChange(klineData), dataType, klineData.getSymbol());
+        break;
+      case Cc:
+        basicData = QuoteDataUtil.convertToBasicData(pushData.getQuoteData());
+        if (null != basicData) {
+          final QuoteBasicData finalBasicData = basicData;
+          executeCallback(() -> callback.ccChange(finalBasicData), dataType,
+              finalBasicData.getSymbol());
+        }
+        bboData = QuoteDataUtil.convertToAskBidData(pushData.getQuoteData());
+        if (null != bboData) {
+          final QuoteBBOData finalBboData = bboData;
+          executeCallback(() -> callback.ccAskBidChange(finalBboData), dataType,
+              finalBboData.getSymbol());
+        }
         break;
       default:
         ApiLogger.info("push data cannot be processed. {}", ProtoMessageUtil.toJson(msg));
+    }
+  }
+
+  private void executeCallback(Runnable task, SocketCommon.DataType dataType, String symbol) {
+    try {
+      executor.execute(task, dataType, symbol);
+    } catch (RejectedExecutionException ex) {
+      ApiLogger.warn("message callback rejected, dataType:{}, symbol:{}", dataType, symbol, ex);
+      task.run();
+    } catch (Throwable th) {
+      ApiLogger.error(
+          "message callback execution error, dataType:" + dataType + ", symbol:" + symbol, th);
     }
   }
 

@@ -18,6 +18,7 @@ public class FutureRealTimeItem extends ApiModel {
   private Long bidSize;
   private Long askSize;
   private Long openInterest;
+  private Long openInterestChange;
   private Long volume;
   private BigDecimal open;
   private BigDecimal high;
@@ -25,6 +26,7 @@ public class FutureRealTimeItem extends ApiModel {
   private BigDecimal settlement;
   private BigDecimal limitUp;
   private BigDecimal limitDown;
+  private BigDecimal avgPrice;
 
   public String getContractCode() {
     return contractCode;
@@ -98,6 +100,14 @@ public class FutureRealTimeItem extends ApiModel {
     this.openInterest = openInterest;
   }
 
+  public Long getOpenInterestChange() {
+    return openInterestChange;
+  }
+
+  public void setOpenInterestChange(Long openInterestChange) {
+    this.openInterestChange = openInterestChange;
+  }
+
   public Long getVolume() {
     return volume;
   }
@@ -154,10 +164,19 @@ public class FutureRealTimeItem extends ApiModel {
     this.limitDown = limitDown;
   }
 
+  public BigDecimal getAvgPrice() {
+    return avgPrice;
+  }
+
+  public void setAvgPrice(BigDecimal avgPrice) {
+    this.avgPrice = avgPrice;
+  }
+
   @Override
   public String toString() {
     return "FutureRealTimeItem{" +
-        "latestPrice=" + latestPrice +
+        "contractCode='" + contractCode + '\'' +
+        ", latestPrice=" + latestPrice +
         ", latestSize=" + latestSize +
         ", latestTime=" + latestTime +
         ", bidPrice=" + bidPrice +
@@ -165,6 +184,7 @@ public class FutureRealTimeItem extends ApiModel {
         ", bidSize=" + bidSize +
         ", askSize=" + askSize +
         ", openInterest=" + openInterest +
+        ", openInterestChange=" + openInterestChange +
         ", volume=" + volume +
         ", open=" + open +
         ", high=" + high +
@@ -172,6 +192,7 @@ public class FutureRealTimeItem extends ApiModel {
         ", settlement=" + settlement +
         ", limitUp=" + limitUp +
         ", limitDown=" + limitDown +
+        ", avgPrice=" + avgPrice +
         '}';
   }
 }

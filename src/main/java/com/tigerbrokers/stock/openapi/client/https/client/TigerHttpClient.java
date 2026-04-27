@@ -1,5 +1,19 @@
 package com.tigerbrokers.stock.openapi.client.https.client;
 
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCESS_TOKEN;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCOUNT_TYPE;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.BIZ_CONTENT;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.CHARSET;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.DEVICE_ID;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.METHOD;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SDK_VERSION;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN_TYPE;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TIGER_ID;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TIMESTAMP;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TRADE_TOKEN;
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.VERSION;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
@@ -41,20 +55,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCESS_TOKEN;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.ACCOUNT_TYPE;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.BIZ_CONTENT;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.CHARSET;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.DEVICE_ID;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.METHOD;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SDK_VERSION;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.SIGN_TYPE;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TIGER_ID;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TIMESTAMP;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.TRADE_TOKEN;
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.VERSION;
-
 public class TigerHttpClient implements TigerClient {
 
   private ClientConfig clientConfig;
@@ -70,6 +70,7 @@ public class TigerHttpClient implements TigerClient {
   private String accountType;
   private String deviceId;
   private int failRetryCounts = TigerApiConstants.DEFAULT_FAIL_RETRY_COUNT;
+  private boolean isCustomServerUrl = false;
 
   private static final String ONLINE_PUBLIC_KEY =
       "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDNF3G8SoEcCZh2rshUbayDgLLrj6rKgzNMxDL2HSnKcB0+GPOsndqSv+a4IBu9+I3fyBp5hkyMMG2+AXugd9pMpy6VxJxlNjhX1MYbNTZJUT4nudki4uh+LMOkIBHOceGNXjgB+cXqmlUnjlqha/HgboeHSnSgpM3dKSJQlIOsDwIDAQAB";
@@ -145,6 +146,17 @@ public class TigerHttpClient implements TigerClient {
     }
   }
 
+  /**
+   * only for inner test
+   * @param customServerUrl
+   */
+  public void useCustomServerUrl(String customServerUrl) {
+    this.serverUrl = customServerUrl;
+    this.paperServerUrl = customServerUrl;
+    this.quoteServerUrl = customServerUrl;
+    this.isCustomServerUrl = true;
+  }
+
   public void destroy() {
     if (this.tokenManager != null) {
       this.tokenManager.destroy();
@@ -205,6 +217,9 @@ public class TigerHttpClient implements TigerClient {
 
   private void refreshUrl() {
     try {
+      if (this.isCustomServerUrl) {
+        return;
+      }
       Map<BizType, String> urlMap = NetworkUtil.getHttpServerAddress(this.clientConfig, this.clientConfig.license, this.serverUrl);
       String newServerUrl = urlMap.get(BizType.TRADE);
       if (newServerUrl == null) {

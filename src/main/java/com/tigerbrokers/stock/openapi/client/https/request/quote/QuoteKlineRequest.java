@@ -8,6 +8,7 @@ import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteKlineResp
 import com.tigerbrokers.stock.openapi.client.struct.enums.KType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.RightOption;
+import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
 
@@ -44,9 +45,23 @@ public class QuoteKlineRequest extends TigerCommonRequest implements TigerReques
   }
 
   public static QuoteKlineRequest newRequest(List<String> symbols, KType kType, String beginTime, String endTime,
+                                             Boolean withFundamental) {
+    return newRequest(symbols, kType, beginTime, endTime, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone(), withFundamental);
+  }
+
+  public static QuoteKlineRequest newRequest(List<String> symbols, KType kType, String beginTime, String endTime,
       TimeZoneId zoneId) {
     QuoteKlineRequest request = new QuoteKlineRequest();
     QuoteKlineModel model = new QuoteKlineModel(symbols, getKType(kType), beginTime, endTime, zoneId);
+    request.setApiModel(model);
+    return request;
+  }
+
+  public static QuoteKlineRequest newRequest(List<String> symbols, KType kType, String beginTime, String endTime,
+                                             TimeZoneId zoneId, Boolean withFundamental) {
+    QuoteKlineRequest request = new QuoteKlineRequest();
+    QuoteKlineModel model = new QuoteKlineModel(symbols, getKType(kType), beginTime, endTime, zoneId);
+    model.setWithFundamental(withFundamental);
     request.setApiModel(model);
     return request;
   }
@@ -60,6 +75,14 @@ public class QuoteKlineRequest extends TigerCommonRequest implements TigerReques
       apiModel = new QuoteKlineModel();
     }
     return (QuoteKlineModel)apiModel;
+  }
+
+  /**
+   * Date format pattern: "yyyyMMdd" (e.g., "20250616").
+   */
+  public QuoteKlineRequest withDate(String date) {
+    getApiModel().setDate(date);
+    return this;
   }
 
   public QuoteKlineRequest withLimit(int limit) {
@@ -93,6 +116,18 @@ public class QuoteKlineRequest extends TigerCommonRequest implements TigerReques
    */
   public void withPageToken(String pageToken) {
     getApiModel().setPageToken(pageToken);
+  }
+
+  public QuoteKlineRequest withFundamental(Boolean withFundamental) {
+    getApiModel().setWithFundamental(withFundamental);
+    return this;
+  }
+
+  public QuoteKlineRequest withSecType(SecType secType) {
+    if (secType != null) {
+      getApiModel().setSecType(secType.name());
+    }
+    return this;
   }
 
   @Override

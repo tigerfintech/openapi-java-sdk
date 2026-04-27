@@ -24,6 +24,12 @@ public class FutureContractItem extends ApiModel {
   private String currency;
   private boolean continuous;
   private boolean trade;
+  private String productWorth;
+  private String deliveryMode;
+  private String productType;
+  private String productScale;
+  private Long lastTradingTimestamp;
+  private String timeZone;
 
   public String getType() {
     return type;
@@ -145,6 +151,54 @@ public class FutureContractItem extends ApiModel {
     this.trade = trade;
   }
 
+  public String getProductWorth() {
+    return productWorth;
+  }
+
+  public void setProductWorth(String productWorth) {
+    this.productWorth = productWorth;
+  }
+
+  public String getDeliveryMode() {
+    return deliveryMode;
+  }
+
+  public void setDeliveryMode(String deliveryMode) {
+    this.deliveryMode = deliveryMode;
+  }
+
+  public String getProductType() {
+    return productType;
+  }
+
+  public void setProductType(String productType) {
+    this.productType = productType;
+  }
+
+  public String getProductScale() {
+    return productScale;
+  }
+
+  public void setProductScale(String productScale) {
+    this.productScale = productScale;
+  }
+
+  public Long getLastTradingTimestamp() {
+    return lastTradingTimestamp;
+  }
+
+  public void setLastTradingTimestamp(Long lastTradingTimestamp) {
+    this.lastTradingTimestamp = lastTradingTimestamp;
+  }
+
+  public String getTimeZone() {
+    return timeZone;
+  }
+
+  public void setTimeZone(String timeZone) {
+    this.timeZone = timeZone;
+  }
+
   @Override
   public String toString() {
     return "FutureContractItem{" +
@@ -155,7 +209,7 @@ public class FutureContractItem extends ApiModel {
         ", contractMonth='" + contractMonth + '\'' +
         ", exchangeCode='" + exchangeCode + '\'' +
         ", exchange='" + exchange + '\'' +
-        ", multiplier=" + (multiplier == null ? multiplier : multiplier.stripTrailingZeros().toPlainString()) +
+        ", multiplier=" + multiplier +
         ", minTick=" + minTick +
         ", lastTradingDate='" + lastTradingDate + '\'' +
         ", firstNoticeDate='" + firstNoticeDate + '\'' +
@@ -163,6 +217,12 @@ public class FutureContractItem extends ApiModel {
         ", currency='" + currency + '\'' +
         ", continuous=" + continuous +
         ", trade=" + trade +
+        ", productWorth='" + productWorth + '\'' +
+        ", deliveryMode='" + deliveryMode + '\'' +
+        ", productType='" + productType + '\'' +
+        ", productScale='" + productScale + '\'' +
+        ", lastTradingTimestamp=" + lastTradingTimestamp +
+        ", timeZone='" + timeZone + '\'' +
         '}';
   }
 }

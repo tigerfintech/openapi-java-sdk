@@ -62,6 +62,9 @@ public class ContractItem extends ApiModel {
   private String discountedTimeZoneCode;
   private String discountedStartAt;
   private String discountedEndAt;
+  private Boolean supportOvernightTrading;
+
+  private Boolean supportFractionalShare;
 
   public Integer getContractId() {
     return contractId;
@@ -404,6 +407,22 @@ public class ContractItem extends ApiModel {
     this.discountedEndAt = discountedEndAt;
   }
 
+  public Boolean getSupportOvernightTrading() {
+    return supportOvernightTrading;
+  }
+
+  public void setSupportOvernightTrading(Boolean supportOvernightTrading) {
+    this.supportOvernightTrading = supportOvernightTrading;
+  }
+
+  public Boolean getSupportFractionalShare() {
+    return supportFractionalShare;
+  }
+
+  public void setSupportFractionalShare(Boolean supportFractionalShare) {
+    this.supportFractionalShare = supportFractionalShare;
+  }
+
   @Override
   public String toString() {
     return "ContractItem{" +
@@ -557,6 +576,14 @@ public class ContractItem extends ApiModel {
   public static ContractItem buildFundContract(String symbol, String currency) {
     ContractItem contractItem = new ContractItem();
     contractItem.setSecType(SecType.FUND.name());
+    contractItem.setSymbol(symbol);
+    contractItem.setCurrency(currency);
+    return contractItem;
+  }
+
+  public static ContractItem buildCcContract(String symbol, String currency) {
+    ContractItem contractItem = new ContractItem();
+    contractItem.setSecType(SecType.CC.name());
     contractItem.setSymbol(symbol);
     contractItem.setCurrency(currency);
     return contractItem;

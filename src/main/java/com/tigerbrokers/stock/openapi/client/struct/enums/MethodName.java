@@ -35,6 +35,12 @@ public enum MethodName {
   SEGMENT_FUND_AVAILABLE("segment_fund_available", MethodType.TRADE),
   ESTIMATE_TRADABLE_QUANTITY("estimate_tradable_quantity", MethodType.TRADE),
   TRANSFER_FUND("transfer_fund", MethodType.TRADE),
+  AGGREGATE_ASSETS("aggregate_assets", MethodType.TRADE),
+  FUND_DETAILS("fund_details", MethodType.TRADE),
+  POSITION_TRANSFER("position_transfer", MethodType.TRADE),
+  POSITION_TRANSFER_RECORDS("position_transfer_records", MethodType.TRADE),
+  POSITION_TRANSFER_DETAIL("position_transfer_detail", MethodType.TRADE),
+  POSITION_TRANSFER_EXTERNAL_RECORDS("position_transfer_external_records", MethodType.TRADE),
 
   /**
    * contract
@@ -63,9 +69,11 @@ public enum MethodName {
   QUOTE_STOCK_TRADE("quote_stock_trade", MethodType.QUOTE),
   QUOTE_DEPTH("quote_depth", MethodType.QUOTE),
   QUOTE_DELAY("quote_delay", MethodType.QUOTE),
+  QUOTE_OVERNIGHT("quote_overnight", MethodType.QUOTE),
   /** trading calendar */
   TRADING_CALENDAR("trading_calendar", MethodType.QUOTE),
   STOCK_BROKER("stock_broker", MethodType.QUOTE),
+  BROKER_HOLD("broker_hold", MethodType.QUOTE),
   CAPITAL_DISTRIBUTION("capital_distribution", MethodType.QUOTE),
   CAPITAL_FLOW("capital_flow", MethodType.QUOTE),
   MARKET_SCANNER("market_scanner", MethodType.QUOTE),
@@ -80,6 +88,8 @@ public enum MethodName {
   OPTION_KLINE("option_kline", MethodType.QUOTE),
   OPTION_TRADE_TICK("option_trade_tick", MethodType.QUOTE),
   OPTION_DEPTH("option_depth", MethodType.QUOTE),
+  OPTION_TIMELINE("option_timeline", MethodType.QUOTE),
+  OPTION_ANALYSIS("option_analysis", MethodType.QUOTE),
   ALL_HK_OPTION_SYMBOLS("all_hk_option_symbols", MethodType.QUOTE),
 
   /**
@@ -102,6 +112,7 @@ public enum MethodName {
   FUTURE_TICK("future_tick", MethodType.QUOTE),
   FUTURE_TRADING_DATE("future_trading_date", MethodType.QUOTE),
   FUTURE_HISTORY_MAIN_CONTRACT("future_history_main_contract", MethodType.QUOTE),
+  FUTURE_DEPTH("future_depth", MethodType.QUOTE),
 
   /**
    * fundamental data

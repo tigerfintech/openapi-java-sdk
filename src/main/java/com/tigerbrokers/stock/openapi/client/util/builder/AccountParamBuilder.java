@@ -3,6 +3,7 @@ package com.tigerbrokers.stock.openapi.client.util.builder;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
+import com.tigerbrokers.stock.openapi.client.struct.enums.AssetQuoteType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
@@ -147,6 +148,10 @@ public class AccountParamBuilder {
     return setTime("start_date", startDate, ClientConfig.DEFAULT_CONFIG.getDefaultTimeZone());
   }
 
+  public AccountParamBuilder sinceDate(String sinceDate) {
+    return setDate("since_date", sinceDate);
+  }
+
   public AccountParamBuilder startDate(String startDate, TimeZoneId zoneId) {
     return setTime("start_date", startDate, zoneId);
   }
@@ -166,10 +171,21 @@ public class AccountParamBuilder {
     return setTime("end_date", endDate, zoneId);
   }
 
+  public AccountParamBuilder toDate(String toDate) {
+    return setDate("to_date", toDate);
+  }
+
   public AccountParamBuilder setTime(String key, String time, TimeZoneId zoneId) {
     Date date = DateUtils.getZoneDate(time, zoneId);
     if (date != null) {
       paramMap.put(key, date.getTime());
+    }
+    return this;
+  }
+
+  private AccountParamBuilder setDate(String key, String date) {
+    if (date != null) {
+      paramMap.put(key, date);
     }
     return this;
   }
@@ -266,6 +282,14 @@ public class AccountParamBuilder {
   public AccountParamBuilder sortBy(OrderSortBy orderSortBy) {
     if (orderSortBy != null) {
       paramMap.put("sort_by", orderSortBy.name());
+    }
+    return this;
+  }
+
+  /** only for position query */
+  public AccountParamBuilder assetQuoteType(AssetQuoteType assetQuoteType) {
+    if (assetQuoteType != null) {
+      paramMap.put("asset_quote_type", assetQuoteType.name());
     }
     return this;
   }
