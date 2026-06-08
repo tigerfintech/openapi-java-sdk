@@ -1,17 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.trade.item;
 
-import com.alibaba.fastjson.annotation.JSONField;
 import java.util.List;
 
 public class OptionExerciseRecordPageItem {
 
-  @JSONField(name = "pageNum")
   private Integer pageNum;
-  @JSONField(name = "pageSize")
   private Integer pageSize;
-  @JSONField(name = "itemCount")
   private Integer itemCount;
-  @JSONField(name = "pageCount")
   private Integer pageCount;
   private List<OptionExerciseRecordItem> items;
 
