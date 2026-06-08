@@ -41,6 +41,11 @@ public enum MethodName {
   POSITION_TRANSFER_RECORDS("position_transfer_records", MethodType.TRADE),
   POSITION_TRANSFER_DETAIL("position_transfer_detail", MethodType.TRADE),
   POSITION_TRANSFER_EXTERNAL_RECORDS("position_transfer_external_records", MethodType.TRADE),
+  OPTION_EXERCISE_SUBMIT("option_exercise_submit", MethodType.TRADE),
+  OPTION_EXERCISE_CHECK("option_exercise_check", MethodType.TRADE),
+  OPTION_EXERCISE_RECORD("option_exercise_record", MethodType.TRADE),
+  OPTION_EXERCISE_POSITION("option_exercise_position", MethodType.TRADE),
+  OPTION_EXERCISE_CANCEL("option_exercise_cancel", MethodType.TRADE),
 
   /**
    * contract
