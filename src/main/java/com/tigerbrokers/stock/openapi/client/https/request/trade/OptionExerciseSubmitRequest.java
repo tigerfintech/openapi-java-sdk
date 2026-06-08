@@ -22,7 +22,7 @@ public class OptionExerciseSubmitRequest extends TigerCommonRequest implements
    * @param account       交易账户
    * @param contractId    期权合约 ID
    * @param quantity      行权数量
-   * @param executingDate 行权执行日期，格式 yyyy-MM-dd
+   * @param executingDate 行权执行日期，格式 yyyy-MM-dd（必填）
    * @param isForce       是否强制行权
    */
   public static OptionExerciseSubmitRequest buildExerciseRequest(

@@ -57,7 +57,9 @@ public class OptionExerciseIntegrationTest {
     config.setEnv(Env.TEST);
 
     client = TigerHttpClient.getInstance();
-    client.useCustomServerUrl(serverUrl);
+    if (serverUrl != null && !serverUrl.isEmpty()) {
+      client.useCustomServerUrl(serverUrl);
+    }
     client.clientConfig(config);
   }
 
