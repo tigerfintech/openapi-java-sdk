@@ -155,6 +155,11 @@ public enum MethodName {
    * trade rank
    */
   TRADE_RANK("trade_rank", MethodType.QUOTE),
+
+  /**
+   * addon entitlements
+   */
+  ADDON_ENTITLEMENTS("addon_entitlements", MethodType.OTHER),
   ;
 
   private String value;
