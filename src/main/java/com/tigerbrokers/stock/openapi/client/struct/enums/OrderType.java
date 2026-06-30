@@ -14,6 +14,7 @@ public enum OrderType {
   AL("AL", "Auction Limit Order"),
   TWAP("TWAP", "Time Weighted Average Price"),
   VWAP("VWAP", "Volume Weighted Average Price"),
+  ICEBERG("ICEBERG", "Iceberg Order"),
   ;
 
   private String type;

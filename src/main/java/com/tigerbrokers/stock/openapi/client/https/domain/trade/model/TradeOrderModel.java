@@ -227,6 +227,30 @@ public class TradeOrderModel extends ApiModel {
   @JSONField(name = "cash_amount")
   private Double cashAmount;
 
+  /** Iceberg order: number of shares to display per slice */
+  @JSONField(name = "display_size")
+  private Integer displaySize;
+
+  /** Iceberg order: minimum display size (defaults to displaySize if null) */
+  @JSONField(name = "min_display_size")
+  private Integer minDisplaySize;
+
+  /** Iceberg order: refresh interval in seconds */
+  @JSONField(name = "check_intervals")
+  private Integer checkIntervals;
+
+  /** Iceberg order: price type — LIMIT_PRICE or MARKET_PRICE */
+  @JSONField(name = "price_type")
+  private String priceType;
+
+  /** Iceberg order: order effective start time (epoch ms) */
+  @JSONField(name = "start_time")
+  private Long startTime;
+
+  /** Iceberg order: order effective end time (epoch ms) */
+  @JSONField(name = "end_time")
+  private Long endTime;
+
   public TradeOrderModel() {
   }
 
@@ -623,6 +647,54 @@ public class TradeOrderModel extends ApiModel {
 
   public void setCashAmount(Double cashAmount) {
     this.cashAmount = cashAmount;
+  }
+
+  public Integer getDisplaySize() {
+    return displaySize;
+  }
+
+  public void setDisplaySize(Integer displaySize) {
+    this.displaySize = displaySize;
+  }
+
+  public Integer getMinDisplaySize() {
+    return minDisplaySize;
+  }
+
+  public void setMinDisplaySize(Integer minDisplaySize) {
+    this.minDisplaySize = minDisplaySize;
+  }
+
+  public Integer getCheckIntervals() {
+    return checkIntervals;
+  }
+
+  public void setCheckIntervals(Integer checkIntervals) {
+    this.checkIntervals = checkIntervals;
+  }
+
+  public String getPriceType() {
+    return priceType;
+  }
+
+  public void setPriceType(String priceType) {
+    this.priceType = priceType;
+  }
+
+  public Long getStartTime() {
+    return startTime;
+  }
+
+  public void setStartTime(Long startTime) {
+    this.startTime = startTime;
+  }
+
+  public Long getEndTime() {
+    return endTime;
+  }
+
+  public void setEndTime(Long endTime) {
+    this.endTime = endTime;
   }
 
   @Override

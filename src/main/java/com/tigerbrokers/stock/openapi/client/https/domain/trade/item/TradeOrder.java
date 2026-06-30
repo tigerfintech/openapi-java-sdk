@@ -100,6 +100,19 @@ public class TradeOrder implements Serializable {
   /** order's multi leg info */
   private List<OrderLeg> legs;
 
+  /** Iceberg order: number of shares to display per slice */
+  private Integer displaySize;
+  /** Iceberg order: minimum display size */
+  private Integer minDisplaySize;
+  /** Iceberg order: refresh interval in seconds */
+  private Integer checkIntervals;
+  /** Iceberg order: price type — LIMIT_PRICE or MARKET_PRICE */
+  private String priceType;
+  /** Iceberg order: order effective start time (epoch ms) */
+  private Long startTime;
+  /** Iceberg order: order effective end time (epoch ms) */
+  private Long endTime;
+
   public String getSymbol() {
     return symbol;
   }
@@ -650,5 +663,53 @@ public class TradeOrder implements Serializable {
 
   public void setOrderDiscountAmount(Double orderDiscountAmount) {
     this.orderDiscountAmount = orderDiscountAmount;
+  }
+
+  public Integer getDisplaySize() {
+    return displaySize;
+  }
+
+  public void setDisplaySize(Integer displaySize) {
+    this.displaySize = displaySize;
+  }
+
+  public Integer getMinDisplaySize() {
+    return minDisplaySize;
+  }
+
+  public void setMinDisplaySize(Integer minDisplaySize) {
+    this.minDisplaySize = minDisplaySize;
+  }
+
+  public Integer getCheckIntervals() {
+    return checkIntervals;
+  }
+
+  public void setCheckIntervals(Integer checkIntervals) {
+    this.checkIntervals = checkIntervals;
+  }
+
+  public String getPriceType() {
+    return priceType;
+  }
+
+  public void setPriceType(String priceType) {
+    this.priceType = priceType;
+  }
+
+  public Long getStartTime() {
+    return startTime;
+  }
+
+  public void setStartTime(Long startTime) {
+    this.startTime = startTime;
+  }
+
+  public Long getEndTime() {
+    return endTime;
+  }
+
+  public void setEndTime(Long endTime) {
+    this.endTime = endTime;
   }
 }
