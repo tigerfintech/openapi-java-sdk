@@ -106,7 +106,7 @@ public class TradeOrder implements Serializable {
   private Integer minDisplaySize;
   /** Iceberg order: refresh interval in seconds */
   private Integer checkIntervals;
-  /** Iceberg order: price type — LIMIT_PRICE or MARKET_PRICE */
+  /** Iceberg order: price type — LIMIT_PRICE / ASK_PRICE / BID_PRICE / LATEST_PRICE */
   private String priceType;
   /** Iceberg order: order effective start time (epoch ms) */
   private Long startTime;

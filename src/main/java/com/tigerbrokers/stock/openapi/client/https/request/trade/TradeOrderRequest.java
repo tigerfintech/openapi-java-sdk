@@ -18,6 +18,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.PriceType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
@@ -350,26 +351,26 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
       ActionType action, Integer quantity, Double limitPrice, Integer displaySize) {
     return buildIcebergOrder(ClientConfig.DEFAULT_CONFIG.defaultAccount,
         contract, action, quantity, limitPrice, displaySize, displaySize, null,
-        TradeConstants.ICEBERG_PRICE_TYPE_LIMIT, null, null);
+        PriceType.LIMIT_PRICE, null, null);
   }
 
   public static TradeOrderRequest buildIcebergOrder(String account, ContractItem contract,
       ActionType action, Integer quantity, Double limitPrice, Integer displaySize) {
     return buildIcebergOrder(account, contract, action, quantity, limitPrice, displaySize, displaySize, null,
-        TradeConstants.ICEBERG_PRICE_TYPE_LIMIT, null, null);
+        PriceType.LIMIT_PRICE, null, null);
   }
 
   public static TradeOrderRequest buildIcebergOrder(String account, ContractItem contract,
       ActionType action, Integer quantity, Double limitPrice,
       Integer displaySize, Integer minDisplaySize, Integer checkIntervals,
-      String priceType, Long startTime, Long endTime) {
+      PriceType priceType, Long startTime, Long endTime) {
     TradeOrderModel model = buildTradeOrderModel(account, contract, action, convertToLong(quantity), null);
     model.setOrderType(OrderType.ICEBERG);
     model.setLimitPrice(limitPrice);
     model.setDisplaySize(displaySize);
     model.setMinDisplaySize(minDisplaySize != null ? minDisplaySize : displaySize);
     model.setCheckIntervals(checkIntervals);
-    model.setPriceType(priceType != null ? priceType : TradeConstants.ICEBERG_PRICE_TYPE_LIMIT);
+    model.setPriceType(priceType != null ? priceType.getValue() : PriceType.LIMIT_PRICE.getValue());
     model.setStartTime(startTime);
     model.setEndTime(endTime);
     model.setTimeInForce(TimeInForce.DAY);

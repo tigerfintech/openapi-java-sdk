@@ -239,7 +239,7 @@ public class TradeOrderModel extends ApiModel {
   @JSONField(name = "check_intervals")
   private Integer checkIntervals;
 
-  /** Iceberg order: price type — LIMIT_PRICE or MARKET_PRICE */
+  /** Iceberg order: price type — LIMIT_PRICE / ASK_PRICE / BID_PRICE / LATEST_PRICE */
   @JSONField(name = "price_type")
   private String priceType;
 
