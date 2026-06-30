@@ -3,7 +3,6 @@ package com.tigerbrokers.stock.openapi.client.https.request.trade;
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.constant.TradeConstants;
-import com.tigerbrokers.stock.openapi.client.constant.TradeConstants;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.ContractLeg;
