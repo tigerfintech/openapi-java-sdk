@@ -1,0 +1,211 @@
+package com.tigerbrokers.stock.openapi.client.trade;
+
+import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
+import com.tigerbrokers.stock.openapi.client.https.client.TigerHttpClient;
+import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
+import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.TradeOrder;
+import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
+import com.tigerbrokers.stock.openapi.client.https.request.trade.QuerySingleOrderRequest;
+import com.tigerbrokers.stock.openapi.client.https.request.trade.TradeOrderRequest;
+import com.tigerbrokers.stock.openapi.client.https.response.trade.SingleOrderResponse;
+import com.tigerbrokers.stock.openapi.client.https.response.trade.TradeOrderResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
+import com.tigerbrokers.stock.openapi.client.struct.enums.PriceType;
+import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
+import com.tigerbrokers.stock.openapi.client.util.builder.AccountParamBuilder;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
+
+/**
+ * Integration tests for iceberg order APIs (place / modify / cancel / query).
+ *
+ * Run with:
+ *   -Dtest.config.path=<path to config directory>
+ *   -Dtest.server.url=<gateway url>  (optional)
+ *   -Dtest.env=PROD|TEST            (optional, default TEST)
+ */
+@Ignore("Integration test — requires live config, run manually")
+public class IcebergOrderIntegrationTest {
+
+  private static String account;
+  private static TigerHttpClient client;
+
+  @BeforeClass
+  public static void setUpClass() {
+    String configPath = System.getProperty("test.config.path");
+    Assert.assertNotNull("set -Dtest.config.path=<config dir>", configPath);
+
+    String envStr = System.getProperty("test.env", "TEST");
+    Env env = "PROD".equalsIgnoreCase(envStr) ? Env.PROD : Env.TEST;
+
+    ClientConfig config = new ClientConfig();
+    config.configFilePath = configPath;
+    config.setEnv(env);
+    ConfigFileUtil.loadConfigFile(config);
+
+    account = config.defaultAccount;
+    // Allow override via -Dtest.account
+    String accountOverride = System.getProperty("test.account");
+    if (accountOverride != null && !accountOverride.isEmpty()) {
+      account = accountOverride;
+    }
+    Assert.assertNotNull("account not loaded from config", account);
+    Assert.assertNotNull("tigerId not loaded from config", config.tigerId);
+    Assert.assertNotNull("privateKey not loaded from config", config.privateKey);
+
+    System.out.println("env=" + env + " account=" + account + " tigerId=" + config.tigerId);
+
+    String serverUrl = System.getProperty("test.server.url");
+
+    client = TigerHttpClient.getInstance();
+    if (serverUrl != null && !serverUrl.isEmpty()) {
+      client.useCustomServerUrl(serverUrl);
+    }
+    client.clientConfig(config);
+  }
+
+  // ── Place ─────────────────────────────────────────────────────────────────
+
+  /** 下冰山单（最简参数） */
+  @Test
+  public void testPlaceIcebergOrder_basic() {
+    ContractItem contract = buildAAPLContract();
+
+    TradeOrderRequest request = TradeOrderRequest.buildIcebergOrder(
+        account, contract, ActionType.BUY, 1000, 180.0, 100);
+
+    TradeOrderResponse response = client.execute(request);
+    Assert.assertNotNull(response);
+    System.out.println("placeIceberg(basic): code=" + response.getCode()
+        + " msg=" + response.getMessage()
+        + " orderId=" + (response.isSuccess() && response.getItem() != null ? response.getItem().getId() : "N/A"));
+    Assert.assertTrue("place iceberg order failed: " + response.getMessage(), response.isSuccess());
+  }
+
+  /** 下冰山单（完整参数，含 start_time/end_time），并查询订单详情验证字段回显 */
+  @Test
+  public void testPlaceIcebergOrder_full() {
+    ContractItem contract = buildAAPLContract();
+
+    long now = System.currentTimeMillis();
+    long startTime = now;
+    long endTime = now + 3600_000L; // 1 hour later
+
+    TradeOrderRequest request = TradeOrderRequest.buildIcebergOrder(
+        account, contract, ActionType.BUY, 1000, 180.0,
+        100, 50, 30,
+        PriceType.LIMIT_PRICE,
+        startTime, endTime);
+
+    TradeOrderResponse placeResp = client.execute(request);
+    Assert.assertNotNull(placeResp);
+    Assert.assertTrue("place iceberg order failed: " + placeResp.getMessage(), placeResp.isSuccess());
+    long orderId = placeResp.getItem().getId();
+    System.out.println("placeIceberg(full): code=" + placeResp.getCode() + " orderId=" + orderId);
+
+    // 查询订单详情，验证 order_type / start_time / end_time 回显
+    QuerySingleOrderRequest queryReq = new QuerySingleOrderRequest();
+    queryReq.setBizContent(AccountParamBuilder.instance()
+        .account(account)
+        .id(orderId)
+        .buildJson());
+
+    SingleOrderResponse queryResp = client.execute(queryReq);
+    Assert.assertNotNull(queryResp);
+    Assert.assertTrue("query order failed: " + queryResp.getMessage(), queryResp.isSuccess());
+
+    TradeOrder order = queryResp.getItem();
+    Assert.assertNotNull("order detail is null", order);
+    System.out.println("orderDetail: orderType=" + order.getOrderType()
+        + " startTime=" + order.getStartTime()
+        + " endTime=" + order.getEndTime()
+        + " displaySize=" + order.getDisplaySize()
+        + " minDisplaySize=" + order.getMinDisplaySize()
+        + " checkIntervals=" + order.getCheckIntervals());
+
+    Assert.assertEquals("ICEBERG", order.getOrderType());
+    System.out.println("  (start_time from server: " + order.getStartTime()
+        + ", expected: " + startTime + ")");
+    System.out.println("  (end_time from server:   " + order.getEndTime()
+        + ", expected: " + endTime + ")");
+  }
+
+  // ── Place + Modify + Cancel ───────────────────────────────────────────────
+
+  /** 下单 → 查询 → 改单 → 撤单 完整流程 */
+  @Test
+  public void testPlaceModifyCancel() throws Exception {
+    ContractItem contract = buildAAPLContract();
+
+    // place
+    TradeOrderRequest placeReq = TradeOrderRequest.buildIcebergOrder(
+        account, contract, ActionType.BUY, 100, 1.0,
+        20, 10, null,
+        PriceType.LIMIT_PRICE,
+        null, null);
+
+    TradeOrderResponse placeResp = client.execute(placeReq);
+    Assert.assertTrue("[place] " + placeResp.getMessage(), placeResp.isSuccess());
+    long orderId = placeResp.getItem().getId();
+    System.out.println("[place] order_id=" + orderId);
+
+    Thread.sleep(1000);
+
+    // query
+    QuerySingleOrderRequest queryReq = new QuerySingleOrderRequest();
+    queryReq.setBizContent(AccountParamBuilder.instance().account(account).id(orderId).buildJson());
+
+    SingleOrderResponse queryResp = client.execute(queryReq);
+    Assert.assertTrue("[query] " + queryResp.getMessage(), queryResp.isSuccess());
+    TradeOrder order = queryResp.getItem();
+    System.out.println("[query] status=" + order.getStatus()
+        + " order_type=" + order.getOrderType()
+        + " display_size=" + order.getDisplaySize()
+        + " min_display_size=" + order.getMinDisplaySize());
+
+    // modify
+    TradeOrderRequest modifyReq = TradeOrderRequest.buildIcebergOrder(
+        account, contract, ActionType.BUY, 100, 1.01,
+        30, 15, null,
+        PriceType.LIMIT_PRICE,
+        null, null);
+    modifyReq.setApiMethodName(MethodName.MODIFY_ORDER);
+    ((TradeOrderModel) modifyReq.getApiModel()).setId(orderId);
+
+    TradeOrderResponse modResp = client.execute(modifyReq);
+    Assert.assertTrue("[modify] " + modResp.getMessage(), modResp.isSuccess());
+    System.out.println("[modify] result=" + modResp.getItem().getId());
+
+    Thread.sleep(1000);
+
+    SingleOrderResponse queryResp2 = client.execute(queryReq);
+    if (queryResp2.isSuccess() && queryResp2.getItem() != null) {
+      TradeOrder o = queryResp2.getItem();
+      System.out.println("[after modify] display_size=" + o.getDisplaySize()
+          + " min_display_size=" + o.getMinDisplaySize());
+    }
+
+    // cancel
+    TradeOrderRequest cancelReq = new TradeOrderRequest();
+    cancelReq.setApiMethodName(MethodName.CANCEL_ORDER);
+    cancelReq.setBizContent(AccountParamBuilder.instance().account(account).id(orderId).buildJson());
+
+    TradeOrderResponse cancelResp = client.execute(cancelReq);
+    Assert.assertTrue("[cancel] " + cancelResp.getMessage(), cancelResp.isSuccess());
+    System.out.println("[cancel] result=" + cancelResp.getItem().getId());
+  }
+
+  // ── Helper ────────────────────────────────────────────────────────────────
+
+  private static ContractItem buildAAPLContract() {
+    ContractItem contract = new ContractItem();
+    contract.setSymbol("AAPL");
+    contract.setCurrency("USD");
+    contract.setSecType("STK");
+    return contract;
+  }
+}

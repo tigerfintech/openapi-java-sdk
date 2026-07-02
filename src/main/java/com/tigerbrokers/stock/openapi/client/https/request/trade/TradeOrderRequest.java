@@ -18,6 +18,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.PriceType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
@@ -343,6 +344,36 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
       //model.addAlgoParam(TagValue.buildTagValue(WAPOrderConstants.NO_TAKE_LIQ, noTakeLiq));
       model.addAlgoParam(TagValue.buildTagValue(TradeConstants.PARTICIPATION_RATE, participationRate));
     }
+    return newRequest(model);
+  }
+
+  public static TradeOrderRequest buildIcebergOrder(ContractItem contract,
+      ActionType action, Integer quantity, Double limitPrice, Integer displaySize) {
+    return buildIcebergOrder(ClientConfig.DEFAULT_CONFIG.defaultAccount,
+        contract, action, quantity, limitPrice, displaySize, displaySize, null,
+        PriceType.LIMIT_PRICE, null, null);
+  }
+
+  public static TradeOrderRequest buildIcebergOrder(String account, ContractItem contract,
+      ActionType action, Integer quantity, Double limitPrice, Integer displaySize) {
+    return buildIcebergOrder(account, contract, action, quantity, limitPrice, displaySize, displaySize, null,
+        PriceType.LIMIT_PRICE, null, null);
+  }
+
+  public static TradeOrderRequest buildIcebergOrder(String account, ContractItem contract,
+      ActionType action, Integer quantity, Double limitPrice,
+      Integer displaySize, Integer minDisplaySize, Integer checkIntervals,
+      PriceType priceType, Long startTime, Long endTime) {
+    TradeOrderModel model = buildTradeOrderModel(account, contract, action, convertToLong(quantity), null);
+    model.setOrderType(OrderType.ICEBERG);
+    model.setLimitPrice(limitPrice);
+    model.setDisplaySize(displaySize);
+    model.setMinDisplaySize(minDisplaySize != null ? minDisplaySize : displaySize);
+    model.setCheckIntervals(checkIntervals);
+    model.setPriceType(priceType != null ? priceType.getValue() : PriceType.LIMIT_PRICE.getValue());
+    model.setStartTime(startTime);
+    model.setEndTime(endTime);
+    model.setTimeInForce(TimeInForce.DAY);
     return newRequest(model);
   }
 
@@ -741,6 +772,42 @@ public class TradeOrderRequest extends TigerCommonRequest implements TigerReques
       model.setOrderType(orderType);
       model.setTimeInForce(timeInForce == TimeInForce.OPG ? timeInForce : TimeInForce.DAY);
     }
+    return this;
+  }
+
+  public TradeOrderRequest setDisplaySize(Integer displaySize) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setDisplaySize(displaySize);
+    return this;
+  }
+
+  public TradeOrderRequest setMinDisplaySize(Integer minDisplaySize) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setMinDisplaySize(minDisplaySize);
+    return this;
+  }
+
+  public TradeOrderRequest setCheckIntervals(Integer checkIntervals) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setCheckIntervals(checkIntervals);
+    return this;
+  }
+
+  public TradeOrderRequest setPriceType(String priceType) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setPriceType(priceType);
+    return this;
+  }
+
+  public TradeOrderRequest setStartTime(Long startTime) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setStartTime(startTime);
+    return this;
+  }
+
+  public TradeOrderRequest setEndTime(Long endTime) {
+    TradeOrderModel model = (TradeOrderModel) getApiModel();
+    model.setEndTime(endTime);
     return this;
   }
 
