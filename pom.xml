@@ -178,6 +178,8 @@
         <extensions>true</extensions>
         <configuration>
           <publishingServerId>ossrh</publishingServerId>
+          <!-- 自动发布:上传->校验->发布，无需网页确认 -->
+          <autoPublish>true</autoPublish>
         </configuration>
       </plugin>
     </plugins>
