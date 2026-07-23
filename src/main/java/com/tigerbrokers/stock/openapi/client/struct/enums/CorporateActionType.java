@@ -7,7 +7,10 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
 public enum CorporateActionType {
   SPLIT("split"),
   DIVIDEND("dividend"),
-  EARNING("earning");
+  EARNING("earning"),
+  SYMBOL_CHANGE("symbol_change"),
+  DELISTING("delisting"),
+  IPO("ipo");
 
   private String value;
 
