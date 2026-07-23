@@ -25,3 +25,6 @@ target/
 
 CLAUDE.md
 .claude/
+
+# local memory / ephemeral data (not for version control)
+.data/
