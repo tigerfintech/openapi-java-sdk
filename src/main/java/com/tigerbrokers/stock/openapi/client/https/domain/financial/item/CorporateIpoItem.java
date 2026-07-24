@@ -55,6 +55,14 @@ public class CorporateIpoItem extends CorporateActionItem {
         "ipoName='" + ipoName + '\'' +
         ", listingDate=" + listingDate +
         ", listingPrice=" + listingPrice +
+        ", country='" + country + '\'' +
+        ", sharesOutstanding=" + sharesOutstanding +
+        ", sharesFloat=" + sharesFloat +
+        ", offerAmount=" + offerAmount +
+        ", priceRange='" + priceRange + '\'' +
+        ", currency='" + currency + '\'' +
+        ", minPurchaseQuantity=" + minPurchaseQuantity +
+        ", leverageRatio=" + leverageRatio +
         ", symbol='" + getSymbol() + '\'' +
         ", market='" + getMarket() + '\'' +
         ", executeDate=" + getExecuteDate() +
