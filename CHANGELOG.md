@@ -1,3 +1,8 @@
+## 2.6.0 (2026-07-23)
+### New
+- `CorporateActionType` 新增：`SYMBOL_CHANGE`、`DELISTING`、`IPO`
+- 新增 `CorporateSymbolChangeRequest/Response/Item`、`CorporateDelistingRequest/Response/Item`、`CorporateIpoRequest/Response/Item`
+
 ## 2.5.1 (2026-06-24)
 ### New
 - 新增冰山单构建方法 `TradeOrderModel.buildIcebergOrder(account, contract, action, quantity, price, displaySize)` 及完整参数重载，支持 `minDisplaySize`、`checkIntervals`、`priceType`（`LIMIT_PRICE`/`OPPONENT_PRICE`）、`startTime`/`endTime`（epoch ms）
