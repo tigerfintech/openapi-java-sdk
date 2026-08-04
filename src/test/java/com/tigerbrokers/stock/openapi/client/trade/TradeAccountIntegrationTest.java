@@ -43,7 +43,7 @@ public class TradeAccountIntegrationTest {
   @Test
   public void testAssets() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.ASSETS);
-    request.setBizContent("{\"account\":\"\" + account + \"\"}");
+    request.setBizContent("{\"account\":\"" + account + "\"}");
     TigerHttpResponse response = client.execute(request);
     assertSuccess(response, "testAssets");
   }
@@ -51,7 +51,7 @@ public class TradeAccountIntegrationTest {
   @Test
   public void testPositions() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.POSITIONS);
-    request.setBizContent("{\"account\":\"\" + account + \"\"}");
+    request.setBizContent("{\"account\":\"" + account + "\"}");
     TigerHttpResponse response = client.execute(request);
     assertSuccess(response, "testPositions");
   }
@@ -59,7 +59,7 @@ public class TradeAccountIntegrationTest {
   @Test
   public void testActiveOrders() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.ACTIVE_ORDERS);
-    request.setBizContent("{\"account\":\"\" + account + \"\"}");
+    request.setBizContent("{\"account\":\"" + account + "\"}");
     TigerHttpResponse response = client.execute(request);
     assertSuccess(response, "testActiveOrders");
   }
@@ -67,7 +67,7 @@ public class TradeAccountIntegrationTest {
   @Test
   public void testInactiveOrders() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.INACTIVE_ORDERS);
-    request.setBizContent("{\"account\":\"\" + account + \"\"}");
+    request.setBizContent("{\"account\":\"" + account + "\"}");
     TigerHttpResponse response = client.execute(request);
     assertSuccess(response, "testInactiveOrders");
   }
@@ -75,7 +75,7 @@ public class TradeAccountIntegrationTest {
   @Test
   public void testFilledOrders() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.FILLED_ORDERS);
-    request.setBizContent("{\"account\":\"\" + account + \"\"}");
+    request.setBizContent("{\"account\":\"" + account + "\"}");
     TigerHttpResponse response = client.execute(request);
     assertSuccess(response, "testFilledOrders");
   }
@@ -83,7 +83,7 @@ public class TradeAccountIntegrationTest {
   @Test
   public void testOrderTransactions() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.ORDER_TRANSACTIONS);
-    request.setBizContent("{\"account\":\"\" + account + \"\"}");
+    request.setBizContent("{\"account\":\"" + account + "\"}");
     TigerHttpResponse response = client.execute(request);
     assertSuccess(response, "testOrderTransactions");
   }
@@ -91,7 +91,7 @@ public class TradeAccountIntegrationTest {
   @Test
   public void testPrimeAssets() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.PRIME_ASSETS);
-    request.setBizContent("{\"account\":\"\" + account + \"\"}");
+    request.setBizContent("{\"account\":\"" + account + "\"}");
     TigerHttpResponse response = client.execute(request);
     assertSuccess(response, "testPrimeAssets");
   }
@@ -99,7 +99,7 @@ public class TradeAccountIntegrationTest {
   @Test
   public void testSegmentFundAvailable() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.SEGMENT_FUND_AVAILABLE);
-    request.setBizContent("{\"account\":\"\" + account + \"\"}");
+    request.setBizContent("{\"account\":\"" + account + "\"}");
     TigerHttpResponse response = client.execute(request);
     assertSuccess(response, "testSegmentFundAvailable");
   }
@@ -107,7 +107,7 @@ public class TradeAccountIntegrationTest {
   @Test
   public void testSegmentFundHistory() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.SEGMENT_FUND_HISTORY);
-    request.setBizContent("{\"account\":\"\" + account + \"\"}");
+    request.setBizContent("{\"account\":\"" + account + "\"}");
     TigerHttpResponse response = client.execute(request);
     assertSuccess(response, "testSegmentFundHistory");
   }
@@ -115,7 +115,7 @@ public class TradeAccountIntegrationTest {
   @Test
   public void testTransferFund() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.TRANSFER_FUND);
-    request.setBizContent("{\"account\":\"\" + account + \"\"}");
+    request.setBizContent("{\"account\":\"" + account + "\"}");
     TigerHttpResponse response = client.execute(request);
     assertSuccess(response, "testTransferFund");
   }
@@ -123,7 +123,7 @@ public class TradeAccountIntegrationTest {
   @Test
   public void testAggregateAssets() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.AGGREGATE_ASSETS);
-    request.setBizContent("{\"account\":\"\" + account + \"\"}");
+    request.setBizContent("{\"account\":\"" + account + "\"}");
     TigerHttpResponse response = client.execute(request);
     assertSuccess(response, "testAggregateAssets");
   }

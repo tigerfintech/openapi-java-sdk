@@ -35,7 +35,7 @@ public class QuoteIntegrationTest {
   @Test
   public void testMarketState() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.MARKET_STATE);
-    request.setBizContent("{}");
+    request.setBizContent("{\"market\":\"US\"}");
     TigerHttpResponse response = client.execute(request);
     assertSuccess(response, "testMarketState");
   }
@@ -167,7 +167,7 @@ public class QuoteIntegrationTest {
   @Test
   public void testOptionExpiration() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.OPTION_EXPIRATION);
-    request.setBizContent("{\"symbol\":\"AAPL\"}");
+    request.setBizContent("{\"symbols\":[\"AAPL\"]}");
     TigerHttpResponse response = client.execute(request);
     assertSuccess(response, "testOptionExpiration");
   }
@@ -175,7 +175,7 @@ public class QuoteIntegrationTest {
   @Test
   public void testOptionChain() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.OPTION_CHAIN);
-    request.setBizContent("{\"symbol\":\"AAPL\",\"expiry\":\"2026-12-19\"}");
+    request.setBizContent("{\"symbol\":\"AAPL\",\"expiry\":\"2027-01-15\"}");
     TigerHttpResponse response = client.execute(request);
     assertSuccess(response, "testOptionChain");
   }
@@ -183,7 +183,7 @@ public class QuoteIntegrationTest {
   @Test
   public void testOptionBrief() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.OPTION_BRIEF);
-    request.setBizContent("{\"identifiers\":[\"AAPL  261219C00200000\"]}");
+    request.setBizContent("{\"identifiers\":[\"AAPL 270115C00200000\"]}");
     TigerHttpResponse response = client.execute(request);
     assertSuccess(response, "testOptionBrief");
   }
@@ -208,7 +208,7 @@ public class QuoteIntegrationTest {
 
   @Test
   public void testFutureContractByCode() {
-    TigerResponse response = client.execute(FutureContractByConCodeRequest.newRequest("ESZ6"));
+    TigerResponse response = client.execute(FutureContractByConCodeRequest.newRequest("CL2702"));
     assertSuccess(response, "testFutureContractByCode");
   }
 
@@ -238,25 +238,25 @@ public class QuoteIntegrationTest {
 
   @Test
   public void testFutureKline() {
-    TigerResponse response = client.execute(FutureKlineRequest.newRequest(java.util.Arrays.asList("ESZ6")));
+    TigerResponse response = client.execute(FutureKlineRequest.newRequest(java.util.Arrays.asList("CL2702")));
     assertSuccess(response, "testFutureKline");
   }
 
   @Test
   public void testFutureRealTimeQuote() {
-    TigerResponse response = client.execute(FutureRealTimeQuoteRequest.newRequest(java.util.Arrays.asList("ESZ6")));
+    TigerResponse response = client.execute(FutureRealTimeQuoteRequest.newRequest(java.util.Arrays.asList("CL2702")));
     assertSuccess(response, "testFutureRealTimeQuote");
   }
 
   @Test
   public void testFutureTradingDate() {
-    TigerResponse response = client.execute(FutureTradingDateRequest.newRequest("ESZ6"));
+    TigerResponse response = client.execute(FutureTradingDateRequest.newRequest("CL2702"));
     assertSuccess(response, "testFutureTradingDate");
   }
 
   @Test
   public void testFutureDepth() {
-    TigerResponse response = client.execute(FutureDepthRequest.newRequest(java.util.Arrays.asList("ESZ6")));
+    TigerResponse response = client.execute(FutureDepthRequest.newRequest(java.util.Arrays.asList("CL2702")));
     assertSuccess(response, "testFutureDepth");
   }
 
@@ -317,7 +317,7 @@ public class QuoteIntegrationTest {
   @Test
   public void testIndustryList() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.INDUSTRY_LIST);
-    request.setBizContent("{\"market\":\"US\"}");
+    request.setBizContent("{\"market\":\"US\",\"level\":\"GSECTOR\"}");
     TigerHttpResponse response = client.execute(request);
     assertSuccess(response, "testIndustryList");
   }
@@ -333,7 +333,7 @@ public class QuoteIntegrationTest {
   @Test
   public void testStockIndustry() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.STOCK_INDUSTRY);
-    request.setBizContent("{\"symbol\":\"AAPL\"}");
+    request.setBizContent("{\"symbol\":\"AAPL\",\"market\":\"US\"}");
     TigerHttpResponse response = client.execute(request);
     assertSuccess(response, "testStockIndustry");
   }
