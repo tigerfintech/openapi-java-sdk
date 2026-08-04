@@ -50,9 +50,11 @@ public final class IntegTestConfig {
     if (serverUrl == null || serverUrl.isEmpty()) {
       serverUrl = env("TIGEROPEN_SERVER_URL");
     }
-    if (serverUrl != null && !serverUrl.isEmpty()) {
-      client.useCustomServerUrl(serverUrl);
+    if (serverUrl == null || serverUrl.isEmpty()) {
+      // Default production gateway - needed when env vars are used without config file
+      serverUrl = "https://openapi.tigerfintech.com/gateway";
     }
+    client.useCustomServerUrl(serverUrl);
 
     client.clientConfig(config);
     return client;
