@@ -1,6 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.trade;
 
-import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
+import com.tigerbrokers.stock.openapi.client.testsupport.IntegTestConfig;
 import com.tigerbrokers.stock.openapi.client.https.client.TigerHttpClient;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.OptionExerciseCheckItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.OptionExercisePositionPageItem;
@@ -15,7 +15,6 @@ import com.tigerbrokers.stock.openapi.client.https.response.trade.OptionExercise
 import com.tigerbrokers.stock.openapi.client.https.response.trade.OptionExercisePositionResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.OptionExerciseRecordResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.OptionExerciseSubmitResponse;
-import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OptionExerciseType;
 import org.junit.Assert;
 import org.junit.Assume;
@@ -46,34 +45,16 @@ public class OptionExerciseIntegrationTest {
 
   @BeforeClass
   public static void setUpClass() {
-    // 集成测试门控：默认跳过，CI 与本地都靠 -Dtest.integ=true 显式开启。
-    // 用 Assume 而不是类级 @Ignore，@Ignore 是硬编码的，没法按环境启用。
     Assume.assumeTrue("integration test; enable with -Dtest.integ=true",
         Boolean.getBoolean("test.integ"));
-    String configPath = System.getProperty("test.config.path");
-    Assert.assertNotNull("set -Dtest.config.path=<config dir>", configPath);
+    client = IntegTestConfig.createClient();
+    account = IntegTestConfig.getAccount();
+    Assert.assertNotNull("TIGEROPEN_ACCOUNT env var required", account);
 
-    String serverUrl = System.getProperty("test.server.url", "");
-
-    ClientConfig config = new ClientConfig();
-    config.configFilePath = configPath;
-    config.setEnv(Env.TEST);
-
-    client = TigerHttpClient.getInstance();
-    if (serverUrl != null && !serverUrl.isEmpty()) {
-      client.useCustomServerUrl(serverUrl);
-    }
-    client.clientConfig(config);
-
-    // account: 优先 -Dtest.account，没有就用 config 里加载的 defaultAccount
-    account = System.getProperty("test.account");
-    if (account == null || account.isEmpty()) {
-      account = config.defaultAccount;
-    }
-    Assert.assertNotNull("account not loaded from config or -Dtest.account", account);
-
-    // contract.id: 只有 integ(WriteApi) 用例需要，contract 层用例不用
     String contractIdStr = System.getProperty("test.contract.id");
+    if (contractIdStr == null || contractIdStr.isEmpty()) {
+      contractIdStr = System.getenv("TIGEROPEN_CONTRACT_ID");
+    }
     if (contractIdStr != null && !contractIdStr.isEmpty()) {
       contractId = Long.parseLong(contractIdStr);
     }

@@ -1,6 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.trade;
 
-import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
+import com.tigerbrokers.stock.openapi.client.testsupport.IntegTestConfig;
 import com.tigerbrokers.stock.openapi.client.https.client.TigerHttpClient;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.TradeOrder;
@@ -10,7 +10,6 @@ import com.tigerbrokers.stock.openapi.client.https.request.trade.TradeOrderReque
 import com.tigerbrokers.stock.openapi.client.https.response.trade.SingleOrderResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.TradeOrderResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
-import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.PriceType;
 import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
@@ -44,36 +43,9 @@ public class IcebergOrderIntegrationTest {
     // 用 Assume 而不是类级 @Ignore，@Ignore 是硬编码的，没法按环境启用。
     Assume.assumeTrue("integration test; enable with -Dtest.integ=true",
         Boolean.getBoolean("test.integ"));
-    String configPath = System.getProperty("test.config.path");
-    Assert.assertNotNull("set -Dtest.config.path=<config dir>", configPath);
-
-    String envStr = System.getProperty("test.env", "TEST");
-    Env env = "PROD".equalsIgnoreCase(envStr) ? Env.PROD : Env.TEST;
-
-    ClientConfig config = new ClientConfig();
-    config.configFilePath = configPath;
-    config.setEnv(env);
-    ConfigFileUtil.loadConfigFile(config);
-
-    account = config.defaultAccount;
-    // Allow override via -Dtest.account
-    String accountOverride = System.getProperty("test.account");
-    if (accountOverride != null && !accountOverride.isEmpty()) {
-      account = accountOverride;
-    }
-    Assert.assertNotNull("account not loaded from config", account);
-    Assert.assertNotNull("tigerId not loaded from config", config.tigerId);
-    Assert.assertNotNull("privateKey not loaded from config", config.privateKey);
-
-    System.out.println("env=" + env + " account=" + account + " tigerId=" + config.tigerId);
-
-    String serverUrl = System.getProperty("test.server.url");
-
-    client = TigerHttpClient.getInstance();
-    if (serverUrl != null && !serverUrl.isEmpty()) {
-      client.useCustomServerUrl(serverUrl);
-    }
-    client.clientConfig(config);
+    client = IntegTestConfig.createClient();
+    account = IntegTestConfig.getAccount();
+    Assert.assertNotNull("TIGEROPEN_ACCOUNT env var required", account);
   }
 
   // ── Place ─────────────────────────────────────────────────────────────────

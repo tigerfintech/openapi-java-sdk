@@ -1,6 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.trade;
 
-import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
+import com.tigerbrokers.stock.openapi.client.testsupport.IntegTestConfig;
 import com.tigerbrokers.stock.openapi.client.https.client.TigerHttpClient;
 import com.tigerbrokers.stock.openapi.client.https.domain.financial.item.CorporateDelistingItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.financial.item.CorporateIpoItem;
@@ -11,7 +11,6 @@ import com.tigerbrokers.stock.openapi.client.https.request.financial.CorporateSy
 import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateDelistingResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateIpoResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateSymbolChangeResponse;
-import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
 import org.junit.Assert;
@@ -50,30 +49,7 @@ public class CorporateActionIntegrationTest {
     // 用 Assume 而不是类级 @Ignore，@Ignore 是硬编码的，没法按环境启用。
     Assume.assumeTrue("integration test; enable with -Dtest.integ=true",
         Boolean.getBoolean("test.integ"));
-    // Support both -Dtest.config.path JVM property and TIGER_CONFIG_PATH env var
-    String configPath = System.getProperty("test.config.path");
-    if (configPath == null || configPath.isEmpty()) {
-      configPath = System.getenv("TIGER_CONFIG_PATH");
-    }
-    Assert.assertNotNull(
-        "set -Dtest.config.path=<config dir> or TIGER_CONFIG_PATH env var",
-        configPath);
-
-    String envStr = System.getProperty("test.env",
-        System.getenv().getOrDefault("TIGER_ENV", "PROD"));
-    Env env = "TEST".equalsIgnoreCase(envStr) ? Env.TEST : Env.PROD;
-
-    ClientConfig config = new ClientConfig();
-    config.configFilePath = configPath;
-    config.setEnv(env);
-    ConfigFileUtil.loadConfigFile(config);
-
-    Assert.assertNotNull("tigerId not loaded from config", config.tigerId);
-    Assert.assertNotNull("privateKey not loaded from config", config.privateKey);
-
-    client = TigerHttpClient.getInstance();
-    client.clientConfig(config);
-    System.out.println("env=" + env + " tigerId=" + config.tigerId);
+    client = IntegTestConfig.createClient();
   }
 
   @Test

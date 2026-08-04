@@ -1,11 +1,10 @@
 package com.tigerbrokers.stock.openapi.client.financial;
 
-import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
+import com.tigerbrokers.stock.openapi.client.testsupport.IntegTestConfig;
 import com.tigerbrokers.stock.openapi.client.https.client.TigerHttpClient;
 import com.tigerbrokers.stock.openapi.client.https.domain.financial.item.CorporateSymbolChangeItem;
 import com.tigerbrokers.stock.openapi.client.https.request.financial.CorporateSymbolChangeRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateSymbolChangeResponse;
-import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -39,25 +38,7 @@ public class CorporateSymbolChangeIntegrationTest {
     // 用 Assume 而不是类级 @Ignore，@Ignore 是硬编码的，没法按环境启用。
     Assume.assumeTrue("integration test; enable with -Dtest.integ=true",
         Boolean.getBoolean("test.integ"));
-    String configPath = System.getProperty("test.config.path");
-    Assert.assertNotNull("set -Dtest.config.path=<config dir path>", configPath);
-    // configFilePath expects a directory; SDK will look for tiger_openapi_config.properties inside it
-
-    String serverUrl = System.getProperty("test.server.url", "");
-
-    ClientConfig config = new ClientConfig();
-    config.configFilePath = configPath;
-    config.setEnv(Env.TEST);
-
-    client = TigerHttpClient.getInstance();
-    if (!serverUrl.isEmpty()) {
-      client.useCustomServerUrl(serverUrl);
-    }
-    client.clientConfig(config);
-    // call again after clientConfig — initDomainRefreshTask may overwrite the url
-    if (!serverUrl.isEmpty()) {
-      client.useCustomServerUrl(serverUrl);
-    }
+    client = IntegTestConfig.createClient();
   }
 
   @Test
