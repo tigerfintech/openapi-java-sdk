@@ -46,8 +46,6 @@ unit:java:
 contract:java:
   extends: .maven_base
   stage: contract
-  tags:
-    - sdk-integ
   variables:
     <<: *integ_vars
   script:
@@ -67,8 +65,6 @@ contract:java:
 integ:java:
   extends: .maven_base
   stage: integ
-  tags:
-    - sdk-integ
   when: manual
   allow_failure: true
   variables:
