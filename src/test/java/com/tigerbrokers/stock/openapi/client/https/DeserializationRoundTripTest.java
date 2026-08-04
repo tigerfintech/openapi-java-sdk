@@ -19,18 +19,7 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
-/**
- * 反序列化 round-trip 测试。
- *
- * <p>对每个声明了 data 载荷的 Response 类，构造一份填满字段的 wire JSON，
- * 用 fastjson 反序列化再序列化回来，断言所有字段往返后非空。
- *
- * <p>和 {@link SerializationContractTest} 的区别：那个测的是「注解位置对不对」，
- * 这个测的是「反序列化路径真的能跑通」—— 类型不匹配、setter 缺失、嵌套对象映射错，
- * 注解检查看不出来，只有这里能发现。
- *
- * <p>这是 L1 单测（零凭据、零网络），反射 + JSON 字符串操作，不发任何请求。
- */
+/** 反序列化 round-trip 测试。. */
 public class DeserializationRoundTripTest {
 
   private static final String RESPONSE_PACKAGE =
@@ -41,15 +30,7 @@ public class DeserializationRoundTripTest {
       // 占位，跑第一遍后按实际需要填
   ));
 
-  /**
-   * 对每个 Response 类执行：
-   * 1. 找到其 data 字段的类型
-   * 2. 为该 Item 类型生成一份 camelCase 的示例 JSON
-   * 3. 包上 code/message/data 信封
-   * 4. 用 fastjson 反序列化成 Response
-   * 5. 断言 code==0、data 字段非空
-   * 6. 如果 Item 有子字段，断言至少一个非空（证明映射路径畅通）
-   */
+  /** 对每个 Response 类执行：. */
   @Test
   public void everyResponseCanDeserializeFromWireJson() {
     List<Class<?>> responses = ClasspathScanner.concreteClasses(
@@ -177,12 +158,7 @@ public class DeserializationRoundTripTest {
     }
   }
 
-  /**
-   * 为一个 Item 类型生成示例 JSON，递归填充嵌套对象（最多两层防循环）。
-   *
-   * <p>策略：为每个声明字段填入该类型的非空值。嵌套 POJO 递归展开到 depth=0 时
-   * 退化为空 object。List 字段如果有泛型参数且是 POJO，填一个元素。
-   */
+  /** 为一个 Item 类型生成示例 JSON，递归填充嵌套对象（最多两层防循环）。. */
   static String generateSampleJsonStatic(Class<?> type) { return generateSampleJson(type); }
 
   private static String generateSampleJson(Class<?> type) {

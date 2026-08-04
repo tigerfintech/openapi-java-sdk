@@ -9,19 +9,7 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
-/**
- * 枚举 wire 值不变量测试（对应跨语言 review-sdk S4）。
- *
- * <p>对所有声明了 {@code getValue()} 方法的枚举，断言：
- * <ol>
- *   <li>每个常量的 wire 值非空、非 null</li>
- *   <li>同一枚举内无重复 wire 值</li>
- *   <li>枚举常量列表非空（类能正常加载）</li>
- * </ol>
- *
- * <p>副作用：触发所有枚举类的类初始化，jacoco 会把静态初始化的行算进覆盖行数，
- * 从而覆盖 struct.enums 下 1500+ 行常量声明。这不是目的，目的是断言 wire 值约束。
- */
+/** 从而覆盖 struct. */
 public class EnumWireValueTest {
 
   private static final String ENUMS_PACKAGE =

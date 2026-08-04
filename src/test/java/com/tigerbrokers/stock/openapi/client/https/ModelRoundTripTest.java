@@ -8,13 +8,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-/**
- * Model 反序列化 round-trip 测试。
- *
- * 对每个 *Model 类：生成填满字段的 camelCase JSON -> 用 fastjson 反序列化 -> 断言成功。
- * 覆盖所有 setter 路径。注意 Model 序列化是 snake_case（有 @JSONField），但反序列化
- * 时 fastjson 默认也能匹配 camelCase setter，所以两种 key 都测。
- */
+/** Model 反序列化 round-trip 测试。. */
 public class ModelRoundTripTest {
 
   private static final String DOMAIN_PACKAGE =

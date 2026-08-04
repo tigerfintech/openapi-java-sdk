@@ -27,16 +27,7 @@ import org.mockito.Mockito;
 
 import static org.mockito.ArgumentMatchers.*;
 
-/**
- * 行情接口逻辑覆盖测试。
- *
- * <p>每个用例走完 TigerHttpClient.execute() 的完整链路：
- * 构造 Request → setDefaultAccount → validate → buildParams → 签名 →
- * HttpUtils.post(MOCKED) → JSON.parseObject(Response)
- *
- * <p>MockedStatic 拦截 HttpUtils.post / HttpUtils.get，返回预设的 wire JSON。
- * 这样覆盖了请求序列化和响应反序列化的全链路，但不出网。
- */
+/** 行情接口逻辑覆盖测试。. */
 public class QuoteApiLogicTest {
 
   private static MockedStatic<HttpUtils> httpUtilsMock;

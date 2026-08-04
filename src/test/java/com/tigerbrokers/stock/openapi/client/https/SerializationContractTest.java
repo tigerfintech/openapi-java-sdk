@@ -17,36 +17,12 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
-/**
- * 序列化契约测试。
- *
- * <p>集成测试只能验证「接口能通」，验证不了字段名对不对 —— 服务端返回 HTTP 200、code 0，
- * 只是某个字段静默为 null。这类问题只有序列化契约测试能强制拦住，而它不需要网络。
- *
- * <p>三条规则，对应跨语言 review-sdk 的 S2 / S3 / S5：
- *
- * <ul>
- *   <li>S2 请求参数序列化 —— 服务端接收 snake_case。Model 的 camelCase 字段必须有
- *       {@code @JSONField(name = "snake_case")}，否则请求体会静默发出错误字段名。</li>
- *   <li>S3 响应字段反序列化 —— 服务端返回 camelCase，fastjson 默认就能匹配。Item 上写
- *       snake_case 的 {@code @JSONField} 会导致该字段反序列化为 null。</li>
- *   <li>S5 Response 的 data 字段 —— 必须有 {@code @JSONField(name = "data")}，
- *       否则整个 data 无法反序列化。</li>
- * </ul>
- *
- * <p>Model / Item / Response 三类加起来近 370 个类，手写用例不现实，所以用反射扇出：
- * 扫描 target/classes 下的所有类，一个用例覆盖全部，新增接口自动纳入。
- */
+/** 只是某个字段静默为 null。这类问题只有序列化契约测试能强制拦住，而它不需要网络。. */
 public class SerializationContractTest {
 
   private static final String BASE_PACKAGE = "com.tigerbrokers.stock.openapi.client.https";
 
-  /**
-   * S2 例外：服务端接收的 wire 名不是该字段的标准 snake_case 形式。
-   *
-   * <p>这里存的是「已核实的正确 wire 名」而不是简单跳过，改错了照样会红。
-   * 加条目前必须核实服务端实际接收的字段名，不能凭猜测。
-   */
+  /** S2 例外：服务端接收的 wire 名不是该字段的标准 snake_case 形式。. */
   private static final Map<String, String> S2_WIRE_NAME_OVERRIDES;
 
   static {
@@ -198,12 +174,7 @@ public class SerializationContractTest {
     return false;
   }
 
-  /**
-   * camelCase 转 snake_case，连续大写按缩写处理。
-   *
-   * <p>{@code secType -> sec_type}、{@code includeOTC -> include_otc}、
-   * {@code expireYM -> expire_ym}。逐字符加下划线会得到 include_o_t_c，与服务端不符。
-   */
+  /** camelCase 转 snake_case，连续大写按缩写处理。. */
   static String toSnakeCase(String camelCase) {
     StringBuilder sb = new StringBuilder(camelCase.length() + 4);
     for (int i = 0; i < camelCase.length(); i++) {

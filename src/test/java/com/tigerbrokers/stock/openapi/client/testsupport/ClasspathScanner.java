@@ -7,24 +7,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * 扫描 target/classes 下的类，供反射扇出类型的测试使用。
- *
- * <p>不引入 Reflections / ClassGraph：测试只需要扫本模块自己的 target/classes 目录，
- * 走 CodeSource 定位再遍历目录就够了，少一个依赖少一处版本冲突。
- */
+/** 走 CodeSource 定位再遍历目录就够了，少一个依赖少一处版本冲突。. */
 public final class ClasspathScanner {
 
   private ClasspathScanner() {
   }
 
-  /**
-   * 扫描指定包下可实例化的具体类。
-   *
-   * @param packageName 包名，如 {@code com.tigerbrokers.stock.openapi.client.https.domain}
-   * @param superType 父类 / 接口过滤，传 null 不过滤
-   * @param simpleNameSuffix 类名后缀过滤，传 null 不过滤
-   */
+  /** 扫描指定包下可实例化的具体类。. */
   public static List<Class<?>> concreteClasses(String packageName, Class<?> superType,
       String simpleNameSuffix) {
     File packageDir = new File(classesRoot(), packageName.replace('.', '/'));

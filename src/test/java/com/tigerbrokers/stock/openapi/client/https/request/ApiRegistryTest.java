@@ -17,31 +17,13 @@ import java.util.TreeSet;
 import org.junit.Assert;
 import org.junit.Test;
 
-/**
- * 本仓自查测试：wire method 注册表完整性。
- *
- * <p>不测任何具体接口，测的是「有没有漏」。全部基于反射，不发请求、不依赖凭据、
- * 不依赖用例执行顺序。
- *
- * <p>各语言 SDK 各自持有自己的测试资产，没有跨仓共享的接口清单，所以「某个接口在本仓
- * 漏实现或漏注册」必须由本仓的测试自己发现。跨语言之间的完整性（某接口只在一个语言里
- * 实现了）不在这里，由 review-sdk skill 负责，那需要人判断是否有意不支持。
- */
+/** 本仓自查测试：wire method 注册表完整性。. */
 public class ApiRegistryTest {
 
   private static final String REQUEST_PACKAGE =
       "com.tigerbrokers.stock.openapi.client.https.request";
 
-  /**
-   * 棘轮清单：只能通过泛用 {@link TigerHttpRequest} 调用、没有类型化 Request 类的 MethodName。
-   *
-   * <p>{@code TigerHttpRequest(MethodName)} 让调用方在构造时传方法名，返回的是未定型的
-   * {@link com.tigerbrokers.stock.openapi.client.https.response.TigerHttpResponse}，
-   * 请求参数和响应字段都没有编译期约束 —— 这是早期 API 风格，新接口不应再走这条路。
-   *
-   * <p>清单只允许变短：给某个方法补上类型化 Request 类后从这里删一行，忘了删也会红。
-   * 不要为了消红往里加条目，那是在往后拨棘轮。
-   */
+  /** 请求参数和响应字段都没有编译期约束 —— 这是早期 API 风格，新接口不应再走这条路。. */
   private static final Set<String> METHOD_NAMES_WITHOUT_REQUEST = new HashSet<>(Arrays.asList(
       "ACCOUNTS",
       "ACTIVE_ORDERS",
@@ -175,12 +157,7 @@ public class ApiRegistryTest {
         + "，请从 METHOD_NAMES_WITHOUT_REQUEST 里删掉，让棘轮往前走一格。", stale.isEmpty());
   }
 
-  /**
-   * 已废弃的 ApiServiceType 常量接口不得领先 MethodName。
-   *
-   * <p>同一份 wire 契约在本仓存在两份声明，ApiServiceType 已标 {@code @Deprecated}，
-   * 新接口只加 MethodName。这里保证它不会反向漂移出 MethodName 没有的方法名。
-   */
+  /** 已废弃的 ApiServiceType 常量接口不得领先 MethodName。. */
   @Test
   public void deprecatedApiServiceTypeDoesNotDriftAheadOfMethodName() throws Exception {
     Set<String> methodNameValues = new HashSet<>();
