@@ -27,7 +27,7 @@ import org.mockito.Mockito;
 
 import static org.mockito.ArgumentMatchers.*;
 
-/** 行情接口逻辑覆盖测试。. */
+/** 行情接口逻辑覆盖测试。 */
 public class QuoteApiLogicTest {
 
   private static MockedStatic<HttpUtils> httpUtilsMock;

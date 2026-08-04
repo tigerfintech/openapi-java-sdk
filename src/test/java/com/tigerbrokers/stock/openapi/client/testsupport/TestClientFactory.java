@@ -7,7 +7,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.Base64;
 
-/** 测试用 TigerHttpClient 工厂。. */
+/** 测试用 TigerHttpClient 工厂。 */
 public final class TestClientFactory {
 
   /** PKCS8 DER 格式私钥的 base64，TigerSignature.rsaSign 需要这个格式。 */
@@ -30,7 +30,7 @@ public final class TestClientFactory {
   private TestClientFactory() {
   }
 
-  /** 获取可用于单测的 TigerHttpClient。. */
+  /** 获取可用于单测的 TigerHttpClient。 */
   public static TigerHttpClient createOfflineClient() {
     ClientConfig config = new ClientConfig();
     config.tigerId = TEST_TIGER_ID;

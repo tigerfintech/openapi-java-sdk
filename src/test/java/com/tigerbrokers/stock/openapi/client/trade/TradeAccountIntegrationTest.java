@@ -32,6 +32,12 @@ public class TradeAccountIntegrationTest {
     Assert.assertTrue(api + " failed: " + resp.getMessage(), resp.isSuccess());
   }
 
+  private TigerHttpResponse executeWithAccount(MethodName method) {
+    TigerHttpRequest request = new TigerHttpRequest(method);
+    request.setBizContent("{\"account\":\"" + account + "\"}");
+    return client.execute(request);
+  }
+
   @Test
   public void testAccounts() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.ACCOUNTS);
@@ -42,89 +48,67 @@ public class TradeAccountIntegrationTest {
 
   @Test
   public void testAssets() {
-    TigerHttpRequest request = new TigerHttpRequest(MethodName.ASSETS);
-    request.setBizContent("{\"account\":\"" + account + "\"}");
-    TigerHttpResponse response = client.execute(request);
+    TigerHttpResponse response = executeWithAccount(MethodName.ASSETS);
     assertSuccess(response, "testAssets");
   }
 
   @Test
   public void testPositions() {
-    TigerHttpRequest request = new TigerHttpRequest(MethodName.POSITIONS);
-    request.setBizContent("{\"account\":\"" + account + "\"}");
-    TigerHttpResponse response = client.execute(request);
+    TigerHttpResponse response = executeWithAccount(MethodName.POSITIONS);
     assertSuccess(response, "testPositions");
   }
 
   @Test
   public void testActiveOrders() {
-    TigerHttpRequest request = new TigerHttpRequest(MethodName.ACTIVE_ORDERS);
-    request.setBizContent("{\"account\":\"" + account + "\"}");
-    TigerHttpResponse response = client.execute(request);
+    TigerHttpResponse response = executeWithAccount(MethodName.ACTIVE_ORDERS);
     assertSuccess(response, "testActiveOrders");
   }
 
   @Test
   public void testInactiveOrders() {
-    TigerHttpRequest request = new TigerHttpRequest(MethodName.INACTIVE_ORDERS);
-    request.setBizContent("{\"account\":\"" + account + "\"}");
-    TigerHttpResponse response = client.execute(request);
+    TigerHttpResponse response = executeWithAccount(MethodName.INACTIVE_ORDERS);
     assertSuccess(response, "testInactiveOrders");
   }
 
   @Test
   public void testFilledOrders() {
-    TigerHttpRequest request = new TigerHttpRequest(MethodName.FILLED_ORDERS);
-    request.setBizContent("{\"account\":\"" + account + "\"}");
-    TigerHttpResponse response = client.execute(request);
+    TigerHttpResponse response = executeWithAccount(MethodName.FILLED_ORDERS);
     assertSuccess(response, "testFilledOrders");
   }
 
   @Test
   public void testOrderTransactions() {
-    TigerHttpRequest request = new TigerHttpRequest(MethodName.ORDER_TRANSACTIONS);
-    request.setBizContent("{\"account\":\"" + account + "\"}");
-    TigerHttpResponse response = client.execute(request);
+    TigerHttpResponse response = executeWithAccount(MethodName.ORDER_TRANSACTIONS);
     assertSuccess(response, "testOrderTransactions");
   }
 
   @Test
   public void testPrimeAssets() {
-    TigerHttpRequest request = new TigerHttpRequest(MethodName.PRIME_ASSETS);
-    request.setBizContent("{\"account\":\"" + account + "\"}");
-    TigerHttpResponse response = client.execute(request);
+    TigerHttpResponse response = executeWithAccount(MethodName.PRIME_ASSETS);
     assertSuccess(response, "testPrimeAssets");
   }
 
   @Test
   public void testSegmentFundAvailable() {
-    TigerHttpRequest request = new TigerHttpRequest(MethodName.SEGMENT_FUND_AVAILABLE);
-    request.setBizContent("{\"account\":\"" + account + "\"}");
-    TigerHttpResponse response = client.execute(request);
+    TigerHttpResponse response = executeWithAccount(MethodName.SEGMENT_FUND_AVAILABLE);
     assertSuccess(response, "testSegmentFundAvailable");
   }
 
   @Test
   public void testSegmentFundHistory() {
-    TigerHttpRequest request = new TigerHttpRequest(MethodName.SEGMENT_FUND_HISTORY);
-    request.setBizContent("{\"account\":\"" + account + "\"}");
-    TigerHttpResponse response = client.execute(request);
+    TigerHttpResponse response = executeWithAccount(MethodName.SEGMENT_FUND_HISTORY);
     assertSuccess(response, "testSegmentFundHistory");
   }
 
   @Test
   public void testTransferFund() {
-    TigerHttpRequest request = new TigerHttpRequest(MethodName.TRANSFER_FUND);
-    request.setBizContent("{\"account\":\"" + account + "\"}");
-    TigerHttpResponse response = client.execute(request);
+    TigerHttpResponse response = executeWithAccount(MethodName.TRANSFER_FUND);
     assertSuccess(response, "testTransferFund");
   }
 
   @Test
   public void testAggregateAssets() {
-    TigerHttpRequest request = new TigerHttpRequest(MethodName.AGGREGATE_ASSETS);
-    request.setBizContent("{\"account\":\"" + account + "\"}");
-    TigerHttpResponse response = client.execute(request);
+    TigerHttpResponse response = executeWithAccount(MethodName.AGGREGATE_ASSETS);
     assertSuccess(response, "testAggregateAssets");
   }
 

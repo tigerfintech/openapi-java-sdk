@@ -19,7 +19,7 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
-/** 反序列化 round-trip 测试。. */
+/** 反序列化 round-trip 测试。 */
 public class DeserializationRoundTripTest {
 
   private static final String RESPONSE_PACKAGE =
@@ -158,7 +158,7 @@ public class DeserializationRoundTripTest {
     }
   }
 
-  /** 为一个 Item 类型生成示例 JSON，递归填充嵌套对象（最多两层防循环）。. */
+  /** 为一个 Item 类型生成示例 JSON，递归填充嵌套对象（最多两层防循环）。 */
   static String generateSampleJsonStatic(Class<?> type) { return generateSampleJson(type); }
 
   private static String generateSampleJson(Class<?> type) {

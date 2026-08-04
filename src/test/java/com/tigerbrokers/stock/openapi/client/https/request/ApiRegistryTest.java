@@ -17,13 +17,13 @@ import java.util.TreeSet;
 import org.junit.Assert;
 import org.junit.Test;
 
-/** 本仓自查测试：wire method 注册表完整性。. */
+/** 本仓自查测试：wire method 注册表完整性。 */
 public class ApiRegistryTest {
 
   private static final String REQUEST_PACKAGE =
       "com.tigerbrokers.stock.openapi.client.https.request";
 
-  /** 请求参数和响应字段都没有编译期约束 —— 这是早期 API 风格，新接口不应再走这条路。. */
+  /** 请求参数和响应字段都没有编译期约束 —— 这是早期 API 风格，新接口不应再走这条路。 */
   private static final Set<String> METHOD_NAMES_WITHOUT_REQUEST = new HashSet<>(Arrays.asList(
       "ACCOUNTS",
       "ACTIVE_ORDERS",
@@ -157,7 +157,7 @@ public class ApiRegistryTest {
         + "，请从 METHOD_NAMES_WITHOUT_REQUEST 里删掉，让棘轮往前走一格。", stale.isEmpty());
   }
 
-  /** 已废弃的 ApiServiceType 常量接口不得领先 MethodName。. */
+  /** 已废弃的 ApiServiceType 常量接口不得领先 MethodName。 */
   @Test
   public void deprecatedApiServiceTypeDoesNotDriftAheadOfMethodName() throws Exception {
     Set<String> methodNameValues = new HashSet<>();

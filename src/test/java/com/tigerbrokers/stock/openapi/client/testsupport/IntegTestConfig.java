@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.testsupport;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
+import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.https.client.TigerHttpClient;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import org.junit.Assert;
@@ -12,23 +13,25 @@ import org.junit.Assert;
  */
 public final class IntegTestConfig {
 
+  private static final String DEFAULT_SERVER_URL =
+      "https://" + TigerApiConstants.API_ONLINE_DOMAIN_URL + "/gateway";
+
+  private static ClientConfig lastConfig;
+
   private IntegTestConfig() {}
 
   public static TigerHttpClient createClient() {
     ClientConfig config = new ClientConfig();
 
-    // Priority: env vars > system properties > config file
     String tigerId = env("TIGEROPEN_TIGER_ID");
     String privateKey = env("TIGEROPEN_PRIVATE_KEY");
     String account = env("TIGEROPEN_ACCOUNT");
 
     if (tigerId != null && privateKey != null) {
-      // Direct env var mode (no config file needed)
       config.tigerId = tigerId;
       config.privateKey = privateKey;
       config.defaultAccount = account;
     } else {
-      // Fall back to config file
       String configPath = System.getProperty("test.config.path");
       if (configPath == null || configPath.isEmpty()) {
         configPath = env("TIGEROPEN_PROPS_PATH");
@@ -40,7 +43,11 @@ public final class IntegTestConfig {
     }
 
     String envStr = System.getProperty("test.env", "PROD");
-    config.setEnv(Env.valueOf(envStr));
+    try {
+      config.setEnv(Env.valueOf(envStr.trim().toUpperCase()));
+    } catch (IllegalArgumentException e) {
+      config.setEnv(Env.PROD);
+    }
     config.isAutoGrabPermission = false;
     config.isAutoRefreshToken = false;
 
@@ -51,20 +58,22 @@ public final class IntegTestConfig {
       serverUrl = env("TIGEROPEN_SERVER_URL");
     }
     if (serverUrl == null || serverUrl.isEmpty()) {
-      // Default production gateway - needed when env vars are used without config file
-      serverUrl = "https://openapi.tigerfintech.com/gateway";
+      serverUrl = DEFAULT_SERVER_URL;
     }
     client.useCustomServerUrl(serverUrl);
-
     client.clientConfig(config);
+
+    lastConfig = config;
     return client;
   }
 
   public static String getAccount() {
-    // Priority: -Dtest.account > TIGEROPEN_ACCOUNT > config.defaultAccount
     String account = System.getProperty("test.account");
     if (account == null || account.isEmpty()) {
       account = env("TIGEROPEN_ACCOUNT");
+    }
+    if (account == null || account.isEmpty() && lastConfig != null) {
+      account = lastConfig.defaultAccount;
     }
     return account;
   }

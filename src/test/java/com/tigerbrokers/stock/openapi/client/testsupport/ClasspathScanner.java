@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** 走 CodeSource 定位再遍历目录就够了，少一个依赖少一处版本冲突。. */
+/** 走 CodeSource 定位再遍历目录就够了，少一个依赖少一处版本冲突。 */
 public final class ClasspathScanner {
 
   private ClasspathScanner() {
   }
 
-  /** 扫描指定包下可实例化的具体类。. */
+  /** 扫描指定包下可实例化的具体类。 */
   public static List<Class<?>> concreteClasses(String packageName, Class<?> superType,
       String simpleNameSuffix) {
     File packageDir = new File(classesRoot(), packageName.replace('.', '/'));

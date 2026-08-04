@@ -8,7 +8,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-/** Model 反序列化 round-trip 测试。. */
+/** Model 反序列化 round-trip 测试。 */
 public class ModelRoundTripTest {
 
   private static final String DOMAIN_PACKAGE =

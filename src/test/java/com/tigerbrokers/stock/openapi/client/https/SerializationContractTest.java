@@ -17,12 +17,12 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
-/** 只是某个字段静默为 null。这类问题只有序列化契约测试能强制拦住，而它不需要网络。. */
+/** 只是某个字段静默为 null。这类问题只有序列化契约测试能强制拦住，而它不需要网络。 */
 public class SerializationContractTest {
 
   private static final String BASE_PACKAGE = "com.tigerbrokers.stock.openapi.client.https";
 
-  /** S2 例外：服务端接收的 wire 名不是该字段的标准 snake_case 形式。. */
+  /** S2 例外：服务端接收的 wire 名不是该字段的标准 snake_case 形式。 */
   private static final Map<String, String> S2_WIRE_NAME_OVERRIDES;
 
   static {
@@ -174,7 +174,7 @@ public class SerializationContractTest {
     return false;
   }
 
-  /** camelCase 转 snake_case，连续大写按缩写处理。. */
+  /** camelCase 转 snake_case，连续大写按缩写处理。 */
   static String toSnakeCase(String camelCase) {
     StringBuilder sb = new StringBuilder(camelCase.length() + 4);
     for (int i = 0; i < camelCase.length(); i++) {

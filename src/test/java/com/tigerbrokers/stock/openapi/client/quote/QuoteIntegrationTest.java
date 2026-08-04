@@ -19,6 +19,8 @@ import org.junit.Test;
 /** Integration tests for all quote/market data APIs. */
 public class QuoteIntegrationTest {
 
+  private static final String FUTURE_CONTRACT = "CL2702";
+
   private static TigerHttpClient client;
 
   @BeforeClass
@@ -208,7 +210,7 @@ public class QuoteIntegrationTest {
 
   @Test
   public void testFutureContractByCode() {
-    TigerResponse response = client.execute(FutureContractByConCodeRequest.newRequest("CL2702"));
+    TigerResponse response = client.execute(FutureContractByConCodeRequest.newRequest(FUTURE_CONTRACT));
     assertSuccess(response, "testFutureContractByCode");
   }
 
@@ -238,25 +240,25 @@ public class QuoteIntegrationTest {
 
   @Test
   public void testFutureKline() {
-    TigerResponse response = client.execute(FutureKlineRequest.newRequest(java.util.Arrays.asList("CL2702")));
+    TigerResponse response = client.execute(FutureKlineRequest.newRequest(java.util.Arrays.asList(FUTURE_CONTRACT)));
     assertSuccess(response, "testFutureKline");
   }
 
   @Test
   public void testFutureRealTimeQuote() {
-    TigerResponse response = client.execute(FutureRealTimeQuoteRequest.newRequest(java.util.Arrays.asList("CL2702")));
+    TigerResponse response = client.execute(FutureRealTimeQuoteRequest.newRequest(java.util.Arrays.asList(FUTURE_CONTRACT)));
     assertSuccess(response, "testFutureRealTimeQuote");
   }
 
   @Test
   public void testFutureTradingDate() {
-    TigerResponse response = client.execute(FutureTradingDateRequest.newRequest("CL2702"));
+    TigerResponse response = client.execute(FutureTradingDateRequest.newRequest(FUTURE_CONTRACT));
     assertSuccess(response, "testFutureTradingDate");
   }
 
   @Test
   public void testFutureDepth() {
-    TigerResponse response = client.execute(FutureDepthRequest.newRequest(java.util.Arrays.asList("CL2702")));
+    TigerResponse response = client.execute(FutureDepthRequest.newRequest(java.util.Arrays.asList(FUTURE_CONTRACT)));
     assertSuccess(response, "testFutureDepth");
   }
 
