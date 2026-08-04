@@ -226,8 +226,7 @@ public class AllApiLogicTest {
           }
         }
       }
-    } catch (Exception e) { System.err.println("mockForRequest failed for " + req.getClass().getSimpleName() + ": " + e); }
-    // System.out.println("[mockForRequest] " + req.getClass().getSimpleName() + " dataJson.len=" + dataJson.length());
+    } catch (Exception e) { /* Response has no typed data field, use empty */ }
     mockResponse(dataJson);
   }
 
@@ -246,16 +245,25 @@ public class AllApiLogicTest {
           new com.tigerbrokers.stock.openapi.client.https.domain.ApiModel() {};
       dummy.setAccount("00000000000000000");
       setter.invoke(req, dummy);
-    } catch (Exception ignored) {
-      // setApiModel 抛 UnsupportedOperationException 或无 setter，说明不需要 model
-      // ClassCastException: AggregateAssetRequest 的已知 bug（getApiModel fallback 类型不对）
+    } catch (UnsupportedOperationException e) {
+      // Request.setApiModel() throws - this request doesn't use a model (e.g. PositionsRequest)
+    } catch (ClassCastException e) {
+      // Known issue: AggregateAssetRequest.getApiModel() has incorrect fallback type cast
+    } catch (Exception e) {
+      // InvocationTargetException wraps UnsupportedOperationException from setApiModel override
+      Throwable cause = e.getCause();
+      if (cause instanceof UnsupportedOperationException) {
+        return; // Request doesn't support model injection
+      }
+      throw new RuntimeException("ensureModelNotNull failed for " + req.getClass().getSimpleName(), e);
     }
   }
 
   @SuppressWarnings("unchecked")
   private static <T extends TigerResponse> TigerRequest<T> instantiate(Class<?> cls) {
     try { Constructor<?> c = cls.getDeclaredConstructor(); c.setAccessible(true); return (TigerRequest<T>) c.newInstance(); }
-    catch (Exception e) { return null; }
+    catch (NoSuchMethodException e) { return null; } // No default constructor - handled by Assume.assumeNotNull
+    catch (Exception e) { throw new RuntimeException("Failed to instantiate " + cls.getSimpleName(), e); }
   }
 
   // ---------- contract (2) ----------
@@ -264,7 +272,7 @@ public class AllApiLogicTest {
     TigerRequest<ContractResponse> req = instantiate(ContractRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     ContractResponse resp = client.execute(req);
     Assert.assertNotNull("ContractRequest", resp);
     Assert.assertTrue("ContractRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -274,7 +282,7 @@ public class AllApiLogicTest {
     TigerRequest<ContractsResponse> req = instantiate(ContractsRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     ContractsResponse resp = client.execute(req);
     Assert.assertNotNull("ContractsRequest", resp);
     Assert.assertTrue("ContractsRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -286,7 +294,7 @@ public class AllApiLogicTest {
     TigerRequest<CorporateDelistingResponse> req = instantiate(CorporateDelistingRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     CorporateDelistingResponse resp = client.execute(req);
     Assert.assertNotNull("CorporateDelistingRequest", resp);
     Assert.assertTrue("CorporateDelistingRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -296,7 +304,7 @@ public class AllApiLogicTest {
     TigerRequest<CorporateDividendResponse> req = instantiate(CorporateDividendRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     CorporateDividendResponse resp = client.execute(req);
     Assert.assertNotNull("CorporateDividendRequest", resp);
     Assert.assertTrue("CorporateDividendRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -306,7 +314,7 @@ public class AllApiLogicTest {
     TigerRequest<CorporateEarningResponse> req = instantiate(CorporateEarningRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     CorporateEarningResponse resp = client.execute(req);
     Assert.assertNotNull("CorporateEarningRequest", resp);
     Assert.assertTrue("CorporateEarningRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -316,7 +324,7 @@ public class AllApiLogicTest {
     TigerRequest<CorporateIpoResponse> req = instantiate(CorporateIpoRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     CorporateIpoResponse resp = client.execute(req);
     Assert.assertNotNull("CorporateIpoRequest", resp);
     Assert.assertTrue("CorporateIpoRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -326,7 +334,7 @@ public class AllApiLogicTest {
     TigerRequest<CorporateSplitResponse> req = instantiate(CorporateSplitRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     CorporateSplitResponse resp = client.execute(req);
     Assert.assertNotNull("CorporateSplitRequest", resp);
     Assert.assertTrue("CorporateSplitRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -336,7 +344,7 @@ public class AllApiLogicTest {
     TigerRequest<CorporateSymbolChangeResponse> req = instantiate(CorporateSymbolChangeRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     CorporateSymbolChangeResponse resp = client.execute(req);
     Assert.assertNotNull("CorporateSymbolChangeRequest", resp);
     Assert.assertTrue("CorporateSymbolChangeRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -346,7 +354,7 @@ public class AllApiLogicTest {
     TigerRequest<FinancialCurrencyResponse> req = instantiate(FinancialCurrencyRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FinancialCurrencyResponse resp = client.execute(req);
     Assert.assertNotNull("FinancialCurrencyRequest", resp);
     Assert.assertTrue("FinancialCurrencyRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -356,7 +364,7 @@ public class AllApiLogicTest {
     TigerRequest<FinancialDailyResponse> req = instantiate(FinancialDailyRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FinancialDailyResponse resp = client.execute(req);
     Assert.assertNotNull("FinancialDailyRequest", resp);
     Assert.assertTrue("FinancialDailyRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -366,7 +374,7 @@ public class AllApiLogicTest {
     TigerRequest<FinancialExchangeRateResponse> req = instantiate(FinancialExchangeRateRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FinancialExchangeRateResponse resp = client.execute(req);
     Assert.assertNotNull("FinancialExchangeRateRequest", resp);
     Assert.assertTrue("FinancialExchangeRateRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -376,7 +384,7 @@ public class AllApiLogicTest {
     TigerRequest<FinancialReportResponse> req = instantiate(FinancialReportRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FinancialReportResponse resp = client.execute(req);
     Assert.assertNotNull("FinancialReportRequest", resp);
     Assert.assertTrue("FinancialReportRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -388,7 +396,7 @@ public class AllApiLogicTest {
     TigerRequest<FundContractsResponse> req = instantiate(FundContractsRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FundContractsResponse resp = client.execute(req);
     Assert.assertNotNull("FundContractsRequest", resp);
     Assert.assertTrue("FundContractsRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -398,7 +406,7 @@ public class AllApiLogicTest {
     TigerRequest<FundHistoryQuoteResponse> req = instantiate(FundHistoryQuoteRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FundHistoryQuoteResponse resp = client.execute(req);
     Assert.assertNotNull("FundHistoryQuoteRequest", resp);
     Assert.assertTrue("FundHistoryQuoteRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -408,7 +416,7 @@ public class AllApiLogicTest {
     TigerRequest<FundQuoteResponse> req = instantiate(FundQuoteRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FundQuoteResponse resp = client.execute(req);
     Assert.assertNotNull("FundQuoteRequest", resp);
     Assert.assertTrue("FundQuoteRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -418,7 +426,7 @@ public class AllApiLogicTest {
     TigerRequest<FundSymbolResponse> req = instantiate(FundSymbolRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FundSymbolResponse resp = client.execute(req);
     Assert.assertNotNull("FundSymbolRequest", resp);
     Assert.assertTrue("FundSymbolRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -430,7 +438,7 @@ public class AllApiLogicTest {
     TigerRequest<FutureContractResponse> req = instantiate(FutureContinuousContractRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FutureContractResponse resp = client.execute(req);
     Assert.assertNotNull("FutureContinuousContractRequest", resp);
     Assert.assertTrue("FutureContinuousContractRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -440,7 +448,7 @@ public class AllApiLogicTest {
     TigerRequest<FutureContractResponse> req = instantiate(FutureContractByConCodeRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FutureContractResponse resp = client.execute(req);
     Assert.assertNotNull("FutureContractByConCodeRequest", resp);
     Assert.assertTrue("FutureContractByConCodeRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -450,7 +458,7 @@ public class AllApiLogicTest {
     TigerRequest<FutureBatchContractResponse> req = instantiate(FutureContractByExchCodeRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FutureBatchContractResponse resp = client.execute(req);
     Assert.assertNotNull("FutureContractByExchCodeRequest", resp);
     Assert.assertTrue("FutureContractByExchCodeRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -460,7 +468,7 @@ public class AllApiLogicTest {
     TigerRequest<FutureContractsResponse> req = instantiate(FutureContractsRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FutureContractsResponse resp = client.execute(req);
     Assert.assertNotNull("FutureContractsRequest", resp);
     Assert.assertTrue("FutureContractsRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -470,7 +478,7 @@ public class AllApiLogicTest {
     TigerRequest<FutureContractResponse> req = instantiate(FutureCurrentContractRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FutureContractResponse resp = client.execute(req);
     Assert.assertNotNull("FutureCurrentContractRequest", resp);
     Assert.assertTrue("FutureCurrentContractRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -480,7 +488,7 @@ public class AllApiLogicTest {
     TigerRequest<FutureDepthResponse> req = instantiate(FutureDepthRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FutureDepthResponse resp = client.execute(req);
     Assert.assertNotNull("FutureDepthRequest", resp);
     Assert.assertTrue("FutureDepthRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -490,7 +498,7 @@ public class AllApiLogicTest {
     TigerRequest<FutureExchangeResponse> req = instantiate(FutureExchangeRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FutureExchangeResponse resp = client.execute(req);
     Assert.assertNotNull("FutureExchangeRequest", resp);
     Assert.assertTrue("FutureExchangeRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -500,7 +508,7 @@ public class AllApiLogicTest {
     TigerRequest<FutureHistoryMainContractResponse> req = instantiate(FutureHistoryMainContractRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FutureHistoryMainContractResponse resp = client.execute(req);
     Assert.assertNotNull("FutureHistoryMainContractRequest", resp);
     Assert.assertTrue("FutureHistoryMainContractRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -510,7 +518,7 @@ public class AllApiLogicTest {
     TigerRequest<FutureKlineResponse> req = instantiate(FutureKlineRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FutureKlineResponse resp = client.execute(req);
     Assert.assertNotNull("FutureKlineRequest", resp);
     Assert.assertTrue("FutureKlineRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -520,7 +528,7 @@ public class AllApiLogicTest {
     TigerRequest<FutureRealTimeQuoteResponse> req = instantiate(FutureRealTimeQuoteRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FutureRealTimeQuoteResponse resp = client.execute(req);
     Assert.assertNotNull("FutureRealTimeQuoteRequest", resp);
     Assert.assertTrue("FutureRealTimeQuoteRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -530,7 +538,7 @@ public class AllApiLogicTest {
     TigerRequest<FutureTickResponse> req = instantiate(FutureTickRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FutureTickResponse resp = client.execute(req);
     Assert.assertNotNull("FutureTickRequest", resp);
     Assert.assertTrue("FutureTickRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -540,7 +548,7 @@ public class AllApiLogicTest {
     TigerRequest<FutureTradingDateResponse> req = instantiate(FutureTradingDateRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FutureTradingDateResponse resp = client.execute(req);
     Assert.assertNotNull("FutureTradingDateRequest", resp);
     Assert.assertTrue("FutureTradingDateRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -552,7 +560,7 @@ public class AllApiLogicTest {
     TigerRequest<OptionAnalysisResponse> req = instantiate(OptionAnalysisRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     OptionAnalysisResponse resp = client.execute(req);
     Assert.assertNotNull("OptionAnalysisRequest", resp);
     Assert.assertTrue("OptionAnalysisRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -562,7 +570,7 @@ public class AllApiLogicTest {
     TigerRequest<OptionBriefResponse> req = instantiate(OptionBriefQueryRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     OptionBriefResponse resp = client.execute(req);
     Assert.assertNotNull("OptionBriefQueryRequest", resp);
     Assert.assertTrue("OptionBriefQueryRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -572,7 +580,7 @@ public class AllApiLogicTest {
     TigerRequest<OptionBriefResponse> req = instantiate(OptionBriefQueryV2Request.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     OptionBriefResponse resp = client.execute(req);
     Assert.assertNotNull("OptionBriefQueryV2Request", resp);
     Assert.assertTrue("OptionBriefQueryV2Request code=" + resp.getCode(), resp.getCode() >= 0);
@@ -582,7 +590,7 @@ public class AllApiLogicTest {
     TigerRequest<OptionChainResponse> req = instantiate(OptionChainQueryRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     OptionChainResponse resp = client.execute(req);
     Assert.assertNotNull("OptionChainQueryRequest", resp);
     Assert.assertTrue("OptionChainQueryRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -592,7 +600,7 @@ public class AllApiLogicTest {
     TigerRequest<OptionDepthResponse> req = instantiate(OptionDepthQueryRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     OptionDepthResponse resp = client.execute(req);
     Assert.assertNotNull("OptionDepthQueryRequest", resp);
     Assert.assertTrue("OptionDepthQueryRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -602,7 +610,7 @@ public class AllApiLogicTest {
     TigerRequest<OptionExpirationResponse> req = instantiate(OptionExpirationQueryRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     OptionExpirationResponse resp = client.execute(req);
     Assert.assertNotNull("OptionExpirationQueryRequest", resp);
     Assert.assertTrue("OptionExpirationQueryRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -612,7 +620,7 @@ public class AllApiLogicTest {
     TigerRequest<OptionKlineResponse> req = instantiate(OptionKlineQueryRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     OptionKlineResponse resp = client.execute(req);
     Assert.assertNotNull("OptionKlineQueryRequest", resp);
     Assert.assertTrue("OptionKlineQueryRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -622,7 +630,7 @@ public class AllApiLogicTest {
     TigerRequest<OptionKlineResponse> req = instantiate(OptionKlineQueryV2Request.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     OptionKlineResponse resp = client.execute(req);
     Assert.assertNotNull("OptionKlineQueryV2Request", resp);
     Assert.assertTrue("OptionKlineQueryV2Request code=" + resp.getCode(), resp.getCode() >= 0);
@@ -632,7 +640,7 @@ public class AllApiLogicTest {
     TigerRequest<OptionSymbolResponse> req = instantiate(OptionSymbolRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     OptionSymbolResponse resp = client.execute(req);
     Assert.assertNotNull("OptionSymbolRequest", resp);
     Assert.assertTrue("OptionSymbolRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -642,7 +650,7 @@ public class AllApiLogicTest {
     TigerRequest<OptionTimelineResponse> req = instantiate(OptionTimelineRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     OptionTimelineResponse resp = client.execute(req);
     Assert.assertNotNull("OptionTimelineRequest", resp);
     Assert.assertTrue("OptionTimelineRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -652,7 +660,7 @@ public class AllApiLogicTest {
     TigerRequest<OptionTradeTickResponse> req = instantiate(OptionTradeTickQueryRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     OptionTradeTickResponse resp = client.execute(req);
     Assert.assertNotNull("OptionTradeTickQueryRequest", resp);
     Assert.assertTrue("OptionTradeTickQueryRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -664,7 +672,7 @@ public class AllApiLogicTest {
     TigerRequest<KlineQuotaResponse> req = instantiate(KlineQuotaRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     KlineQuotaResponse resp = client.execute(req);
     Assert.assertNotNull("KlineQuotaRequest", resp);
     Assert.assertTrue("KlineQuotaRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -674,7 +682,7 @@ public class AllApiLogicTest {
     TigerRequest<MarketScannerResponse> req = instantiate(MarketScannerRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     MarketScannerResponse resp = client.execute(req);
     Assert.assertNotNull("MarketScannerRequest", resp);
     Assert.assertTrue("MarketScannerRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -684,7 +692,7 @@ public class AllApiLogicTest {
     TigerRequest<MarketScannerTagsResponse> req = instantiate(MarketScannerTagsRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     MarketScannerTagsResponse resp = client.execute(req);
     Assert.assertNotNull("MarketScannerTagsRequest", resp);
     Assert.assertTrue("MarketScannerTagsRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -694,7 +702,7 @@ public class AllApiLogicTest {
     TigerRequest<QuoteBrokerHoldResponse> req = instantiate(QuoteBrokerHoldRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     QuoteBrokerHoldResponse resp = client.execute(req);
     Assert.assertNotNull("QuoteBrokerHoldRequest", resp);
     Assert.assertTrue("QuoteBrokerHoldRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -704,7 +712,7 @@ public class AllApiLogicTest {
     TigerRequest<QuoteCapitalDistributionResponse> req = instantiate(QuoteCapitalDistributionRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     QuoteCapitalDistributionResponse resp = client.execute(req);
     Assert.assertNotNull("QuoteCapitalDistributionRequest", resp);
     Assert.assertTrue("QuoteCapitalDistributionRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -714,7 +722,7 @@ public class AllApiLogicTest {
     TigerRequest<QuoteCapitalFlowResponse> req = instantiate(QuoteCapitalFlowRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     QuoteCapitalFlowResponse resp = client.execute(req);
     Assert.assertNotNull("QuoteCapitalFlowRequest", resp);
     Assert.assertTrue("QuoteCapitalFlowRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -724,7 +732,7 @@ public class AllApiLogicTest {
     TigerRequest<QuoteContractResponse> req = instantiate(QuoteContractRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     QuoteContractResponse resp = client.execute(req);
     Assert.assertNotNull("QuoteContractRequest", resp);
     Assert.assertTrue("QuoteContractRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -734,7 +742,7 @@ public class AllApiLogicTest {
     TigerRequest<QuoteDelayResponse> req = instantiate(QuoteDelayRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     QuoteDelayResponse resp = client.execute(req);
     Assert.assertNotNull("QuoteDelayRequest", resp);
     Assert.assertTrue("QuoteDelayRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -744,7 +752,7 @@ public class AllApiLogicTest {
     TigerRequest<QuoteDepthResponse> req = instantiate(QuoteDepthRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     QuoteDepthResponse resp = client.execute(req);
     Assert.assertNotNull("QuoteDepthRequest", resp);
     Assert.assertTrue("QuoteDepthRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -754,7 +762,7 @@ public class AllApiLogicTest {
     TigerRequest<QuoteHistoryTimelineResponse> req = instantiate(QuoteHistoryTimelineRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     QuoteHistoryTimelineResponse resp = client.execute(req);
     Assert.assertNotNull("QuoteHistoryTimelineRequest", resp);
     Assert.assertTrue("QuoteHistoryTimelineRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -764,7 +772,7 @@ public class AllApiLogicTest {
     TigerRequest<QuoteOvernightResponse> req = instantiate(QuoteOvernightRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     QuoteOvernightResponse resp = client.execute(req);
     Assert.assertNotNull("QuoteOvernightRequest", resp);
     Assert.assertTrue("QuoteOvernightRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -774,7 +782,7 @@ public class AllApiLogicTest {
     TigerRequest<QuoteRealTimeQuoteResponse> req = instantiate(QuoteRealTimeQuoteRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     QuoteRealTimeQuoteResponse resp = client.execute(req);
     Assert.assertNotNull("QuoteRealTimeQuoteRequest", resp);
     Assert.assertTrue("QuoteRealTimeQuoteRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -784,7 +792,7 @@ public class AllApiLogicTest {
     TigerRequest<QuoteShortableStockResponse> req = instantiate(QuoteShortableStockRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     QuoteShortableStockResponse resp = client.execute(req);
     Assert.assertNotNull("QuoteShortableStockRequest", resp);
     Assert.assertTrue("QuoteShortableStockRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -794,7 +802,7 @@ public class AllApiLogicTest {
     TigerRequest<QuoteStockBrokerResponse> req = instantiate(QuoteStockBrokerRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     QuoteStockBrokerResponse resp = client.execute(req);
     Assert.assertNotNull("QuoteStockBrokerRequest", resp);
     Assert.assertTrue("QuoteStockBrokerRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -804,7 +812,7 @@ public class AllApiLogicTest {
     TigerRequest<QuoteStockFundamentalResponse> req = instantiate(QuoteStockFundamentalRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     QuoteStockFundamentalResponse resp = client.execute(req);
     Assert.assertNotNull("QuoteStockFundamentalRequest", resp);
     Assert.assertTrue("QuoteStockFundamentalRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -814,7 +822,7 @@ public class AllApiLogicTest {
     TigerRequest<QuoteTimelineResponse> req = instantiate(QuoteTimelineRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     QuoteTimelineResponse resp = client.execute(req);
     Assert.assertNotNull("QuoteTimelineRequest", resp);
     Assert.assertTrue("QuoteTimelineRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -824,7 +832,7 @@ public class AllApiLogicTest {
     TigerRequest<QuoteTradeCalendarResponse> req = instantiate(QuoteTradeCalendarRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     QuoteTradeCalendarResponse resp = client.execute(req);
     Assert.assertNotNull("QuoteTradeCalendarRequest", resp);
     Assert.assertTrue("QuoteTradeCalendarRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -834,7 +842,7 @@ public class AllApiLogicTest {
     TigerRequest<QuoteTradeRankResponse> req = instantiate(QuoteTradeRankRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     QuoteTradeRankResponse resp = client.execute(req);
     Assert.assertNotNull("QuoteTradeRankRequest", resp);
     Assert.assertTrue("QuoteTradeRankRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -844,7 +852,7 @@ public class AllApiLogicTest {
     TigerRequest<QuoteTradeTickResponse> req = instantiate(QuoteTradeTickRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     QuoteTradeTickResponse resp = client.execute(req);
     Assert.assertNotNull("QuoteTradeTickRequest", resp);
     Assert.assertTrue("QuoteTradeTickRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -856,7 +864,7 @@ public class AllApiLogicTest {
     TigerRequest<AggregateAssetResponse> req = instantiate(AggregateAssetRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     AggregateAssetResponse resp = client.execute(req);
     Assert.assertNotNull("AggregateAssetRequest", resp);
     Assert.assertTrue("AggregateAssetRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -866,7 +874,7 @@ public class AllApiLogicTest {
     TigerRequest<DepositWithdrawResponse> req = instantiate(DepositWithdrawRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     DepositWithdrawResponse resp = client.execute(req);
     Assert.assertNotNull("DepositWithdrawRequest", resp);
     Assert.assertTrue("DepositWithdrawRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -876,7 +884,7 @@ public class AllApiLogicTest {
     TigerRequest<EstimateTradableQuantityResponse> req = instantiate(EstimateTradableQuantityRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     EstimateTradableQuantityResponse resp = client.execute(req);
     Assert.assertNotNull("EstimateTradableQuantityRequest", resp);
     Assert.assertTrue("EstimateTradableQuantityRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -886,7 +894,7 @@ public class AllApiLogicTest {
     TigerRequest<ForexTradeOrderResponse> req = instantiate(ForexTradeOrderRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     ForexTradeOrderResponse resp = client.execute(req);
     Assert.assertNotNull("ForexTradeOrderRequest", resp);
     Assert.assertTrue("ForexTradeOrderRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -896,7 +904,7 @@ public class AllApiLogicTest {
     TigerRequest<FundDetailsResponse> req = instantiate(FundDetailsRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     FundDetailsResponse resp = client.execute(req);
     Assert.assertNotNull("FundDetailsRequest", resp);
     Assert.assertTrue("FundDetailsRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -906,7 +914,7 @@ public class AllApiLogicTest {
     TigerRequest<OptionExerciseCancelResponse> req = instantiate(OptionExerciseCancelRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     OptionExerciseCancelResponse resp = client.execute(req);
     Assert.assertNotNull("OptionExerciseCancelRequest", resp);
     Assert.assertTrue("OptionExerciseCancelRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -916,7 +924,7 @@ public class AllApiLogicTest {
     TigerRequest<OptionExerciseCheckResponse> req = instantiate(OptionExerciseCheckRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     OptionExerciseCheckResponse resp = client.execute(req);
     Assert.assertNotNull("OptionExerciseCheckRequest", resp);
     Assert.assertTrue("OptionExerciseCheckRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -926,7 +934,7 @@ public class AllApiLogicTest {
     TigerRequest<OptionExercisePositionResponse> req = instantiate(OptionExercisePositionRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     OptionExercisePositionResponse resp = client.execute(req);
     Assert.assertNotNull("OptionExercisePositionRequest", resp);
     Assert.assertTrue("OptionExercisePositionRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -936,7 +944,7 @@ public class AllApiLogicTest {
     TigerRequest<OptionExerciseRecordResponse> req = instantiate(OptionExerciseRecordRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     OptionExerciseRecordResponse resp = client.execute(req);
     Assert.assertNotNull("OptionExerciseRecordRequest", resp);
     Assert.assertTrue("OptionExerciseRecordRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -946,7 +954,7 @@ public class AllApiLogicTest {
     TigerRequest<OptionExerciseSubmitResponse> req = instantiate(OptionExerciseSubmitRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     OptionExerciseSubmitResponse resp = client.execute(req);
     Assert.assertNotNull("OptionExerciseSubmitRequest", resp);
     Assert.assertTrue("OptionExerciseSubmitRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -956,7 +964,7 @@ public class AllApiLogicTest {
     TigerRequest<PositionTransferDetailResponse> req = instantiate(PositionTransferDetailRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     PositionTransferDetailResponse resp = client.execute(req);
     Assert.assertNotNull("PositionTransferDetailRequest", resp);
     Assert.assertTrue("PositionTransferDetailRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -966,7 +974,7 @@ public class AllApiLogicTest {
     TigerRequest<PositionTransferExternalRecordsResponse> req = instantiate(PositionTransferExternalRecordsRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     PositionTransferExternalRecordsResponse resp = client.execute(req);
     Assert.assertNotNull("PositionTransferExternalRecordsRequest", resp);
     Assert.assertTrue("PositionTransferExternalRecordsRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -976,7 +984,7 @@ public class AllApiLogicTest {
     TigerRequest<PositionTransferRecordsResponse> req = instantiate(PositionTransferRecordsRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     PositionTransferRecordsResponse resp = client.execute(req);
     Assert.assertNotNull("PositionTransferRecordsRequest", resp);
     Assert.assertTrue("PositionTransferRecordsRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -986,7 +994,7 @@ public class AllApiLogicTest {
     TigerRequest<PositionTransferResponse> req = instantiate(PositionTransferRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     PositionTransferResponse resp = client.execute(req);
     Assert.assertNotNull("PositionTransferRequest", resp);
     Assert.assertTrue("PositionTransferRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -996,7 +1004,7 @@ public class AllApiLogicTest {
     TigerRequest<PositionsResponse> req = instantiate(PositionsRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     PositionsResponse resp = client.execute(req);
     Assert.assertNotNull("PositionsRequest", resp);
     Assert.assertTrue("PositionsRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -1006,7 +1014,7 @@ public class AllApiLogicTest {
     TigerRequest<PrimeAnalyticsAssetResponse> req = instantiate(PrimeAnalyticsAssetRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     PrimeAnalyticsAssetResponse resp = client.execute(req);
     Assert.assertNotNull("PrimeAnalyticsAssetRequest", resp);
     Assert.assertTrue("PrimeAnalyticsAssetRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -1016,7 +1024,7 @@ public class AllApiLogicTest {
     TigerRequest<PrimeAssetResponse> req = instantiate(PrimeAssetRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     PrimeAssetResponse resp = client.execute(req);
     Assert.assertNotNull("PrimeAssetRequest", resp);
     Assert.assertTrue("PrimeAssetRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -1026,7 +1034,7 @@ public class AllApiLogicTest {
     TigerRequest<BatchOrderResponse> req = instantiate(QueryOrderRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     BatchOrderResponse resp = client.execute(req);
     Assert.assertNotNull("QueryOrderRequest", resp);
     Assert.assertTrue("QueryOrderRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -1036,7 +1044,7 @@ public class AllApiLogicTest {
     TigerRequest<SingleOrderResponse> req = instantiate(QuerySingleOrderRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     SingleOrderResponse resp = client.execute(req);
     Assert.assertNotNull("QuerySingleOrderRequest", resp);
     Assert.assertTrue("QuerySingleOrderRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -1046,7 +1054,7 @@ public class AllApiLogicTest {
     TigerRequest<SegmentFundAvailableResponse> req = instantiate(SegmentFundAvailableRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     SegmentFundAvailableResponse resp = client.execute(req);
     Assert.assertNotNull("SegmentFundAvailableRequest", resp);
     Assert.assertTrue("SegmentFundAvailableRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -1056,7 +1064,7 @@ public class AllApiLogicTest {
     TigerRequest<SegmentFundResponse> req = instantiate(SegmentFundCancelRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     SegmentFundResponse resp = client.execute(req);
     Assert.assertNotNull("SegmentFundCancelRequest", resp);
     Assert.assertTrue("SegmentFundCancelRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -1066,7 +1074,7 @@ public class AllApiLogicTest {
     TigerRequest<SegmentFundsResponse> req = instantiate(SegmentFundHistoryRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     SegmentFundsResponse resp = client.execute(req);
     Assert.assertNotNull("SegmentFundHistoryRequest", resp);
     Assert.assertTrue("SegmentFundHistoryRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -1076,7 +1084,7 @@ public class AllApiLogicTest {
     TigerRequest<SegmentFundResponse> req = instantiate(SegmentFundTransferRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     SegmentFundResponse resp = client.execute(req);
     Assert.assertNotNull("SegmentFundTransferRequest", resp);
     Assert.assertTrue("SegmentFundTransferRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -1086,7 +1094,7 @@ public class AllApiLogicTest {
     TigerRequest<TradeOrderPreviewResponse> req = instantiate(TradeOrderPreviewRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     TradeOrderPreviewResponse resp = client.execute(req);
     Assert.assertNotNull("TradeOrderPreviewRequest", resp);
     Assert.assertTrue("TradeOrderPreviewRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -1096,7 +1104,7 @@ public class AllApiLogicTest {
     TigerRequest<TradeOrderResponse> req = instantiate(TradeOrderRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     TradeOrderResponse resp = client.execute(req);
     Assert.assertNotNull("TradeOrderRequest", resp);
     Assert.assertTrue("TradeOrderRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -1108,7 +1116,7 @@ public class AllApiLogicTest {
     TigerRequest<AddonEntitlementResponse> req = instantiate(AddonEntitlementRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     AddonEntitlementResponse resp = client.execute(req);
     Assert.assertNotNull("AddonEntitlementRequest", resp);
     Assert.assertTrue("AddonEntitlementRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -1118,7 +1126,7 @@ public class AllApiLogicTest {
     TigerRequest<UserLicenseResponse> req = instantiate(UserLicenseRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     UserLicenseResponse resp = client.execute(req);
     Assert.assertNotNull("UserLicenseRequest", resp);
     Assert.assertTrue("UserLicenseRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -1128,7 +1136,7 @@ public class AllApiLogicTest {
     TigerRequest<UserLoginResponse> req = instantiate(UserLoginRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     UserLoginResponse resp = client.execute(req);
     Assert.assertNotNull("UserLoginRequest", resp);
     Assert.assertTrue("UserLoginRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -1138,7 +1146,7 @@ public class AllApiLogicTest {
     TigerRequest<UserTokenResponse> req = instantiate(UserTokenRefreshRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     UserTokenResponse resp = client.execute(req);
     Assert.assertNotNull("UserTokenRefreshRequest", resp);
     Assert.assertTrue("UserTokenRefreshRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -1148,7 +1156,7 @@ public class AllApiLogicTest {
     TigerRequest<UserTradePasswordResetResponse> req = instantiate(UserTradePasswordResetRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     UserTradePasswordResetResponse resp = client.execute(req);
     Assert.assertNotNull("UserTradePasswordResetRequest", resp);
     Assert.assertTrue("UserTradePasswordResetRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -1158,7 +1166,7 @@ public class AllApiLogicTest {
     TigerRequest<UserTradePasswordVerifyResponse> req = instantiate(UserTradePasswordVerifyRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     UserTradePasswordVerifyResponse resp = client.execute(req);
     Assert.assertNotNull("UserTradePasswordVerifyRequest", resp);
     Assert.assertTrue("UserTradePasswordVerifyRequest code=" + resp.getCode(), resp.getCode() >= 0);
@@ -1168,7 +1176,7 @@ public class AllApiLogicTest {
     TigerRequest<UserTradeTokenResponse> req = instantiate(UserTradeTokenRequest.class);
     Assume.assumeNotNull(req);
     ensureModelNotNull(req);
-    mockForRequest(req); // debug: System.out.println(req.getClass().getSimpleName() + " -> data=" + (req.getResponseClass() != null ? "yes" : "no"));
+    mockForRequest(req);
     UserTradeTokenResponse resp = client.execute(req);
     Assert.assertNotNull("UserTradeTokenRequest", resp);
     Assert.assertTrue("UserTradeTokenRequest code=" + resp.getCode(), resp.getCode() >= 0);
