@@ -1,10 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.option.model;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
 
 
 public class OptionTimelineModel extends OptionCommonModel {
 
+  @JSONField(name = "begin_time")
   private Long beginTime;
 
   public OptionTimelineModel() {

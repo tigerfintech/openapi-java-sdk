@@ -16,9 +16,12 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.PriceType;
 import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
 import com.tigerbrokers.stock.openapi.client.util.builder.AccountParamBuilder;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+
+import com.tigerbrokers.stock.openapi.client.testsupport.WriteApi;
 
 /**
  * Integration tests for iceberg order APIs (place / modify / cancel / query).
@@ -28,7 +31,8 @@ import org.junit.Test;
  *   -Dtest.server.url=<gateway url>  (optional)
  *   -Dtest.env=PROD|TEST            (optional, default TEST)
  */
-@Ignore("Integration test — requires live config, run manually")
+// 全部用例都会真实下单 / 改单 / 撤单
+@Category(WriteApi.class)
 public class IcebergOrderIntegrationTest {
 
   private static String account;
@@ -36,6 +40,10 @@ public class IcebergOrderIntegrationTest {
 
   @BeforeClass
   public static void setUpClass() {
+    // 集成测试门控：默认跳过，CI 与本地都靠 -Dtest.integ=true 显式开启。
+    // 用 Assume 而不是类级 @Ignore，@Ignore 是硬编码的，没法按环境启用。
+    Assume.assumeTrue("integration test; enable with -Dtest.integ=true",
+        Boolean.getBoolean("test.integ"));
     String configPath = System.getProperty("test.config.path");
     Assert.assertNotNull("set -Dtest.config.path=<config dir>", configPath);
 

@@ -13,9 +13,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+
+import com.tigerbrokers.stock.openapi.client.testsupport.ReadOnlyApi;
 
 /**
  * Integration test for SYMBOL_CHANGE corporate action type.
@@ -25,13 +28,17 @@ import org.junit.Test;
  *   -Dtest.server.url=<server url>/gateway
  */
 
-@Ignore("Integration test — run manually with -Dtest.config.path and -Dtest.server.url")
+@Category(ReadOnlyApi.class)
 public class CorporateSymbolChangeIntegrationTest {
 
   private static TigerHttpClient client;
 
   @BeforeClass
   public static void setUp() throws Exception {
+    // 集成测试门控：默认跳过，CI 与本地都靠 -Dtest.integ=true 显式开启。
+    // 用 Assume 而不是类级 @Ignore，@Ignore 是硬编码的，没法按环境启用。
+    Assume.assumeTrue("integration test; enable with -Dtest.integ=true",
+        Boolean.getBoolean("test.integ"));
     String configPath = System.getProperty("test.config.path");
     Assert.assertNotNull("set -Dtest.config.path=<config dir path>", configPath);
     // configFilePath expects a directory; SDK will look for tiger_openapi_config.properties inside it

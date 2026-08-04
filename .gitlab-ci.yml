@@ -1,0 +1,103 @@
+# 测试分层与 Python SDK 口径一致，三个 stage 对应三层：
+#
+#   unit        L1  零凭据、零网络，每次 push 必跑，红了就阻断
+#   contract    L2  真实接口只读，断言字段与类型，红了也阻断
+#   integ       L3  真实接口写操作，手动触发，允许失败
+#
+# unit stage 故意不注入任何凭据变量。这是强制 L1 与凭据解耦的机制：
+# 谁写了依赖凭据或网络的单测，这个 job 会立刻红。
+#
+# 分层由 pom 的 surefire / failsafe 划分：
+#   surefire 只收 **/*Test.java 并排除 **/*IntegrationTest.java  -> mvn test
+#   failsafe 只收 **/*IntegrationTest.java                        -> failsafe goal
+# 集成测试类另有 Assume 门控，必须显式 -Dtest.integ=true 才会真正执行。
+#
+# contract / integ 的凭据来自 GitLab CI Variables（Protected + Masked），
+# 由 runner 落到受控目录后用 -Dtest.config.path 传入，不进仓库、不进日志。
+
+stages:
+  - unit
+  - contract
+  - integ
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
+  MAVEN_CLI_OPTS: "--batch-mode --no-transfer-progress"
+
+.maven_base:
+  image: maven:3.8-eclipse-temurin-8
+  cache:
+    key: maven-repo
+    paths:
+      - .m2/repository
+
+unit:java:
+  extends: .maven_base
+  stage: unit
+  script:
+    - mvn $MAVEN_CLI_OPTS test
+    # jacoco 没有控制台 reporter，从 csv 汇总一行给 GitLab 抓覆盖率
+    - awk -F, 'NR>1 {miss+=$8; cov+=$9} END {printf "Total line coverage: %.1f%%\n", cov*100/(cov+miss)}'
+      target/site/jacoco/jacoco.csv
+  coverage: '/Total line coverage: ([0-9.]+)%/'
+  artifacts:
+    when: always
+    paths:
+      - target/site/jacoco/
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
+    expire_in: 1 week
+
+# 读写分离靠 JUnit Category：
+#   ReadOnlyApi -> L2，只读，每次 push 跑
+#   WriteApi    -> L3，下单 / 撤单 / 行权，只手动触发
+# OptionExerciseIntegrationTest 是混合类（类上 ReadOnlyApi，写用例上 WriteApi），
+# 所以 contract job 除了选 ReadOnlyApi 还要显式排掉 WriteApi。
+.integ_vars: &integ_vars
+  READ_ONLY_GROUP: "com.tigerbrokers.stock.openapi.client.testsupport.ReadOnlyApi"
+  WRITE_GROUP: "com.tigerbrokers.stock.openapi.client.testsupport.WriteApi"
+
+# 集成测试的凭据：CI runner 上已有配置目录（含 tiger_openapi_config.properties），
+# 通过 TIGEROPEN_PROPS_PATH 指向它（与 Python SDK 统一）。文件里的 tiger_id /
+# private_key / account 会被 ConfigFileUtil 自动加载到 ClientConfig。
+#
+# 只跑集成测试的 goal，不走完整 verify 生命周期 —— pom 里 maven-gpg-plugin 绑在
+# verify 阶段，走 verify 会要求 GPG 私钥，而 CI 跑测试不该依赖发布用的密钥。
+
+contract:java:
+  extends: .maven_base
+  stage: contract
+  tags:
+    - sdk-integ
+  variables:
+    <<: *integ_vars
+  script:
+    - mvn $MAVEN_CLI_OPTS test-compile
+    - mvn $MAVEN_CLI_OPTS failsafe:integration-test failsafe:verify
+      -Dtest.integ=true
+      -Dgroups="$READ_ONLY_GROUP"
+      -DexcludedGroups="$WRITE_GROUP"
+      -Dtest.config.path="$TIGEROPEN_PROPS_PATH"
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - target/failsafe-reports/TEST-*.xml
+    expire_in: 1 week
+
+integ:java:
+  extends: .maven_base
+  stage: integ
+  tags:
+    - sdk-integ
+  when: manual
+  allow_failure: true
+  variables:
+    <<: *integ_vars
+  script:
+    - mvn $MAVEN_CLI_OPTS test-compile
+    - mvn $MAVEN_CLI_OPTS failsafe:integration-test failsafe:verify
+      -Dtest.integ=true
+      -Dgroups="$WRITE_GROUP"
+      -Dtest.config.path="$TIGEROPEN_PROPS_PATH"

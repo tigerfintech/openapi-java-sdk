@@ -18,9 +18,13 @@ import com.tigerbrokers.stock.openapi.client.https.response.trade.OptionExercise
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OptionExerciseType;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+
+import com.tigerbrokers.stock.openapi.client.testsupport.ReadOnlyApi;
+import com.tigerbrokers.stock.openapi.client.testsupport.WriteApi;
 
 /**
  * Integration tests for option exercise APIs.
@@ -31,7 +35,9 @@ import org.junit.Test;
  *   -Dtest.contract.id=<exercisable contract id>
  *   -Dtest.server.url=<gateway url>  (optional)
  */
-@Ignore("Integration test — requires live config, run manually")
+// 类上标只读，唯一涉及写操作的 testSubmitAndCancelExercise 单独标 WriteApi。
+// contract job 用 -DexcludedGroups=...WriteApi 把它排掉，避免每次 push 都真实提交行权。
+@Category(ReadOnlyApi.class)
 public class OptionExerciseIntegrationTest {
 
   private static String account;
@@ -40,15 +46,12 @@ public class OptionExerciseIntegrationTest {
 
   @BeforeClass
   public static void setUpClass() {
+    // 集成测试门控：默认跳过，CI 与本地都靠 -Dtest.integ=true 显式开启。
+    // 用 Assume 而不是类级 @Ignore，@Ignore 是硬编码的，没法按环境启用。
+    Assume.assumeTrue("integration test; enable with -Dtest.integ=true",
+        Boolean.getBoolean("test.integ"));
     String configPath = System.getProperty("test.config.path");
     Assert.assertNotNull("set -Dtest.config.path=<config dir>", configPath);
-
-    account = System.getProperty("test.account");
-    Assert.assertNotNull("set -Dtest.account=<trade account>", account);
-
-    String contractIdStr = System.getProperty("test.contract.id");
-    Assert.assertNotNull("set -Dtest.contract.id=<contract id>", contractIdStr);
-    contractId = Long.parseLong(contractIdStr);
 
     String serverUrl = System.getProperty("test.server.url", "");
 
@@ -61,6 +64,19 @@ public class OptionExerciseIntegrationTest {
       client.useCustomServerUrl(serverUrl);
     }
     client.clientConfig(config);
+
+    // account: 优先 -Dtest.account，没有就用 config 里加载的 defaultAccount
+    account = System.getProperty("test.account");
+    if (account == null || account.isEmpty()) {
+      account = config.defaultAccount;
+    }
+    Assert.assertNotNull("account not loaded from config or -Dtest.account", account);
+
+    // contract.id: 只有 integ(WriteApi) 用例需要，contract 层用例不用
+    String contractIdStr = System.getProperty("test.contract.id");
+    if (contractIdStr != null && !contractIdStr.isEmpty()) {
+      contractId = Long.parseLong(contractIdStr);
+    }
   }
 
   @Test
@@ -141,7 +157,10 @@ public class OptionExerciseIntegrationTest {
     System.out.println("getRecordsFiltered: " + response.getItem());
   }
 
-  // @Test
+  // 会真实提交并撤销行权申请，只在手动触发的 integ job 里跑。
+  // 原先靠注释掉 @Test 来禁用，现在由 WriteApi 分类 + -Dgroups 选择控制。
+  @Test
+  @Category(WriteApi.class)
   public void testSubmitAndCancelExercise() {
     OptionExerciseSubmitRequest submitRequest =
         OptionExerciseSubmitRequest.buildExerciseRequest(account, contractId, 1.0, null, false);

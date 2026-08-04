@@ -15,9 +15,12 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+
+import com.tigerbrokers.stock.openapi.client.testsupport.ReadOnlyApi;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -35,7 +38,7 @@ import java.util.Map;
  *   TIGER_CONFIG_PATH=<path to config directory> mvn test -Dtest=CorporateActionIntegrationTest
  */
 
-@Ignore("Integration test — requires real credentials. Remove @Ignore and set -Dtest.config.path to run.")
+@Category(ReadOnlyApi.class)
 public class CorporateActionIntegrationTest {
 
   private static TigerHttpClient client;
@@ -43,6 +46,10 @@ public class CorporateActionIntegrationTest {
 
   @BeforeClass
   public static void setUpClass() {
+    // 集成测试门控：默认跳过，CI 与本地都靠 -Dtest.integ=true 显式开启。
+    // 用 Assume 而不是类级 @Ignore，@Ignore 是硬编码的，没法按环境启用。
+    Assume.assumeTrue("integration test; enable with -Dtest.integ=true",
+        Boolean.getBoolean("test.integ"));
     // Support both -Dtest.config.path JVM property and TIGER_CONFIG_PATH env var
     String configPath = System.getProperty("test.config.path");
     if (configPath == null || configPath.isEmpty()) {

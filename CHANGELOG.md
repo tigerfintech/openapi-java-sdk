@@ -1,3 +1,10 @@
+## 2.6.1 (2026-08-03)
+
+### Fixed
+
+- 修复期权分析接口 `requireVolatilityList` 参数未生效的问题，此前请求该参数会被服务端忽略，无法返回波动率列表数据
+- 修复期权分时接口 `beginTime` 参数未生效的问题，此前设置起始时间不会过滤返回结果
+
 ## 2.6.0 (2026-07-23)
 ### New
 - `CorporateActionType` 新增：`SYMBOL_CHANGE`、`DELISTING`、`IPO`
