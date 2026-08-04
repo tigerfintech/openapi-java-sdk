@@ -1,10 +1,9 @@
-# Three-stage pipeline: unit (no credentials) / contract (read-only) / integ (write, manual).
+# Two-stage pipeline: unit (no credentials) / integration (real API).
 # Unit stage does NOT inject any credential variables.
 
 stages:
   - unit
-  - contract
-  - integ
+  - integration
 
 variables:
   MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
@@ -35,40 +34,16 @@ unit:java:
         - target/surefire-reports/TEST-*.xml
     expire_in: 1 week
 
-# Read/write split via JUnit Category: ReadOnlyApi (contract) vs WriteApi (integ).
-.integ_vars: &integ_vars
-  READ_ONLY_GROUP: "com.tigerbrokers.stock.openapi.client.testsupport.ReadOnlyApi"
-  WRITE_GROUP: "com.tigerbrokers.stock.openapi.client.testsupport.WriteApi"
-
-# Integration credentials: TIGEROPEN_TIGER_ID, TIGEROPEN_PRIVATE_KEY, TIGEROPEN_ACCOUNT
-# env vars set in GitLab CI Variables (Protected + Masked). No config file needed.
-
-contract:java:
+integration:java:
   extends: .maven_base
-  stage: contract
-  variables:
-    <<: *integ_vars
+  stage: integration
+  allow_failure: true
   script:
     - mvn $MAVEN_CLI_OPTS test-compile
-    - mvn $MAVEN_CLI_OPTS failsafe:integration-test failsafe:verify
-      -Dtest.integ=true
-      -Dgroups="$READ_ONLY_GROUP"
-      -DexcludedGroups="$WRITE_GROUP"
+    - mvn $MAVEN_CLI_OPTS failsafe:integration-test failsafe:verify -Dtest.integ=true
   artifacts:
     when: always
     reports:
       junit:
         - target/failsafe-reports/TEST-*.xml
     expire_in: 1 week
-
-integ:java:
-  extends: .maven_base
-  stage: integ
-  allow_failure: true
-  variables:
-    <<: *integ_vars
-  script:
-    - mvn $MAVEN_CLI_OPTS test-compile
-    - mvn $MAVEN_CLI_OPTS failsafe:integration-test failsafe:verify
-      -Dtest.integ=true
-      -Dgroups="$WRITE_GROUP"
