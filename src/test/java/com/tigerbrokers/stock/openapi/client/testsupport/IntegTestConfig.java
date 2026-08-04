@@ -39,7 +39,7 @@ public final class IntegTestConfig {
       config.configFilePath = configPath;
     }
 
-    String envStr = System.getProperty("test.env", "TEST");
+    String envStr = System.getProperty("test.env", "PROD");
     config.setEnv(Env.valueOf(envStr));
     config.isAutoGrabPermission = false;
     config.isAutoRefreshToken = false;
