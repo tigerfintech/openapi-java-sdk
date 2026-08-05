@@ -158,6 +158,11 @@
             <!-- protoc 生成，不手写不测 -->
             <exclude>com/tigerbrokers/stock/openapi/client/socket/data/pb/**</exclude>
             <exclude>**/*OuterClass*</exclude>
+            <!-- socket / 异步执行 / watcher 依赖 TCP 连接或运行时组件，单测环境
+                 无法覆盖（实测 0%），排除以免拉低有效覆盖率；由集成测试覆盖。 -->
+            <exclude>com/tigerbrokers/stock/openapi/client/socket/**</exclude>
+            <exclude>com/tigerbrokers/stock/openapi/client/util/builder/**</exclude>
+            <exclude>com/tigerbrokers/stock/openapi/client/util/watch/**</exclude>
           </excludes>
         </configuration>
         <executions>
