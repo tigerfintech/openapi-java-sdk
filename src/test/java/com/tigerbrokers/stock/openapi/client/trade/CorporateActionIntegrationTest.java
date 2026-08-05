@@ -67,8 +67,14 @@ public class CorporateActionIntegrationTest {
     Assert.assertNotNull(items);
     Assert.assertFalse("expect at least one SYMBOL_CHANGE record for META", items.isEmpty());
     CorporateSymbolChangeItem first = items.values().iterator().next().get(0);
-    Assert.assertNotNull(first.getOldSymbol());
-    Assert.assertNotNull(first.getNewSymbol());
+    Assert.assertNotNull("oldSymbol should not be null", first.getOldSymbol());
+    Assert.assertFalse("oldSymbol should not be empty", first.getOldSymbol().isEmpty());
+    Assert.assertNotNull("newSymbol should not be null", first.getNewSymbol());
+    Assert.assertFalse("newSymbol should not be empty", first.getNewSymbol().isEmpty());
+    Assert.assertNotNull("symbol should not be null", first.getSymbol());
+    Assert.assertNotNull("market should not be null", first.getMarket());
+    Assert.assertNotNull("actionType should not be null", first.getActionType());
+    Assert.assertNotNull("executeDate should not be null", first.getExecuteDate());
     System.out.println("SYMBOL_CHANGE items: " + items);
   }
 
@@ -87,7 +93,10 @@ public class CorporateActionIntegrationTest {
     Assert.assertNotNull(items);
     Assert.assertFalse("expect at least one DELISTING record for TWTR", items.isEmpty());
     CorporateDelistingItem first = items.values().iterator().next().get(0);
-    Assert.assertNotNull(first.getAnnouncedDate());
+    Assert.assertNotNull("announcedDate should not be null", first.getAnnouncedDate());
+    Assert.assertNotNull("symbol should not be null", first.getSymbol());
+    Assert.assertNotNull("market should not be null", first.getMarket());
+    Assert.assertNotNull("actionType should not be null", first.getActionType());
     System.out.println("DELISTING items: " + items);
   }
 
@@ -106,7 +115,11 @@ public class CorporateActionIntegrationTest {
     Assert.assertNotNull(items);
     Assert.assertFalse("expect at least one IPO record for RIVN", items.isEmpty());
     CorporateIpoItem first = items.values().iterator().next().get(0);
-    Assert.assertNotNull(first.getListingDate());
+    Assert.assertNotNull("listingDate should not be null", first.getListingDate());
+    Assert.assertNotNull("symbol should not be null", first.getSymbol());
+    Assert.assertNotNull("market should not be null", first.getMarket());
+    Assert.assertNotNull("actionType should not be null", first.getActionType());
+    Assert.assertNotNull("country should not be null", first.getCountry());
     System.out.println("IPO items: " + items);
   }
 

@@ -34,24 +34,44 @@ public class QuoteIntegrationTest {
     Assert.assertTrue(api + " failed: " + resp.getMessage(), resp.isSuccess());
   }
 
+  private void assertDataPresent(TigerHttpResponse resp, String api) {
+    assertSuccess(resp, api);
+    Assert.assertNotNull(api + " data should not be null", resp.getData());
+    Assert.assertFalse(api + " data should not be empty",
+        resp.getData() == null || resp.getData().trim().isEmpty());
+  }
+
   @Test
   public void testMarketState() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.MARKET_STATE);
     request.setBizContent("{\"market\":\"US\"}");
     TigerHttpResponse response = client.execute(request);
-    assertSuccess(response, "testMarketState");
+    assertDataPresent(response, "testMarketState");
   }
 
   @Test
   public void testAllSymbols() {
     TigerResponse response = client.execute(QuoteSymbolRequest.newRequest(Market.US));
     assertSuccess(response, "testAllSymbols");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteSymbolResponse symbolResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteSymbolResponse) response;
+    Assert.assertNotNull("symbols should not be null", symbolResp.getSymbols());
+    Assert.assertFalse("symbols should not be empty", symbolResp.getSymbols().isEmpty());
+    Assert.assertNotNull("first symbol should not be null", symbolResp.getSymbols().get(0));
   }
 
   @Test
   public void testAllSymbolNames() {
     TigerResponse response = client.execute(QuoteSymbolNameRequest.newRequest(Market.US));
     assertSuccess(response, "testAllSymbolNames");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteSymbolNameResponse nameResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteSymbolNameResponse) response;
+    Assert.assertNotNull("symbolNameItems should not be null", nameResp.getSymbolNameItems());
+    Assert.assertFalse("symbolNameItems should not be empty", nameResp.getSymbolNameItems().isEmpty());
+    Assert.assertNotNull("first symbol should not be null",
+        nameResp.getSymbolNameItems().get(0).getSymbol());
+    Assert.assertNotNull("first name should not be null",
+        nameResp.getSymbolNameItems().get(0).getName());
   }
 
   @Test
@@ -59,7 +79,7 @@ public class QuoteIntegrationTest {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.BRIEF);
     request.setBizContent("{\"symbols\":[\"AAPL\"]}");
     TigerHttpResponse response = client.execute(request);
-    assertSuccess(response, "testBrief");
+    assertDataPresent(response, "testBrief");
   }
 
   @Test
@@ -67,103 +87,206 @@ public class QuoteIntegrationTest {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.STOCK_DETAIL);
     request.setBizContent("{\"symbols\":[\"AAPL\"]}");
     TigerHttpResponse response = client.execute(request);
-    assertSuccess(response, "testStockDetail");
+    assertDataPresent(response, "testStockDetail");
   }
 
   @Test
   public void testTimeline() {
     TigerResponse response = client.execute(QuoteTimelineRequest.newRequest(java.util.Arrays.asList("AAPL")));
     assertSuccess(response, "testTimeline");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteTimelineResponse tlResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteTimelineResponse) response;
+    Assert.assertNotNull("timelineItems should not be null", tlResp.getTimelineItems());
+    Assert.assertFalse("timelineItems should not be empty", tlResp.getTimelineItems().isEmpty());
+    Assert.assertNotNull("first timeline symbol should not be null",
+        tlResp.getTimelineItems().get(0).getSymbol());
   }
 
   @Test
   public void testHistoryTimeline() {
     TigerResponse response = client.execute(QuoteHistoryTimelineRequest.newRequest(java.util.Arrays.asList("AAPL")));
     assertSuccess(response, "testHistoryTimeline");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteHistoryTimelineResponse htlResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteHistoryTimelineResponse) response;
+    Assert.assertNotNull("historyTimelineItems should not be null", htlResp.getTimelineItems());
+    Assert.assertFalse("historyTimelineItems should not be empty", htlResp.getTimelineItems().isEmpty());
+    Assert.assertNotNull("first history timeline symbol should not be null",
+        htlResp.getTimelineItems().get(0).getSymbol());
   }
 
   @Test
   public void testKline() {
     TigerResponse response = client.execute(QuoteKlineRequest.newRequest(java.util.Arrays.asList("AAPL"), KType.day));
     assertSuccess(response, "testKline");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteKlineResponse klineResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteKlineResponse) response;
+    Assert.assertNotNull("klineItems should not be null", klineResp.getKlineItems());
+    Assert.assertFalse("klineItems should not be empty", klineResp.getKlineItems().isEmpty());
+    Assert.assertNotNull("first kline symbol should not be null",
+        klineResp.getKlineItems().get(0).getSymbol());
+    if (klineResp.getKlineItems().get(0).getItems() != null
+        && !klineResp.getKlineItems().get(0).getItems().isEmpty()) {
+      Assert.assertNotNull("first kline point time should not be null",
+          klineResp.getKlineItems().get(0).getItems().get(0).getTime());
+      Assert.assertNotNull("first kline point close should not be null",
+          klineResp.getKlineItems().get(0).getItems().get(0).getClose());
+    }
   }
 
   @Test
   public void testTradeTick() {
     TigerResponse response = client.execute(QuoteTradeTickRequest.newRequest(java.util.Arrays.asList("AAPL")));
     assertSuccess(response, "testTradeTick");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteTradeTickResponse ttResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteTradeTickResponse) response;
+    Assert.assertNotNull("tradeTickItems should not be null", ttResp.getTradeTickItems());
+    Assert.assertFalse("tradeTickItems should not be empty", ttResp.getTradeTickItems().isEmpty());
+    Assert.assertNotNull("first trade tick symbol should not be null",
+        ttResp.getTradeTickItems().get(0).getSymbol());
   }
 
   @Test
   public void testQuoteContract() {
     TigerResponse response = client.execute(QuoteContractRequest.newRequest("AAPL"));
     assertSuccess(response, "testQuoteContract");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteContractResponse cResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteContractResponse) response;
+    Assert.assertNotNull("contractItems should not be null", cResp.getContractItems());
+    Assert.assertFalse("contractItems should not be empty", cResp.getContractItems().isEmpty());
+    Assert.assertNotNull("first contract symbol should not be null",
+        cResp.getContractItems().get(0).getSymbol());
+    Assert.assertNotNull("first contract secType should not be null",
+        cResp.getContractItems().get(0).getSecType());
   }
 
   @Test
   public void testQuoteRealTime() {
     TigerResponse response = client.execute(QuoteRealTimeQuoteRequest.newRequest(java.util.Arrays.asList("AAPL")));
     assertSuccess(response, "testQuoteRealTime");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteRealTimeQuoteResponse rtResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteRealTimeQuoteResponse) response;
+    Assert.assertNotNull("realTimeQuoteItems should not be null", rtResp.getRealTimeQuoteItems());
+    Assert.assertFalse("realTimeQuoteItems should not be empty", rtResp.getRealTimeQuoteItems().isEmpty());
+    Assert.assertNotNull("first realtime symbol should not be null",
+        rtResp.getRealTimeQuoteItems().get(0).getSymbol());
+    Assert.assertNotNull("first realtime latestPrice should not be null",
+        rtResp.getRealTimeQuoteItems().get(0).getLatestPrice());
   }
 
   @Test
   public void testQuoteShortableStocks() {
     TigerResponse response = client.execute(QuoteShortableStockRequest.newRequest(java.util.Arrays.asList("AAPL")));
     assertSuccess(response, "testQuoteShortableStocks");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteShortableStockResponse ssResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteShortableStockResponse) response;
+    Assert.assertNotNull("shortableStockItems should not be null", ssResp.getShortableStockItems());
+    Assert.assertFalse("shortableStockItems should not be empty", ssResp.getShortableStockItems().isEmpty());
+    Assert.assertNotNull("first shortable symbol should not be null",
+        ssResp.getShortableStockItems().get(0).getSymbol());
   }
 
   @Test
   public void testQuoteStockTrade() {
     TigerResponse response = client.execute(QuoteStockTradeRequest.newRequest(java.util.Arrays.asList("AAPL")));
     assertSuccess(response, "testQuoteStockTrade");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteStockTradeResponse stResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteStockTradeResponse) response;
+    Assert.assertNotNull("stockTradeItems should not be null", stResp.getStockTradeItems());
+    Assert.assertFalse("stockTradeItems should not be empty", stResp.getStockTradeItems().isEmpty());
+    Assert.assertNotNull("first stock trade symbol should not be null",
+        stResp.getStockTradeItems().get(0).getSymbol());
   }
 
   @Test
   public void testQuoteDepth() {
     TigerResponse response = client.execute(QuoteDepthRequest.newRequest(java.util.Arrays.asList("AAPL"), "US"));
     assertSuccess(response, "testQuoteDepth");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteDepthResponse dResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteDepthResponse) response;
+    Assert.assertNotNull("quoteDepthItems should not be null", dResp.getQuoteDepthItems());
+    Assert.assertFalse("quoteDepthItems should not be empty", dResp.getQuoteDepthItems().isEmpty());
+    Assert.assertNotNull("first depth symbol should not be null",
+        dResp.getQuoteDepthItems().get(0).getSymbol());
   }
 
   @Test
   public void testQuoteDelay() {
     TigerResponse response = client.execute(QuoteDelayRequest.newRequest(java.util.Arrays.asList("AAPL")));
     assertSuccess(response, "testQuoteDelay");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteDelayResponse dlResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteDelayResponse) response;
+    Assert.assertNotNull("quoteDelayItems should not be null", dlResp.getQuoteDelayItems());
+    Assert.assertFalse("quoteDelayItems should not be empty", dlResp.getQuoteDelayItems().isEmpty());
+    Assert.assertNotNull("first delay symbol should not be null",
+        dlResp.getQuoteDelayItems().get(0).getSymbol());
   }
 
   @Test
   public void testQuoteOvernight() {
     TigerResponse response = client.execute(QuoteOvernightRequest.newRequest(java.util.Arrays.asList("AAPL")));
     assertSuccess(response, "testQuoteOvernight");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteOvernightResponse ovResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteOvernightResponse) response;
+    Assert.assertNotNull("overnight data should not be null", ovResp.getData());
+    Assert.assertFalse("overnight data should not be empty", ovResp.getData().isEmpty());
   }
 
   @Test
   public void testTradingCalendar() {
     TigerResponse response = client.execute(QuoteTradeCalendarRequest.newRequest(Market.US));
     assertSuccess(response, "testTradingCalendar");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteTradeCalendarResponse tcResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteTradeCalendarResponse) response;
+    Assert.assertNotNull("calendar items should not be null", tcResp.getItems());
+    Assert.assertFalse("calendar items should not be empty", tcResp.getItems().isEmpty());
+    Assert.assertNotNull("first calendar date should not be null",
+        tcResp.getItems().get(0).getDate());
   }
 
   @Test
   public void testStockBroker() {
     TigerResponse response = client.execute(QuoteStockBrokerRequest.newRequest("00700"));
     assertSuccess(response, "testStockBroker");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteStockBrokerResponse sbResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteStockBrokerResponse) response;
+    Assert.assertNotNull("stockBrokerItem should not be null", sbResp.getStockBrokerItem());
+    Assert.assertNotNull("broker symbol should not be null",
+        sbResp.getStockBrokerItem().getSymbol());
   }
 
   @Test
   public void testCapitalDistribution() {
     TigerResponse response = client.execute(QuoteCapitalDistributionRequest.newRequest("AAPL", Market.US));
     assertSuccess(response, "testCapitalDistribution");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteCapitalDistributionResponse cdResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteCapitalDistributionResponse) response;
+    Assert.assertNotNull("capitalDistributionItem should not be null",
+        cdResp.getCapitalDistributionItem());
+    Assert.assertNotNull("capital distribution symbol should not be null",
+        cdResp.getCapitalDistributionItem().getSymbol());
   }
 
   @Test
   public void testCapitalFlow() {
     TigerResponse response = client.execute(QuoteCapitalFlowRequest.newRequest("AAPL", Market.US, CapitalPeriod.intraday));
     assertSuccess(response, "testCapitalFlow");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteCapitalFlowResponse cfResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteCapitalFlowResponse) response;
+    Assert.assertNotNull("capitalFlowItem should not be null", cfResp.getCapitalFlowItem());
+    Assert.assertNotNull("capital flow symbol should not be null",
+        cfResp.getCapitalFlowItem().getSymbol());
   }
 
   @Test
   public void testTradeRank() {
     TigerResponse response = client.execute(QuoteTradeRankRequest.newRequest(Market.US));
     assertSuccess(response, "testTradeRank");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteTradeRankResponse trResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteTradeRankResponse) response;
+    Assert.assertNotNull("tradeRank items should not be null", trResp.getItems());
+    Assert.assertFalse("tradeRank items should not be empty", trResp.getItems().isEmpty());
+    Assert.assertNotNull("first trade rank symbol should not be null",
+        trResp.getItems().get(0).getSymbol());
   }
 
   @Test
@@ -171,7 +294,7 @@ public class QuoteIntegrationTest {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.OPTION_EXPIRATION);
     request.setBizContent("{\"symbols\":[\"AAPL\"]}");
     TigerHttpResponse response = client.execute(request);
-    assertSuccess(response, "testOptionExpiration");
+    assertDataPresent(response, "testOptionExpiration");
   }
 
   @Test
@@ -179,7 +302,7 @@ public class QuoteIntegrationTest {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.OPTION_CHAIN);
     request.setBizContent("{\"symbol\":\"AAPL\",\"expiry\":\"2027-01-15\"}");
     TigerHttpResponse response = client.execute(request);
-    assertSuccess(response, "testOptionChain");
+    assertDataPresent(response, "testOptionChain");
   }
 
   @Test
@@ -187,97 +310,194 @@ public class QuoteIntegrationTest {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.OPTION_BRIEF);
     request.setBizContent("{\"identifiers\":[\"AAPL 270115C00200000\"]}");
     TigerHttpResponse response = client.execute(request);
-    assertSuccess(response, "testOptionBrief");
+    assertDataPresent(response, "testOptionBrief");
   }
 
   @Test
   public void testWarrantFilter() {
     TigerResponse response = client.execute(WarrantFilterRequest.newRequest("00700"));
     assertSuccess(response, "testWarrantFilter");
+    com.tigerbrokers.stock.openapi.client.https.response.option.WarrantFilterResponse wfResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.option.WarrantFilterResponse) response;
+    Assert.assertNotNull("warrantFilter item should not be null", wfResp.getItem());
   }
 
   @Test
   public void testWarrantRealTimeQuote() {
     TigerResponse response = client.execute(WarrantQuoteRequest.newRequest(java.util.Arrays.asList("15792")));
     assertSuccess(response, "testWarrantRealTimeQuote");
+    com.tigerbrokers.stock.openapi.client.https.response.option.WarrantQuoteResponse wqResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.option.WarrantQuoteResponse) response;
+    Assert.assertNotNull("warrantQuote item should not be null", wqResp.getItem());
   }
 
   @Test
   public void testFutureExchange() {
     TigerResponse response = client.execute(FutureExchangeRequest.newRequest("FUT"));
     assertSuccess(response, "testFutureExchange");
+    com.tigerbrokers.stock.openapi.client.https.response.future.FutureExchangeResponse feResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.future.FutureExchangeResponse) response;
+    Assert.assertNotNull("futureExchangeItems should not be null", feResp.getFutureExchangeItems());
+    Assert.assertFalse("futureExchangeItems should not be empty",
+        feResp.getFutureExchangeItems().isEmpty());
+    Assert.assertNotNull("first exchange code should not be null",
+        feResp.getFutureExchangeItems().get(0).getCode());
   }
 
   @Test
   public void testFutureContractByCode() {
     TigerResponse response = client.execute(FutureContractByConCodeRequest.newRequest(FUTURE_CONTRACT));
     assertSuccess(response, "testFutureContractByCode");
+    com.tigerbrokers.stock.openapi.client.https.response.future.FutureContractResponse fcResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.future.FutureContractResponse) response;
+    Assert.assertNotNull("futureContractItem should not be null", fcResp.getFutureContractItem());
+    Assert.assertNotNull("contract code should not be null",
+        fcResp.getFutureContractItem().getContractCode());
   }
 
   @Test
   public void testFutureContractByExchange() {
     TigerResponse response = client.execute(FutureContractByExchCodeRequest.newRequest("CME"));
     assertSuccess(response, "testFutureContractByExchange");
+    com.tigerbrokers.stock.openapi.client.https.response.future.FutureContractsResponse fcsResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.future.FutureContractsResponse) response;
+    Assert.assertNotNull("futureContractItems should not be null", fcsResp.getFutureContractItems());
+    Assert.assertFalse("futureContractItems should not be empty",
+        fcsResp.getFutureContractItems().isEmpty());
+    Assert.assertNotNull("first contract code should not be null",
+        fcsResp.getFutureContractItems().get(0).getContractCode());
   }
 
   @Test
   public void testFutureContinuousContracts() {
     TigerResponse response = client.execute(FutureContinuousContractRequest.newRequest("ES"));
     assertSuccess(response, "testFutureContinuousContracts");
+    com.tigerbrokers.stock.openapi.client.https.response.future.FutureContractResponse fccResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.future.FutureContractResponse) response;
+    Assert.assertNotNull("continuous contract item should not be null",
+        fccResp.getFutureContractItem());
+    Assert.assertNotNull("continuous contract code should not be null",
+        fccResp.getFutureContractItem().getContractCode());
   }
 
   @Test
   public void testFutureCurrentContract() {
     TigerResponse response = client.execute(FutureCurrentContractRequest.newRequest("ES"));
     assertSuccess(response, "testFutureCurrentContract");
+    com.tigerbrokers.stock.openapi.client.https.response.future.FutureContractResponse fcurResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.future.FutureContractResponse) response;
+    Assert.assertNotNull("current contract item should not be null",
+        fcurResp.getFutureContractItem());
+    Assert.assertNotNull("current contract code should not be null",
+        fcurResp.getFutureContractItem().getContractCode());
   }
 
   @Test
   public void testFutureContracts() {
     TigerResponse response = client.execute(FutureContractsRequest.newRequest("ES"));
     assertSuccess(response, "testFutureContracts");
+    com.tigerbrokers.stock.openapi.client.https.response.future.FutureContractsResponse fctResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.future.FutureContractsResponse) response;
+    Assert.assertNotNull("futureContractItems should not be null", fctResp.getFutureContractItems());
+    Assert.assertFalse("futureContractItems should not be empty",
+        fctResp.getFutureContractItems().isEmpty());
+    Assert.assertNotNull("first contract code should not be null",
+        fctResp.getFutureContractItems().get(0).getContractCode());
   }
 
   @Test
   public void testFutureKline() {
     TigerResponse response = client.execute(FutureKlineRequest.newRequest(java.util.Arrays.asList(FUTURE_CONTRACT)));
     assertSuccess(response, "testFutureKline");
+    com.tigerbrokers.stock.openapi.client.https.response.future.FutureKlineResponse fkResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.future.FutureKlineResponse) response;
+    Assert.assertNotNull("futureKlineItems should not be null", fkResp.getFutureKlineItems());
+    Assert.assertFalse("futureKlineItems should not be empty",
+        fkResp.getFutureKlineItems().isEmpty());
+    Assert.assertNotNull("first kline contractCode should not be null",
+        fkResp.getFutureKlineItems().get(0).getContractCode());
   }
 
   @Test
   public void testFutureRealTimeQuote() {
     TigerResponse response = client.execute(FutureRealTimeQuoteRequest.newRequest(java.util.Arrays.asList(FUTURE_CONTRACT)));
     assertSuccess(response, "testFutureRealTimeQuote");
+    com.tigerbrokers.stock.openapi.client.https.response.future.FutureRealTimeQuoteResponse frResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.future.FutureRealTimeQuoteResponse) response;
+    Assert.assertNotNull("futureRealTimeItems should not be null", frResp.getFutureRealTimeItems());
+    Assert.assertFalse("futureRealTimeItems should not be empty",
+        frResp.getFutureRealTimeItems().isEmpty());
+    Assert.assertNotNull("first realtime contractCode should not be null",
+        frResp.getFutureRealTimeItems().get(0).getContractCode());
+    Assert.assertNotNull("first realtime latestPrice should not be null",
+        frResp.getFutureRealTimeItems().get(0).getLatestPrice());
   }
 
   @Test
   public void testFutureTradingDate() {
     TigerResponse response = client.execute(FutureTradingDateRequest.newRequest(FUTURE_CONTRACT));
     assertSuccess(response, "testFutureTradingDate");
+    com.tigerbrokers.stock.openapi.client.https.response.future.FutureTradingDateResponse ftdResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.future.FutureTradingDateResponse) response;
+    Assert.assertNotNull("futureTradingDateItem should not be null",
+        ftdResp.getFutureTradingDateItem());
   }
 
   @Test
   public void testFutureDepth() {
     TigerResponse response = client.execute(FutureDepthRequest.newRequest(java.util.Arrays.asList(FUTURE_CONTRACT)));
     assertSuccess(response, "testFutureDepth");
+    com.tigerbrokers.stock.openapi.client.https.response.future.FutureDepthResponse fdResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.future.FutureDepthResponse) response;
+    Assert.assertNotNull("futureDepthItems should not be null", fdResp.getFutureDepthItems());
+    Assert.assertFalse("futureDepthItems should not be empty",
+        fdResp.getFutureDepthItems().isEmpty());
+    Assert.assertNotNull("first depth contractCode should not be null",
+        fdResp.getFutureDepthItems().get(0).getContractCode());
   }
 
   @Test
   public void testFinancialCurrency() {
     TigerResponse response = client.execute(FinancialCurrencyRequest.newRequest(java.util.Arrays.asList("AAPL"), Market.US));
     assertSuccess(response, "testFinancialCurrency");
+    com.tigerbrokers.stock.openapi.client.https.response.financial.FinancialCurrencyResponse fcResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.financial.FinancialCurrencyResponse) response;
+    Assert.assertNotNull("financialCurrencyItems should not be null",
+        fcResp.getFinancialCurrencyItems());
+    Assert.assertFalse("financialCurrencyItems should not be empty",
+        fcResp.getFinancialCurrencyItems().isEmpty());
+    Assert.assertNotNull("first currency symbol should not be null",
+        fcResp.getFinancialCurrencyItems().get(0).getSymbol());
+    Assert.assertNotNull("first currency should not be null",
+        fcResp.getFinancialCurrencyItems().get(0).getCurrency());
   }
 
   @Test
   public void testFinancialExchangeRate() {
     TigerResponse response = client.execute(FinancialExchangeRateRequest.newRequest(java.util.Arrays.asList("USD"), "2026-01-01", "2026-01-31"));
     assertSuccess(response, "testFinancialExchangeRate");
+    com.tigerbrokers.stock.openapi.client.https.response.financial.FinancialExchangeRateResponse ferResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.financial.FinancialExchangeRateResponse) response;
+    Assert.assertNotNull("financialExchangeRateItems should not be null",
+        ferResp.getFinancialExchangeRateItems());
+    Assert.assertFalse("financialExchangeRateItems should not be empty",
+        ferResp.getFinancialExchangeRateItems().isEmpty());
+    Assert.assertNotNull("first exchange rate currency should not be null",
+        ferResp.getFinancialExchangeRateItems().get(0).getCurrency());
   }
 
   @Test
   public void testStockFundamental() {
     TigerResponse response = client.execute(QuoteStockFundamentalRequest.newRequest(java.util.Arrays.asList("AAPL"), "US"));
     assertSuccess(response, "testStockFundamental");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteStockFundamentalResponse sfResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteStockFundamentalResponse) response;
+    Assert.assertNotNull("stockFundamentalItems should not be null",
+        sfResp.getStockFundamentalItems());
+    Assert.assertFalse("stockFundamentalItems should not be empty",
+        sfResp.getStockFundamentalItems().isEmpty());
+    Assert.assertNotNull("first fundamental symbol should not be null",
+        sfResp.getStockFundamentalItems().get(0).getSymbol());
   }
 
   @Test
@@ -285,19 +505,32 @@ public class QuoteIntegrationTest {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.FUND_ALL_SYMBOLS);
     request.setBizContent("{\"market\":\"US\"}");
     TigerHttpResponse response = client.execute(request);
-    assertSuccess(response, "testFundAllSymbols");
+    assertDataPresent(response, "testFundAllSymbols");
   }
 
   @Test
   public void testFundContracts() {
     TigerResponse response = client.execute(FundContractsRequest.newRequest(java.util.Arrays.asList("SPY")));
     assertSuccess(response, "testFundContracts");
+    com.tigerbrokers.stock.openapi.client.https.response.fund.FundContractsResponse fucResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.fund.FundContractsResponse) response;
+    Assert.assertNotNull("fundContractItems should not be null", fucResp.getFundContractItems());
+    Assert.assertFalse("fundContractItems should not be empty",
+        fucResp.getFundContractItems().isEmpty());
+    Assert.assertNotNull("first fund symbol should not be null",
+        fucResp.getFundContractItems().get(0).getSymbol());
   }
 
   @Test
   public void testFundQuote() {
     TigerResponse response = client.execute(FundQuoteRequest.newRequest(java.util.Arrays.asList("SPY")));
     assertSuccess(response, "testFundQuote");
+    com.tigerbrokers.stock.openapi.client.https.response.fund.FundQuoteResponse fqResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.fund.FundQuoteResponse) response;
+    Assert.assertNotNull("fundQuoteItems should not be null", fqResp.getQuoteItems());
+    Assert.assertFalse("fundQuoteItems should not be empty", fqResp.getQuoteItems().isEmpty());
+    Assert.assertNotNull("first fund quote symbol should not be null",
+        fqResp.getQuoteItems().get(0).getSymbol());
   }
 
   @Test
@@ -305,7 +538,7 @@ public class QuoteIntegrationTest {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.GRAB_QUOTE_PERMISSION);
     request.setBizContent("{}");
     TigerHttpResponse response = client.execute(request);
-    assertSuccess(response, "testGrabQuotePermission");
+    assertDataPresent(response, "testGrabQuotePermission");
   }
 
   @Test
@@ -313,7 +546,7 @@ public class QuoteIntegrationTest {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.GET_QUOTE_PERMISSION);
     request.setBizContent("{}");
     TigerHttpResponse response = client.execute(request);
-    assertSuccess(response, "testGetQuotePermission");
+    assertDataPresent(response, "testGetQuotePermission");
   }
 
   @Test
@@ -321,7 +554,7 @@ public class QuoteIntegrationTest {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.INDUSTRY_LIST);
     request.setBizContent("{\"market\":\"US\",\"level\":\"GSECTOR\"}");
     TigerHttpResponse response = client.execute(request);
-    assertSuccess(response, "testIndustryList");
+    assertDataPresent(response, "testIndustryList");
   }
 
   @Test
@@ -329,7 +562,7 @@ public class QuoteIntegrationTest {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.INDUSTRY_STOCKS);
     request.setBizContent("{\"industry_id\":1,\"market\":\"US\"}");
     TigerHttpResponse response = client.execute(request);
-    assertSuccess(response, "testIndustryStocks");
+    assertDataPresent(response, "testIndustryStocks");
   }
 
   @Test
@@ -337,7 +570,7 @@ public class QuoteIntegrationTest {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.STOCK_INDUSTRY);
     request.setBizContent("{\"symbol\":\"AAPL\",\"market\":\"US\"}");
     TigerHttpResponse response = client.execute(request);
-    assertSuccess(response, "testStockIndustry");
+    assertDataPresent(response, "testStockIndustry");
   }
 
 }

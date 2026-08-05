@@ -32,6 +32,13 @@ public class TradeAccountIntegrationTest {
     Assert.assertTrue(api + " failed: " + resp.getMessage(), resp.isSuccess());
   }
 
+  private void assertDataPresent(TigerHttpResponse resp, String api) {
+    assertSuccess(resp, api);
+    Assert.assertNotNull(api + " data should not be null", resp.getData());
+    Assert.assertFalse(api + " data should not be empty",
+        resp.getData() == null || resp.getData().trim().isEmpty());
+  }
+
   private TigerHttpResponse executeWithAccount(MethodName method) {
     TigerHttpRequest request = new TigerHttpRequest(method);
     request.setBizContent("{\"account\":\"" + account + "\"}");
@@ -43,73 +50,74 @@ public class TradeAccountIntegrationTest {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.ACCOUNTS);
     request.setBizContent("{}");
     TigerHttpResponse response = client.execute(request);
-    assertSuccess(response, "testAccounts");
+    assertDataPresent(response, "testAccounts");
   }
 
   @Test
   public void testAssets() {
     TigerHttpResponse response = executeWithAccount(MethodName.ASSETS);
-    assertSuccess(response, "testAssets");
+    assertDataPresent(response, "testAssets");
   }
 
   @Test
   public void testPositions() {
     TigerHttpResponse response = executeWithAccount(MethodName.POSITIONS);
-    assertSuccess(response, "testPositions");
+    assertDataPresent(response, "testPositions");
   }
 
   @Test
   public void testActiveOrders() {
     TigerHttpResponse response = executeWithAccount(MethodName.ACTIVE_ORDERS);
-    assertSuccess(response, "testActiveOrders");
+    assertDataPresent(response, "testActiveOrders");
   }
 
   @Test
   public void testInactiveOrders() {
     TigerHttpResponse response = executeWithAccount(MethodName.INACTIVE_ORDERS);
-    assertSuccess(response, "testInactiveOrders");
+    assertDataPresent(response, "testInactiveOrders");
   }
 
   @Test
   public void testFilledOrders() {
     TigerHttpResponse response = executeWithAccount(MethodName.FILLED_ORDERS);
-    assertSuccess(response, "testFilledOrders");
+    assertDataPresent(response, "testFilledOrders");
   }
 
   @Test
   public void testOrderTransactions() {
     TigerHttpResponse response = executeWithAccount(MethodName.ORDER_TRANSACTIONS);
-    assertSuccess(response, "testOrderTransactions");
+    assertDataPresent(response, "testOrderTransactions");
   }
 
   @Test
   public void testPrimeAssets() {
     TigerHttpResponse response = executeWithAccount(MethodName.PRIME_ASSETS);
-    assertSuccess(response, "testPrimeAssets");
+    assertDataPresent(response, "testPrimeAssets");
   }
 
   @Test
   public void testSegmentFundAvailable() {
     TigerHttpResponse response = executeWithAccount(MethodName.SEGMENT_FUND_AVAILABLE);
-    assertSuccess(response, "testSegmentFundAvailable");
+    assertDataPresent(response, "testSegmentFundAvailable");
   }
 
   @Test
   public void testSegmentFundHistory() {
     TigerHttpResponse response = executeWithAccount(MethodName.SEGMENT_FUND_HISTORY);
-    assertSuccess(response, "testSegmentFundHistory");
+    assertDataPresent(response, "testSegmentFundHistory");
   }
 
   @Test
   public void testTransferFund() {
     TigerHttpResponse response = executeWithAccount(MethodName.TRANSFER_FUND);
     assertSuccess(response, "testTransferFund");
+    Assert.assertNotNull("testTransferFund data should not be null", response.getData());
   }
 
   @Test
   public void testAggregateAssets() {
     TigerHttpResponse response = executeWithAccount(MethodName.AGGREGATE_ASSETS);
-    assertSuccess(response, "testAggregateAssets");
+    assertDataPresent(response, "testAggregateAssets");
   }
 
 }

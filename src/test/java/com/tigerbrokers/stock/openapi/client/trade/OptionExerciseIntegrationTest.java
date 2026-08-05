@@ -70,6 +70,11 @@ public class OptionExerciseIntegrationTest {
     Assert.assertNotNull(response);
     Assert.assertTrue("check exercise failed: " + response.getMessage(), response.isSuccess());
     OptionExerciseCheckItem item = response.getItem();
+    Assert.assertNotNull("check exercise item should not be null", item);
+    Assert.assertNotNull("availableQuantity should not be null", item.getAvailableQuantity());
+    Assert.assertTrue("availableQuantity should be >= 0", item.getAvailableQuantity() >= 0);
+    Assert.assertNotNull("position should not be null", item.getPosition());
+    Assert.assertTrue("position should be >= 0", item.getPosition() >= 0);
     System.out.println("checkExercise: item=" + (item == null ? "null" : "availableQuantity="
         + item.getAvailableQuantity() + " position=" + item.getPosition()));
   }
@@ -84,6 +89,13 @@ public class OptionExerciseIntegrationTest {
 
     Assert.assertNotNull(response);
     Assert.assertTrue("check expire failed: " + response.getMessage(), response.isSuccess());
+    OptionExerciseCheckItem expireItem = response.getItem();
+    if (expireItem != null) {
+      Assert.assertNotNull("expire availableQuantity should not be null", expireItem.getAvailableQuantity());
+      Assert.assertTrue("expire availableQuantity should be >= 0", expireItem.getAvailableQuantity() >= 0);
+      Assert.assertNotNull("expire position should not be null", expireItem.getPosition());
+      Assert.assertTrue("expire position should be >= 0", expireItem.getPosition() >= 0);
+    }
     System.out.println("checkExpire: item=" + response.getItem());
   }
 
@@ -97,14 +109,27 @@ public class OptionExerciseIntegrationTest {
     Assert.assertNotNull(response);
     Assert.assertTrue("get positions failed: " + response.getMessage(), response.isSuccess());
     OptionExercisePositionPageItem page = response.getItem();
-    Assert.assertNotNull(page);
-    System.out.println("getPositions: itemCount=" + page.getItemCount());
-    if (page.getItems() != null) {
+    Assert.assertNotNull("positions page should not be null", page);
+    Assert.assertNotNull("itemCount should not be null", page.getItemCount());
+    Assert.assertTrue("itemCount should be >= 0", page.getItemCount() >= 0);
+    if (page.getItems() != null && !page.getItems().isEmpty()) {
+      com.tigerbrokers.stock.openapi.client.https.domain.trade.item.OptionExercisePositionItem first = page.getItems().get(0);
+      Assert.assertNotNull("position symbol should not be null", first.getSymbol());
+      Assert.assertNotNull("position contractId should not be null", first.getContractId());
+      Assert.assertNotNull("position expireDate should not be null", first.getExpireDate());
+      Assert.assertNotNull("position strike should not be null", first.getStrike());
+      Assert.assertNotNull("position callPut should not be null", first.getCallPut());
+      Assert.assertNotNull("position market should not be null", first.getMarket());
+      Assert.assertNotNull("position position should not be null", first.getPosition());
+      Assert.assertTrue("position position should be >= 0", first.getPosition() >= 0);
+      System.out.println("getPositions: itemCount=" + page.getItemCount());
       page.getItems().forEach(p -> System.out.println(
           "  contractId=" + p.getContractId() + " symbol=" + p.getSymbol()
           + " expireDate=" + p.getExpireDate() + " strike=" + p.getStrike()
           + " callPut=" + p.getCallPut() + " position=" + p.getPosition()
           + " availableQty=" + p.getAvailableQuantity()));
+    } else {
+      System.out.println("getPositions: itemCount=" + page.getItemCount() + " (no positions)");
     }
   }
 
@@ -118,9 +143,22 @@ public class OptionExerciseIntegrationTest {
     Assert.assertNotNull(response);
     Assert.assertTrue("get records failed: " + response.getMessage(), response.isSuccess());
     OptionExerciseRecordPageItem page = response.getItem();
-    Assert.assertNotNull(page);
+    Assert.assertNotNull("records page should not be null", page);
+    Assert.assertNotNull("itemCount should not be null", page.getItemCount());
+    Assert.assertTrue("itemCount should be >= 0", page.getItemCount() >= 0);
+    Assert.assertNotNull("pageCount should not be null", page.getPageCount());
+    Assert.assertTrue("pageCount should be >= 0", page.getPageCount() >= 0);
     System.out.println("getRecords: itemCount=" + page.getItemCount()
         + " pageCount=" + page.getPageCount());
+    if (page.getItems() != null && !page.getItems().isEmpty()) {
+      com.tigerbrokers.stock.openapi.client.https.domain.trade.item.OptionExerciseRecordItem first = page.getItems().get(0);
+      Assert.assertNotNull("record id should not be null", first.getId());
+      Assert.assertNotNull("record symbol should not be null", first.getSymbol());
+      Assert.assertNotNull("record status should not be null", first.getStatus());
+      Assert.assertNotNull("record type should not be null", first.getType());
+      Assert.assertNotNull("record callPut should not be null", first.getCallPut());
+      Assert.assertNotNull("record expireDate should not be null", first.getExpireDate());
+    }
   }
 
   @Test
@@ -135,6 +173,10 @@ public class OptionExerciseIntegrationTest {
     Assert.assertNotNull(response);
     Assert.assertTrue("get records with filter failed: " + response.getMessage(),
         response.isSuccess());
+    OptionExerciseRecordPageItem filterPage = response.getItem();
+    Assert.assertNotNull("filtered records page should not be null", filterPage);
+    Assert.assertNotNull("filtered itemCount should not be null", filterPage.getItemCount());
+    Assert.assertTrue("filtered itemCount should be >= 0", filterPage.getItemCount() >= 0);
     System.out.println("getRecordsFiltered: " + response.getItem());
   }
 
