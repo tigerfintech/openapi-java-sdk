@@ -1,11 +1,24 @@
 package com.tigerbrokers.stock.openapi.client.https.client;
 
 import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
+import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.PrimeAssetModel;
+import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
+import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
+import com.tigerbrokers.stock.openapi.client.https.request.trade.PrimeAssetRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.user.UserLicenseRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
+import com.tigerbrokers.stock.openapi.client.https.response.user.UserLicenseResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
+import com.tigerbrokers.stock.openapi.client.struct.enums.License;
+import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
+import com.tigerbrokers.stock.openapi.client.util.TigerSignature;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Collections;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +38,7 @@ public class TigerHttpClientTest {
     config.tigerId = "testTigerId";
     config.privateKey = "testPrivateKey";
     config.defaultAccount = "testAccount";
+    config.token = "testToken";
 
     Field f = TigerHttpClient.class.getDeclaredField("clientConfig");
     f.setAccessible(true);
@@ -70,6 +84,13 @@ public class TigerHttpClientTest {
     TigerHttpClient c = new TigerHttpClient();
     c.setAccountType(AccountType.GLOBAL);
     Assert.assertEquals("GLOBAL", c.getAccountType());
+  }
+
+  @Test
+  public void testAccountTypeNull() {
+    TigerHttpClient c = new TigerHttpClient();
+    c.setAccountType(null);
+    Assert.assertNull(c.getAccountType());
   }
 
   @Test
@@ -142,5 +163,301 @@ public class TigerHttpClientTest {
       Assert.assertNotNull(response);
       Assert.assertTrue(response.getCode() != 0);
     }
+  }
+
+  /* ---------- buildParams paths via execute ---------- */
+
+  /**
+   * Covers the TigerCommonRequest + apiModel path (PrimeAssetRequest is a TRADE method),
+   * setDefaultAccountIfAbsent (account empty + defaultAccount set),
+   * and setDefaultSecretKey (when secretKey set in config).
+   */
+  @Test
+  public void testExecute_tradeRequestWithApiModel_setsDefaultAccountAndSecretKey() throws Exception {
+    // secretKey is on clientConfig, not on client
+    ClientConfig cfg = (ClientConfig) getField(client, "clientConfig");
+    cfg.secretKey = "sk-xyz";
+
+    try (MockedStatic<HttpUtils> mocked = Mockito.mockStatic(HttpUtils.class)) {
+      String json = "{\"code\":0,\"message\":\"ok\",\"timestamp\":1,\"data\":{\"items\":[]}}";
+      mocked.when(() -> HttpUtils.post(
+          Mockito.anyString(), Mockito.anyString(),
+          Mockito.anyString(), Mockito.anyInt()))
+          .thenReturn(json);
+
+      // PrimeAssetRequest with empty account → defaultAccount injected by setDefaultAccountIfAbsent,
+      // then setDefaultSecretKey fires because account is now non-empty.
+      PrimeAssetRequest request = PrimeAssetRequest.buildPrimeAssetRequest("");
+      TigerResponse response = client.execute(request);
+      Assert.assertNotNull(response);
+      // verify default account was set on the model
+      Assert.assertEquals("testAccount", request.getApiModel().getAccount());
+    }
+  }
+
+  /**
+   * Covers accessToken/tradeToken/accountType/deviceId branches in buildParams.
+   */
+  @Test
+  public void testExecute_buildParamsIncludesAllOptionalFields() {
+    client.setAccessToken("at-1");
+    client.setTradeToken("tt-2");
+    client.setAccountType(AccountType.GLOBAL);
+    setFieldNoEx(client, "deviceId", "dev-1");
+    setFieldNoEx(client, "tigerId", "testTigerId");
+    setFieldNoEx(client, "privateKey", "pk-1");
+
+    try (MockedStatic<HttpUtils> mocked = Mockito.mockStatic(HttpUtils.class);
+        MockedStatic<TigerSignature> sigMock = Mockito.mockStatic(TigerSignature.class)) {
+      sigMock.when(() -> TigerSignature.getSignContent(Mockito.anyMap())).thenReturn("content");
+      sigMock.when(() -> TigerSignature.rsaSign(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+          .thenReturn("signed");
+      mocked.when(() -> HttpUtils.post(
+          Mockito.anyString(), Mockito.anyString(),
+          Mockito.anyString(), Mockito.anyInt()))
+          .thenReturn("{\"code\":0,\"message\":\"ok\",\"timestamp\":1}");
+
+      UserLicenseRequest request = new UserLicenseRequest();
+      TigerResponse response = client.execute(request);
+      Assert.assertNotNull(response);
+    }
+  }
+
+  /**
+   * Covers the BatchApiModel branch in buildParams.
+   */
+  @Test
+  public void testExecute_batchApiModel() throws Exception {
+    try (MockedStatic<HttpUtils> mocked = Mockito.mockStatic(HttpUtils.class)) {
+      mocked.when(() -> HttpUtils.post(
+          Mockito.anyString(), Mockito.anyString(),
+          Mockito.anyString(), Mockito.anyInt()))
+          .thenReturn("{\"code\":0,\"message\":\"ok\",\"timestamp\":1,\"data\":{}}");
+
+      // Build a TigerCommonRequest and set a BatchApiModel as its apiModel via reflection.
+      UserLicenseRequest req = new UserLicenseRequest();
+      PrimeAssetModel item = new PrimeAssetModel("acct1");
+      BatchApiModel batch = new BatchApiModel(Collections.singletonList(item));
+      Field apiModelField = TigerCommonRequest.class.getDeclaredField("apiModel");
+      apiModelField.setAccessible(true);
+      apiModelField.set(req, batch);
+
+      TigerResponse response = client.execute(req);
+      Assert.assertNotNull(response);
+    }
+  }
+
+  /* ---------- sign check path ---------- */
+
+  @Test
+  public void testExecute_signCheckPass() {
+    setFieldNoEx(client, "tigerPublicKey", "fake-pub-key");
+    setFieldNoEx(client, "tigerId", "testTigerId");
+    setFieldNoEx(client, "privateKey", "pk");
+
+    try (MockedStatic<HttpUtils> mocked = Mockito.mockStatic(HttpUtils.class);
+        MockedStatic<TigerSignature> sigMock = Mockito.mockStatic(TigerSignature.class)) {
+      sigMock.when(() -> TigerSignature.getSignContent(Mockito.anyMap())).thenReturn("c");
+      sigMock.when(() -> TigerSignature.rsaSign(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+          .thenReturn("s");
+      sigMock.when(() -> TigerSignature.rsaCheckContent(
+          Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+          .thenReturn(true);
+
+      String json = "{\"code\":0,\"message\":\"ok\",\"timestamp\":1,\"sign\":\"abc\"}";
+      mocked.when(() -> HttpUtils.post(
+          Mockito.anyString(), Mockito.anyString(),
+          Mockito.anyString(), Mockito.anyInt()))
+          .thenReturn(json);
+
+      UserLicenseRequest request = new UserLicenseRequest();
+      TigerResponse response = client.execute(request);
+      Assert.assertNotNull(response);
+      Assert.assertEquals(0, response.getCode());
+    }
+  }
+
+  @Test
+  public void testExecute_signCheckFail() {
+    setFieldNoEx(client, "tigerPublicKey", "fake-pub-key");
+    setFieldNoEx(client, "tigerId", "testTigerId");
+    setFieldNoEx(client, "privateKey", "pk");
+
+    try (MockedStatic<HttpUtils> mocked = Mockito.mockStatic(HttpUtils.class);
+        MockedStatic<TigerSignature> sigMock = Mockito.mockStatic(TigerSignature.class)) {
+      sigMock.when(() -> TigerSignature.getSignContent(Mockito.anyMap())).thenReturn("c");
+      sigMock.when(() -> TigerSignature.rsaSign(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+          .thenReturn("s");
+      sigMock.when(() -> TigerSignature.rsaCheckContent(
+          Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+          .thenReturn(false);
+
+      String json = "{\"code\":0,\"message\":\"ok\",\"timestamp\":1,\"sign\":\"abc\"}";
+      mocked.when(() -> HttpUtils.post(
+          Mockito.anyString(), Mockito.anyString(),
+          Mockito.anyString(), Mockito.anyInt()))
+          .thenReturn(json);
+
+      UserLicenseRequest request = new UserLicenseRequest();
+      TigerResponse response = client.execute(request);
+      Assert.assertNotNull(response);
+      Assert.assertTrue(response.getCode() != 0);
+    }
+  }
+
+  /* ---------- getServerUrl paper-account path ---------- */
+
+  @Test
+  public void testExecute_paperAccountRoutesToPaperServerUrl() {
+    setFieldNoEx(client, "paperServerUrl", "http://paper:1234");
+    setFieldNoEx(client, "tigerId", "testTigerId");
+    setFieldNoEx(client, "privateKey", "pk");
+
+    try (MockedStatic<HttpUtils> mocked = Mockito.mockStatic(HttpUtils.class);
+        MockedStatic<TigerSignature> sigMock = Mockito.mockStatic(TigerSignature.class)) {
+      sigMock.when(() -> TigerSignature.getSignContent(Mockito.anyMap())).thenReturn("c");
+      sigMock.when(() -> TigerSignature.rsaSign(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+          .thenReturn("s");
+      // capture the url passed to HttpUtils.post to verify paper url used
+      String[] usedUrl = new String[1];
+      mocked.when(() -> HttpUtils.post(
+          Mockito.anyString(), Mockito.anyString(),
+          Mockito.anyString(), Mockito.anyInt()))
+          .thenAnswer(inv -> {
+            usedUrl[0] = inv.getArgument(0);
+            return "{\"code\":0,\"message\":\"ok\",\"timestamp\":1,\"data\":{}}";
+          });
+
+      // 17-digit numeric account is treated as virtual
+      PrimeAssetRequest req = PrimeAssetRequest.buildPrimeAssetRequest("12345678901234567");
+      TigerResponse response = client.execute(req);
+      Assert.assertNotNull(response);
+      Assert.assertEquals("http://paper:1234", usedUrl[0]);
+    }
+  }
+
+  @Test
+  public void testExecute_quoteMethodRoutesToQuoteServerUrl() {
+    setFieldNoEx(client, "quoteServerUrl", "http://quote:5678");
+    setFieldNoEx(client, "tigerId", "testTigerId");
+    setFieldNoEx(client, "privateKey", "pk");
+
+    try (MockedStatic<HttpUtils> mocked = Mockito.mockStatic(HttpUtils.class);
+        MockedStatic<TigerSignature> sigMock = Mockito.mockStatic(TigerSignature.class)) {
+      sigMock.when(() -> TigerSignature.getSignContent(Mockito.anyMap())).thenReturn("c");
+      sigMock.when(() -> TigerSignature.rsaSign(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+          .thenReturn("s");
+      String[] usedUrl = new String[1];
+      mocked.when(() -> HttpUtils.post(
+          Mockito.anyString(), Mockito.anyString(),
+          Mockito.anyString(), Mockito.anyInt()))
+          .thenAnswer(inv -> {
+            usedUrl[0] = inv.getArgument(0);
+            return "{\"code\":0,\"message\":\"ok\",\"timestamp\":1,\"data\":{}}";
+          });
+
+      TigerHttpRequest req = new TigerHttpRequest(MethodName.BRIEF);
+      req.setBizContent("{\"symbols\":[\"AAPL\"]}");
+      TigerResponse response = client.execute(req);
+      Assert.assertNotNull(response);
+      Assert.assertEquals("http://quote:5678", usedUrl[0]);
+    }
+  }
+
+  /* ---------- init validation errors via reflection ---------- */
+
+  @Test
+  public void testInit_tigerIdNull() throws Exception {
+    ClientConfig cfg = new ClientConfig();
+    cfg.tigerId = null;
+    cfg.privateKey = "k";
+    setField(client, "clientConfig", cfg);
+    try {
+      invokeInit(null, "k");
+      Assert.fail("expected RuntimeException");
+    } catch (java.lang.reflect.InvocationTargetException e) {
+      Assert.assertTrue(e.getCause() instanceof RuntimeException);
+    }
+  }
+
+  @Test
+  public void testInit_privateKeyNull() throws Exception {
+    ClientConfig cfg = new ClientConfig();
+    cfg.tigerId = "tid";
+    cfg.privateKey = null;
+    setField(client, "clientConfig", cfg);
+    try {
+      invokeInit("tid", null);
+      Assert.fail("expected RuntimeException");
+    } catch (java.lang.reflect.InvocationTargetException e) {
+      Assert.assertTrue(e.getCause() instanceof RuntimeException);
+    }
+  }
+
+  /* ---------- refreshUrl via reflection (custom url returns early) ---------- */
+
+  @Test
+  public void testRefreshUrl_customUrlReturnsEarly() throws Exception {
+    // isCustomServerUrl is already true from setUp
+    invokeRefreshUrl();
+    // no exception means success
+  }
+
+  @Test
+  public void testRefreshUrl_throwableCaught() throws Exception {
+    // unset custom url and make clientConfig.license null + tigerPublicKey null
+    setFieldNoEx(client, "isCustomServerUrl", false);
+    // serverUrl stays null → getHttpServerAddress via NetworkUtil may throw;
+    // refreshUrl catches Throwable
+    invokeRefreshUrl();
+  }
+
+  /* ---------- destroy with tokenManager ---------- */
+
+  @Test
+  public void testDestroy_withTokenManagerAndExecutor() throws Exception {
+    TigerHttpClient c = new TigerHttpClient();
+    // inject a mock TokenManager via reflection
+    Object mockTm = Mockito.mock(com.tigerbrokers.stock.openapi.client.https.client.TokenManager.class);
+    Field tmField = TigerHttpClient.class.getDeclaredField("tokenManager");
+    tmField.setAccessible(true);
+    tmField.set(c, mockTm);
+    c.destroy();
+  }
+
+  /* ---------- helpers ---------- */
+
+  private static Object getField(Object target, String name) throws Exception {
+    Field f = TigerHttpClient.class.getDeclaredField(name);
+    f.setAccessible(true);
+    return f.get(target);
+  }
+
+  private static void setField(Object target, String name, Object value) throws Exception {
+    Field f = TigerHttpClient.class.getDeclaredField(name);
+    f.setAccessible(true);
+    f.set(target, value);
+  }
+
+  private static void setFieldNoEx(Object target, String name, Object value) {
+    try {
+      Field f = TigerHttpClient.class.getDeclaredField(name);
+      f.setAccessible(true);
+      f.set(target, value);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void invokeInit(String tigerId, String privateKey) throws Exception {
+    Method m = TigerHttpClient.class.getDeclaredMethod("init", String.class, String.class);
+    m.setAccessible(true);
+    m.invoke(client, tigerId, privateKey);
+  }
+
+  private void invokeRefreshUrl() throws Exception {
+    Method m = TigerHttpClient.class.getDeclaredMethod("refreshUrl");
+    m.setAccessible(true);
+    m.invoke(client);
   }
 }

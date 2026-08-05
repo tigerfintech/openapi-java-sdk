@@ -9,6 +9,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.ContractLeg;
 import com.tigerbrokers.stock.openapi.client.struct.TagValue;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ComboType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.AttachType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.PriceType;
@@ -556,5 +557,107 @@ public class TradeOrderFactoryTest {
   }
   @Test public void testTrailOrder_accountWithScale() {
     assertValid(TradeOrderRequest.buildTrailOrder(ACCOUNT, STOCK, ActionType.SELL, 50L, 0, 3.0, 145.0), OrderType.TRAIL);
+  }
+
+  // --- TradeOrderRequest: builder setter chain coverage ---
+  @Test public void testBuilderSetters() {
+    TradeOrderRequest req = TradeOrderRequest.buildMarketOrder(ACCOUNT, STOCK, ActionType.BUY, 100);
+    TradeOrderModel m = (TradeOrderModel) req.getApiModel();
+
+    req.setAttachType(AttachType.PROFIT);
+    Assert.assertEquals(AttachType.PROFIT, m.getAttachType());
+
+    req.setProfitTakerOrderId(123);
+    Assert.assertEquals(Integer.valueOf(123), m.getProfitTakerOrderId());
+    req.setProfitTakerPrice(150.0);
+    Assert.assertEquals(150.0, m.getProfitTakerPrice(), 0.001);
+    req.setProfitTakerTif(TimeInForce.GTC);
+    Assert.assertEquals(TimeInForce.GTC, m.getProfitTakerTif());
+    req.setProfitTakerRth(true);
+    Assert.assertEquals(Boolean.TRUE, m.getProfitTakerRth());
+
+    req.setStopLossOrderType(OrderType.STP);
+    Assert.assertEquals(OrderType.STP, m.getStopLossOrderType());
+    req.setStopLossOrderId(456);
+    Assert.assertEquals(Integer.valueOf(456), m.getStopLossOrderId());
+    req.setStopLossPrice(140.0);
+    Assert.assertEquals(140.0, m.getStopLossPrice(), 0.001);
+    req.setStopLossLimitPrice(138.0);
+    Assert.assertEquals(138.0, m.getStopLossLimitPrice(), 0.001);
+    req.setStopLossTif(TimeInForce.DAY);
+    Assert.assertEquals(TimeInForce.DAY, m.getStopLossTif());
+    req.setStopLossTrailingPercent(2.5);
+    Assert.assertEquals(2.5, m.getStopLossTrailingPercent(), 0.001);
+    req.setStopLossTrailingAmount(1.0);
+    Assert.assertEquals(1.0, m.getStopLossTrailingAmount(), 0.001);
+
+    req.setAlgoParams(Collections.<TagValue>emptyList());
+    Assert.assertNotNull(m.getAlgoParams());
+    req.withUserMark("um1");
+    Assert.assertEquals("um1", m.getUserMark());
+    req.setUserMark("um2");
+    Assert.assertEquals("um2", m.getUserMark());
+    req.setTimeInForce(TimeInForce.GTC);
+    Assert.assertEquals(TimeInForce.GTC, m.getTimeInForce());
+    req.setExpireTime(999L);
+    Assert.assertEquals(Long.valueOf(999L), m.getExpireTime());
+    req.setTradingSessionType(TradingSessionType.OVERNIGHT);
+    Assert.assertEquals(TradingSessionType.OVERNIGHT, m.getTradingSessionType());
+    req.setLang(Language.en_US);
+    Assert.assertEquals(Language.en_US, m.getLang());
+    req.setAuctionOrder(OrderType.AM, TimeInForce.OPG);
+    Assert.assertEquals(OrderType.AM, m.getOrderType());
+    Assert.assertEquals(TimeInForce.OPG, m.getTimeInForce());
+    req.setAuctionOrder(OrderType.AL, TimeInForce.DAY);
+    Assert.assertEquals(OrderType.AL, m.getOrderType());
+    req.setAuctionOrder(OrderType.LMT, TimeInForce.OPG);
+    // LMT is not AM/AL, order type should remain AL
+    Assert.assertEquals(OrderType.AL, m.getOrderType());
+    req.setDisplaySize(100);
+    Assert.assertEquals(Integer.valueOf(100), m.getDisplaySize());
+    req.setMinDisplaySize(10);
+    Assert.assertEquals(Integer.valueOf(10), m.getMinDisplaySize());
+    req.setCheckIntervals(5);
+    Assert.assertEquals(Integer.valueOf(5), m.getCheckIntervals());
+    req.setPriceType("MID");
+    Assert.assertEquals("MID", m.getPriceType());
+    req.setStartTime(1000L);
+    Assert.assertEquals(Long.valueOf(1000L), m.getStartTime());
+    req.setEndTime(2000L);
+    Assert.assertEquals(Long.valueOf(2000L), m.getEndTime());
+  }
+
+  // --- TradeOrderRequest: FUT contract edge cases in buildTradeOrderModel ---
+  @Test public void testBuildTradeOrderModel_futGlobalAccount() {
+    ContractItem fut = new ContractItem();
+    fut.setSymbol("ESmain");
+    fut.setCurrency("USD");
+    fut.setSecType(SecType.FUT.name());
+    fut.setExchange("CME");
+    fut.setType("ES");
+    fut.setLastTradingDate("20231215");
+    TradeOrderRequest req = TradeOrderRequest.buildLimitOrder("U123456", fut, ActionType.BUY, 1, 1500.0);
+    TradeOrderModel m = (TradeOrderModel) req.getApiModel();
+    // global account + FUT + type set → symbol=type
+    Assert.assertEquals("ES", m.getSymbol());
+    Assert.assertEquals("20231215", m.getExpiry());
+  }
+
+  @Test public void testBuildTradeOrderModel_futNonGlobalAccount() {
+    ContractItem fut = new ContractItem();
+    fut.setSymbol("ESmain");
+    fut.setCurrency("USD");
+    fut.setSecType(SecType.FUT.name());
+    fut.setExchange("CME");
+    fut.setExpiry("20231215");
+    TradeOrderRequest req = TradeOrderRequest.buildLimitOrder(ACCOUNT, fut, ActionType.BUY, 1, 1500.0);
+    TradeOrderModel m = (TradeOrderModel) req.getApiModel();
+    // non-global account + FUT → expiry cleared to null
+    Assert.assertNull(m.getExpiry());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBuildTradeOrderModel_nullContract() {
+    TradeOrderRequest.buildMarketOrder(ACCOUNT, null, ActionType.BUY, 100);
   }
 }

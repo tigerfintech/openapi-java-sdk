@@ -158,6 +158,55 @@ public class TradeRequestTest {
   @Test public void testPositionTransferRequestEmptyTransfers() {
     Assert.assertNotNull(PositionTransferRequest.buildRequest(ACCOUNT, "targetAcct", "US", Collections.emptyList()).getApiModel());
   }
+
+  @Test public void testPositionTransferRecordsModelGettersSetters() {
+    com.tigerbrokers.stock.openapi.client.https.domain.trade.model.PositionTransferRecordsModel m =
+        new com.tigerbrokers.stock.openapi.client.https.domain.trade.model.PositionTransferRecordsModel(
+            "acct1", "2024-01-01", "2024-06-30", "done", "US", "AAPL");
+    Assert.assertEquals("acct1", m.getAccount());
+    Assert.assertEquals("acct1", m.getAccountId());
+    Assert.assertEquals("2024-01-01", m.getSinceDate());
+    Assert.assertEquals("2024-06-30", m.getToDate());
+    Assert.assertEquals("done", m.getStatus());
+    Assert.assertEquals("US", m.getMarket());
+    Assert.assertEquals("AAPL", m.getSymbol());
+    Assert.assertNull(m.getSecretKey());
+
+    m.setAccountId("a2"); Assert.assertEquals("a2", m.getAccountId());
+    m.setSinceDate("d1"); Assert.assertEquals("d1", m.getSinceDate());
+    m.setToDate("d2"); Assert.assertEquals("d2", m.getToDate());
+    m.setStatus("pending"); Assert.assertEquals("pending", m.getStatus());
+    m.setMarket("HK"); Assert.assertEquals("HK", m.getMarket());
+    m.setSymbol("GOOG"); Assert.assertEquals("GOOG", m.getSymbol());
+    m.setSecretKey("sk"); Assert.assertEquals("sk", m.getSecretKey());
+  }
+
+  @Test public void testPositionTransferModelGettersSetters() {
+    PositionTransferModel m = new PositionTransferModel("from1", "to1",
+        Collections.<PositionTransferModel.Transfer>emptyList(), "US");
+    Assert.assertEquals("from1", m.getAccount());
+    Assert.assertEquals("from1", m.getFromAccount());
+    Assert.assertEquals("to1", m.getToAccount());
+    Assert.assertEquals("US", m.getMarket());
+    Assert.assertNull(m.getSecretKey());
+    Assert.assertNotNull(m.getTransfers());
+
+    m.setFromAccount("f2"); Assert.assertEquals("f2", m.getFromAccount());
+    m.setToAccount("t2"); Assert.assertEquals("t2", m.getToAccount());
+    m.setTransfers(null); Assert.assertNull(m.getTransfers());
+    m.setMarket("HK"); Assert.assertEquals("HK", m.getMarket());
+    m.setSecretKey("sk"); Assert.assertEquals("sk", m.getSecretKey());
+
+    PositionTransferModel.Transfer t = new PositionTransferModel.Transfer("AAPL", 100L);
+    Assert.assertEquals("AAPL", t.getSymbol());
+    Assert.assertEquals(Long.valueOf(100L), t.getQuantity());
+    t.setExpiry("20231215"); Assert.assertEquals("20231215", t.getExpiry());
+    t.setStrike("150"); Assert.assertEquals("150", t.getStrike());
+    t.setRight("C"); Assert.assertEquals("C", t.getRight());
+    t.setQuantity(200L); Assert.assertEquals(Long.valueOf(200L), t.getQuantity());
+    t.setSecType("FUT"); Assert.assertEquals("FUT", t.getSecType());
+    t.setSymbol("GOOG"); Assert.assertEquals("GOOG", t.getSymbol());
+  }
   @Test public void testPrimeAnalyticsAssetRequest() {
     Assert.assertEquals(MethodName.ANALYTICS_ASSET, new PrimeAnalyticsAssetRequest().getApiMethodName());
     Assert.assertEquals(PrimeAnalyticsAssetResponse.class, new PrimeAnalyticsAssetRequest().getResponseClass());
