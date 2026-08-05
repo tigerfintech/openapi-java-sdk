@@ -46,7 +46,8 @@ public final class IntegTestConfig {
     try {
       config.setEnv(Env.valueOf(envStr.trim().toUpperCase()));
     } catch (IllegalArgumentException e) {
-      config.setEnv(Env.PROD);
+      Assert.fail("invalid test.env: " + envStr
+          + " (expected one of " + java.util.Arrays.toString(Env.values()) + ")");
     }
     config.isAutoGrabPermission = false;
     config.isAutoRefreshToken = false;
@@ -72,7 +73,7 @@ public final class IntegTestConfig {
     if (account == null || account.isEmpty()) {
       account = env("TIGEROPEN_ACCOUNT");
     }
-    if (account == null || account.isEmpty() && lastConfig != null) {
+    if ((account == null || account.isEmpty()) && lastConfig != null) {
       account = lastConfig.defaultAccount;
     }
     return account;
