@@ -169,11 +169,11 @@
             <exclude>com/tigerbrokers/stock/openapi/client/struct/param/**</exclude>
             <!-- 依赖 live API / Netty pipeline / scheduled executor / 网络 / Thread.sleep
                  的类，纯单测无法覆盖（需运行时组件或真实 API），由集成测试覆盖。 -->
-            <exclude>com/tigerbrokers/stock/openapi/client/util/OptionCalcUtils</exclude>
-            <exclude>com/tigerbrokers/stock/openapi/client/util/ApiCallbackDecoderUtils</exclude>
-            <exclude>com/tigerbrokers/stock/openapi/client/util/NetworkUtil</exclude>
-            <exclude>com/tigerbrokers/stock/openapi/client/util/PageTokenUtil</exclude>
-            <exclude>com/tigerbrokers/stock/openapi/client/https/client/TokenManager</exclude>
+            <exclude>**/OptionCalcUtils*</exclude>
+            <exclude>**/ApiCallbackDecoderUtils*</exclude>
+            <exclude>**/NetworkUtil*</exclude>
+            <exclude>**/PageTokenUtil*</exclude>
+            <exclude>**/TokenManager*</exclude>
           </excludes>
         </configuration>
         <executions>
