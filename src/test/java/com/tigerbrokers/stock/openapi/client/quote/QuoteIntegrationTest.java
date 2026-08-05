@@ -11,6 +11,7 @@ import com.tigerbrokers.stock.openapi.client.https.response.TigerHttpResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.*;
 import com.tigerbrokers.stock.openapi.client.testsupport.IntegTestConfig;
+import java.math.BigDecimal;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
@@ -47,6 +48,8 @@ public class QuoteIntegrationTest {
     request.setBizContent("{\"market\":\"US\"}");
     TigerHttpResponse response = client.execute(request);
     assertDataPresent(response, "testMarketState");
+    Assert.assertTrue("market state data should mention US market",
+        response.getData().contains("US"));
   }
 
   @Test
@@ -58,6 +61,8 @@ public class QuoteIntegrationTest {
     Assert.assertNotNull("symbols should not be null", symbolResp.getSymbols());
     Assert.assertFalse("symbols should not be empty", symbolResp.getSymbols().isEmpty());
     Assert.assertNotNull("first symbol should not be null", symbolResp.getSymbols().get(0));
+    Assert.assertTrue("first symbol should not be empty",
+        !symbolResp.getSymbols().get(0).isEmpty());
   }
 
   @Test
@@ -70,8 +75,12 @@ public class QuoteIntegrationTest {
     Assert.assertFalse("symbolNameItems should not be empty", nameResp.getSymbolNameItems().isEmpty());
     Assert.assertNotNull("first symbol should not be null",
         nameResp.getSymbolNameItems().get(0).getSymbol());
+    Assert.assertTrue("first symbol should not be empty",
+        !nameResp.getSymbolNameItems().get(0).getSymbol().isEmpty());
     Assert.assertNotNull("first name should not be null",
         nameResp.getSymbolNameItems().get(0).getName());
+    Assert.assertTrue("first name should not be empty",
+        !nameResp.getSymbolNameItems().get(0).getName().isEmpty());
   }
 
   @Test
@@ -80,6 +89,7 @@ public class QuoteIntegrationTest {
     request.setBizContent("{\"symbols\":[\"AAPL\"]}");
     TigerHttpResponse response = client.execute(request);
     assertDataPresent(response, "testBrief");
+    Assert.assertTrue("brief data should contain AAPL", response.getData().contains("AAPL"));
   }
 
   @Test
@@ -88,6 +98,8 @@ public class QuoteIntegrationTest {
     request.setBizContent("{\"symbols\":[\"AAPL\"]}");
     TigerHttpResponse response = client.execute(request);
     assertDataPresent(response, "testStockDetail");
+    Assert.assertTrue("stock detail data should contain AAPL",
+        response.getData().contains("AAPL"));
   }
 
   @Test
@@ -100,6 +112,8 @@ public class QuoteIntegrationTest {
     Assert.assertFalse("timelineItems should not be empty", tlResp.getTimelineItems().isEmpty());
     Assert.assertNotNull("first timeline symbol should not be null",
         tlResp.getTimelineItems().get(0).getSymbol());
+    Assert.assertEquals("first timeline symbol should be AAPL",
+        "AAPL", tlResp.getTimelineItems().get(0).getSymbol());
   }
 
   @Test
@@ -112,6 +126,8 @@ public class QuoteIntegrationTest {
     Assert.assertFalse("historyTimelineItems should not be empty", htlResp.getTimelineItems().isEmpty());
     Assert.assertNotNull("first history timeline symbol should not be null",
         htlResp.getTimelineItems().get(0).getSymbol());
+    Assert.assertEquals("first history timeline symbol should be AAPL",
+        "AAPL", htlResp.getTimelineItems().get(0).getSymbol());
   }
 
   @Test
@@ -124,12 +140,30 @@ public class QuoteIntegrationTest {
     Assert.assertFalse("klineItems should not be empty", klineResp.getKlineItems().isEmpty());
     Assert.assertNotNull("first kline symbol should not be null",
         klineResp.getKlineItems().get(0).getSymbol());
+    Assert.assertEquals("first kline symbol should be AAPL",
+        "AAPL", klineResp.getKlineItems().get(0).getSymbol());
     if (klineResp.getKlineItems().get(0).getItems() != null
         && !klineResp.getKlineItems().get(0).getItems().isEmpty()) {
       Assert.assertNotNull("first kline point time should not be null",
           klineResp.getKlineItems().get(0).getItems().get(0).getTime());
+      Assert.assertTrue("first kline point time should be > 0",
+          klineResp.getKlineItems().get(0).getItems().get(0).getTime() > 0);
       Assert.assertNotNull("first kline point close should not be null",
           klineResp.getKlineItems().get(0).getItems().get(0).getClose());
+      Assert.assertTrue("first kline point close should be > 0",
+          klineResp.getKlineItems().get(0).getItems().get(0).getClose() > 0);
+      Assert.assertNotNull("first kline point open should not be null",
+          klineResp.getKlineItems().get(0).getItems().get(0).getOpen());
+      Assert.assertTrue("first kline point open should be > 0",
+          klineResp.getKlineItems().get(0).getItems().get(0).getOpen() > 0);
+      Assert.assertNotNull("first kline point high should not be null",
+          klineResp.getKlineItems().get(0).getItems().get(0).getHigh());
+      Assert.assertTrue("first kline point high should be > 0",
+          klineResp.getKlineItems().get(0).getItems().get(0).getHigh() > 0);
+      Assert.assertNotNull("first kline point volume should not be null",
+          klineResp.getKlineItems().get(0).getItems().get(0).getVolume());
+      Assert.assertTrue("first kline point volume should be >= 0",
+          klineResp.getKlineItems().get(0).getItems().get(0).getVolume() >= 0);
     }
   }
 
@@ -143,6 +177,8 @@ public class QuoteIntegrationTest {
     Assert.assertFalse("tradeTickItems should not be empty", ttResp.getTradeTickItems().isEmpty());
     Assert.assertNotNull("first trade tick symbol should not be null",
         ttResp.getTradeTickItems().get(0).getSymbol());
+    Assert.assertEquals("first trade tick symbol should be AAPL",
+        "AAPL", ttResp.getTradeTickItems().get(0).getSymbol());
   }
 
   @Test
@@ -155,8 +191,12 @@ public class QuoteIntegrationTest {
     Assert.assertFalse("contractItems should not be empty", cResp.getContractItems().isEmpty());
     Assert.assertNotNull("first contract symbol should not be null",
         cResp.getContractItems().get(0).getSymbol());
+    Assert.assertEquals("first contract symbol should be AAPL",
+        "AAPL", cResp.getContractItems().get(0).getSymbol());
     Assert.assertNotNull("first contract secType should not be null",
         cResp.getContractItems().get(0).getSecType());
+    Assert.assertTrue("first contract secType should not be empty",
+        !cResp.getContractItems().get(0).getSecType().isEmpty());
   }
 
   @Test
@@ -169,8 +209,12 @@ public class QuoteIntegrationTest {
     Assert.assertFalse("realTimeQuoteItems should not be empty", rtResp.getRealTimeQuoteItems().isEmpty());
     Assert.assertNotNull("first realtime symbol should not be null",
         rtResp.getRealTimeQuoteItems().get(0).getSymbol());
+    Assert.assertEquals("first realtime symbol should be AAPL",
+        "AAPL", rtResp.getRealTimeQuoteItems().get(0).getSymbol());
     Assert.assertNotNull("first realtime latestPrice should not be null",
         rtResp.getRealTimeQuoteItems().get(0).getLatestPrice());
+    Assert.assertTrue("first realtime latestPrice should be > 0",
+        rtResp.getRealTimeQuoteItems().get(0).getLatestPrice() > 0);
   }
 
   @Test
@@ -183,6 +227,8 @@ public class QuoteIntegrationTest {
     Assert.assertFalse("shortableStockItems should not be empty", ssResp.getShortableStockItems().isEmpty());
     Assert.assertNotNull("first shortable symbol should not be null",
         ssResp.getShortableStockItems().get(0).getSymbol());
+    Assert.assertEquals("first shortable symbol should be AAPL",
+        "AAPL", ssResp.getShortableStockItems().get(0).getSymbol());
   }
 
   @Test
@@ -195,6 +241,12 @@ public class QuoteIntegrationTest {
     Assert.assertFalse("stockTradeItems should not be empty", stResp.getStockTradeItems().isEmpty());
     Assert.assertNotNull("first stock trade symbol should not be null",
         stResp.getStockTradeItems().get(0).getSymbol());
+    Assert.assertEquals("first stock trade symbol should be AAPL",
+        "AAPL", stResp.getStockTradeItems().get(0).getSymbol());
+    Assert.assertNotNull("first stock trade lotSize should not be null",
+        stResp.getStockTradeItems().get(0).getLotSize());
+    Assert.assertTrue("first stock trade lotSize should be > 0",
+        stResp.getStockTradeItems().get(0).getLotSize() > 0);
   }
 
   @Test
@@ -207,6 +259,8 @@ public class QuoteIntegrationTest {
     Assert.assertFalse("quoteDepthItems should not be empty", dResp.getQuoteDepthItems().isEmpty());
     Assert.assertNotNull("first depth symbol should not be null",
         dResp.getQuoteDepthItems().get(0).getSymbol());
+    Assert.assertEquals("first depth symbol should be AAPL",
+        "AAPL", dResp.getQuoteDepthItems().get(0).getSymbol());
   }
 
   @Test
@@ -219,6 +273,12 @@ public class QuoteIntegrationTest {
     Assert.assertFalse("quoteDelayItems should not be empty", dlResp.getQuoteDelayItems().isEmpty());
     Assert.assertNotNull("first delay symbol should not be null",
         dlResp.getQuoteDelayItems().get(0).getSymbol());
+    Assert.assertEquals("first delay symbol should be AAPL",
+        "AAPL", dlResp.getQuoteDelayItems().get(0).getSymbol());
+    Assert.assertNotNull("first delay time should not be null",
+        dlResp.getQuoteDelayItems().get(0).getTime());
+    Assert.assertTrue("first delay time should be > 0",
+        dlResp.getQuoteDelayItems().get(0).getTime() > 0);
   }
 
   @Test
@@ -229,6 +289,18 @@ public class QuoteIntegrationTest {
         (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteOvernightResponse) response;
     Assert.assertNotNull("overnight data should not be null", ovResp.getData());
     Assert.assertFalse("overnight data should not be empty", ovResp.getData().isEmpty());
+    Assert.assertNotNull("first overnight symbol should not be null",
+        ovResp.getData().get(0).getSymbol());
+    Assert.assertEquals("first overnight symbol should be AAPL",
+        "AAPL", ovResp.getData().get(0).getSymbol());
+    if (ovResp.getData().get(0).getLatestPrice() != null) {
+      Assert.assertTrue("first overnight latestPrice should be > 0",
+          ovResp.getData().get(0).getLatestPrice() > 0);
+    }
+    if (ovResp.getData().get(0).getTimestamp() != null) {
+      Assert.assertTrue("first overnight timestamp should be > 0",
+          ovResp.getData().get(0).getTimestamp() > 0);
+    }
   }
 
   @Test
@@ -241,6 +313,8 @@ public class QuoteIntegrationTest {
     Assert.assertFalse("calendar items should not be empty", tcResp.getItems().isEmpty());
     Assert.assertNotNull("first calendar date should not be null",
         tcResp.getItems().get(0).getDate());
+    Assert.assertTrue("first calendar date should not be empty",
+        !tcResp.getItems().get(0).getDate().isEmpty());
   }
 
   @Test
@@ -252,6 +326,8 @@ public class QuoteIntegrationTest {
     Assert.assertNotNull("stockBrokerItem should not be null", sbResp.getStockBrokerItem());
     Assert.assertNotNull("broker symbol should not be null",
         sbResp.getStockBrokerItem().getSymbol());
+    Assert.assertEquals("broker symbol should be 00700",
+        "00700", sbResp.getStockBrokerItem().getSymbol());
   }
 
   @Test
@@ -264,6 +340,8 @@ public class QuoteIntegrationTest {
         cdResp.getCapitalDistributionItem());
     Assert.assertNotNull("capital distribution symbol should not be null",
         cdResp.getCapitalDistributionItem().getSymbol());
+    Assert.assertEquals("capital distribution symbol should be AAPL",
+        "AAPL", cdResp.getCapitalDistributionItem().getSymbol());
   }
 
   @Test
@@ -275,6 +353,8 @@ public class QuoteIntegrationTest {
     Assert.assertNotNull("capitalFlowItem should not be null", cfResp.getCapitalFlowItem());
     Assert.assertNotNull("capital flow symbol should not be null",
         cfResp.getCapitalFlowItem().getSymbol());
+    Assert.assertEquals("capital flow symbol should be AAPL",
+        "AAPL", cfResp.getCapitalFlowItem().getSymbol());
   }
 
   @Test
@@ -287,6 +367,8 @@ public class QuoteIntegrationTest {
     Assert.assertFalse("tradeRank items should not be empty", trResp.getItems().isEmpty());
     Assert.assertNotNull("first trade rank symbol should not be null",
         trResp.getItems().get(0).getSymbol());
+    Assert.assertTrue("first trade rank symbol should not be empty",
+        !trResp.getItems().get(0).getSymbol().isEmpty());
   }
 
   @Test
@@ -295,6 +377,8 @@ public class QuoteIntegrationTest {
     request.setBizContent("{\"symbols\":[\"AAPL\"]}");
     TigerHttpResponse response = client.execute(request);
     assertDataPresent(response, "testOptionExpiration");
+    Assert.assertTrue("option expiration data should contain AAPL",
+        response.getData().contains("AAPL"));
   }
 
   @Test
@@ -303,6 +387,8 @@ public class QuoteIntegrationTest {
     request.setBizContent("{\"symbol\":\"AAPL\",\"expiry\":\"2027-01-15\"}");
     TigerHttpResponse response = client.execute(request);
     assertDataPresent(response, "testOptionChain");
+    Assert.assertTrue("option chain data should contain AAPL",
+        response.getData().contains("AAPL"));
   }
 
   @Test
@@ -311,6 +397,8 @@ public class QuoteIntegrationTest {
     request.setBizContent("{\"identifiers\":[\"AAPL 270115C00200000\"]}");
     TigerHttpResponse response = client.execute(request);
     assertDataPresent(response, "testOptionBrief");
+    Assert.assertTrue("option brief data should contain AAPL",
+        response.getData().contains("AAPL"));
   }
 
   @Test
@@ -320,6 +408,10 @@ public class QuoteIntegrationTest {
     com.tigerbrokers.stock.openapi.client.https.response.option.WarrantFilterResponse wfResp =
         (com.tigerbrokers.stock.openapi.client.https.response.option.WarrantFilterResponse) response;
     Assert.assertNotNull("warrantFilter item should not be null", wfResp.getItem());
+    Assert.assertNotNull("warrantFilter totalCount should not be null",
+        wfResp.getItem().getTotalCount());
+    Assert.assertTrue("warrantFilter totalCount should be >= 0",
+        wfResp.getItem().getTotalCount() >= 0);
   }
 
   @Test
@@ -329,6 +421,14 @@ public class QuoteIntegrationTest {
     com.tigerbrokers.stock.openapi.client.https.response.option.WarrantQuoteResponse wqResp =
         (com.tigerbrokers.stock.openapi.client.https.response.option.WarrantQuoteResponse) response;
     Assert.assertNotNull("warrantQuote item should not be null", wqResp.getItem());
+    Assert.assertNotNull("warrantQuote items should not be null",
+        wqResp.getItem().getItems());
+    if (wqResp.getItem().getItems() != null && !wqResp.getItem().getItems().isEmpty()) {
+      Assert.assertNotNull("first warrant quote symbol should not be null",
+          wqResp.getItem().getItems().get(0).getSymbol());
+      Assert.assertTrue("first warrant quote symbol should not be empty",
+          !wqResp.getItem().getItems().get(0).getSymbol().isEmpty());
+    }
   }
 
   @Test
@@ -342,6 +442,12 @@ public class QuoteIntegrationTest {
         feResp.getFutureExchangeItems().isEmpty());
     Assert.assertNotNull("first exchange code should not be null",
         feResp.getFutureExchangeItems().get(0).getCode());
+    Assert.assertTrue("first exchange code should not be empty",
+        !feResp.getFutureExchangeItems().get(0).getCode().isEmpty());
+    Assert.assertNotNull("first exchange name should not be null",
+        feResp.getFutureExchangeItems().get(0).getName());
+    Assert.assertTrue("first exchange name should not be empty",
+        !feResp.getFutureExchangeItems().get(0).getName().isEmpty());
   }
 
   @Test
@@ -353,6 +459,8 @@ public class QuoteIntegrationTest {
     Assert.assertNotNull("futureContractItem should not be null", fcResp.getFutureContractItem());
     Assert.assertNotNull("contract code should not be null",
         fcResp.getFutureContractItem().getContractCode());
+    Assert.assertEquals("contract code should match request",
+        FUTURE_CONTRACT, fcResp.getFutureContractItem().getContractCode());
   }
 
   @Test
@@ -366,6 +474,8 @@ public class QuoteIntegrationTest {
         fcsResp.getFutureContractItems().isEmpty());
     Assert.assertNotNull("first contract code should not be null",
         fcsResp.getFutureContractItems().get(0).getContractCode());
+    Assert.assertTrue("first contract code should not be empty",
+        !fcsResp.getFutureContractItems().get(0).getContractCode().isEmpty());
   }
 
   @Test
@@ -378,6 +488,8 @@ public class QuoteIntegrationTest {
         fccResp.getFutureContractItem());
     Assert.assertNotNull("continuous contract code should not be null",
         fccResp.getFutureContractItem().getContractCode());
+    Assert.assertTrue("continuous contract code should not be empty",
+        !fccResp.getFutureContractItem().getContractCode().isEmpty());
   }
 
   @Test
@@ -390,6 +502,8 @@ public class QuoteIntegrationTest {
         fcurResp.getFutureContractItem());
     Assert.assertNotNull("current contract code should not be null",
         fcurResp.getFutureContractItem().getContractCode());
+    Assert.assertTrue("current contract code should not be empty",
+        !fcurResp.getFutureContractItem().getContractCode().isEmpty());
   }
 
   @Test
@@ -403,6 +517,8 @@ public class QuoteIntegrationTest {
         fctResp.getFutureContractItems().isEmpty());
     Assert.assertNotNull("first contract code should not be null",
         fctResp.getFutureContractItems().get(0).getContractCode());
+    Assert.assertTrue("first contract code should not be empty",
+        !fctResp.getFutureContractItems().get(0).getContractCode().isEmpty());
   }
 
   @Test
@@ -416,6 +532,8 @@ public class QuoteIntegrationTest {
         fkResp.getFutureKlineItems().isEmpty());
     Assert.assertNotNull("first kline contractCode should not be null",
         fkResp.getFutureKlineItems().get(0).getContractCode());
+    Assert.assertEquals("first kline contractCode should match request",
+        FUTURE_CONTRACT, fkResp.getFutureKlineItems().get(0).getContractCode());
   }
 
   @Test
@@ -429,8 +547,12 @@ public class QuoteIntegrationTest {
         frResp.getFutureRealTimeItems().isEmpty());
     Assert.assertNotNull("first realtime contractCode should not be null",
         frResp.getFutureRealTimeItems().get(0).getContractCode());
+    Assert.assertEquals("first realtime contractCode should match request",
+        FUTURE_CONTRACT, frResp.getFutureRealTimeItems().get(0).getContractCode());
     Assert.assertNotNull("first realtime latestPrice should not be null",
         frResp.getFutureRealTimeItems().get(0).getLatestPrice());
+    Assert.assertTrue("first realtime latestPrice should be > 0",
+        frResp.getFutureRealTimeItems().get(0).getLatestPrice().compareTo(BigDecimal.ZERO) > 0);
   }
 
   @Test
@@ -441,6 +563,8 @@ public class QuoteIntegrationTest {
         (com.tigerbrokers.stock.openapi.client.https.response.future.FutureTradingDateResponse) response;
     Assert.assertNotNull("futureTradingDateItem should not be null",
         ftdResp.getFutureTradingDateItem());
+    Assert.assertNotNull("tradingTimes should not be null",
+        ftdResp.getFutureTradingDateItem().getTradingTimes());
   }
 
   @Test
@@ -454,6 +578,8 @@ public class QuoteIntegrationTest {
         fdResp.getFutureDepthItems().isEmpty());
     Assert.assertNotNull("first depth contractCode should not be null",
         fdResp.getFutureDepthItems().get(0).getContractCode());
+    Assert.assertEquals("first depth contractCode should match request",
+        FUTURE_CONTRACT, fdResp.getFutureDepthItems().get(0).getContractCode());
   }
 
   @Test
@@ -468,8 +594,12 @@ public class QuoteIntegrationTest {
         fcResp.getFinancialCurrencyItems().isEmpty());
     Assert.assertNotNull("first currency symbol should not be null",
         fcResp.getFinancialCurrencyItems().get(0).getSymbol());
+    Assert.assertEquals("first currency symbol should be AAPL",
+        "AAPL", fcResp.getFinancialCurrencyItems().get(0).getSymbol());
     Assert.assertNotNull("first currency should not be null",
         fcResp.getFinancialCurrencyItems().get(0).getCurrency());
+    Assert.assertTrue("first currency should not be empty",
+        !fcResp.getFinancialCurrencyItems().get(0).getCurrency().isEmpty());
   }
 
   @Test
@@ -484,6 +614,8 @@ public class QuoteIntegrationTest {
         ferResp.getFinancialExchangeRateItems().isEmpty());
     Assert.assertNotNull("first exchange rate currency should not be null",
         ferResp.getFinancialExchangeRateItems().get(0).getCurrency());
+    Assert.assertTrue("first exchange rate currency should not be empty",
+        !ferResp.getFinancialExchangeRateItems().get(0).getCurrency().isEmpty());
   }
 
   @Test
@@ -498,6 +630,8 @@ public class QuoteIntegrationTest {
         sfResp.getStockFundamentalItems().isEmpty());
     Assert.assertNotNull("first fundamental symbol should not be null",
         sfResp.getStockFundamentalItems().get(0).getSymbol());
+    Assert.assertEquals("first fundamental symbol should be AAPL",
+        "AAPL", sfResp.getStockFundamentalItems().get(0).getSymbol());
   }
 
   @Test
@@ -519,6 +653,8 @@ public class QuoteIntegrationTest {
         fucResp.getFundContractItems().isEmpty());
     Assert.assertNotNull("first fund symbol should not be null",
         fucResp.getFundContractItems().get(0).getSymbol());
+    Assert.assertEquals("first fund symbol should be SPY",
+        "SPY", fucResp.getFundContractItems().get(0).getSymbol());
   }
 
   @Test
@@ -531,6 +667,12 @@ public class QuoteIntegrationTest {
     Assert.assertFalse("fundQuoteItems should not be empty", fqResp.getQuoteItems().isEmpty());
     Assert.assertNotNull("first fund quote symbol should not be null",
         fqResp.getQuoteItems().get(0).getSymbol());
+    Assert.assertEquals("first fund quote symbol should be SPY",
+        "SPY", fqResp.getQuoteItems().get(0).getSymbol());
+    Assert.assertNotNull("first fund quote timestamp should not be null",
+        fqResp.getQuoteItems().get(0).getTimestamp());
+    Assert.assertTrue("first fund quote timestamp should be > 0",
+        fqResp.getQuoteItems().get(0).getTimestamp() > 0);
   }
 
   @Test
@@ -571,6 +713,8 @@ public class QuoteIntegrationTest {
     request.setBizContent("{\"symbol\":\"AAPL\",\"market\":\"US\"}");
     TigerHttpResponse response = client.execute(request);
     assertDataPresent(response, "testStockIndustry");
+    Assert.assertTrue("stock industry data should contain AAPL",
+        response.getData().contains("AAPL"));
   }
 
 }

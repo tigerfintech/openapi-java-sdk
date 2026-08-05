@@ -11,6 +11,7 @@ import com.tigerbrokers.stock.openapi.client.https.request.financial.CorporateSy
 import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateDelistingResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateIpoResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateSymbolChangeResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.CorporateActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
 import org.junit.Assert;
@@ -72,8 +73,12 @@ public class CorporateActionIntegrationTest {
     Assert.assertNotNull("newSymbol should not be null", first.getNewSymbol());
     Assert.assertFalse("newSymbol should not be empty", first.getNewSymbol().isEmpty());
     Assert.assertNotNull("symbol should not be null", first.getSymbol());
+    Assert.assertTrue("symbol should not be empty", !first.getSymbol().isEmpty());
     Assert.assertNotNull("market should not be null", first.getMarket());
+    Assert.assertEquals("market should be US", "US", first.getMarket());
     Assert.assertNotNull("actionType should not be null", first.getActionType());
+    Assert.assertEquals("actionType should be SYMBOL_CHANGE",
+        CorporateActionType.SYMBOL_CHANGE, first.getActionType());
     Assert.assertNotNull("executeDate should not be null", first.getExecuteDate());
     System.out.println("SYMBOL_CHANGE items: " + items);
   }
@@ -95,8 +100,12 @@ public class CorporateActionIntegrationTest {
     CorporateDelistingItem first = items.values().iterator().next().get(0);
     Assert.assertNotNull("announcedDate should not be null", first.getAnnouncedDate());
     Assert.assertNotNull("symbol should not be null", first.getSymbol());
+    Assert.assertTrue("symbol should not be empty", !first.getSymbol().isEmpty());
     Assert.assertNotNull("market should not be null", first.getMarket());
+    Assert.assertEquals("market should be US", "US", first.getMarket());
     Assert.assertNotNull("actionType should not be null", first.getActionType());
+    Assert.assertEquals("actionType should be DELISTING",
+        CorporateActionType.DELISTING, first.getActionType());
     System.out.println("DELISTING items: " + items);
   }
 
@@ -117,9 +126,17 @@ public class CorporateActionIntegrationTest {
     CorporateIpoItem first = items.values().iterator().next().get(0);
     Assert.assertNotNull("listingDate should not be null", first.getListingDate());
     Assert.assertNotNull("symbol should not be null", first.getSymbol());
+    Assert.assertTrue("symbol should not be empty", !first.getSymbol().isEmpty());
     Assert.assertNotNull("market should not be null", first.getMarket());
+    Assert.assertEquals("market should be US", "US", first.getMarket());
     Assert.assertNotNull("actionType should not be null", first.getActionType());
+    Assert.assertEquals("actionType should be IPO",
+        CorporateActionType.IPO, first.getActionType());
     Assert.assertNotNull("country should not be null", first.getCountry());
+    Assert.assertTrue("country should not be empty", !first.getCountry().isEmpty());
+    if (first.getListingPrice() != null) {
+      Assert.assertTrue("listingPrice should be > 0", first.getListingPrice() > 0);
+    }
     System.out.println("IPO items: " + items);
   }
 

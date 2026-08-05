@@ -51,60 +51,80 @@ public class TradeAccountIntegrationTest {
     request.setBizContent("{}");
     TigerHttpResponse response = client.execute(request);
     assertDataPresent(response, "testAccounts");
+    Assert.assertTrue("accounts data should contain account field",
+        response.getData().contains("account"));
   }
 
   @Test
   public void testAssets() {
     TigerHttpResponse response = executeWithAccount(MethodName.ASSETS);
     assertDataPresent(response, "testAssets");
+    Assert.assertTrue("assets data should contain the requested account",
+        response.getData().contains(account));
   }
 
   @Test
   public void testPositions() {
     TigerHttpResponse response = executeWithAccount(MethodName.POSITIONS);
     assertDataPresent(response, "testPositions");
+    Assert.assertTrue("positions data should contain the requested account",
+        response.getData().contains(account));
   }
 
   @Test
   public void testActiveOrders() {
     TigerHttpResponse response = executeWithAccount(MethodName.ACTIVE_ORDERS);
     assertDataPresent(response, "testActiveOrders");
+    Assert.assertTrue("active orders data should contain the requested account",
+        response.getData().contains(account));
   }
 
   @Test
   public void testInactiveOrders() {
     TigerHttpResponse response = executeWithAccount(MethodName.INACTIVE_ORDERS);
     assertDataPresent(response, "testInactiveOrders");
+    Assert.assertTrue("inactive orders data should contain the requested account",
+        response.getData().contains(account));
   }
 
   @Test
   public void testFilledOrders() {
     TigerHttpResponse response = executeWithAccount(MethodName.FILLED_ORDERS);
     assertDataPresent(response, "testFilledOrders");
+    Assert.assertTrue("filled orders data should contain the requested account",
+        response.getData().contains(account));
   }
 
   @Test
   public void testOrderTransactions() {
     TigerHttpResponse response = executeWithAccount(MethodName.ORDER_TRANSACTIONS);
     assertDataPresent(response, "testOrderTransactions");
+    Assert.assertTrue("order transactions data should contain the requested account",
+        response.getData().contains(account));
   }
 
   @Test
   public void testPrimeAssets() {
     TigerHttpResponse response = executeWithAccount(MethodName.PRIME_ASSETS);
     assertDataPresent(response, "testPrimeAssets");
+    Assert.assertTrue("prime assets data should contain the requested account",
+        response.getData().contains(account));
   }
 
   @Test
   public void testSegmentFundAvailable() {
     TigerHttpResponse response = executeWithAccount(MethodName.SEGMENT_FUND_AVAILABLE);
     assertDataPresent(response, "testSegmentFundAvailable");
+    Assert.assertTrue("segment fund available data should contain the requested account",
+        response.getData().contains(account));
   }
 
   @Test
   public void testSegmentFundHistory() {
     TigerHttpResponse response = executeWithAccount(MethodName.SEGMENT_FUND_HISTORY);
     assertDataPresent(response, "testSegmentFundHistory");
+    Assert.assertTrue("segment fund history data should contain the requested account",
+        response.getData().contains(account));
   }
 
   @Test
@@ -112,12 +132,16 @@ public class TradeAccountIntegrationTest {
     TigerHttpResponse response = executeWithAccount(MethodName.TRANSFER_FUND);
     assertSuccess(response, "testTransferFund");
     Assert.assertNotNull("testTransferFund data should not be null", response.getData());
+    Assert.assertFalse("testTransferFund data should not be empty",
+        response.getData().trim().isEmpty());
   }
 
   @Test
   public void testAggregateAssets() {
     TigerHttpResponse response = executeWithAccount(MethodName.AGGREGATE_ASSETS);
     assertDataPresent(response, "testAggregateAssets");
+    Assert.assertTrue("aggregate assets data should contain the requested account",
+        response.getData().contains(account));
   }
 
 }

@@ -5,6 +5,7 @@ import com.tigerbrokers.stock.openapi.client.https.client.TigerHttpClient;
 import com.tigerbrokers.stock.openapi.client.https.domain.financial.item.CorporateSymbolChangeItem;
 import com.tigerbrokers.stock.openapi.client.https.request.financial.CorporateSymbolChangeRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateSymbolChangeResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.CorporateActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -70,8 +71,13 @@ public class CorporateSymbolChangeIntegrationTest {
         Assert.assertFalse("list for " + symbol + " should not be empty", list.isEmpty());
         list.forEach(item -> {
           Assert.assertNotNull("actionType should not be null for " + symbol, item.getActionType());
+          Assert.assertEquals("actionType should be SYMBOL_CHANGE for " + symbol,
+              CorporateActionType.SYMBOL_CHANGE, item.getActionType());
           Assert.assertNotNull("symbol should not be null", item.getSymbol());
+          Assert.assertTrue("symbol should not be empty for " + symbol,
+              !item.getSymbol().isEmpty());
           Assert.assertNotNull("market should not be null", item.getMarket());
+          Assert.assertEquals("market should be US for " + symbol, "US", item.getMarket());
           Assert.assertNotNull("executeDate should not be null", item.getExecuteDate());
           Assert.assertNotNull("oldSymbol should not be null", item.getOldSymbol());
           Assert.assertFalse("oldSymbol should not be empty", item.getOldSymbol().isEmpty());
@@ -110,7 +116,10 @@ public class CorporateSymbolChangeIntegrationTest {
         list.forEach(item -> {
           Assert.assertNotNull("HK actionType should not be null for " + symbol, item.getActionType());
           Assert.assertNotNull("HK symbol should not be null", item.getSymbol());
+          Assert.assertTrue("HK symbol should not be empty for " + symbol,
+              !item.getSymbol().isEmpty());
           Assert.assertNotNull("HK market should not be null", item.getMarket());
+          Assert.assertEquals("HK market should be HK for " + symbol, "HK", item.getMarket());
         });
       });
     }
