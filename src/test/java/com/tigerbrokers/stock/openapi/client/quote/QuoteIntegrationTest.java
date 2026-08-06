@@ -7,11 +7,17 @@ import com.tigerbrokers.stock.openapi.client.https.request.future.*;
 import com.tigerbrokers.stock.openapi.client.https.request.financial.*;
 import com.tigerbrokers.stock.openapi.client.https.request.fund.*;
 import com.tigerbrokers.stock.openapi.client.https.request.option.*;
+import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionAnalysisModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionCommonModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionKlineModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionTimelineModel;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerHttpResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.*;
 import com.tigerbrokers.stock.openapi.client.testsupport.IntegTestConfig;
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Collections;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
@@ -715,6 +721,252 @@ public class QuoteIntegrationTest {
     assertDataPresent(response, "testStockIndustry");
     Assert.assertTrue("stock industry data should contain AAPL",
         response.getData().contains("AAPL"));
+  }
+
+  // ── Kline Quota ──────────────────────────────────────────────────────────
+
+  @Test
+  public void testKlineQuota() {
+    TigerResponse response = client.execute(KlineQuotaRequest.newRequest());
+    assertSuccess(response, "testKlineQuota");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.KlineQuotaResponse kqResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.KlineQuotaResponse) response;
+    Assert.assertNotNull("quotaItems should not be null", kqResp.getQuotaItems());
+  }
+
+  // ── Hour Trading Timeline ────────────────────────────────────────────────
+
+  @Test
+  public void testHourTradingTimeline() {
+    TigerHttpRequest request = new TigerHttpRequest(MethodName.HOUR_TRADING_TIMELINE);
+    request.setBizContent("{\"symbols\":[\"AAPL\"]}");
+    TigerHttpResponse response = client.execute(request);
+    assertDataPresent(response, "testHourTradingTimeline");
+    Assert.assertTrue("hour trading timeline data should contain AAPL",
+        response.getData().contains("AAPL"));
+  }
+
+  // ── Broker Hold ──────────────────────────────────────────────────────────
+
+  @Test
+  public void testBrokerHold() {
+    TigerResponse response = client.execute(QuoteBrokerHoldRequest.newRequest(Market.HK, 5, 1));
+    assertSuccess(response, "testBrokerHold");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteBrokerHoldResponse bhResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteBrokerHoldResponse) response;
+    Assert.assertNotNull("brokerHoldPageItem should not be null", bhResp.getBrokerHoldPageItem());
+    Assert.assertNotNull("totalCount should not be null",
+        bhResp.getBrokerHoldPageItem().getTotalCount());
+    Assert.assertTrue("totalCount should be >= 0",
+        bhResp.getBrokerHoldPageItem().getTotalCount() >= 0);
+  }
+
+  // ── Market Scanner Tags ───────────────────────────────────────────────────
+
+  @Test
+  public void testMarketScannerTags() {
+    TigerResponse response = client.execute(MarketScannerTagsRequest.newRequest(
+        Market.US, Collections.singletonList(MultiTagField.MultiTagField_Industry)));
+    assertSuccess(response, "testMarketScannerTags");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.MarketScannerTagsResponse mstResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.MarketScannerTagsResponse) response;
+    Assert.assertNotNull("scanner tags items should not be null", mstResp.getItems());
+    if (!mstResp.getItems().isEmpty()) {
+      Assert.assertNotNull("first tag market should not be null",
+          mstResp.getItems().get(0).getMarket());
+      Assert.assertTrue("first tag market should not be empty",
+          !mstResp.getItems().get(0).getMarket().isEmpty());
+    }
+  }
+
+  // ── Option Kline (V2) ─────────────────────────────────────────────────────
+
+  @Test
+  public void testOptionKline() throws Exception {
+    OptionKlineModel model = new OptionKlineModel("AAPL 270115C00200000");
+    model.setPeriod(KType.day.name());
+    TigerResponse response = client.execute(OptionKlineQueryV2Request.of(model));
+    assertSuccess(response, "testOptionKline");
+    com.tigerbrokers.stock.openapi.client.https.response.option.OptionKlineResponse okResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.option.OptionKlineResponse) response;
+    Assert.assertNotNull("optionKlineItems should not be null", okResp.getKlineItems());
+    if (!okResp.getKlineItems().isEmpty()) {
+      Assert.assertNotNull("first kline symbol should not be null",
+          okResp.getKlineItems().get(0).getSymbol());
+      Assert.assertTrue("first kline symbol should not be empty",
+          !okResp.getKlineItems().get(0).getSymbol().isEmpty());
+      Assert.assertNotNull("first kline strike should not be null",
+          okResp.getKlineItems().get(0).getStrike());
+    }
+  }
+
+  // ── Option Trade Tick ──────────────────────────────────────────────────────
+
+  @Test
+  public void testOptionTradeTick() throws Exception {
+    OptionCommonModel model = new OptionCommonModel("AAPL 270115C00200000");
+    TigerResponse response = client.execute(OptionTradeTickQueryRequest.of(
+        Collections.singletonList(model)));
+    assertSuccess(response, "testOptionTradeTick");
+    com.tigerbrokers.stock.openapi.client.https.response.option.OptionTradeTickResponse ottResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.option.OptionTradeTickResponse) response;
+    Assert.assertNotNull("optionTradeTickItems should not be null",
+        ottResp.getOptionTradeTickItems());
+    if (!ottResp.getOptionTradeTickItems().isEmpty()) {
+      Assert.assertNotNull("first trade tick symbol should not be null",
+          ottResp.getOptionTradeTickItems().get(0).getSymbol());
+      Assert.assertTrue("first trade tick symbol should not be empty",
+          !ottResp.getOptionTradeTickItems().get(0).getSymbol().isEmpty());
+    }
+  }
+
+  // ── Option Depth ───────────────────────────────────────────────────────────
+
+  @Test
+  public void testOptionDepth() throws Exception {
+    OptionCommonModel model = new OptionCommonModel("AAPL 270115C00200000");
+    TigerResponse response = client.execute(OptionDepthQueryRequest.of(
+        Collections.singletonList(model)));
+    assertSuccess(response, "testOptionDepth");
+    com.tigerbrokers.stock.openapi.client.https.response.option.OptionDepthResponse odResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.option.OptionDepthResponse) response;
+    Assert.assertNotNull("optionDepthItems should not be null", odResp.getOptionDepthItems());
+    if (!odResp.getOptionDepthItems().isEmpty()) {
+      Assert.assertNotNull("first depth symbol should not be null",
+          odResp.getOptionDepthItems().get(0).getSymbol());
+      Assert.assertTrue("first depth symbol should not be empty",
+          !odResp.getOptionDepthItems().get(0).getSymbol().isEmpty());
+    }
+  }
+
+  // ── Option Timeline ─────────────────────────────────────────────────────────
+
+  @Test
+  public void testOptionTimeline() throws Exception {
+    OptionTimelineModel model = new OptionTimelineModel("AAPL 270115C00200000");
+    TigerResponse response = client.execute(OptionTimelineRequest.of(model));
+    assertSuccess(response, "testOptionTimeline");
+    com.tigerbrokers.stock.openapi.client.https.response.option.OptionTimelineResponse otResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.option.OptionTimelineResponse) response;
+    Assert.assertNotNull("optionTimelineItems should not be null", otResp.getTimelineItems());
+    if (!otResp.getTimelineItems().isEmpty()) {
+      Assert.assertNotNull("first timeline symbol should not be null",
+          otResp.getTimelineItems().get(0).getSymbol());
+      Assert.assertTrue("first timeline symbol should not be empty",
+          !otResp.getTimelineItems().get(0).getSymbol().isEmpty());
+    }
+  }
+
+  // ── Option Analysis ──────────────────────────────────────────────────────────
+
+  @Test
+  public void testOptionAnalysis() {
+    TigerResponse response = client.execute(OptionAnalysisRequest.of(
+        "AAPL", OptionAnalysisPeriod.FIFTY_TWO_WEEK, Market.US));
+    assertSuccess(response, "testOptionAnalysis");
+    com.tigerbrokers.stock.openapi.client.https.response.option.OptionAnalysisResponse oaResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.option.OptionAnalysisResponse) response;
+    Assert.assertNotNull("optionAnalysisItems should not be null",
+        oaResp.getOptionAnalysisItems());
+    if (!oaResp.getOptionAnalysisItems().isEmpty()) {
+      Assert.assertNotNull("first analysis symbol should not be null",
+          oaResp.getOptionAnalysisItems().get(0).getSymbol());
+      Assert.assertTrue("first analysis symbol should not be empty",
+          !oaResp.getOptionAnalysisItems().get(0).getSymbol().isEmpty());
+    }
+  }
+
+  // ── All HK Option Symbols ────────────────────────────────────────────────────
+
+  @Test
+  public void testAllHkOptionSymbols() {
+    TigerResponse response = client.execute(OptionSymbolRequest.newRequest(Market.HK));
+    assertSuccess(response, "testAllHkOptionSymbols");
+    com.tigerbrokers.stock.openapi.client.https.response.option.OptionSymbolResponse osResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.option.OptionSymbolResponse) response;
+    Assert.assertNotNull("symbolItems should not be null", osResp.getSymbolItems());
+  }
+
+  // ── Future Tick ──────────────────────────────────────────────────────────────
+
+  @Test
+  public void testFutureTick() {
+    TigerResponse response = client.execute(FutureTickRequest.newRequest(FUTURE_CONTRACT));
+    assertSuccess(response, "testFutureTick");
+    com.tigerbrokers.stock.openapi.client.https.response.future.FutureTickResponse ftResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.future.FutureTickResponse) response;
+    Assert.assertNotNull("futureTickItems should not be null", ftResp.getFutureTickItems());
+    if (ftResp.getFutureTickItems() != null) {
+      Assert.assertNotNull("tick contractCode should not be null",
+          ftResp.getFutureTickItems().getContractCode());
+    }
+  }
+
+  // ── Future History Main Contract ─────────────────────────────────────────────
+
+  @Test
+  public void testFutureHistoryMainContract() {
+    TigerResponse response = client.execute(FutureHistoryMainContractRequest.newRequest(
+        Arrays.asList("ES"), "2024-01-01", "2025-01-01"));
+    assertSuccess(response, "testFutureHistoryMainContract");
+    com.tigerbrokers.stock.openapi.client.https.response.future.FutureHistoryMainContractResponse fhResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.future.FutureHistoryMainContractResponse) response;
+    Assert.assertNotNull("historyMainContractItems should not be null",
+        fhResp.getHistoryMainContractItems());
+    if (!fhResp.getHistoryMainContractItems().isEmpty()) {
+      Assert.assertNotNull("first contract code should not be null",
+          fhResp.getHistoryMainContractItems().get(0).getContractCode());
+      Assert.assertTrue("first contract code should not be empty",
+          !fhResp.getHistoryMainContractItems().get(0).getContractCode().isEmpty());
+    }
+  }
+
+  // ── Financial Daily ──────────────────────────────────────────────────────────
+
+  @Test
+  public void testFinancialDaily() {
+    TigerResponse response = client.execute(FinancialDailyRequest.newRequest(
+        Arrays.asList("AAPL"),
+        Arrays.asList("total_revenues"),
+        "2024-01-01", "2024-06-01"));
+    assertSuccess(response, "testFinancialDaily");
+    com.tigerbrokers.stock.openapi.client.https.response.financial.FinancialDailyResponse fdResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.financial.FinancialDailyResponse) response;
+    Assert.assertNotNull("financialDailyItems should not be null",
+        fdResp.getFinancialDailyItems());
+  }
+
+  // ── Financial Report ──────────────────────────────────────────────────────────
+
+  @Test
+  public void testFinancialReport() {
+    TigerResponse response = client.execute(FinancialReportRequest.newRequest(
+        Arrays.asList("AAPL"), Market.US,
+        Arrays.asList("total_revenues"),
+        FinancialPeriodType.Quarterly));
+    assertSuccess(response, "testFinancialReport");
+    com.tigerbrokers.stock.openapi.client.https.response.financial.FinancialReportResponse frResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.financial.FinancialReportResponse) response;
+    Assert.assertNotNull("financialReportItems should not be null",
+        frResp.getFinancialReportItems());
+  }
+
+  // ── Fund History Quote ─────────────────────────────────────────────────────────
+
+  @Test
+  public void testFundHistoryQuote() {
+    TigerResponse response = client.execute(FundHistoryQuoteRequest.newRequest(
+        Arrays.asList("SPY")));
+    assertSuccess(response, "testFundHistoryQuote");
+    com.tigerbrokers.stock.openapi.client.https.response.fund.FundHistoryQuoteResponse fhqResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.fund.FundHistoryQuoteResponse) response;
+    Assert.assertNotNull("fundHistoryQuoteItems should not be null", fhqResp.getQuoteItems());
+    if (!fhqResp.getQuoteItems().isEmpty()) {
+      Assert.assertNotNull("first fund history quote symbol should not be null",
+          fhqResp.getQuoteItems().get(0).getSymbol());
+      Assert.assertEquals("first fund history quote symbol should be SPY",
+          "SPY", fhqResp.getQuoteItems().get(0).getSymbol());
+    }
   }
 
 }

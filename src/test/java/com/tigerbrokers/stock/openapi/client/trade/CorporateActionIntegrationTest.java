@@ -3,13 +3,22 @@ package com.tigerbrokers.stock.openapi.client.trade;
 import com.tigerbrokers.stock.openapi.client.testsupport.IntegTestConfig;
 import com.tigerbrokers.stock.openapi.client.https.client.TigerHttpClient;
 import com.tigerbrokers.stock.openapi.client.https.domain.financial.item.CorporateDelistingItem;
+import com.tigerbrokers.stock.openapi.client.https.domain.financial.item.CorporateDividendItem;
+import com.tigerbrokers.stock.openapi.client.https.domain.financial.item.CorporateEarningItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.financial.item.CorporateIpoItem;
+import com.tigerbrokers.stock.openapi.client.https.domain.financial.item.CorporateSplitItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.financial.item.CorporateSymbolChangeItem;
 import com.tigerbrokers.stock.openapi.client.https.request.financial.CorporateDelistingRequest;
+import com.tigerbrokers.stock.openapi.client.https.request.financial.CorporateDividendRequest;
+import com.tigerbrokers.stock.openapi.client.https.request.financial.CorporateEarningRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.financial.CorporateIpoRequest;
+import com.tigerbrokers.stock.openapi.client.https.request.financial.CorporateSplitRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.financial.CorporateSymbolChangeRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateDelistingResponse;
+import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateDividendResponse;
+import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateEarningResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateIpoResponse;
+import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateSplitResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateSymbolChangeResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.CorporateActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
@@ -138,6 +147,75 @@ public class CorporateActionIntegrationTest {
       Assert.assertTrue("listingPrice should be > 0", first.getListingPrice() > 0);
     }
     System.out.println("IPO items: " + items);
+  }
+
+  @Test
+  public void testGetCorporateDividend() {
+    CorporateDividendRequest request = CorporateDividendRequest.newRequest(
+        Arrays.asList("AAPL"),
+        Market.US,
+        parse("2023-01-01"),
+        parse("2024-01-01")
+    );
+    CorporateDividendResponse response = client.execute(request);
+    Assert.assertNotNull(response);
+    Assert.assertTrue("dividend request failed: " + response.getMessage(), response.isSuccess());
+    Map<String, List<CorporateDividendItem>> items = response.getItems();
+    Assert.assertNotNull(items);
+    if (!items.isEmpty()) {
+      CorporateDividendItem first = items.values().iterator().next().get(0);
+      Assert.assertNotNull("symbol should not be null", first.getSymbol());
+      Assert.assertTrue("symbol should not be empty", !first.getSymbol().isEmpty());
+      Assert.assertNotNull("market should not be null", first.getMarket());
+      Assert.assertEquals("market should be US", "US", first.getMarket());
+      Assert.assertNotNull("actionType should not be null", first.getActionType());
+      Assert.assertEquals("actionType should be DIVIDEND",
+          CorporateActionType.DIVIDEND, first.getActionType());
+    }
+    System.out.println("DIVIDEND items: " + items);
+  }
+
+  @Test
+  public void testGetCorporateEarning() {
+    CorporateEarningRequest request = CorporateEarningRequest.newRequest(
+        Market.US,
+        parse("2023-01-01"),
+        parse("2024-01-01")
+    );
+    CorporateEarningResponse response = client.execute(request);
+    Assert.assertNotNull(response);
+    Assert.assertTrue("earning request failed: " + response.getMessage(), response.isSuccess());
+    Map<String, List<CorporateEarningItem>> items = response.getItems();
+    Assert.assertNotNull(items);
+    if (!items.isEmpty()) {
+      CorporateEarningItem first = items.values().iterator().next().get(0);
+      Assert.assertNotNull("actionType should not be null", first.getActionType());
+      Assert.assertEquals("actionType should be EARNING",
+          CorporateActionType.EARNING, first.getActionType());
+    }
+    System.out.println("EARNING items: " + items);
+  }
+
+  @Test
+  public void testGetCorporateSplit() {
+    CorporateSplitRequest request = CorporateSplitRequest.newRequest(
+        Arrays.asList("AAPL"),
+        Market.US,
+        parse("2020-01-01"),
+        parse("2024-01-01")
+    );
+    CorporateSplitResponse response = client.execute(request);
+    Assert.assertNotNull(response);
+    Assert.assertTrue("split request failed: " + response.getMessage(), response.isSuccess());
+    Map<String, List<CorporateSplitItem>> items = response.getItems();
+    Assert.assertNotNull(items);
+    if (!items.isEmpty()) {
+      CorporateSplitItem first = items.values().iterator().next().get(0);
+      Assert.assertNotNull("actionType should not be null", first.getActionType());
+      Assert.assertEquals("actionType should be SPLIT",
+          CorporateActionType.SPLIT, first.getActionType());
+    }
+    System.out.println("SPLIT items: " + items);
   }
 
   private static java.util.Date parse(String s) {
