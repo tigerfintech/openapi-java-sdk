@@ -14,9 +14,7 @@ variables:
   tags:
     - openapi
   before_script:
-    - mkdir -p ~/.m2 && cat > ~/.m2/settings.xml << 'SETTINGS'
-      <settings><mirrors><mirror><id>aliyun</id><mirrorOf>central</mirrorOf><url>https://maven.aliyun.com/repository/public</url></mirror></mirrors></settings>
-      SETTINGS
+    - mkdir -p ~/.m2 && echo '<settings><mirrors><mirror><id>aliyun</id><mirrorOf>central</mirrorOf><url>https://maven.aliyun.com/repository/public</url></mirror></mirrors></settings>' > ~/.m2/settings.xml
   cache:
     key: maven-repo
     paths:
