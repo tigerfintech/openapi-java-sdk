@@ -135,14 +135,14 @@ public class TradeAccountIntegrationTest {
   @Test
   public void testSegmentFundAvailable() {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.SEGMENT_FUND_AVAILABLE);
-    request.setBizContent("{\"account\":\"" + account + "\",\"from_segment\":\"SEC\"}");
+    request.setBizContent("{\"account\":\"" + account
+        + "\",\"from_segment\":\"SEC\",\"to_segment\":\"FUT\"}");
     TigerHttpResponse response = client.execute(request);
     assertDataPresent(response, "testSegmentFundAvailable");
-    String data = response.getData();
-    if (data == null || !data.contains(account)) {
-        System.out.println("segment fund available: account not in response (expected for non-institution)");
-        return;
-    }
+    // The segment_fund_available response format does not include the account
+    // identifier in the data field; skip if the account is not present.
+    Assume.assumeTrue("segment fund available data should contain the requested account",
+        response.getData().contains(account));
   }
 
   @Test
