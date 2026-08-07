@@ -49,7 +49,7 @@ integration:java:
     - mvn $MAVEN_CLI_OPTS test-compile
     - mvn $MAVEN_CLI_OPTS failsafe:integration-test failsafe:verify -Dtest.integ=true
   artifacts:
-    when: always
+    when: on_failure
     reports:
       junit:
         - target/failsafe-reports/TEST-*.xml
