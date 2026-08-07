@@ -63,8 +63,8 @@ public class TradeAccountIntegrationTest {
     request.setBizContent("{}");
     TigerHttpResponse response = client.execute(request);
     assertDataPresent(response, "testAccounts");
-    Assert.assertTrue("accounts data should contain account field",
-        response.getData().contains("account"));
+    Assert.assertTrue("accounts data should contain the configured account",
+        response.getData().contains(account));
   }
 
   @Test
@@ -142,10 +142,7 @@ public class TradeAccountIntegrationTest {
   @Test
   public void testTransferFund() {
     TigerHttpResponse response = executeWithAccount(MethodName.TRANSFER_FUND);
-    assertSuccess(response, "testTransferFund");
-    Assert.assertNotNull("testTransferFund data should not be null", response.getData());
-    Assert.assertFalse("testTransferFund data should not be empty",
-        response.getData().trim().isEmpty());
+    assertDataPresent(response, "testTransferFund");
   }
 
   @Test

@@ -163,14 +163,17 @@ public class CorporateActionIntegrationTest {
     Map<String, List<CorporateDividendItem>> items = response.getItems();
     Assert.assertNotNull(items);
     if (!items.isEmpty()) {
-      CorporateDividendItem first = items.values().iterator().next().get(0);
-      Assert.assertNotNull("symbol should not be null", first.getSymbol());
-      Assert.assertTrue("symbol should not be empty", !first.getSymbol().isEmpty());
-      Assert.assertNotNull("market should not be null", first.getMarket());
-      Assert.assertEquals("market should be US", "US", first.getMarket());
-      Assert.assertNotNull("actionType should not be null", first.getActionType());
-      Assert.assertEquals("actionType should be DIVIDEND",
-          CorporateActionType.DIVIDEND, first.getActionType());
+      List<CorporateDividendItem> innerList = items.values().iterator().next();
+      if (!innerList.isEmpty()) {
+        CorporateDividendItem first = innerList.get(0);
+        Assert.assertNotNull("symbol should not be null", first.getSymbol());
+        Assert.assertTrue("symbol should not be empty", !first.getSymbol().isEmpty());
+        Assert.assertNotNull("market should not be null", first.getMarket());
+        Assert.assertEquals("market should be US", "US", first.getMarket());
+        Assert.assertNotNull("actionType should not be null", first.getActionType());
+        Assert.assertEquals("actionType should be DIVIDEND",
+            CorporateActionType.DIVIDEND, first.getActionType());
+      }
     }
     System.out.println("DIVIDEND items: " + items);
   }
@@ -188,10 +191,13 @@ public class CorporateActionIntegrationTest {
     Map<String, List<CorporateEarningItem>> items = response.getItems();
     Assert.assertNotNull(items);
     if (!items.isEmpty()) {
-      CorporateEarningItem first = items.values().iterator().next().get(0);
-      Assert.assertNotNull("actionType should not be null", first.getActionType());
-      Assert.assertEquals("actionType should be EARNING",
-          CorporateActionType.EARNING, first.getActionType());
+      List<CorporateEarningItem> innerList = items.values().iterator().next();
+      if (!innerList.isEmpty()) {
+        CorporateEarningItem first = innerList.get(0);
+        Assert.assertNotNull("actionType should not be null", first.getActionType());
+        Assert.assertEquals("actionType should be EARNING",
+            CorporateActionType.EARNING, first.getActionType());
+      }
     }
     System.out.println("EARNING items: " + items);
   }
@@ -210,10 +216,13 @@ public class CorporateActionIntegrationTest {
     Map<String, List<CorporateSplitItem>> items = response.getItems();
     Assert.assertNotNull(items);
     if (!items.isEmpty()) {
-      CorporateSplitItem first = items.values().iterator().next().get(0);
-      Assert.assertNotNull("actionType should not be null", first.getActionType());
-      Assert.assertEquals("actionType should be SPLIT",
-          CorporateActionType.SPLIT, first.getActionType());
+      List<CorporateSplitItem> innerList = items.values().iterator().next();
+      if (!innerList.isEmpty()) {
+        CorporateSplitItem first = innerList.get(0);
+        Assert.assertNotNull("actionType should not be null", first.getActionType());
+        Assert.assertEquals("actionType should be SPLIT",
+            CorporateActionType.SPLIT, first.getActionType());
+      }
     }
     System.out.println("SPLIT items: " + items);
   }

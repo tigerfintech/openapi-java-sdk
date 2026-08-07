@@ -92,12 +92,11 @@ public class OptionExerciseIntegrationTest {
     Assert.assertNotNull(response);
     Assert.assertTrue("check expire failed: " + response.getMessage(), response.isSuccess());
     OptionExerciseCheckItem expireItem = response.getItem();
-    if (expireItem != null) {
-      Assert.assertNotNull("expire availableQuantity should not be null", expireItem.getAvailableQuantity());
-      Assert.assertTrue("expire availableQuantity should be >= 0", expireItem.getAvailableQuantity() >= 0);
-      Assert.assertNotNull("expire position should not be null", expireItem.getPosition());
-      Assert.assertTrue("expire position should be >= 0", expireItem.getPosition() >= 0);
-    }
+    Assert.assertNotNull("expire item should not be null", expireItem);
+    Assert.assertNotNull("expire availableQuantity should not be null", expireItem.getAvailableQuantity());
+    Assert.assertTrue("expire availableQuantity should be >= 0", expireItem.getAvailableQuantity() >= 0);
+    Assert.assertNotNull("expire position should not be null", expireItem.getPosition());
+    Assert.assertTrue("expire position should be >= 0", expireItem.getPosition() >= 0);
     System.out.println("checkExpire: item=" + response.getItem());
   }
 

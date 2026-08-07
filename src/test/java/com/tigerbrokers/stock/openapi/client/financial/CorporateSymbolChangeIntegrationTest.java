@@ -115,11 +115,18 @@ public class CorporateSymbolChangeIntegrationTest {
         Assert.assertFalse("HK list for " + symbol + " should not be empty", list.isEmpty());
         list.forEach(item -> {
           Assert.assertNotNull("HK actionType should not be null for " + symbol, item.getActionType());
+          Assert.assertEquals("HK actionType should be SYMBOL_CHANGE for " + symbol,
+              CorporateActionType.SYMBOL_CHANGE, item.getActionType());
           Assert.assertNotNull("HK symbol should not be null", item.getSymbol());
           Assert.assertTrue("HK symbol should not be empty for " + symbol,
               !item.getSymbol().isEmpty());
           Assert.assertNotNull("HK market should not be null", item.getMarket());
           Assert.assertEquals("HK market should be HK for " + symbol, "HK", item.getMarket());
+          Assert.assertNotNull("HK executeDate should not be null", item.getExecuteDate());
+          Assert.assertNotNull("HK oldSymbol should not be null", item.getOldSymbol());
+          Assert.assertFalse("HK oldSymbol should not be empty", item.getOldSymbol().isEmpty());
+          Assert.assertNotNull("HK newSymbol should not be null", item.getNewSymbol());
+          Assert.assertFalse("HK newSymbol should not be empty", item.getNewSymbol().isEmpty());
         });
       });
     }
