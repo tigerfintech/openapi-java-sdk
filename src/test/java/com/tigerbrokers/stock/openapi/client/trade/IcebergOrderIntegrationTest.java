@@ -17,6 +17,7 @@ import com.tigerbrokers.stock.openapi.client.util.builder.AccountParamBuilder;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -52,6 +53,7 @@ public class IcebergOrderIntegrationTest {
 
   /** 下冰山单（最简参数） */
   @Test
+  @Ignore("iceberg order not supported under regulatory requirements")
   public void testPlaceIcebergOrder_basic() {
     ContractItem contract = buildAAPLContract();
 
@@ -68,6 +70,7 @@ public class IcebergOrderIntegrationTest {
 
   /** 下冰山单（完整参数，含 start_time/end_time），并查询订单详情验证字段回显 */
   @Test
+  @Ignore("iceberg order not supported under regulatory requirements")
   public void testPlaceIcebergOrder_full() {
     ContractItem contract = buildAAPLContract();
 
@@ -118,6 +121,7 @@ public class IcebergOrderIntegrationTest {
 
   /** 下单 → 查询 → 改单 → 撤单 完整流程 */
   @Test
+  @Ignore("iceberg order not supported under regulatory requirements")
   public void testPlaceModifyCancel() throws Exception {
     ContractItem contract = buildAAPLContract();
 
