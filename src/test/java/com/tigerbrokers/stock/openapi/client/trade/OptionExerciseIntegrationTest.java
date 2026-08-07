@@ -62,6 +62,7 @@ public class OptionExerciseIntegrationTest {
 
   @Test
   public void testCheckExercise() {
+    Assume.assumeNotNull("set -Dtest.contract.id for check exercise", contractId);
     OptionExerciseCheckRequest request =
         OptionExerciseCheckRequest.buildRequest(account, contractId, OptionExerciseType.Exercise);
 
@@ -83,6 +84,7 @@ public class OptionExerciseIntegrationTest {
 
   @Test
   public void testCheckExpireWithItmRate() {
+    Assume.assumeNotNull("set -Dtest.contract.id for check expire", contractId);
     OptionExerciseCheckRequest request =
         OptionExerciseCheckRequest.buildRequest(account, contractId, OptionExerciseType.Expire)
             .setItmRate(5);
