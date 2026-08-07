@@ -43,7 +43,7 @@ integration:java:
   stage: integration
   allow_failure: true
   tags:
-    - sdk-integ
+    - openapi
   script:
     - test -n "$TIGEROPEN_PROPS_PATH" || { echo "TIGEROPEN_PROPS_PATH not set — skipping integration"; exit 1; }
     - mvn $MAVEN_CLI_OPTS test-compile
