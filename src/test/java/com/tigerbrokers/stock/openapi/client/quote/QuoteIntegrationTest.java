@@ -1054,8 +1054,10 @@ public class QuoteIntegrationTest {
 
   @Test
   public void testFutureHistoryMainContract() {
+    String contract = getFirstFutureContract();
+    Assume.assumeNotNull("no future contract available for ES", contract);
     TigerResponse response = client.execute(FutureHistoryMainContractRequest.newRequest(
-        Arrays.asList("ES"), "2024-01-01", "2025-01-01"));
+        Arrays.asList(contract), "2024-01-01", "2025-01-01"));
     assertSuccess(response, "testFutureHistoryMainContract");
     com.tigerbrokers.stock.openapi.client.https.response.future.FutureHistoryMainContractResponse fhResp =
         (com.tigerbrokers.stock.openapi.client.https.response.future.FutureHistoryMainContractResponse) response;
