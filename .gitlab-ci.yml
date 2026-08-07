@@ -11,6 +11,8 @@ variables:
 
 .maven_base:
   image: maven:3.8-eclipse-temurin-8
+  tags:
+    - openapi
   cache:
     key: maven-repo
     paths:
