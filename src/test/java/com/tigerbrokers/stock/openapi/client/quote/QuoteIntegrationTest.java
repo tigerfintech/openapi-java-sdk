@@ -1,5 +1,8 @@
 package com.tigerbrokers.stock.openapi.client.quote;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.https.client.TigerHttpClient;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.quote.*;
@@ -188,6 +191,20 @@ public class QuoteIntegrationTest {
     TigerHttpResponse response = client.execute(request);
     assertDataPresent(response, "testBrief");
     Assert.assertTrue("brief data should contain AAPL", response.getData().contains("AAPL"));
+    // Deeper field-level assertions: parse JSON items array
+    JSONArray items = JSON.parseObject(response.getData()).getJSONArray("items");
+    if (items != null && !items.isEmpty()) {
+      JSONObject first = items.getJSONObject(0);
+      Assert.assertEquals("brief symbol should be AAPL", "AAPL", first.getString("symbol"));
+      Double latestPrice = first.getDouble("latestPrice");
+      if (latestPrice != null) {
+        Assert.assertTrue("brief latestPrice should be > 0", latestPrice > 0);
+      }
+      Long volume = first.getLong("volume");
+      if (volume != null) {
+        Assert.assertTrue("brief volume should be >= 0", volume >= 0);
+      }
+    }
   }
 
   @Test
@@ -264,6 +281,12 @@ public class QuoteIntegrationTest {
           klineResp.getKlineItems().get(0).getItems().get(0).getVolume());
       Assert.assertTrue("first kline point volume should be >= 0",
           klineResp.getKlineItems().get(0).getItems().get(0).getVolume() >= 0);
+      // Cross-field: high must be >= low
+      Double hi = klineResp.getKlineItems().get(0).getItems().get(0).getHigh();
+      Double lo = klineResp.getKlineItems().get(0).getItems().get(0).getLow();
+      if (hi != null && lo != null) {
+        Assert.assertTrue("kline high should be >= low (high=" + hi + ", low=" + lo + ")", hi >= lo);
+      }
     }
   }
 

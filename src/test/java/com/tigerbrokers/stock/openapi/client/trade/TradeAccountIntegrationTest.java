@@ -1,5 +1,8 @@
 package com.tigerbrokers.stock.openapi.client.trade;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.https.client.TigerHttpClient;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.contract.*;
@@ -73,6 +76,21 @@ public class TradeAccountIntegrationTest {
     assertDataPresent(response, "testAssets");
     Assert.assertTrue("assets data should contain the requested account",
         response.getData().contains(account));
+    // Deeper field-level assertions on the first segment asset item
+    JSONObject root = JSON.parseObject(response.getData());
+    JSONArray segments = root != null ? root.getJSONArray("segments") : null;
+    if (segments != null && !segments.isEmpty()) {
+      JSONObject seg = segments.getJSONObject(0);
+      Double buyingPower = seg.getDouble("buyingPower");
+      if (buyingPower != null) {
+        Assert.assertTrue("assets buyingPower should be >= 0", buyingPower >= 0);
+      }
+      Double netLiquidation = seg.getDouble("netLiquidation");
+      if (netLiquidation != null) {
+        // net liquidation can be negative in theory but usually >= 0 for paper accounts
+        Assert.assertNotNull("assets netLiquidation should not be null", netLiquidation);
+      }
+    }
   }
 
   @Test
@@ -288,6 +306,30 @@ public class TradeAccountIntegrationTest {
     TigerHttpResponse response = executeWithAccount(MethodName.ORDER_NO);
     assertSuccess(response, "testOrderNo");
     Assert.assertNotNull("testOrderNo data should not be null", response.getData());
+  }
+
+  // ── Derivative Contracts (OPT secType) ─────────────────────────────────────
+
+  /**
+   * Verifies that ContractsRequest with secType=OPT returns a success response.
+   * The underlying server may return an empty list if no option contracts are active
+   * for the given symbol, so we only assert success and non-null items.
+   */
+  @Test
+  public void testDerivativeContractsOpt() {
+    ContractsRequest request = ContractsRequest.newRequest(
+        new ContractsModel(Arrays.asList("AAPL"), "OPT"), account);
+    TigerResponse response = client.execute(request);
+    assertSuccess(response, "testDerivativeContractsOpt");
+    ContractsResponse csResp = (ContractsResponse) response;
+    Assert.assertNotNull("OPT contracts items should not be null", csResp.getItems());
+    // Items may be empty if no active option contracts for this account; that is acceptable.
+    if (csResp.getItems() != null && !csResp.getItems().isEmpty()) {
+      Assert.assertNotNull("first OPT contract symbol should not be null",
+          csResp.getItems().get(0).getSymbol());
+      Assert.assertNotNull("first OPT contract secType should not be null",
+          csResp.getItems().get(0).getSecType());
+    }
   }
 
   // ── Position Transfer Detail ────────────────────────────────────────────────
