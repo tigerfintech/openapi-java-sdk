@@ -21,6 +21,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.*;
 import com.tigerbrokers.stock.openapi.client.https.request.option.OptionExpirationQueryRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.option.OptionExpirationResponse;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.item.OptionExpirationItem;
+import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Assume;
