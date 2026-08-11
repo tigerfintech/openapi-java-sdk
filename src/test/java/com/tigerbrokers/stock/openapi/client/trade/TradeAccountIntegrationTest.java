@@ -18,8 +18,10 @@ import com.tigerbrokers.stock.openapi.client.https.response.trade.PositionTransf
 import com.tigerbrokers.stock.openapi.client.https.response.trade.PositionTransferRecordsResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.PrimeAnalyticsAssetResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.*;
-import com.tigerbrokers.stock.openapi.client.testsupport.IntegTestConfig;
-import java.util.Arrays;
+import com.tigerbrokers.stock.openapi.client.https.request.option.OptionExpirationQueryRequest;
+import com.tigerbrokers.stock.openapi.client.https.response.option.OptionExpirationResponse;
+import com.tigerbrokers.stock.openapi.client.https.domain.option.item.OptionExpirationItem;
+
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
@@ -312,18 +314,32 @@ public class TradeAccountIntegrationTest {
 
   /**
    * Verifies that ContractsRequest with secType=OPT returns a success response.
-   * The underlying server may return an empty list if no option contracts are active
-   * for the given symbol, so we only assert success and non-null items.
+   * Fetches expiry dynamically from option_expiration to satisfy the required field.
    */
   @Test
   public void testDerivativeContractsOpt() {
+    // OPT contracts require an expiry — fetch dynamically
+    TigerResponse expResp = client.execute(
+        new OptionExpirationQueryRequest(Arrays.asList("AAPL")));
+    if (expResp == null || !expResp.isSuccess()) {
+      Assume.assumeTrue("option_expiration unavailable, skipping OPT contracts test", false);
+    }
+    OptionExpirationResponse oeResp = (OptionExpirationResponse) expResp;
+    if (oeResp.getOptionExpirationItems() == null || oeResp.getOptionExpirationItems().isEmpty()) {
+      Assume.assumeTrue("no option expiry available for AAPL", false);
+    }
+    OptionExpirationItem item = oeResp.getOptionExpirationItems().get(0);
+    if (item.getDates() == null || item.getDates().isEmpty()) {
+      Assume.assumeTrue("no option expiry dates available for AAPL", false);
+    }
+    String expiry = item.getDates().get(0);
+
     ContractsRequest request = ContractsRequest.newRequest(
-        new ContractsModel(Arrays.asList("AAPL"), "OPT"), account);
+        new ContractsModel(Arrays.asList("AAPL"), "OPT", expiry, null, null), account);
     TigerResponse response = client.execute(request);
     assertSuccess(response, "testDerivativeContractsOpt");
     ContractsResponse csResp = (ContractsResponse) response;
     Assert.assertNotNull("OPT contracts items should not be null", csResp.getItems());
-    // Items may be empty if no active option contracts for this account; that is acceptable.
     if (csResp.getItems() != null && !csResp.getItems().isEmpty()) {
       Assert.assertNotNull("first OPT contract symbol should not be null",
           csResp.getItems().get(0).getSymbol());
