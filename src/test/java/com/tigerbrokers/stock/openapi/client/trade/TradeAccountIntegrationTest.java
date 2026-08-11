@@ -28,6 +28,7 @@ import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import com.tigerbrokers.stock.openapi.client.testsupport.IntegTestConfig;
 import com.tigerbrokers.stock.openapi.client.testsupport.ReadOnlyApi;
 
 /** Integration tests for trade/account/asset APIs. */
