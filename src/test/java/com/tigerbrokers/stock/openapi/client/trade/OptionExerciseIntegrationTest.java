@@ -204,7 +204,7 @@ public class OptionExerciseIntegrationTest {
   @Test
   @Category(WriteApi.class)
   public void testSubmitAndCancelExercise() {
-    Assume.assumeNotNull("set -Dtest.contract.id for write tests", contractId);
+    Assume.assumeTrue("set -Dtest.contract.id for write tests", contractId != null);
     OptionExerciseSubmitRequest submitRequest =
         OptionExerciseSubmitRequest.buildExerciseRequest(account, contractId, 1.0, null, false);
     OptionExerciseSubmitResponse submitResponse = client.execute(submitRequest);

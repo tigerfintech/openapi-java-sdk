@@ -9,7 +9,7 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 
-/** 从而覆盖 struct. */
+/** 枚举 wire 值不变量测试（对应跨语言 review-sdk S4）。 */
 public class EnumWireValueTest {
 
   private static final String ENUMS_PACKAGE =

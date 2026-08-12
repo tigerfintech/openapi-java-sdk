@@ -1124,6 +1124,206 @@ public class QuoteIntegrationTest {
         frResp.getFinancialReportItems());
   }
 
+  // ── Kline 30-day time range (AAPL + HK 00700) ────────────────────────────────
+
+  @Test
+  public void testKlineDailyTimeRange() {
+    long endTime = System.currentTimeMillis();
+    long beginTime = endTime - 30L * 24 * 60 * 60 * 1000;
+    for (String symbol : Arrays.asList("AAPL", "00700")) {
+      TigerResponse response = client.execute(
+          QuoteKlineRequest.newRequest(Arrays.asList(symbol), KType.day, beginTime, endTime));
+      assertSuccess(response, "testKlineDailyTimeRange[" + symbol + "]");
+      com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteKlineResponse kResp =
+          (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteKlineResponse) response;
+      Assert.assertNotNull("klineItems should not be null for " + symbol, kResp.getKlineItems());
+      Assume.assumeTrue("klineItems empty for " + symbol + " — may have no data in this range",
+          !kResp.getKlineItems().isEmpty());
+      com.tigerbrokers.stock.openapi.client.https.domain.quote.item.KlineItem klineItem =
+          kResp.getKlineItems().get(0);
+      Assert.assertEquals("kline symbol should be " + symbol, symbol, klineItem.getSymbol());
+      java.util.List<com.tigerbrokers.stock.openapi.client.https.domain.quote.item.KlinePoint> pts =
+          klineItem.getItems();
+      Assume.assumeTrue("kline points empty for " + symbol, pts != null && !pts.isEmpty());
+      Assert.assertTrue("30-day daily kline should have >= 15 points for " + symbol,
+          pts.size() >= 15);
+      // Timestamps must be strictly ascending
+      for (int i = 1; i < pts.size(); i++) {
+        Assert.assertTrue("kline timestamps should be ascending for " + symbol,
+            pts.get(i).getTime() > pts.get(i - 1).getTime());
+      }
+      // OHLC constraints for every point
+      for (int i = 0; i < pts.size(); i++) {
+        com.tigerbrokers.stock.openapi.client.https.domain.quote.item.KlinePoint pt = pts.get(i);
+        Double hi = pt.getHigh(), lo = pt.getLow(), op = pt.getOpen(), cl = pt.getClose();
+        Long vol = pt.getVolume();
+        if (hi != null && lo != null) {
+          Assert.assertTrue("high >= low at index " + i + " for " + symbol, hi >= lo);
+        }
+        if (hi != null && op != null) {
+          Assert.assertTrue("high >= open at index " + i + " for " + symbol, hi >= op);
+        }
+        if (hi != null && cl != null) {
+          Assert.assertTrue("high >= close at index " + i + " for " + symbol, hi >= cl);
+        }
+        if (lo != null && op != null) {
+          Assert.assertTrue("open >= low at index " + i + " for " + symbol, op >= lo);
+        }
+        if (lo != null && cl != null) {
+          Assert.assertTrue("close >= low at index " + i + " for " + symbol, cl >= lo);
+        }
+        if (vol != null) {
+          Assert.assertTrue("volume >= 0 at index " + i + " for " + symbol, vol >= 0);
+        }
+      }
+    }
+  }
+
+  // ── Kline intraday 60min (AAPL, 5 days) ──────────────────────────────────────
+
+  @Test
+  public void testKlineIntraday60min() {
+    long endTime = System.currentTimeMillis();
+    long beginTime = endTime - 5L * 24 * 60 * 60 * 1000;
+    TigerResponse response = client.execute(
+        QuoteKlineRequest.newRequest(Arrays.asList("AAPL"), KType.min60, beginTime, endTime));
+    assertSuccess(response, "testKlineIntraday60min");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteKlineResponse kResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteKlineResponse) response;
+    Assert.assertNotNull("klineItems should not be null", kResp.getKlineItems());
+    Assume.assumeTrue("klineItems empty — may be weekend or no intraday data",
+        !kResp.getKlineItems().isEmpty());
+    com.tigerbrokers.stock.openapi.client.https.domain.quote.item.KlineItem klineItem =
+        kResp.getKlineItems().get(0);
+    Assert.assertEquals("kline symbol should be AAPL", "AAPL", klineItem.getSymbol());
+    java.util.List<com.tigerbrokers.stock.openapi.client.https.domain.quote.item.KlinePoint> pts =
+        klineItem.getItems();
+    Assume.assumeTrue("kline points empty for 60min intraday", pts != null && !pts.isEmpty());
+    Assert.assertTrue("60min kline over 5 days should have >= 5 points", pts.size() >= 5);
+    // Timestamps must be strictly ascending
+    for (int i = 1; i < pts.size(); i++) {
+      Assert.assertTrue("60min kline timestamps should be ascending",
+          pts.get(i).getTime() > pts.get(i - 1).getTime());
+    }
+    // OHLC constraints
+    for (int i = 0; i < pts.size(); i++) {
+      com.tigerbrokers.stock.openapi.client.https.domain.quote.item.KlinePoint pt = pts.get(i);
+      Double hi = pt.getHigh(), lo = pt.getLow(), op = pt.getOpen(), cl = pt.getClose();
+      Long vol = pt.getVolume();
+      if (hi != null && lo != null) {
+        Assert.assertTrue("high >= low at index " + i, hi >= lo);
+      }
+      if (hi != null && op != null) {
+        Assert.assertTrue("high >= open at index " + i, hi >= op);
+      }
+      if (hi != null && cl != null) {
+        Assert.assertTrue("high >= close at index " + i, hi >= cl);
+      }
+      if (lo != null && op != null) {
+        Assert.assertTrue("open >= low at index " + i, op >= lo);
+      }
+      if (lo != null && cl != null) {
+        Assert.assertTrue("close >= low at index " + i, cl >= lo);
+      }
+      if (vol != null) {
+        Assert.assertTrue("volume >= 0 at index " + i, vol >= 0);
+      }
+    }
+  }
+
+  // ── Quote depth ordering (AAPL US + 00700 HK) ────────────────────────────────
+
+  @Test
+  public void testQuoteDepthOrdering() {
+    String[][] cases = {{"AAPL", "US"}, {"00700", "HK"}};
+    for (String[] c : cases) {
+      String sym = c[0], market = c[1];
+      TigerResponse response = client.execute(
+          QuoteDepthRequest.newRequest(Arrays.asList(sym), market));
+      assertSuccess(response, "testQuoteDepthOrdering[" + sym + "]");
+      com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteDepthResponse dResp =
+          (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteDepthResponse) response;
+      Assert.assertNotNull("quoteDepthItems should not be null for " + sym,
+          dResp.getQuoteDepthItems());
+      Assume.assumeTrue("quoteDepthItems empty — may be non-trading hours for " + sym,
+          !dResp.getQuoteDepthItems().isEmpty());
+      com.tigerbrokers.stock.openapi.client.https.domain.quote.item.QuoteDepthItem item =
+          dResp.getQuoteDepthItems().get(0);
+      Assert.assertEquals("depth symbol should be " + sym, sym, item.getSymbol());
+      java.util.List<com.tigerbrokers.stock.openapi.client.https.domain.quote.item.DepthEntry> asks =
+          item.getAsks();
+      java.util.List<com.tigerbrokers.stock.openapi.client.https.domain.quote.item.DepthEntry> bids =
+          item.getBids();
+      if (asks != null && asks.size() >= 2) {
+        for (int i = 1; i < asks.size(); i++) {
+          Double prev = asks.get(i - 1).getPrice(), curr = asks.get(i).getPrice();
+          if (prev != null && curr != null) {
+            Assert.assertTrue("asks should be ascending for " + sym + " at index " + i,
+                curr >= prev);
+          }
+        }
+        for (com.tigerbrokers.stock.openapi.client.https.domain.quote.item.DepthEntry e : asks) {
+          if (e.getPrice() != null) {
+            Assert.assertTrue("ask price > 0 for " + sym, e.getPrice() > 0);
+          }
+        }
+      }
+      if (bids != null && bids.size() >= 2) {
+        for (int i = 1; i < bids.size(); i++) {
+          Double prev = bids.get(i - 1).getPrice(), curr = bids.get(i).getPrice();
+          if (prev != null && curr != null) {
+            Assert.assertTrue("bids should be descending for " + sym + " at index " + i,
+                curr <= prev);
+          }
+        }
+        for (com.tigerbrokers.stock.openapi.client.https.domain.quote.item.DepthEntry e : bids) {
+          if (e.getPrice() != null) {
+            Assert.assertTrue("bid price > 0 for " + sym, e.getPrice() > 0);
+          }
+        }
+      }
+      // Spread constraint: lowest ask >= highest bid
+      if (asks != null && !asks.isEmpty() && bids != null && !bids.isEmpty()) {
+        Double lowestAsk = asks.get(0).getPrice();
+        Double highestBid = bids.get(0).getPrice();
+        if (lowestAsk != null && highestBid != null) {
+          Assert.assertTrue("lowestAsk >= highestBid for " + sym + " (lowestAsk="
+              + lowestAsk + ", highestBid=" + highestBid + ")", lowestAsk >= highestBid);
+        }
+      }
+    }
+  }
+
+  // ── Brief multi-market (AAPL US + 00700 HK + 09988 HK) ──────────────────────
+
+  @Test
+  public void testBriefMultiMarket() {
+    TigerHttpRequest request = new TigerHttpRequest(MethodName.BRIEF);
+    request.setBizContent("{\"symbols\":[\"AAPL\",\"00700\",\"09988\"]}");
+    TigerHttpResponse response = client.execute(request);
+    assertDataPresent(response, "testBriefMultiMarket");
+    JSONArray items = JSON.parseObject(response.getData()).getJSONArray("items");
+    Assume.assumeTrue("brief multi-market items empty", items != null && !items.isEmpty());
+    for (int i = 0; i < items.size(); i++) {
+      JSONObject item = items.getJSONObject(i);
+      Assert.assertNotNull("brief symbol should not be null at index " + i,
+          item.getString("symbol"));
+      Double latestPrice = item.getDouble("latestPrice");
+      if (latestPrice != null) {
+        Assert.assertTrue("latestPrice > 0 for " + item.getString("symbol"),
+            latestPrice > 0);
+      }
+      Double high = item.getDouble("high"), low = item.getDouble("low");
+      if (high != null && low != null && high > 0 && low > 0) {
+        Assert.assertTrue("high >= low for " + item.getString("symbol"), high >= low);
+      }
+      Double ask = item.getDouble("askPrice"), bid = item.getDouble("bidPrice");
+      if (ask != null && bid != null && ask > 0 && bid > 0) {
+        Assert.assertTrue("askPrice >= bidPrice for " + item.getString("symbol"), ask >= bid);
+      }
+    }
+  }
+
   // ── Fund History Quote ─────────────────────────────────────────────────────────
 
   @Test
