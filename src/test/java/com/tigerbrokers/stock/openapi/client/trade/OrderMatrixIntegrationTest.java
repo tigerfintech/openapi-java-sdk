@@ -230,9 +230,10 @@ public class OrderMatrixIntegrationTest {
   public void previewUsStkMarketByCashAmount() {
     ContractItem contract = usStkContract();
     TradeOrderRequest req = TradeOrderRequest.buildAmountOrder(account, contract, ActionType.BUY, 100.0);
-    // Gateway rejects amount-order preview without an explicit quantity — set 0
-    // so the request has total_quantity while cash_amount takes precedence.
-    ((TradeOrderModel) req.getApiModel()).setTotalQuantity(0L);
+    // PlaceOrderRequestValidator rejects total_quantity <= 0 client-side, so
+    // amount-order requests must carry a positive quantity even though
+    // cash_amount is what actually sizes the order on the wire.
+    ((TradeOrderModel) req.getApiModel()).setTotalQuantity(1L);
     previewOnly(req, "US STK MKT-by-cashAmount preview");
   }
 
