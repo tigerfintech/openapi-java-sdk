@@ -227,23 +227,15 @@ public class OrderMatrixIntegrationTest {
   }
 
   @Test
-  public void buildUsStkAmountOrder() {
-    // Amount orders on the Java SDK sit in a validation stalemate:
-    //   - PlaceOrderRequestValidator (client-side) rejects total_quantity <= 0
-    //   - The gateway rejects preview when cashAmount + total_quantity both exist
-    // So the amount-order path can only be *placed* end-to-end, not previewed
-    // without risking a real fill on MKT. We assert marshaling correctness by
-    // constructing the request and inspecting the model — no round-trip.
-    // TODO(sdk): PlaceOrderRequestValidator should permit total_quantity == null
-    // when cashAmount > 0. Then a proper preview round-trip could work.
+  public void previewUsStkMarketByCashAmount() {
+    // Amount orders size by dollars, not by share count. Previously the
+    // client-side PlaceOrderRequestValidator required total_quantity > 0,
+    // creating a stalemate with the gateway's rule that cash_amount and
+    // total_quantity cannot coexist. Validator now skips the quantity
+    // check when cashAmount > 0, so this preview round-trips cleanly.
     ContractItem contract = usStkContract();
     TradeOrderRequest req = TradeOrderRequest.buildAmountOrder(account, contract, ActionType.BUY, 100.0);
-    TradeOrderModel model = (TradeOrderModel) req.getApiModel();
-    Assert.assertEquals(OrderType.MKT, model.getOrderType());
-    Assert.assertEquals(Double.valueOf(100.0), model.getCashAmount());
-    Assert.assertEquals(ActionType.BUY, model.getAction());
-    Assert.assertEquals("AAPL", model.getSymbol());
-    System.out.println("US STK MKT-by-cashAmount: marshaled model OK (preview blocked by validator stalemate)");
+    previewOnly(req, "US STK MKT-by-cashAmount preview");
   }
 
   @Test
