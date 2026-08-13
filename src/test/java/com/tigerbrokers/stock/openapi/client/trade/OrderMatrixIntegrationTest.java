@@ -230,6 +230,9 @@ public class OrderMatrixIntegrationTest {
   public void previewUsStkMarketByCashAmount() {
     ContractItem contract = usStkContract();
     TradeOrderRequest req = TradeOrderRequest.buildAmountOrder(account, contract, ActionType.BUY, 100.0);
+    // Gateway rejects amount-order preview without an explicit quantity — set 0
+    // so the request has total_quantity while cash_amount takes precedence.
+    ((TradeOrderModel) req.getApiModel()).setTotalQuantity(0L);
     previewOnly(req, "US STK MKT-by-cashAmount preview");
   }
 
@@ -287,12 +290,11 @@ public class OrderMatrixIntegrationTest {
   public void placeUsStkOcaBrackets() {
     ContractItem contract = usStkContract();
     // OCA brackets: profit + stop-loss legs attached to a parent LMT BUY.
+    // Use the account-aware overload so nested OCA legs inherit account.
     TradeOrderRequest req = TradeOrderRequest.buildOCABracketsOrder(
-        contract, ActionType.BUY, 1,
+        account, contract, ActionType.BUY, 1L, null,
         SAFE_SELL_PRICE, TimeInForce.GTC, false,
         SAFE_BUY_PRICE, SAFE_BUY_PRICE, TimeInForce.GTC, false);
-    // Ensure account is set (builder without account uses DEFAULT_CONFIG).
-    ((TradeOrderModel) req.getApiModel()).setAccount(account);
     ((TradeOrderModel) req.getApiModel()).setLimitPrice(SAFE_BUY_PRICE);
     previewAndPlace(req, "US STK OCA brackets");
   }
