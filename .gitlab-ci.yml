@@ -42,7 +42,7 @@ unit:java:
 contract:java:
   image: maven:3.8-eclipse-temurin-8
   tags:
-    - sdk-integ
+    - openapi
   stage: contract
   allow_failure: false
   before_script:
@@ -72,7 +72,7 @@ contract:java:
 integ:java:
   image: maven:3.8-eclipse-temurin-8
   tags:
-    - sdk-integ
+    - openapi
   stage: integration
   when: manual
   allow_failure: true
@@ -102,7 +102,7 @@ integration:java:
   stage: integration
   allow_failure: true
   tags:
-    - sdk-integ
+    - openapi
   variables:
     TIGEROPEN_PROPS_PATH: "$TIGEROPEN_PROPS_PATH"
   script:
