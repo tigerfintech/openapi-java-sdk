@@ -1,7 +1,9 @@
 package com.tigerbrokers.stock.openapi.client.trade;
 
 import com.tigerbrokers.stock.openapi.client.testsupport.IntegTestConfig;
+import com.tigerbrokers.stock.openapi.client.testsupport.MarketHelpers;
 import com.tigerbrokers.stock.openapi.client.https.client.TigerHttpClient;
+import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.OptionExercisePositionItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.OptionExerciseCheckItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.OptionExercisePositionPageItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.OptionExerciseRecordPageItem;
@@ -51,6 +53,7 @@ public class OptionExerciseIntegrationTest {
     account = IntegTestConfig.getAccount();
     Assert.assertNotNull("TIGEROPEN_ACCOUNT env var required", account);
 
+    // Explicit override (kept for backward compatibility with existing CI jobs).
     String contractIdStr = System.getProperty("test.contract.id");
     if (contractIdStr == null || contractIdStr.isEmpty()) {
       contractIdStr = System.getenv("TIGEROPEN_CONTRACT_ID");
@@ -60,11 +63,62 @@ public class OptionExerciseIntegrationTest {
     }
   }
 
+  /**
+   * Returns a usable option contract ID: the explicit override when set,
+   * otherwise a freshly-resolved AAPL ATM option ID via MarketHelpers.
+   */
+  private static Long ensureContractId() {
+    if (contractId != null) {
+      return contractId;
+    }
+    Long resolved = MarketHelpers.resolveUsOptionContractId(client);
+    if (resolved != null) {
+      contractId = resolved;
+    }
+    return contractId;
+  }
+
+  /**
+   * Returns a contract ID we can actually submit an exercise against —
+   * i.e. one the account currently holds with a positive available quantity.
+   * Falls back to the explicit override when the positions list is empty.
+   */
+  private static Long pickExercisableContractId() {
+    OptionExercisePositionRequest posReq =
+        OptionExercisePositionRequest.buildRequest(account, OptionExerciseType.Exercise);
+    OptionExercisePositionResponse posResp = client.execute(posReq);
+    if (posResp != null && posResp.isSuccess() && posResp.getItem() != null
+        && posResp.getItem().getItems() != null && !posResp.getItem().getItems().isEmpty()) {
+      for (OptionExercisePositionItem p : posResp.getItem().getItems()) {
+        if (p.getContractId() == null) {
+          continue;
+        }
+        Double avail = p.getAvailableQuantity();
+        if (avail != null && avail > 0) {
+          return p.getContractId();
+        }
+      }
+    }
+    // Fallback to explicit override; do NOT fall back to the chain resolver
+    // here — submitting a random ATM contract the account does not hold would
+    // always fail.
+    return contractId;
+  }
+
   @Test
   public void testCheckExercise() {
-    Assume.assumeNotNull("set -Dtest.contract.id for check exercise", contractId);
+    Long id = ensureContractId();
+    if (id == null) {
+      // In-hours + resolve fail = data gap; out-of-hours = allowed skip.
+      Assume.assumeFalse(
+          "no option contract available while US TRADING is live — resolver failed",
+          MarketHelpers.isMarketTrading(client, "US"));
+      Assume.assumeNotNull(
+          "no option contract available (out of hours) — set -Dtest.contract.id to force", id);
+      return;
+    }
     OptionExerciseCheckRequest request =
-        OptionExerciseCheckRequest.buildRequest(account, contractId, OptionExerciseType.Exercise);
+        OptionExerciseCheckRequest.buildRequest(account, id, OptionExerciseType.Exercise);
 
     OptionExerciseCheckResponse response = client.execute(request);
 
@@ -84,9 +138,17 @@ public class OptionExerciseIntegrationTest {
 
   @Test
   public void testCheckExpireWithItmRate() {
-    Assume.assumeNotNull("set -Dtest.contract.id for check expire", contractId);
+    Long id = ensureContractId();
+    if (id == null) {
+      Assume.assumeFalse(
+          "no option contract available while US TRADING is live — resolver failed",
+          MarketHelpers.isMarketTrading(client, "US"));
+      Assume.assumeNotNull(
+          "no option contract available (out of hours) — set -Dtest.contract.id to force", id);
+      return;
+    }
     OptionExerciseCheckRequest request =
-        OptionExerciseCheckRequest.buildRequest(account, contractId, OptionExerciseType.Expire)
+        OptionExerciseCheckRequest.buildRequest(account, id, OptionExerciseType.Expire)
             .setItmRate(5);
 
     OptionExerciseCheckResponse response = client.execute(request);
@@ -201,12 +263,28 @@ public class OptionExerciseIntegrationTest {
 
   // 会真实提交并撤销行权申请，只在手动触发的 integ job 里跑。
   // 原先靠注释掉 @Test 来禁用，现在由 WriteApi 分类 + -Dgroups 选择控制。
+  //
+  // Additional safety: only submit when we can prove the account actually
+  // holds the target contract via the exercise-positions API. Blindly
+  // submitting an ATM option resolved from the chain would 100% fail because
+  // the account is unlikely to hold that random strike.
   @Test
   @Category(WriteApi.class)
   public void testSubmitAndCancelExercise() {
-    Assume.assumeTrue("set -Dtest.contract.id for write tests", contractId != null);
+    // Prefer a contract the account actually holds; fall back to the explicit
+    // override / resolver only when positions are empty.
+    Long id = pickExercisableContractId();
+    if (id == null) {
+      Assume.assumeFalse(
+          "no exercisable position and no override during US TRADING hours",
+          MarketHelpers.isMarketTrading(client, "US"));
+      Assume.assumeNotNull(
+          "no exercisable option position for account — set -Dtest.contract.id to force",
+          id);
+      return;
+    }
     OptionExerciseSubmitRequest submitRequest =
-        OptionExerciseSubmitRequest.buildExerciseRequest(account, contractId, 1.0, null, false);
+        OptionExerciseSubmitRequest.buildExerciseRequest(account, id, 1.0, null, false);
     OptionExerciseSubmitResponse submitResponse = client.execute(submitRequest);
     Assert.assertNotNull(submitResponse);
     Assert.assertTrue("submit failed: " + submitResponse.getMessage(), submitResponse.isSuccess());

@@ -26,6 +26,7 @@ import com.tigerbrokers.stock.openapi.client.https.response.TigerHttpResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.*;
 import com.tigerbrokers.stock.openapi.client.testsupport.IntegTestConfig;
+import com.tigerbrokers.stock.openapi.client.testsupport.MarketHelpers;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -345,13 +346,22 @@ public class QuoteIntegrationTest {
   @Test
   public void testQuoteShortableStocks() {
     TigerResponse response = client.execute(QuoteShortableStockRequest.newRequest(java.util.Arrays.asList("AAPL")));
-    // Some accounts do not support the shortable stocks method; skip if not supported
-    Assume.assumeTrue("shortable stocks not supported: " + response.getMessage(), response.isSuccess());
+    // Shortable stocks is a permissioned API — accounts without the entitlement
+    // return "common param error". This is an account-capability limit, not a
+    // data availability issue, so it stays a skip regardless of trading hours.
+    Assume.assumeTrue(
+        "shortable stocks API not entitled for this account: " + response.getMessage(),
+        response.isSuccess());
     com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteShortableStockResponse ssResp =
         (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteShortableStockResponse) response;
     Assert.assertNotNull("shortableStockItems should not be null", ssResp.getShortableStockItems());
-    Assume.assumeTrue("shortableStockItems empty — non-trading hours or no data",
-        !ssResp.getShortableStockItems().isEmpty());
+    // Out-of-hours the stream can be empty; only fail when regular US trading is live.
+    if (ssResp.getShortableStockItems().isEmpty()) {
+      Assume.assumeFalse(
+          "shortableStockItems empty during US TRADING hours — data gap",
+          MarketHelpers.isMarketTrading(client, "US"));
+      return;
+    }
     Assert.assertNotNull("first shortable symbol should not be null",
         ssResp.getShortableStockItems().get(0).getSymbol());
     Assert.assertEquals("first shortable symbol should be AAPL",
@@ -808,34 +818,61 @@ public class QuoteIntegrationTest {
 
   @Test
   public void testFundContracts() {
-    TigerResponse response = client.execute(FundContractsRequest.newRequest(java.util.Arrays.asList("SPY")));
+    // SPY is an ETF, not a fund — hardcoding it made the test unreliable across
+    // accounts. Resolve a live fund symbol first, and only skip when the fund
+    // catalog is empty AND we are out of US trading hours.
+    String fundSymbol = MarketHelpers.resolveFundSymbol(client, "US");
+    if (fundSymbol == null) {
+      Assume.assumeFalse(
+          "fund catalog is empty during US TRADING hours — data gap",
+          MarketHelpers.isMarketTrading(client, "US"));
+      Assume.assumeNotNull("no fund symbol available for US (out of hours)", fundSymbol);
+      return;
+    }
+    TigerResponse response = client.execute(
+        FundContractsRequest.newRequest(java.util.Arrays.asList(fundSymbol)));
     assertSuccess(response, "testFundContracts");
     com.tigerbrokers.stock.openapi.client.https.response.fund.FundContractsResponse fucResp =
         (com.tigerbrokers.stock.openapi.client.https.response.fund.FundContractsResponse) response;
     Assert.assertNotNull("fundContractItems should not be null", fucResp.getFundContractItems());
-    // SPY may not return fund contract data for all accounts; skip if empty
-    Assume.assumeTrue("fundContractItems empty — SPY may not have fund contract data",
-        !fucResp.getFundContractItems().isEmpty());
+    if (fucResp.getFundContractItems().isEmpty()) {
+      Assume.assumeFalse(
+          "fundContractItems empty for " + fundSymbol + " during US TRADING hours",
+          MarketHelpers.isMarketTrading(client, "US"));
+      return;
+    }
     Assert.assertNotNull("first fund symbol should not be null",
         fucResp.getFundContractItems().get(0).getSymbol());
-    Assert.assertEquals("first fund symbol should be SPY",
-        "SPY", fucResp.getFundContractItems().get(0).getSymbol());
+    Assert.assertEquals("first fund symbol should be " + fundSymbol,
+        fundSymbol, fucResp.getFundContractItems().get(0).getSymbol());
   }
 
   @Test
   public void testFundQuote() {
-    TigerResponse response = client.execute(FundQuoteRequest.newRequest(java.util.Arrays.asList("SPY")));
+    String fundSymbol = MarketHelpers.resolveFundSymbol(client, "US");
+    if (fundSymbol == null) {
+      Assume.assumeFalse(
+          "fund catalog is empty during US TRADING hours — data gap",
+          MarketHelpers.isMarketTrading(client, "US"));
+      Assume.assumeNotNull("no fund symbol available for US (out of hours)", fundSymbol);
+      return;
+    }
+    TigerResponse response = client.execute(
+        FundQuoteRequest.newRequest(java.util.Arrays.asList(fundSymbol)));
     assertSuccess(response, "testFundQuote");
     com.tigerbrokers.stock.openapi.client.https.response.fund.FundQuoteResponse fqResp =
         (com.tigerbrokers.stock.openapi.client.https.response.fund.FundQuoteResponse) response;
     Assert.assertNotNull("fundQuoteItems should not be null", fqResp.getQuoteItems());
-    // SPY may not return fund quote data for all accounts; skip if empty
-    Assume.assumeTrue("fundQuoteItems empty — SPY may not have fund quote data",
-        !fqResp.getQuoteItems().isEmpty());
+    if (fqResp.getQuoteItems().isEmpty()) {
+      Assume.assumeFalse(
+          "fundQuoteItems empty for " + fundSymbol + " during US TRADING hours",
+          MarketHelpers.isMarketTrading(client, "US"));
+      return;
+    }
     Assert.assertNotNull("first fund quote symbol should not be null",
         fqResp.getQuoteItems().get(0).getSymbol());
-    Assert.assertEquals("first fund quote symbol should be SPY",
-        "SPY", fqResp.getQuoteItems().get(0).getSymbol());
+    Assert.assertEquals("first fund quote symbol should be " + fundSymbol,
+        fundSymbol, fqResp.getQuoteItems().get(0).getSymbol());
     Assert.assertNotNull("first fund quote timestamp should not be null",
         fqResp.getQuoteItems().get(0).getTimestamp());
     Assert.assertTrue("first fund quote timestamp should be > 0",

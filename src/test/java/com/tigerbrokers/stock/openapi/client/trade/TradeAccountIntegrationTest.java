@@ -29,7 +29,14 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import com.tigerbrokers.stock.openapi.client.testsupport.IntegTestConfig;
+import com.tigerbrokers.stock.openapi.client.testsupport.MarketHelpers;
 import com.tigerbrokers.stock.openapi.client.testsupport.ReadOnlyApi;
+import com.tigerbrokers.stock.openapi.client.https.domain.option.item.OptionChainItem;
+import com.tigerbrokers.stock.openapi.client.https.domain.option.item.OptionRealTimeQuote;
+import com.tigerbrokers.stock.openapi.client.https.domain.option.item.OptionRealTimeQuoteGroup;
+import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionChainModel;
+import com.tigerbrokers.stock.openapi.client.https.request.option.OptionChainQueryRequest;
+import com.tigerbrokers.stock.openapi.client.https.response.option.OptionChainResponse;
 
 /** Integration tests for trade/account/asset APIs. */
 @Category(ReadOnlyApi.class)
@@ -161,10 +168,12 @@ public class TradeAccountIntegrationTest {
         + "\",\"from_segment\":\"SEC\",\"to_segment\":\"FUT\"}");
     TigerHttpResponse response = client.execute(request);
     assertDataPresent(response, "testSegmentFundAvailable");
-    // The segment_fund_available response format does not include the account
-    // identifier in the data field; skip if the account is not present.
-    Assume.assumeTrue("segment fund available data should contain the requested account",
-        response.getData().contains(account));
+    // The segment_fund_available response wraps the segment info but does not
+    // echo the account identifier — the original assertion was over-strict.
+    // The API returns a JSON object with the available amount / currency; a
+    // valid response is enough. Do a lightweight sanity check on the shape.
+    JSONObject root = JSON.parseObject(response.getData());
+    Assert.assertNotNull("segment fund available data should be a JSON object", root);
   }
 
   @Test
@@ -184,8 +193,12 @@ public class TradeAccountIntegrationTest {
   @Test
   public void testAggregateAssets() {
     TigerHttpResponse response = executeWithAccount(MethodName.AGGREGATE_ASSETS);
-    // Aggregate assets only supports institution accounts; skip if not supported
-    Assume.assumeTrue("aggregate assets only supports institution accounts: " + response.getMessage(),
+    // aggregate_assets is entitled only for institutional accounts. Non-inst
+    // accounts get an authorization/capability error — this is not a data or
+    // trading-hours issue, so the skip is unconditional.
+    Assume.assumeTrue(
+        "aggregate_assets API is entitled only for institutional accounts: "
+            + response.getMessage(),
         response.isSuccess());
     assertDataPresent(response, "testAggregateAssets");
     Assert.assertTrue("aggregate assets data should contain the requested account",
@@ -315,15 +328,78 @@ public class TradeAccountIntegrationTest {
   // ── Derivative Contracts (OPT secType) ─────────────────────────────────────
 
   /**
-   * Verifies that ContractsRequest with secType=OPT returns a success response.
-   * OPT contracts require expiry + strike + right; fetching all three dynamically
-   * requires a full option chain lookup which is out of scope for a trade integration test.
-   * Skipped — covered by QuoteIntegrationTest.testGetOptionChain.
+   * Verifies that ContractsRequest with secType=OPT succeeds when given a live
+   * expiry+strike+right. All three are resolved dynamically from the same
+   * quote endpoints QuoteIntegrationTest uses — we do not depend on the other
+   * test class, just its data source.
    */
   @Test
   public void testDerivativeContractsOpt() {
-    Assume.assumeTrue("OPT contracts require expiry+strike+right; " +
-        "dynamic lookup needs quote client — covered by QuoteIntegrationTest", false);
+    OptionExpirationQueryRequest expReq =
+        OptionExpirationQueryRequest.of(Arrays.asList("AAPL"));
+    TigerResponse expResp = client.execute(expReq);
+    assertSuccess(expResp, "testDerivativeContractsOpt:expiration");
+    OptionExpirationResponse oe = (OptionExpirationResponse) expResp;
+    boolean tradingUs = MarketHelpers.isMarketTrading(client, "US");
+    if (oe.getOptionExpirationItems() == null || oe.getOptionExpirationItems().isEmpty()) {
+      Assume.assumeFalse(
+          "no option expiries returned during US TRADING hours — data gap", tradingUs);
+      Assume.assumeTrue("no option expiries available for AAPL (out of hours)", false);
+      return;
+    }
+    OptionExpirationItem expItem = oe.getOptionExpirationItems().get(0);
+    if (expItem.getDates() == null || expItem.getDates().isEmpty()) {
+      Assume.assumeFalse(
+          "no option expiry dates during US TRADING hours — data gap", tradingUs);
+      Assume.assumeTrue("no option expiry dates for AAPL (out of hours)", false);
+      return;
+    }
+    String expiry = expItem.getDates().get(0);
+
+    OptionChainModel chainModel = new OptionChainModel("AAPL", expiry);
+    TigerResponse chainResp = client.execute(OptionChainQueryRequest.of(chainModel));
+    assertSuccess(chainResp, "testDerivativeContractsOpt:chain");
+    OptionChainResponse oc = (OptionChainResponse) chainResp;
+    if (oc.getOptionChainItems() == null || oc.getOptionChainItems().isEmpty()) {
+      Assume.assumeFalse(
+          "empty option chain during US TRADING hours — data gap", tradingUs);
+      Assume.assumeTrue("no option chain items for AAPL (out of hours)", false);
+      return;
+    }
+    OptionChainItem chainItem = oc.getOptionChainItems().get(0);
+    Double strike = null;
+    String right = null;
+    for (OptionRealTimeQuoteGroup g :
+        chainItem.getItems() == null ? java.util.Collections.<OptionRealTimeQuoteGroup>emptyList()
+            : chainItem.getItems()) {
+      OptionRealTimeQuote pick = g.getCall() != null ? g.getCall() : g.getPut();
+      if (pick != null && pick.getStrike() != null && !pick.getStrike().isEmpty()) {
+        try {
+          strike = Double.parseDouble(pick.getStrike());
+          right = pick.getRight();
+          if (right == null || right.isEmpty()) {
+            right = g.getCall() != null ? "CALL" : "PUT";
+          }
+          break;
+        } catch (NumberFormatException ignore) {
+          // try next
+        }
+      }
+    }
+    if (strike == null || right == null) {
+      Assume.assumeFalse(
+          "no usable strike/right in option chain during US TRADING hours — data gap",
+          tradingUs);
+      Assume.assumeTrue("no usable option strike for AAPL (out of hours)", false);
+      return;
+    }
+
+    ContractsModel model = new ContractsModel(
+        Arrays.asList("AAPL"), SecType.OPT.name(), expiry, strike, right);
+    TigerResponse response = client.execute(ContractsRequest.newRequest(model, account));
+    assertSuccess(response, "testDerivativeContractsOpt");
+    ContractsResponse csResp = (ContractsResponse) response;
+    Assert.assertNotNull("OPT contracts items should not be null", csResp.getItems());
   }
 
   // ── Position Transfer Detail ────────────────────────────────────────────────
