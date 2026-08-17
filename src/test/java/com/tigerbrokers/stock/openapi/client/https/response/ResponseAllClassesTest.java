@@ -79,7 +79,7 @@ public class ResponseAllClassesTest {
         }
       }
     }
-    Assert.assertTrue("Should test > 0 response classes, got " + tested.size(), tested.size() > 50);
+    Assert.assertTrue("Should test > 50 response classes, got " + tested.size(), tested.size() > 50);
     if (!failures.isEmpty()) {
       Assert.fail("Response round-trip failures:\n" + String.join("\n", failures));
     }

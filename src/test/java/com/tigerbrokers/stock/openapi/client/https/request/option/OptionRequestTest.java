@@ -185,6 +185,8 @@ public class OptionRequestTest {
     Assert.assertEquals(Long.valueOf(20240119L), m1.getExpiry());
     OptionChainModel m2 = new OptionChainModel("AAPL", "2024-01-19");
     Assert.assertEquals("AAPL", m2.getSymbol());
+    // String-date constructor should populate expiry (non-null)
+    Assert.assertNotNull("expiry should be set by string-date constructor", m2.getExpiry());
   }
   @Test public void testEdgeCasesNullMarket() {
     OptionAnalysisRequest req = OptionAnalysisRequest.newRequest(Arrays.asList(new OptionAnalysisModel("AAPL", "3year")), null);

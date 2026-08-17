@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** 走 CodeSource 定位再遍历目录就够了，少一个依赖少一处版本冲突。 */
+/** 扫描 target/classes 下指定包的类，供反射扇出类型的测试使用。 */
 public final class ClasspathScanner {
 
   private ClasspathScanner() {

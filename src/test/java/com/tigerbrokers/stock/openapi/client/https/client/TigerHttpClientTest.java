@@ -197,6 +197,8 @@ public class TigerHttpClientTest {
 
   /**
    * Covers accessToken/tradeToken/accountType/deviceId branches in buildParams.
+   * Verifies that the request reaches HttpUtils.post (meaning all buildParams branches
+   * were exercised without throwing) and that the response is non-null.
    */
   @Test
   public void testExecute_buildParamsIncludesAllOptionalFields() {
@@ -212,38 +214,59 @@ public class TigerHttpClientTest {
       sigMock.when(() -> TigerSignature.getSignContent(Mockito.anyMap())).thenReturn("content");
       sigMock.when(() -> TigerSignature.rsaSign(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
           .thenReturn("signed");
+
+      // Capture params map passed to HttpUtils.post to verify optional fields were included.
+      String[] capturedBody = new String[1];
       mocked.when(() -> HttpUtils.post(
           Mockito.anyString(), Mockito.anyString(),
           Mockito.anyString(), Mockito.anyInt()))
-          .thenReturn("{\"code\":0,\"message\":\"ok\",\"timestamp\":1}");
+          .thenAnswer(inv -> {
+            capturedBody[0] = inv.getArgument(1);
+            return "{\"code\":0,\"message\":\"ok\",\"timestamp\":1}";
+          });
 
       UserLicenseRequest request = new UserLicenseRequest();
       TigerResponse response = client.execute(request);
       Assert.assertNotNull(response);
+      // Verify optional fields were present in the serialized params
+      Assert.assertNotNull("request body should not be null", capturedBody[0]);
+      Assert.assertTrue("access_token should be in params", capturedBody[0].contains("at-1"));
+      Assert.assertTrue("trade_token should be in params", capturedBody[0].contains("tt-2"));
+      Assert.assertTrue("account_type should be in params", capturedBody[0].contains("GLOBAL"));
     }
   }
 
   /**
    * Covers the BatchApiModel branch in buildParams.
+   * Verifies that BatchApiModel content is serialized and the response is non-null.
    */
   @Test
   public void testExecute_batchApiModel() throws Exception {
     try (MockedStatic<HttpUtils> mocked = Mockito.mockStatic(HttpUtils.class)) {
+      String[] capturedBody = new String[1];
       mocked.when(() -> HttpUtils.post(
           Mockito.anyString(), Mockito.anyString(),
           Mockito.anyString(), Mockito.anyInt()))
-          .thenReturn("{\"code\":0,\"message\":\"ok\",\"timestamp\":1,\"data\":{}}");
+          .thenAnswer(inv -> {
+            capturedBody[0] = inv.getArgument(1);
+            return "{\"code\":0,\"message\":\"ok\",\"timestamp\":1,\"data\":{}}";
+          });
 
       // Build a TigerCommonRequest and set a BatchApiModel as its apiModel via reflection.
       UserLicenseRequest req = new UserLicenseRequest();
       PrimeAssetModel item = new PrimeAssetModel("acct1");
-      BatchApiModel batch = new BatchApiModel(Collections.singletonList(item));
+      @SuppressWarnings("unchecked")
+      BatchApiModel<ApiModel> batch = new BatchApiModel<>(Collections.singletonList(item));
       Field apiModelField = TigerCommonRequest.class.getDeclaredField("apiModel");
       apiModelField.setAccessible(true);
       apiModelField.set(req, batch);
 
       TigerResponse response = client.execute(req);
       Assert.assertNotNull(response);
+      // Verify the batch model was serialized into the request body
+      Assert.assertNotNull("request body should not be null", capturedBody[0]);
+      Assert.assertTrue("batch content should be in serialized params",
+          capturedBody[0].contains("acct1") || capturedBody[0].contains("biz_content"));
     }
   }
 

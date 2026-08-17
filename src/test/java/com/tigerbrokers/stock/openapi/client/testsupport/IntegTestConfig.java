@@ -52,7 +52,8 @@ public final class IntegTestConfig {
     config.isAutoGrabPermission = false;
     config.isAutoRefreshToken = false;
 
-    TigerHttpClient client = TigerHttpClient.getInstance();
+    // Use a fresh client instance to avoid mutating the global singleton used by unit tests.
+    TigerHttpClient client = new TigerHttpClient();
 
     String serverUrl = System.getProperty("test.server.url");
     if (serverUrl == null || serverUrl.isEmpty()) {
@@ -73,7 +74,7 @@ public final class IntegTestConfig {
     if (account == null || account.isEmpty()) {
       account = env("TIGEROPEN_ACCOUNT");
     }
-    if ((account == null || account.isEmpty()) && lastConfig != null) {
+    if ((account == null || account.isEmpty()) && lastConfig != null) {  // explicit parens: && binds tighter than ||
       account = lastConfig.defaultAccount;
     }
     return account;

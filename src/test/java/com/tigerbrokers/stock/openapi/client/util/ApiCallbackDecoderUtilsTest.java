@@ -177,7 +177,7 @@ public class ApiCallbackDecoderUtilsTest {
   }
 
   @Test
-  public void testReceiveConnected_heartBeatShortArray() {
+  public void testReceiveConnected_heartBeatStringValue() {
     ChannelHandlerContext ctx = mockCtx();
     ApiCallbackDecoder decoder = mock(ApiCallbackDecoder.class);
     ApiComposeCallback callback = mock(ApiComposeCallback.class);

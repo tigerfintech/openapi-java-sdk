@@ -275,6 +275,7 @@ public class AllApiLogicTest {
     mockForRequest(req);
     ContractResponse resp = client.execute(req);
     Assert.assertNotNull("ContractRequest", resp);
+    // NOTE: mock always returns code=0; this assertion only verifies execute() doesn't throw and returns non-null
     Assert.assertTrue("ContractRequest code=" + resp.getCode(), resp.getCode() >= 0);
   }
 

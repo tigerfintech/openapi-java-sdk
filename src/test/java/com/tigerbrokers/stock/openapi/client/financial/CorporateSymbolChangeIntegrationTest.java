@@ -65,7 +65,7 @@ public class CorporateSymbolChangeIntegrationTest {
 
     Map<String, List<CorporateSymbolChangeItem>> items = response.getItems();
     Assert.assertNotNull("items should not be null", items);
-    if (items != null && !items.isEmpty()) {
+    if (!items.isEmpty()) {
       items.forEach((symbol, list) -> {
         Assert.assertNotNull("list for " + symbol + " should not be null", list);
         Assert.assertFalse("list for " + symbol + " should not be empty", list.isEmpty());

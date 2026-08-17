@@ -154,6 +154,9 @@ public class DeserializationRoundTripTest {
       ctor.setAccessible(true);
       return (TigerRequest<?>) ctor.newInstance();
     } catch (Throwable th) {
+      // Log so failures surface instead of silently skipping test coverage.
+      System.err.println("[instantiate] " + type.getSimpleName() + " skipped: "
+          + th.getClass().getSimpleName() + ": " + th.getMessage());
       return null;
     }
   }

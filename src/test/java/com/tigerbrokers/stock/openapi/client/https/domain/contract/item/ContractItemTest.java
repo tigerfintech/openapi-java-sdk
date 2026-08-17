@@ -35,6 +35,9 @@ public class ContractItemTest {
     ContractItem item = ContractItem.convert(future);
     Assert.assertEquals(SecType.FUT.name(), item.getSecType());
     Assert.assertEquals("CL", item.getSymbol());
+    Assert.assertEquals("Crude Oil", item.getName());
+    Assert.assertEquals("NYMEX", item.getExchange());
+    Assert.assertEquals("USD", item.getCurrency());
   }
 
   @Test

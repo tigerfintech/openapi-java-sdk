@@ -3,6 +3,7 @@
 
 stages:
   - unit
+  - contract
   - integration
 
 variables:
@@ -38,12 +39,72 @@ unit:java:
         - target/surefire-reports/TEST-*.xml
     expire_in: 1 week
 
+contract:java:
+  image: maven:3.8-eclipse-temurin-8
+  tags:
+    - sdk-integ
+  stage: contract
+  allow_failure: false
+  before_script:
+    - mkdir -p ~/.m2 && echo '<settings><mirrors><mirror><id>aliyun</id><mirrorOf>central</mirrorOf><url>https://maven.aliyun.com/repository/public</url></mirror></mirrors></settings>' > ~/.m2/settings.xml
+  cache:
+    key: maven-repo
+    paths:
+      - .m2/repository
+  variables:
+    TIGEROPEN_PROPS_PATH: "$TIGEROPEN_PROPS_PATH"
+  script:
+    - test -n "$TIGEROPEN_TIGER_ID" || test -n "$TIGEROPEN_PROPS_PATH" || { echo "No credentials — skipping contract"; exit 0; }
+    - mvn $MAVEN_CLI_OPTS test-compile
+    - mvn $MAVEN_CLI_OPTS failsafe:integration-test failsafe:verify
+        -Dtest.integ=true
+        -Dgroups=com.tigerbrokers.stock.openapi.client.testsupport.ReadOnlyApi
+        -DexcludedGroups=com.tigerbrokers.stock.openapi.client.testsupport.WriteApi
+  artifacts:
+    when: always
+    paths:
+      - target/failsafe-reports/
+    reports:
+      junit:
+        - target/failsafe-reports/TEST-*.xml
+    expire_in: 1 week
+
+integ:java:
+  image: maven:3.8-eclipse-temurin-8
+  tags:
+    - sdk-integ
+  stage: integration
+  when: manual
+  allow_failure: true
+  before_script:
+    - mkdir -p ~/.m2 && echo '<settings><mirrors><mirror><id>aliyun</id><mirrorOf>central</mirrorOf><url>https://maven.aliyun.com/repository/public</url></mirror></mirrors></settings>' > ~/.m2/settings.xml
+  cache:
+    key: maven-repo
+    paths:
+      - .m2/repository
+  variables:
+    TIGEROPEN_PROPS_PATH: "$TIGEROPEN_PROPS_PATH"
+  script:
+    - test -n "$TIGEROPEN_TIGER_ID" || test -n "$TIGEROPEN_PROPS_PATH" || { echo "No credentials — skipping integration"; exit 0; }
+    - mvn $MAVEN_CLI_OPTS test-compile
+    - mvn $MAVEN_CLI_OPTS failsafe:integration-test failsafe:verify -Dtest.integ=true
+  artifacts:
+    when: always
+    paths:
+      - target/failsafe-reports/
+    reports:
+      junit:
+        - target/failsafe-reports/TEST-*.xml
+    expire_in: 1 week
+
 integration:java:
   extends: .maven_base
   stage: integration
   allow_failure: true
   tags:
-    - openapi
+    - sdk-integ
+  variables:
+    TIGEROPEN_PROPS_PATH: "$TIGEROPEN_PROPS_PATH"
   script:
     - test -n "$TIGEROPEN_TIGER_ID" || test -n "$TIGEROPEN_PROPS_PATH" || { echo "No credentials — skipping integration"; exit 0; }
     - mvn $MAVEN_CLI_OPTS test-compile
@@ -69,8 +130,12 @@ notify:webhook:
   needs:
     - job: unit:java
       artifacts: true
-    - job: integration:java
+    - job: contract:java
       artifacts: true
+      optional: true
+    - job: integ:java
+      artifacts: true
+      optional: true
   script:
     - |
       python3 << 'PYEOF'

@@ -17,13 +17,27 @@ import java.util.TreeSet;
 import org.junit.Assert;
 import org.junit.Test;
 
-/** 本仓自查测试：wire method 注册表完整性。 */
+/**
+ * 本仓自查测试：wire method 注册表完整性。
+ *
+ * <p>扫描 target/classes 下所有 {@link TigerRequest} 具体子类，
+ * 检验每个 Request 都声明了 MethodName、都能解析到对应的 Response 类，
+ * 并验证已废弃的 {@link ApiServiceType} 常量与 MethodName 对齐。
+ *
+ * <p>走 CodeSource 定位再遍历目录就够了，少一个依赖少一处版本冲突。
+ */
 public class ApiRegistryTest {
 
   private static final String REQUEST_PACKAGE =
       "com.tigerbrokers.stock.openapi.client.https.request";
 
-  /** 请求参数和响应字段都没有编译期约束 —— 这是早期 API 风格，新接口不应再走这条路。 */
+  /**
+   * 棘轮清单（ratchet list）：只能通过泛用 {@link com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest}
+   * 调用、尚无类型化 Request 的 MethodName 白名单。
+   *
+   * <p>规则：只允许变短，不允许变长。新增枚举值必须同时加 Request 类；
+   * 若某个方法名已有 Request 类，就从这里删掉，让棘轮往前走一格。
+   */
   private static final Set<String> METHOD_NAMES_WITHOUT_REQUEST = new HashSet<>(Arrays.asList(
       "ACCOUNTS",
       "ACTIVE_ORDERS",

@@ -30,7 +30,7 @@ public final class TestClientFactory {
   private TestClientFactory() {
   }
 
-  /** 获取可用于单测的 TigerHttpClient。 */
+  /** 获取可用于单测的 TigerHttpClient。每次返回独立实例，不污染全局单例。 */
   public static TigerHttpClient createOfflineClient() {
     ClientConfig config = new ClientConfig();
     config.tigerId = TEST_TIGER_ID;
@@ -41,7 +41,7 @@ public final class TestClientFactory {
     config.failRetryCounts = 0;
     config.setEnv(Env.SANDBOX);  // 用 SANDBOX 公钥，避免签名校验问题
 
-    TigerHttpClient client = TigerHttpClient.getInstance();
+    TigerHttpClient client = new TigerHttpClient();  // 新实例，不影响全局单例
     client.useCustomServerUrl(TEST_SERVER_URL);  // 必须在 clientConfig 之前
     client.clientConfig(config);
     return client;
