@@ -172,8 +172,12 @@ public class TradeAccountIntegrationTest {
     // echo the account identifier — the original assertion was over-strict.
     // The API returns a JSON object with the available amount / currency; a
     // valid response is enough. Do a lightweight sanity check on the shape.
-    JSONObject root = JSON.parseObject(response.getData());
-    Assert.assertNotNull("segment fund available data should be a JSON object", root);
+    // The segment_fund_available response wraps the `data` field as either an
+    // object OR an array — the Response DTO declares it as List<Item>, so the
+    // top-level "data" element in the raw string is a JSONArray. Use JSON.parse
+    // so we accept both shapes without casting errors.
+    Object root = JSON.parse(response.getData());
+    Assert.assertNotNull("segment fund available data should parse as JSON", root);
   }
 
   @Test
