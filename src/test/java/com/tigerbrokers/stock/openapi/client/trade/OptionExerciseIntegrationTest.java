@@ -118,7 +118,8 @@ public class OptionExerciseIntegrationTest {
       return;
     }
     OptionExerciseCheckRequest request =
-        OptionExerciseCheckRequest.buildRequest(account, id, OptionExerciseType.Exercise);
+        OptionExerciseCheckRequest.buildRequest(account, id, OptionExerciseType.Exercise)
+            .setQuantity(1.0);
 
     OptionExerciseCheckResponse response = client.execute(request);
 
@@ -149,6 +150,7 @@ public class OptionExerciseIntegrationTest {
     }
     OptionExerciseCheckRequest request =
         OptionExerciseCheckRequest.buildRequest(account, id, OptionExerciseType.Expire)
+            .setQuantity(1.0)
             .setItmRate(5);
 
     OptionExerciseCheckResponse response = client.execute(request);
@@ -283,8 +285,10 @@ public class OptionExerciseIntegrationTest {
           id);
       return;
     }
+    String executingDate = java.time.LocalDate.now().plusDays(1)
+        .format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE);
     OptionExerciseSubmitRequest submitRequest =
-        OptionExerciseSubmitRequest.buildExerciseRequest(account, id, 1.0, null, false);
+        OptionExerciseSubmitRequest.buildExerciseRequest(account, id, 1.0, executingDate, false);
     OptionExerciseSubmitResponse submitResponse = client.execute(submitRequest);
     Assert.assertNotNull(submitResponse);
     Assert.assertTrue("submit failed: " + submitResponse.getMessage(), submitResponse.isSuccess());

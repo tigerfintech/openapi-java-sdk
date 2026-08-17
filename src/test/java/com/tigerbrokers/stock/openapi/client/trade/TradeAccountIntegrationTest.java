@@ -325,81 +325,50 @@ public class TradeAccountIntegrationTest {
     Assert.assertNotNull("testOrderNo data should not be null", response.getData());
   }
 
-  // ── Derivative Contracts (OPT secType) ─────────────────────────────────────
+  // ── Derivative Contracts (FUT secType) ─────────────────────────────────────
 
   /**
-   * Verifies that ContractsRequest with secType=OPT succeeds when given a live
-   * expiry+strike+right. All three are resolved dynamically from the same
-   * quote endpoints QuoteIntegrationTest uses — we do not depend on the other
-   * test class, just its data source.
+   * Verifies that ContractsRequest works for a derivative sec_type. The
+   * /contracts endpoint only accepts STK/FUT/CC (options go through the
+   * option chain / option_brief endpoints, and calling /contracts with
+   * sec_type=OPT returns "'sec_type':'OPT' is not supported"). We therefore
+   * exercise it with a live FUT symbol resolved via future_contracts.
    */
   @Test
-  public void testDerivativeContractsOpt() {
-    OptionExpirationQueryRequest expReq =
-        OptionExpirationQueryRequest.of(Arrays.asList("AAPL"));
-    TigerResponse expResp = client.execute(expReq);
-    assertSuccess(expResp, "testDerivativeContractsOpt:expiration");
-    OptionExpirationResponse oe = (OptionExpirationResponse) expResp;
+  public void testDerivativeContractsFut() {
+    com.tigerbrokers.stock.openapi.client.https.request.future.FutureContractsRequest fcReq =
+        com.tigerbrokers.stock.openapi.client.https.request.future.FutureContractsRequest.newRequest("ES");
+    TigerResponse fcResp = client.execute(fcReq);
+    assertSuccess(fcResp, "testDerivativeContractsFut:future_contracts");
+    com.tigerbrokers.stock.openapi.client.https.response.future.FutureContractsResponse fc =
+        (com.tigerbrokers.stock.openapi.client.https.response.future.FutureContractsResponse) fcResp;
     boolean tradingUs = MarketHelpers.isMarketTrading(client, "US");
-    if (oe.getOptionExpirationItems() == null || oe.getOptionExpirationItems().isEmpty()) {
+    if (fc.getFutureContractItems() == null || fc.getFutureContractItems().isEmpty()) {
       Assume.assumeFalse(
-          "no option expiries returned during US TRADING hours — data gap", tradingUs);
-      Assume.assumeTrue("no option expiries available for AAPL (out of hours)", false);
+          "no future contracts returned during US TRADING hours — data gap", tradingUs);
+      Assume.assumeTrue("no future contracts for ES (out of hours)", false);
       return;
     }
-    OptionExpirationItem expItem = oe.getOptionExpirationItems().get(0);
-    if (expItem.getDates() == null || expItem.getDates().isEmpty()) {
-      Assume.assumeFalse(
-          "no option expiry dates during US TRADING hours — data gap", tradingUs);
-      Assume.assumeTrue("no option expiry dates for AAPL (out of hours)", false);
-      return;
-    }
-    String expiry = expItem.getDates().get(0);
-
-    OptionChainModel chainModel = new OptionChainModel("AAPL", expiry);
-    TigerResponse chainResp = client.execute(OptionChainQueryRequest.of(chainModel));
-    assertSuccess(chainResp, "testDerivativeContractsOpt:chain");
-    OptionChainResponse oc = (OptionChainResponse) chainResp;
-    if (oc.getOptionChainItems() == null || oc.getOptionChainItems().isEmpty()) {
-      Assume.assumeFalse(
-          "empty option chain during US TRADING hours — data gap", tradingUs);
-      Assume.assumeTrue("no option chain items for AAPL (out of hours)", false);
-      return;
-    }
-    OptionChainItem chainItem = oc.getOptionChainItems().get(0);
-    Double strike = null;
-    String right = null;
-    for (OptionRealTimeQuoteGroup g :
-        chainItem.getItems() == null ? java.util.Collections.<OptionRealTimeQuoteGroup>emptyList()
-            : chainItem.getItems()) {
-      OptionRealTimeQuote pick = g.getCall() != null ? g.getCall() : g.getPut();
-      if (pick != null && pick.getStrike() != null && !pick.getStrike().isEmpty()) {
-        try {
-          strike = Double.parseDouble(pick.getStrike());
-          right = pick.getRight();
-          if (right == null || right.isEmpty()) {
-            right = g.getCall() != null ? "CALL" : "PUT";
-          }
-          break;
-        } catch (NumberFormatException ignore) {
-          // try next
-        }
+    String contractCode = null;
+    for (com.tigerbrokers.stock.openapi.client.https.domain.future.item.FutureContractItem item
+        : fc.getFutureContractItems()) {
+      if (item.getContractCode() != null && !item.getContractCode().isEmpty()) {
+        contractCode = item.getContractCode();
+        break;
       }
     }
-    if (strike == null || right == null) {
+    if (contractCode == null) {
       Assume.assumeFalse(
-          "no usable strike/right in option chain during US TRADING hours — data gap",
-          tradingUs);
-      Assume.assumeTrue("no usable option strike for AAPL (out of hours)", false);
+          "no usable future contract code during US TRADING hours — data gap", tradingUs);
+      Assume.assumeTrue("no usable future contract code (out of hours)", false);
       return;
     }
 
-    ContractsModel model = new ContractsModel(
-        Arrays.asList("AAPL"), SecType.OPT.name(), expiry, strike, right);
+    ContractsModel model = new ContractsModel(Arrays.asList(contractCode), SecType.FUT.name());
     TigerResponse response = client.execute(ContractsRequest.newRequest(model, account));
-    assertSuccess(response, "testDerivativeContractsOpt");
+    assertSuccess(response, "testDerivativeContractsFut");
     ContractsResponse csResp = (ContractsResponse) response;
-    Assert.assertNotNull("OPT contracts items should not be null", csResp.getItems());
+    Assert.assertNotNull("FUT contracts items should not be null", csResp.getItems());
   }
 
   // ── Position Transfer Detail ────────────────────────────────────────────────
