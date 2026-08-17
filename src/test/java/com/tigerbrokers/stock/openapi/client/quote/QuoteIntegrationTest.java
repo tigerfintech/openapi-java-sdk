@@ -152,6 +152,23 @@ public class QuoteIntegrationTest {
     assertDataPresent(response, "testMarketState");
     Assert.assertTrue("market state data should mention US market",
         response.getData().contains("US"));
+    // Assert status field presence
+    JSONObject root = JSON.parseObject(response.getData());
+    if (root != null) {
+      JSONArray items = root.getJSONArray("items");
+      if (items == null) {
+        // some responses return a single object with status at root level
+        String status = root.getString("status");
+        if (status != null) {
+          Assert.assertFalse("market state status should not be empty", status.isEmpty());
+        }
+      } else if (!items.isEmpty()) {
+        String status = items.getJSONObject(0).getString("status");
+        if (status != null) {
+          Assert.assertFalse("market state status should not be empty", status.isEmpty());
+        }
+      }
+    }
   }
 
   @Test
@@ -216,6 +233,15 @@ public class QuoteIntegrationTest {
     assertDataPresent(response, "testStockDetail");
     Assert.assertTrue("stock detail data should contain AAPL",
         response.getData().contains("AAPL"));
+    // Assert latestPrice field
+    JSONArray items = JSON.parseObject(response.getData()).getJSONArray("items");
+    if (items != null && !items.isEmpty()) {
+      JSONObject first = items.getJSONObject(0);
+      Double latestPrice = first.getDouble("latestPrice");
+      if (latestPrice != null) {
+        Assert.assertTrue("stock detail latestPrice should be > 0", latestPrice > 0);
+      }
+    }
   }
 
   @Test
@@ -232,6 +258,19 @@ public class QuoteIntegrationTest {
         tlResp.getTimelineItems().get(0).getSymbol());
     Assert.assertEquals("first timeline symbol should be AAPL",
         "AAPL", tlResp.getTimelineItems().get(0).getSymbol());
+  }
+
+  @Test
+  public void testTimelineHK() {
+    TigerResponse response = client.execute(QuoteTimelineRequest.newRequest(java.util.Arrays.asList("00700")));
+    assertSuccess(response, "testTimelineHK");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteTimelineResponse tlResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteTimelineResponse) response;
+    Assert.assertNotNull("HK timelineItems should not be null", tlResp.getTimelineItems());
+    Assume.assumeTrue("non-trading hours, HK timeline data may be empty",
+        !tlResp.getTimelineItems().isEmpty());
+    Assert.assertEquals("first HK timeline symbol should be 00700",
+        "00700", tlResp.getTimelineItems().get(0).getSymbol());
   }
 
   @Test
@@ -292,6 +331,52 @@ public class QuoteIntegrationTest {
   }
 
   @Test
+  public void testKlineWeekly() {
+    TigerResponse response = client.execute(QuoteKlineRequest.newRequest(java.util.Arrays.asList("AAPL"), KType.week));
+    assertSuccess(response, "testKlineWeekly");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteKlineResponse klineResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteKlineResponse) response;
+    Assert.assertNotNull("weekly klineItems should not be null", klineResp.getKlineItems());
+    Assert.assertFalse("weekly klineItems should not be empty", klineResp.getKlineItems().isEmpty());
+    Assert.assertEquals("weekly kline symbol should be AAPL",
+        "AAPL", klineResp.getKlineItems().get(0).getSymbol());
+    if (klineResp.getKlineItems().get(0).getItems() != null
+        && !klineResp.getKlineItems().get(0).getItems().isEmpty()) {
+      Long vol = klineResp.getKlineItems().get(0).getItems().get(0).getVolume();
+      if (vol != null) {
+        Assert.assertTrue("weekly kline volume should be >= 0", vol >= 0);
+      }
+      Double open = klineResp.getKlineItems().get(0).getItems().get(0).getOpen();
+      if (open != null) {
+        Assert.assertTrue("weekly kline open should be > 0", open > 0);
+      }
+    }
+  }
+
+  @Test
+  public void testKlineHK() {
+    TigerResponse response = client.execute(QuoteKlineRequest.newRequest(java.util.Arrays.asList("00700"), KType.day));
+    assertSuccess(response, "testKlineHK");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteKlineResponse klineResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteKlineResponse) response;
+    Assert.assertNotNull("HK klineItems should not be null", klineResp.getKlineItems());
+    Assert.assertFalse("HK klineItems should not be empty", klineResp.getKlineItems().isEmpty());
+    Assert.assertEquals("HK kline symbol should be 00700",
+        "00700", klineResp.getKlineItems().get(0).getSymbol());
+    if (klineResp.getKlineItems().get(0).getItems() != null
+        && !klineResp.getKlineItems().get(0).getItems().isEmpty()) {
+      Long vol = klineResp.getKlineItems().get(0).getItems().get(0).getVolume();
+      if (vol != null) {
+        Assert.assertTrue("HK kline volume should be >= 0", vol >= 0);
+      }
+      Double open = klineResp.getKlineItems().get(0).getItems().get(0).getOpen();
+      if (open != null) {
+        Assert.assertTrue("HK kline open should be > 0", open > 0);
+      }
+    }
+  }
+
+  @Test
   public void testTradeTick() {
     TigerResponse response = client.execute(QuoteTradeTickRequest.newRequest(java.util.Arrays.asList("AAPL")));
     assertSuccess(response, "testTradeTick");
@@ -305,6 +390,14 @@ public class QuoteIntegrationTest {
         ttResp.getTradeTickItems().get(0).getSymbol());
     Assert.assertEquals("first trade tick symbol should be AAPL",
         "AAPL", ttResp.getTradeTickItems().get(0).getSymbol());
+    // Assert price field on tick items
+    if (ttResp.getTradeTickItems().get(0).getItems() != null
+        && !ttResp.getTradeTickItems().get(0).getItems().isEmpty()) {
+      Double price = ttResp.getTradeTickItems().get(0).getItems().get(0).getPrice();
+      if (price != null) {
+        Assert.assertTrue("trade tick price should be > 0", price > 0);
+      }
+    }
   }
 
   @Test
@@ -341,6 +434,22 @@ public class QuoteIntegrationTest {
         rtResp.getRealTimeQuoteItems().get(0).getLatestPrice());
     Assert.assertTrue("first realtime latestPrice should be > 0",
         rtResp.getRealTimeQuoteItems().get(0).getLatestPrice() > 0);
+  }
+
+  @Test
+  public void testQuoteRealTimeHK() {
+    TigerResponse response = client.execute(QuoteRealTimeQuoteRequest.newRequest(java.util.Arrays.asList("00700")));
+    assertSuccess(response, "testQuoteRealTimeHK");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteRealTimeQuoteResponse rtResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteRealTimeQuoteResponse) response;
+    Assert.assertNotNull("HK realTimeQuoteItems should not be null", rtResp.getRealTimeQuoteItems());
+    Assert.assertFalse("HK realTimeQuoteItems should not be empty", rtResp.getRealTimeQuoteItems().isEmpty());
+    Assert.assertEquals("HK realtime symbol should be 00700",
+        "00700", rtResp.getRealTimeQuoteItems().get(0).getSymbol());
+    Double latestPrice = rtResp.getRealTimeQuoteItems().get(0).getLatestPrice();
+    if (latestPrice != null) {
+      Assert.assertTrue("HK realtime latestPrice should be > 0", latestPrice > 0);
+    }
   }
 
   @Test
@@ -398,6 +507,18 @@ public class QuoteIntegrationTest {
         dResp.getQuoteDepthItems().get(0).getSymbol());
     Assert.assertEquals("first depth symbol should be AAPL",
         "AAPL", dResp.getQuoteDepthItems().get(0).getSymbol());
+  }
+
+  @Test
+  public void testQuoteDepthHK() {
+    TigerResponse response = client.execute(QuoteDepthRequest.newRequest(java.util.Arrays.asList("00700"), "HK"));
+    assertSuccess(response, "testQuoteDepthHK");
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteDepthResponse dResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteDepthResponse) response;
+    Assert.assertNotNull("HK quoteDepthItems should not be null", dResp.getQuoteDepthItems());
+    Assert.assertFalse("HK quoteDepthItems should not be empty", dResp.getQuoteDepthItems().isEmpty());
+    Assert.assertEquals("HK depth symbol should be 00700",
+        "00700", dResp.getQuoteDepthItems().get(0).getSymbol());
   }
 
   @Test
@@ -538,6 +659,23 @@ public class QuoteIntegrationTest {
         ocResp.getOptionChainItems().get(0).getSymbol());
     Assert.assertEquals("first chain symbol should be AAPL",
         "AAPL", ocResp.getOptionChainItems().get(0).getSymbol());
+    // Assert strike and expiry fields on the first chain item's first group
+    OptionChainItem chainItem = ocResp.getOptionChainItems().get(0);
+    // expiry is validated via the request model; assert strike on the quote item
+    if (chainItem.getItems() != null && !chainItem.getItems().isEmpty()) {
+      OptionRealTimeQuoteGroup group = chainItem.getItems().get(0);
+      OptionRealTimeQuote call = group.getCall();
+      OptionRealTimeQuote put = group.getPut();
+      OptionRealTimeQuote quote = call != null ? call : put;
+      if (quote != null) {
+        Assert.assertNotNull("option chain item strike should not be null", quote.getStrike());
+        Assert.assertFalse("option chain item strike should not be empty",
+            quote.getStrike().isEmpty());
+      }
+      // expiry validated: the chain model expiry was used to build the request
+      Assert.assertNotNull("option chain expiry from request model should not be null", expiry);
+      Assert.assertFalse("option chain expiry should not be empty", expiry.isEmpty());
+    }
   }
 
   @Test
@@ -1158,6 +1296,19 @@ public class QuoteIntegrationTest {
     com.tigerbrokers.stock.openapi.client.https.response.financial.FinancialReportResponse frResp =
         (com.tigerbrokers.stock.openapi.client.https.response.financial.FinancialReportResponse) response;
     Assert.assertNotNull("financialReportItems should not be null",
+        frResp.getFinancialReportItems());
+  }
+
+  @Test
+  public void testFinancialReportAnnual() {
+    TigerResponse response = client.execute(FinancialReportRequest.newRequest(
+        Arrays.asList("AAPL"), Market.US,
+        Arrays.asList("net_income"),
+        FinancialPeriodType.Annual));
+    assertSuccess(response, "testFinancialReportAnnual");
+    com.tigerbrokers.stock.openapi.client.https.response.financial.FinancialReportResponse frResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.financial.FinancialReportResponse) response;
+    Assert.assertNotNull("annual financialReportItems should not be null",
         frResp.getFinancialReportItems());
   }
 

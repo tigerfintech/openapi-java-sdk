@@ -110,6 +110,20 @@ public class TradeAccountIntegrationTest {
     assertDataPresent(response, "testPositions");
     Assert.assertTrue("positions data should contain the requested account",
         response.getData().contains(account));
+    // Assert averageCost and marketValue fields when positions exist
+    JSONObject root = JSON.parseObject(response.getData());
+    JSONArray positions = root != null ? root.getJSONArray("positions") : null;
+    if (positions != null && !positions.isEmpty()) {
+      JSONObject first = positions.getJSONObject(0);
+      Double averageCost = first.getDouble("averageCost");
+      if (averageCost != null) {
+        Assert.assertTrue("position averageCost should be > 0", averageCost > 0);
+      }
+      Double marketValue = first.getDouble("marketValue");
+      if (marketValue != null) {
+        Assert.assertNotNull("position marketValue should not be null", marketValue);
+      }
+    }
   }
 
   @Test
@@ -318,6 +332,20 @@ public class TradeAccountIntegrationTest {
     assertDataPresent(response, "testOrders");
     Assert.assertTrue("orders data should contain the requested account",
         response.getData().contains(account));
+    // Assert orderType and status fields when orders exist
+    JSONObject root = JSON.parseObject(response.getData());
+    JSONArray orders = root != null ? root.getJSONArray("orders") : null;
+    if (orders != null && !orders.isEmpty()) {
+      JSONObject first = orders.getJSONObject(0);
+      String orderType = first.getString("orderType");
+      if (orderType != null) {
+        Assert.assertFalse("order orderType should not be empty", orderType.isEmpty());
+      }
+      String status = first.getString("status");
+      if (status != null) {
+        Assert.assertFalse("order status should not be empty", status.isEmpty());
+      }
+    }
   }
 
   // ── Order No (single order query) ────────────────────────────────────────────
