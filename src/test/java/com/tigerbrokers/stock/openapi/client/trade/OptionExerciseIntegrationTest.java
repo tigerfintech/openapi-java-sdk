@@ -47,8 +47,8 @@ public class OptionExerciseIntegrationTest {
 
   @BeforeClass
   public static void setUpClass() {
-    Assume.assumeTrue("integration test; enable with -Dtest.integ=true",
-        Boolean.getBoolean("test.integ"));
+    // test.integ gate removed: ReadOnlyApi tests are controlled by -Dgroups=ReadOnlyApi alone.
+    // WriteApi tests are additionally excluded via -DexcludedGroups=WriteApi in contract jobs.
     client = IntegTestConfig.createClient();
     account = IntegTestConfig.getAccount();
     Assert.assertNotNull("TIGEROPEN_ACCOUNT env var required", account);
@@ -277,18 +277,14 @@ public class OptionExerciseIntegrationTest {
   @Test
   @Category(WriteApi.class)
   public void testSubmitAndCancelExercise() {
-    // Prefer a contract the account actually holds; fall back to the explicit
-    // override / resolver only when positions are empty.
+    // Guard at method entry: if no exercisable contract can be determined,
+    // skip rather than NPE inside the submit API call.
     Long id = pickExercisableContractId();
-    if (id == null) {
-      Assume.assumeFalse(
-          "no exercisable position and no override during US TRADING hours",
-          MarketHelpers.isMarketTrading(client, "US"));
-      Assume.assumeNotNull(
-          "no exercisable option position for account — set -Dtest.contract.id to force",
-          id);
-      return;
-    }
+    Assume.assumeNotNull(
+        "no exercisable option position for account — set -Dtest.contract.id=<id> to force",
+        id);
+    Assert.assertNotNull(
+        "contractId must not be null before calling WriteApi (set -Dtest.contract.id=<id>)", id);
     String executingDate = java.time.LocalDate.now().plusDays(1)
         .format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE);
     OptionExerciseSubmitRequest submitRequest =

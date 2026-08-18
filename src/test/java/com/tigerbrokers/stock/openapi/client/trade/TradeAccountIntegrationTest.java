@@ -47,7 +47,7 @@ public class TradeAccountIntegrationTest {
 
   @BeforeClass
   public static void setUpClass() {
-    Assume.assumeTrue("enable with -Dtest.integ=true", Boolean.getBoolean("test.integ"));
+    // test.integ gate removed: ReadOnlyApi tests are controlled by -Dgroups=ReadOnlyApi alone.
     client = IntegTestConfig.createClient();
     account = IntegTestConfig.getAccount();
     Assert.assertNotNull("TIGEROPEN_ACCOUNT required", account);

@@ -51,7 +51,17 @@ public class IcebergOrderIntegrationTest {
 
   // ── Place ─────────────────────────────────────────────────────────────────
 
-  /** 下冰山单（最简参数） */
+  /**
+   * 下冰山单（最简参数）
+   *
+   * KNOWN RISK: These three Iceberg tests are permanently @Ignored due to regulatory
+   * restrictions at this venue. They cannot be validated by CI under any circumstances.
+   * Manual verification is required if/when the regulatory restriction is lifted:
+   *   1. Remove @Ignore from all three methods
+   *   2. Run against a test account during US trading hours
+   *   3. Confirm place/modify/cancel round-trip succeeds
+   * Without this manual step, Iceberg order SDK changes are unverified against the live gateway.
+   */
   @Test
   @Ignore("iceberg orders disabled by regulator for this venue; keep skip regardless of trading hours")
   public void testPlaceIcebergOrder_basic() {

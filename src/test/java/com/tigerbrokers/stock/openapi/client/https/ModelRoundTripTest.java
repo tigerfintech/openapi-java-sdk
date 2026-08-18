@@ -39,7 +39,7 @@ public class ModelRoundTripTest {
   @Test
   public void everyModelCanSerializeToJson() {
     List<Class<?>> models = ClasspathScanner.concreteClasses(DOMAIN_PACKAGE, ApiModel.class, "Model");
-    Assert.assertTrue("No Model classes found", models.size() > 50);
+    Assert.assertTrue("没扫到 Model 类", models.size() > 50);
     List<String> failures = new ArrayList<>();
     for (Class<?> type : models) {
       String json = DeserializationRoundTripTest.generateSampleJsonStatic(type);
