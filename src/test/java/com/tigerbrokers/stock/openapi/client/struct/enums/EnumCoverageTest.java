@@ -16,12 +16,26 @@ public class EnumCoverageTest {
     AccumulateField field = AccumulateField.getTypeByIndex(1);
     Assert.assertNotNull(field);
     Assert.assertNull(AccumulateField.getTypeByIndex(999));
-    field.setValue("test");
-    Assert.assertEquals("test", field.getValue());
-    field.setIndex(100);
-    Assert.assertEquals(Integer.valueOf(100), field.getIndex());
-    field.setCombineSign("sign");
-    Assert.assertEquals("sign", field.getCombineSign());
+    // AccumulateField is an enum whose constants are shared JVM-wide.
+    // Test setter behaviour by saving original values, mutating, asserting, then restoring,
+    // so subsequent runs and other tests see the original state.
+    String origValue = field.getValue();
+    Integer origIndex = field.getIndex();
+    String origSign = field.getCombineSign();
+    try {
+      field.setValue("test");
+      Assert.assertEquals("test", field.getValue());
+      field.setIndex(100);
+      Assert.assertEquals(Integer.valueOf(100), field.getIndex());
+      field.setCombineSign("sign");
+      Assert.assertEquals("sign", field.getCombineSign());
+    } finally {
+      field.setValue(origValue);
+      field.setIndex(origIndex);
+      field.setCombineSign(origSign);
+    }
+    // Confirm the shared constant is fully restored.
+    Assert.assertEquals(Integer.valueOf(1), AccumulateField.getIndexByValue("changeRate"));
   }
 
   @Test

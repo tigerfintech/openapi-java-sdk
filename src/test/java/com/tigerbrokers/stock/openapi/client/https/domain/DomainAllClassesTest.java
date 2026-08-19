@@ -22,7 +22,7 @@ public class DomainAllClassesTest {
   @Test
   public void everyDomainClassRoundTripsThroughJson() {
     List<Class<?>> classes = ClasspathScanner.concreteClasses(DOMAIN_PACKAGE, null, null);
-    Assert.assertTrue("Should scan > 0 classes", classes.size() > 50);
+    Assert.assertTrue("Should scan > 50 classes, got " + classes.size(), classes.size() > 50);
 
     List<String> tested = new ArrayList<>();
     List<String> failures = new ArrayList<>();
@@ -47,7 +47,7 @@ public class DomainAllClassesTest {
         failures.add(clazz.getSimpleName() + ": " + th.getClass().getSimpleName() + " - " + th.getMessage());
       }
     }
-    Assert.assertTrue("tested > 0, got " + tested.size(), tested.size() > 50);
+    Assert.assertTrue("Should test > 50 domain classes, got " + tested.size(), tested.size() > 50);
     if (!failures.isEmpty()) {
       Assert.fail("JSON round-trip failures:\n" + String.join("\n", failures));
     }
@@ -88,10 +88,6 @@ public class DomainAllClassesTest {
     }
 
     // Tolerant: if no classes have builder() methods, that's fine — don't fail.
-    // Only assert > 0 if we actually found builder classes.
-    if (builders == 0 && !failures.isEmpty()) {
-      Assert.fail("Builder failures:\n" + String.join("\n", failures));
-    }
     if (!failures.isEmpty()) {
       Assert.fail("Builder failures:\n" + String.join("\n", failures));
     }
@@ -119,16 +115,12 @@ public class DomainAllClassesTest {
   public void domainPackageScansAllSubpackages() {
     List<Class<?>> classes = ClasspathScanner.concreteClasses(DOMAIN_PACKAGE, null, null);
     // verify we get classes from multiple sub-packages
-    int distinctSubpackages = 0;
-    String lastPkg = null;
+    java.util.Set<String> subpackages = new java.util.HashSet<>();
     for (Class<?> clazz : classes) {
-      String pkg = clazz.getPackage().getName();
-      if (!pkg.equals(lastPkg)) {
-        distinctSubpackages++;
-        lastPkg = pkg;
-      }
+      subpackages.add(clazz.getPackage().getName());
     }
-    Assert.assertTrue("Should find classes in multiple sub-packages", distinctSubpackages > 5);
+    Assert.assertTrue("Should find classes in multiple sub-packages, got " + subpackages.size(),
+        subpackages.size() > 5);
   }
 
   static String generateSampleJson(Class<?> clazz) {

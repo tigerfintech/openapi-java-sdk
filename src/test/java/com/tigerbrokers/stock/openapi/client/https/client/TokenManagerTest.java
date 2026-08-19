@@ -88,14 +88,15 @@ public class TokenManagerTest {
     Path dir = Files.createTempDirectory("tk");
     Path tokenFile = dir.resolve("tiger_openapi_token.properties");
     Files.write(tokenFile, "token=tok123".getBytes());
-
-    config.configFilePath = dir.toString();
-    TokenManager mgr = new TokenManager(client);
-    Assert.assertTrue(mgr.loadTokenFile(config));
-    Assert.assertEquals("tok123", config.token);
-
-    Files.deleteIfExists(tokenFile);
-    Files.deleteIfExists(dir);
+    try {
+      config.configFilePath = dir.toString();
+      TokenManager mgr = new TokenManager(client);
+      Assert.assertTrue(mgr.loadTokenFile(config));
+      Assert.assertEquals("tok123", config.token);
+    } finally {
+      Files.deleteIfExists(tokenFile);
+      Files.deleteIfExists(dir);
+    }
   }
 
   @Test

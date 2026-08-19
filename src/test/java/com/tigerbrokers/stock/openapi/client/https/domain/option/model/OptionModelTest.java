@@ -6,6 +6,6 @@ import org.junit.Test;
 public class OptionModelTest {
   @Test
   public void pojoSurface() {
-    PojoTester.testPackage("com.tigerbrokers.stock.openapi.client.https.domain.option.model");
+    PojoTester.testPackage(getClass().getPackage().getName());
   }
 }

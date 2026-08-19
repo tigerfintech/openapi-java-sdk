@@ -6,6 +6,6 @@ import org.junit.Test;
 public class QuoteModelTest {
   @Test
   public void pojoSurface() {
-    PojoTester.testPackage("com.tigerbrokers.stock.openapi.client.https.domain.quote.model");
+    PojoTester.testPackage(getClass().getPackage().getName());
   }
 }

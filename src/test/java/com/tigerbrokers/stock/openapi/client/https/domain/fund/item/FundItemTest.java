@@ -6,6 +6,6 @@ import org.junit.Test;
 public class FundItemTest {
   @Test
   public void pojoSurface() {
-    PojoTester.testPackage("com.tigerbrokers.stock.openapi.client.https.domain.fund.item");
+    PojoTester.testPackage(getClass().getPackage().getName());
   }
 }

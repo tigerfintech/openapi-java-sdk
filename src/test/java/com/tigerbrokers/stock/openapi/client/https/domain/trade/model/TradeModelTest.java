@@ -6,6 +6,6 @@ import org.junit.Test;
 public class TradeModelTest {
   @Test
   public void pojoSurface() {
-    PojoTester.testPackage("com.tigerbrokers.stock.openapi.client.https.domain.trade.model");
+    PojoTester.testPackage(getClass().getPackage().getName());
   }
 }

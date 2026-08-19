@@ -169,7 +169,9 @@ public class ValidatorCoverageTest {
   // === Option validators ===
 
   @Test
-  public void optionChainModel_needsExpiry() {
+  public void optionChainModel_stillRejectsWithSymbolAndExpiry() {
+    // symbol + expiry alone is not enough — additional required fields (e.g. strike/right)
+    // are still missing, so the validator should reject.
     OptionChainModel m = new OptionChainModel();
     m.setSymbol("AAPL");
     m.setExpiry("20240119");

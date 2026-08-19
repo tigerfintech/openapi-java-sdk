@@ -33,6 +33,11 @@ public class ContractItemCoverageTest {
     ContractItem item = ContractItem.buildOptionContract(identifier);
     Assert.assertNotNull(item);
     Assert.assertEquals(SecType.OPT.name(), item.getSecType());
+    // Verify the OCC identifier is parsed correctly: symbol / expiry / right / strike.
+    Assert.assertEquals("AAPL", item.getSymbol());
+    Assert.assertEquals("2024-01-19", item.getExpiry());
+    Assert.assertEquals("CALL", item.getRight());
+    Assert.assertEquals(150.0, item.getStrike(), 0.001);
   }
 
   @Test

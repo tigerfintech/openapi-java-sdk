@@ -68,24 +68,47 @@ public class InnerClassCoverageTest {
   @Test
   public void testTransferPropertyInfo_jsonRoundTrip() {
     TransferPropertyInfo info = new TransferPropertyInfo();
+    info.setSymbol("AAPL");
+    info.setMarket("US");
+    info.setSecType("STK");
+    info.setQuantity(100.0);
+    info.setStatus("FINISHED");
     String json = JSON.toJSONString(info);
     TransferPropertyInfo parsed = JSON.parseObject(json, TransferPropertyInfo.class);
     Assert.assertNotNull(parsed);
+    Assert.assertEquals("AAPL", parsed.getSymbol());
+    Assert.assertEquals("US", parsed.getMarket());
+    Assert.assertEquals(100.0, parsed.getQuantity(), 0.001);
+    Assert.assertEquals("FINISHED", parsed.getStatus());
   }
 
   @Test
   public void testTransferDetail_jsonRoundTrip() {
     TransferDetail detail = new TransferDetail();
+    detail.setSymbol("TSLA");
+    detail.setDirection("IN");
+    detail.setMarket("US");
+    detail.setQuantity(50.0);
     String json = JSON.toJSONString(detail);
     TransferDetail parsed = JSON.parseObject(json, TransferDetail.class);
     Assert.assertNotNull(parsed);
+    Assert.assertEquals("TSLA", parsed.getSymbol());
+    Assert.assertEquals("IN", parsed.getDirection());
+    Assert.assertEquals(50.0, parsed.getQuantity(), 0.001);
   }
 
   @Test
   public void testEntitlement_jsonRoundTrip() {
     Entitlement e = new Entitlement();
+    e.setHistoryStockLimit(100);
+    e.setHistoryStockRemaining(80);
+    e.setSubscribeLimit(50);
+    e.setSubscribeRemaining(45);
     String json = JSON.toJSONString(e);
     Entitlement parsed = JSON.parseObject(json, Entitlement.class);
     Assert.assertNotNull(parsed);
+    Assert.assertEquals(Integer.valueOf(100), parsed.getHistoryStockLimit());
+    Assert.assertEquals(Integer.valueOf(80), parsed.getHistoryStockRemaining());
+    Assert.assertEquals(Integer.valueOf(50), parsed.getSubscribeLimit());
   }
 }
