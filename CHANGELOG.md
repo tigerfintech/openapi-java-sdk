@@ -1,3 +1,7 @@
+## 2.6.2 (2026-08-19)
+### New
+- `OptionRealTimeQuote` 新增 `markPrice`、`preMarkPrice`、`markTimestamp`、`midPrice`、`preMidPrice`、`midTimestamp` 字段
+
 ## 2.6.1 (2026-08-03)
 
 ### Fixed
