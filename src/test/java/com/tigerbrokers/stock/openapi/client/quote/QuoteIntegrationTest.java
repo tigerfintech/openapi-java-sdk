@@ -553,6 +553,8 @@ public class QuoteIntegrationTest {
         ovResp.getData().get(0).getSymbol());
     Assert.assertEquals("first overnight symbol should be AAPL",
         "AAPL", ovResp.getData().get(0).getSymbol());
+    Assert.assertEquals("first overnight tradingStatus should be 5",
+        Integer.valueOf(5), ovResp.getData().get(0).getTradingStatus());
     if (ovResp.getData().get(0).getLatestPrice() != null) {
       Assert.assertTrue("first overnight latestPrice should be > 0",
           ovResp.getData().get(0).getLatestPrice() > 0);

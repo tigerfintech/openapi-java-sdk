@@ -1,3 +1,7 @@
+## Unreleased
+### New
+- `QuoteOvernight` 新增可空的 `tradingStatus` 字段，隔夜交易数据返回固定值 `5`
+
 ## 2.6.2 (2026-08-19)
 ### New
 - `OptionRealTimeQuote` 新增 `markPrice`、`preMarkPrice`、`markTimestamp`、`midPrice`、`preMidPrice`、`midTimestamp` 字段

@@ -37,6 +37,8 @@ public class QuoteOvernight implements Serializable {
 
   private Long timestamp;
 
+  private Integer tradingStatus;
+
   public String getSymbol() {
     return symbol;
   }
@@ -141,6 +143,14 @@ public class QuoteOvernight implements Serializable {
     this.timestamp = timestamp;
   }
 
+  public Integer getTradingStatus() {
+    return tradingStatus;
+  }
+
+  public void setTradingStatus(Integer tradingStatus) {
+    this.tradingStatus = tradingStatus;
+  }
+
   @Override
   public String toString() {
     return "QuoteOvernight{" +
@@ -157,6 +167,7 @@ public class QuoteOvernight implements Serializable {
         ", changeRate=" + changeRate +
         ", amplitude=" + amplitude +
         ", timestamp=" + timestamp +
+        ", tradingStatus=" + tradingStatus +
         '}';
   }
 }
