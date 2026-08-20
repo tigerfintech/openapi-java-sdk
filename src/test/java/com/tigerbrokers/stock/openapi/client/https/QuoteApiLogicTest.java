@@ -104,17 +104,26 @@ public class QuoteApiLogicTest {
     QuoteStockTradeResponse response = client.execute(request);
     Assert.assertNotNull(response);
     Assert.assertEquals(0, response.getCode());
+    Assert.assertNotNull("stockTradeItems should not be null", response.getStockTradeItems());
+    Assert.assertFalse("stockTradeItems should not be empty", response.getStockTradeItems().isEmpty());
+    Assert.assertEquals("AAPL", response.getStockTradeItems().get(0).getSymbol());
   }
 
   @Test
   public void testGetKline() {
-    String rawData = "{\"AAPL\":{\"period\":\"day\",\"items\":[{\"time\":1700000000000,\"open\":150.0,\"high\":155.0,\"low\":149.0,\"close\":153.0,\"volume\":1000000}]}}";
+    String rawData = "[{\"symbol\":\"AAPL\",\"period\":\"day\",\"items\":[{\"time\":1700000000000,\"open\":150.0,\"high\":155.0,\"low\":149.0,\"close\":153.0,\"volume\":1000000}]}]";
     Object data = JSON.parse(rawData);
     mockResponse(data);
     QuoteKlineRequest request = QuoteKlineRequest.newRequest(Collections.singletonList("AAPL"), KType.day);
     QuoteKlineResponse response = client.execute(request);
     Assert.assertNotNull(response);
     Assert.assertEquals(0, response.getCode());
+    Assert.assertNotNull("klineItems should not be null", response.getKlineItems());
+    Assert.assertFalse("klineItems should not be empty", response.getKlineItems().isEmpty());
+    Assert.assertEquals("AAPL", response.getKlineItems().get(0).getSymbol());
+    Assert.assertFalse("AAPL kline points should not be empty",
+        response.getKlineItems().get(0).getItems().isEmpty());
+    Assert.assertEquals(150.0, response.getKlineItems().get(0).getItems().get(0).getOpen(), 0.001);
   }
 
   // ---------- 辅助类 ----------

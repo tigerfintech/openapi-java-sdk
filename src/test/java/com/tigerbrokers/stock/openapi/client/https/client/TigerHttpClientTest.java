@@ -265,8 +265,8 @@ public class TigerHttpClientTest {
       Assert.assertNotNull(response);
       // Verify the batch model was serialized into the request body
       Assert.assertNotNull("request body should not be null", capturedBody[0]);
-      Assert.assertTrue("batch content should be in serialized params",
-          capturedBody[0].contains("acct1") || capturedBody[0].contains("biz_content"));
+      Assert.assertTrue("batch item content (acct1) should be serialized into params",
+          capturedBody[0].contains("acct1"));
     }
   }
 

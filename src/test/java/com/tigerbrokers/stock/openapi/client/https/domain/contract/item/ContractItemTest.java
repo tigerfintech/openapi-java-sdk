@@ -38,6 +38,8 @@ public class ContractItemTest {
     Assert.assertEquals("Crude Oil", item.getName());
     Assert.assertEquals("NYMEX", item.getExchange());
     Assert.assertEquals("USD", item.getCurrency());
+    Assert.assertEquals("202401", item.getContractMonth());
+    Assert.assertEquals(1000.0, item.getMultiplier(), 0.001);
   }
 
   @Test
