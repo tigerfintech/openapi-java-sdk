@@ -112,8 +112,14 @@ public final class PojoTester {
       try {
         setter.invoke(instance, sample);
         Object result = getter.invoke(instance);
-        // Skip if getter returns null - some base classes (e.g. ApiModel) have no-op getters
-        // that always return null. This is not a real failure.
+        // Verify setter->getter round-trip: if sample was non-null and getter returns non-null,
+        // the value should be equal. Skip null results as some base classes (e.g. ApiModel)
+        // have no-op getters that always return null.
+        if (sample != null && result != null && !result.equals(sample)) {
+          throw new AssertionError(
+              clazz.getSimpleName() + "." + prop + ": setter wrote " + sample
+                  + " but getter returned " + result + " (field mismatch?)");
+        }
       } catch (java.lang.reflect.InvocationTargetException e) {
         // some getters/setters may throw for certain sample values; skip them
         continue;

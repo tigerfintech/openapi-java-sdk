@@ -1,9 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.contract.item;
 
 import com.tigerbrokers.stock.openapi.client.https.domain.fund.item.FundContractItem;
-import com.tigerbrokers.stock.openapi.client.https.domain.future.item.FutureContractItem;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
-import java.math.BigDecimal;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,6 +23,7 @@ public class ContractItemCoverageTest {
     ContractItem item = ContractItem.buildStockContract("AAPL", "USD");
     Assert.assertEquals("AAPL", item.getSymbol());
     Assert.assertEquals(SecType.STK.name(), item.getSecType());
+    Assert.assertEquals("USD", item.getCurrency());
   }
 
   @Test
@@ -46,6 +45,8 @@ public class ContractItemCoverageTest {
     Assert.assertEquals("AAPL", item.getSymbol());
     Assert.assertEquals(SecType.OPT.name(), item.getSecType());
     Assert.assertEquals("20240119", item.getExpiry());
+    Assert.assertEquals(150.0, item.getStrike(), 0.001);
+    Assert.assertEquals("CALL", item.getRight());
   }
 
   @Test
@@ -72,5 +73,9 @@ public class ContractItemCoverageTest {
     ContractItem item = ContractItem.buildFutureContract("CL", "USD", "NYMEX", "202401", 1000.0);
     Assert.assertEquals("CL", item.getSymbol());
     Assert.assertEquals(SecType.FUT.name(), item.getSecType());
+    Assert.assertEquals("USD", item.getCurrency());
+    Assert.assertEquals("NYMEX", item.getExchange());
+    Assert.assertEquals("202401", item.getExpiry());
+    Assert.assertEquals(1000.0, item.getMultiplier(), 0.001);
   }
 }

@@ -41,6 +41,19 @@ public class InnerClassCoverageTest {
     Assert.assertEquals("cap1", parsed.getCapability());
     Assert.assertEquals("USD", parsed.getCurrency());
     Assert.assertEquals(1000.0, parsed.getCashBalance(), 0.001);
+    Assert.assertEquals(500.0, parsed.getCashAvailableForTrade(), 0.001);
+    Assert.assertEquals(2000.0, parsed.getGrossPositionValue(), 0.001);
+    Assert.assertEquals(1500.0, parsed.getEquityWithLoan(), 0.001);
+    Assert.assertEquals(1200.0, parsed.getNetLiquidation(), 0.001);
+    Assert.assertEquals(100.0, parsed.getInitMargin(), 0.001);
+    Assert.assertEquals(80.0, parsed.getMaintainMargin(), 0.001);
+    Assert.assertEquals(90.0, parsed.getOvernightMargin(), 0.001);
+    Assert.assertEquals(50.0, parsed.getUnrealizedPL(), 0.001);
+    Assert.assertEquals(30.0, parsed.getRealizedPL(), 0.001);
+    Assert.assertEquals(60.0, parsed.getTotalTodayPL(), 0.001);
+    Assert.assertEquals(110.0, parsed.getExcessLiquidation(), 0.001);
+    Assert.assertEquals(200.0, parsed.getBuyingPower(), 0.001);
+    Assert.assertEquals(3.0, parsed.getLeverage(), 0.001);
   }
 
   @Test
