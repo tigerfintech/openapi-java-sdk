@@ -203,6 +203,32 @@ public final class MarketHelpers {
   }
 
   /**
+   * Resolves a live, tradable AAPL (US) option contract, needed by order
+   * tests that must submit a real option leg instead of a fabricated one.
+   * Returns null if a suitable option is not available.
+   */
+  public static com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem
+      resolveUsOptionContract(TigerHttpClient client) {
+    String identifier = resolveUsOptionIdentifier(client);
+    if (identifier == null) {
+      return null;
+    }
+    ParsedOption parsed = parseOccIdentifier(identifier);
+    if (parsed == null) {
+      return null;
+    }
+    com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem item =
+        new com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem();
+    item.setSymbol(parsed.symbol);
+    item.setSecType("OPT");
+    item.setCurrency("USD");
+    item.setExpiry(parsed.expiry.replace("-", ""));
+    item.setStrike(parsed.strike);
+    item.setRight(parsed.right);
+    return item;
+  }
+
+  /**
    * Resolves the first available fund symbol for the given market. Returns
    * null when the fund catalog is empty for that market.
    */

@@ -19,6 +19,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SegmentType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
 import com.tigerbrokers.stock.openapi.client.testsupport.IntegTestConfig;
+import com.tigerbrokers.stock.openapi.client.testsupport.MarketHelpers;
 import com.tigerbrokers.stock.openapi.client.testsupport.WriteApi;
 import com.tigerbrokers.stock.openapi.client.util.builder.AccountParamBuilder;
 import java.util.Arrays;
@@ -303,43 +304,18 @@ public class OrderMatrixIntegrationTest {
 
   @Test
   public void placeUsOptLimit() {
-    // Best-effort: derive an OPT contract for AAPL via getDerivativeContracts.
-    // If none is available in the account context, skip.
-    // This mirrors _resolve_us_option_contract in the Python SDK.
-    ContractItem opt = resolveUsOptionContract();
+    ContractItem opt = MarketHelpers.resolveUsOptionContract(client);
+    boolean tradingUs = MarketHelpers.isMarketTrading(client, "US");
     if (opt == null) {
-      System.out.println("US OPT LMT: could not resolve an option contract — skipping");
+      Assume.assumeFalse(
+          "could not resolve a live AAPL option contract during US TRADING hours — data gap",
+          tradingUs);
+      Assume.assumeTrue("could not resolve a live AAPL option contract (out of hours)", false);
       return;
     }
     TradeOrderRequest req = TradeOrderRequest.buildLimitOrder(
         account, opt, ActionType.BUY, 1, SAFE_BUY_PRICE);
     previewAndPlace(req, "US OPT LMT");
-  }
-
-  private ContractItem resolveUsOptionContract() {
-    // Query nearest expiry via getDerivativeContracts (7+ days out).
-    long msDay = 24L * 3600L * 1000L;
-    long future = System.currentTimeMillis() + 30 * msDay;
-    java.util.Date d = new java.util.Date(future);
-    String expiry = String.format("%tY%tm%td", d, d, d);
-
-    JSONObject biz = new JSONObject();
-    biz.put("symbol", "AAPL");
-    biz.put("sec_type", "OPT");
-    biz.put("expiry", expiry);
-    // Call via generic ContractRequest — but Java SDK's API for this is best
-    // reached through the trade-side derivative contracts endpoint. Since
-    // there's no simple typed helper here, we fall back to a stable known
-    // AAPL option pattern: nearest 3rd Friday, strike 200, CALL. If the
-    // gateway rejects it, previewAndPlace's permission-error path handles it.
-    ContractItem c = new ContractItem();
-    c.setSymbol("AAPL");
-    c.setSecType("OPT");
-    c.setCurrency("USD");
-    c.setExpiry(expiry);
-    c.setStrike(200.0);
-    c.setRight(Right.CALL.name());
-    return c;
   }
 
   @Test
