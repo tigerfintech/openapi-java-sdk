@@ -35,4 +35,30 @@ public class QuoteItemTest {
     Assert.assertEquals(Long.valueOf(1755590400000L), quote.getTimestamp());
     Assert.assertEquals(Integer.valueOf(5), quote.getTradingStatus());
   }
+
+  @Test
+  public void deserializeKlinePointVolumeDecimal() {
+    KlinePoint fractional = JSON.parseObject(
+        "{\"volume\":123,\"volumeDecimal\":123.456}", KlinePoint.class);
+    KlinePoint absent = JSON.parseObject("{\"volume\":123}", KlinePoint.class);
+    KlinePoint explicitNull = JSON.parseObject(
+        "{\"volume\":123,\"volumeDecimal\":null}", KlinePoint.class);
+
+    Assert.assertEquals(Double.valueOf(123.456), fractional.getVolumeDecimal());
+    Assert.assertNull(absent.getVolumeDecimal());
+    Assert.assertNull(explicitNull.getVolumeDecimal());
+  }
+
+  @Test
+  public void deserializeTimelinePointVolumeDecimal() {
+    TimelinePoint fractional = JSON.parseObject(
+        "{\"volume\":123,\"volumeDecimal\":123.456}", TimelinePoint.class);
+    TimelinePoint absent = JSON.parseObject("{\"volume\":123}", TimelinePoint.class);
+    TimelinePoint explicitNull = JSON.parseObject(
+        "{\"volume\":123,\"volumeDecimal\":null}", TimelinePoint.class);
+
+    Assert.assertEquals(Double.valueOf(123.456), fractional.getVolumeDecimal());
+    Assert.assertNull(absent.getVolumeDecimal());
+    Assert.assertNull(explicitNull.getVolumeDecimal());
+  }
 }

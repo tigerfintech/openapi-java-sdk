@@ -16,6 +16,9 @@ public class TimelinePoint implements Serializable {
 
   private Long volume;
 
+  /**
+   * Fractional volume, when supplied for assets such as cryptocurrencies.
+   */
   private Double volumeDecimal;
 
   public Double getPrice() {
@@ -50,6 +53,9 @@ public class TimelinePoint implements Serializable {
     this.volume = volume;
   }
 
+  /**
+   * Returns the fractional volume, or {@code null} when it is not supplied.
+   */
   public Double getVolumeDecimal() {
     return volumeDecimal;
   }
