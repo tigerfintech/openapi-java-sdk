@@ -233,6 +233,7 @@ public class TigerHttpClientTest {
       Assert.assertTrue("access_token should be in params", capturedBody[0].contains("at-1"));
       Assert.assertTrue("trade_token should be in params", capturedBody[0].contains("tt-2"));
       Assert.assertTrue("account_type should be in params", capturedBody[0].contains("GLOBAL"));
+      Assert.assertTrue("device_id should be in params", capturedBody[0].contains("dev-1"));
     }
   }
 

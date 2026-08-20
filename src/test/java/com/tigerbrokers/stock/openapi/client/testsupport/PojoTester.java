@@ -115,10 +115,17 @@ public final class PojoTester {
         // Verify setter->getter round-trip: if sample was non-null and getter returns non-null,
         // the value should be equal. Skip null results as some base classes (e.g. ApiModel)
         // have no-op getters that always return null.
-        if (sample != null && result != null && !result.equals(sample)) {
-          throw new AssertionError(
-              clazz.getSimpleName() + "." + prop + ": setter wrote " + sample
-                  + " but getter returned " + result + " (field mismatch?)");
+        // Use compareTo() for BigDecimal to avoid scale-sensitive equals() false negatives
+        // (e.g. new BigDecimal("42") scale=0 vs new BigDecimal("42.00") scale=2).
+        if (sample != null && result != null) {
+          boolean equal = (result instanceof java.math.BigDecimal && sample instanceof java.math.BigDecimal)
+              ? ((java.math.BigDecimal) result).compareTo((java.math.BigDecimal) sample) == 0
+              : result.equals(sample);
+          if (!equal) {
+            throw new AssertionError(
+                clazz.getSimpleName() + "." + prop + ": setter wrote " + sample
+                    + " but getter returned " + result + " (field mismatch?)");
+          }
         }
       } catch (java.lang.reflect.InvocationTargetException e) {
         // some getters/setters may throw for certain sample values; skip them
