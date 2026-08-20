@@ -179,7 +179,7 @@ notify:webhook:
               continue
           integ_t += t; integ_p += p; integ_f += fl; integ_s += s
 
-      unit_stats = f"Unit: {unit_t} tests: {unit_p} passed, {unit_f} failed, {unit_s} skipped" if unit_t else ""
+      unit_stats = f"Unit: {unit_t} tests: {unit_p} passed, {unit_f} failed, {unit_s} skipped" if unit_t and unit_f is not None else ""
       integ_stats = f"Integration: {integ_t} tests: {integ_p} passed, {integ_f} failed, {integ_s} skipped" if integ_t else ""
 
       # Determine pass/fail.
@@ -191,7 +191,7 @@ notify:webhook:
           has_failed = True
           print("Unit surefire XML unavailable — treating pipeline as failed")
       else:
-          has_failed = (unit_f > 0) or (integ_f is not None and integ_f > 0)
+          has_failed = (unit_f > 0) or (integ_f > 0)
 
       title = "❌ Pipeline failed" if has_failed else "✅ Pipeline passed"
       color = "red" if has_failed else "green"

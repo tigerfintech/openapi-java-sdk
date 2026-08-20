@@ -108,9 +108,11 @@ public final class PojoTester {
       }
 
       Class<?> paramType = setter.getParameterTypes()[0];
-      // Skip enum-typed setters: these are lossy converters (e.g. setPeriod(OptionAnalysisPeriod)
-      // stores getValue() as String), so setter→getter round-trip cannot hold.
-      if (paramType.isEnum()) {
+      // Skip only lossy enum converters, i.e. setter param type differs from getter return type
+      // (e.g. setPeriod(OptionAnalysisPeriod) stores getValue() as String, so getter returns
+      // String, not the enum). Normal enum fields (setFoo(MyEnum)/getFoo():MyEnum) keep the
+      // round-trip check so a setter/getter field mismatch bug can still be caught.
+      if (paramType.isEnum() && !paramType.equals(getter.getReturnType())) {
         continue;
       }
       Object sample = sampleValue(paramType);
