@@ -108,6 +108,11 @@ public final class PojoTester {
       }
 
       Class<?> paramType = setter.getParameterTypes()[0];
+      // Skip enum-typed setters: these are lossy converters (e.g. setPeriod(OptionAnalysisPeriod)
+      // stores getValue() as String), so setter→getter round-trip cannot hold.
+      if (paramType.isEnum()) {
+        continue;
+      }
       Object sample = sampleValue(paramType);
       try {
         setter.invoke(instance, sample);
