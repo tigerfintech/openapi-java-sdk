@@ -148,6 +148,7 @@ notify:webhook:
           exit(0)
 
       def parse_xml(path):
+          """Return (total, passed, failed, skipped) or None on parse error."""
           t, f, s = 0, 0, 0
           try:
               tree = ET.parse(path)
@@ -158,27 +159,39 @@ notify:webhook:
                   s += int(suite.get("skipped", 0))
           except Exception as e:
               print(f"Failed to parse {path}: {e}")
+              return None, None, None, None
           return t, t - f - s, f, s
 
       # Parse surefire (unit) + failsafe (integration) JUnit XML
       unit_t, unit_p, unit_f, unit_s = 0, 0, 0, 0
-      for f in glob.glob("target/surefire-reports/TEST-*.xml"):
-          t, p, fl, s = parse_xml(f)
+      unit_files = glob.glob("target/surefire-reports/TEST-*.xml")
+      for xml_file in unit_files:
+          t, p, fl, s = parse_xml(xml_file)
+          if t is None:
+              unit_f = None  # mark as unavailable
+              break
           unit_t += t; unit_p += p; unit_f += fl; unit_s += s
 
       integ_t, integ_p, integ_f, integ_s = 0, 0, 0, 0
-      for f in glob.glob("target/failsafe-reports/TEST-*.xml"):
-          t, p, fl, s = parse_xml(f)
+      for xml_file in glob.glob("target/failsafe-reports/TEST-*.xml"):
+          t, p, fl, s = parse_xml(xml_file)
+          if t is None:
+              continue
           integ_t += t; integ_p += p; integ_f += fl; integ_s += s
 
-      unit_stats = f"Unit: {unit_t} tests: {unit_p} passed, {unit_f} failed, {unit_s} skipped" if unit_t > 0 else ""
-      integ_stats = f"Integration: {integ_t} tests: {integ_p} passed, {integ_f} failed, {integ_s} skipped" if integ_t > 0 else ""
+      unit_stats = f"Unit: {unit_t} tests: {unit_p} passed, {unit_f} failed, {unit_s} skipped" if unit_t else ""
+      integ_stats = f"Integration: {integ_t} tests: {integ_p} passed, {integ_f} failed, {integ_s} skipped" if integ_t else ""
 
-      # Determine pass/fail: unit test failures = pipeline failed
-      has_failed = unit_f > 0
-      status = os.environ.get("CI_PIPELINE_STATUS", "")
-      if status == "failed":
+      # Determine pass/fail.
+      #   unit_f is None  → XML missing/corrupt; treat as failed (conservative).
+      #   unit_f > 0      → explicit unit failures.
+      #   CI_PIPELINE_STATUS is unreliable in .post stage (reads "running"),
+      #   so we rely exclusively on parsed XML counts.
+      if unit_f is None or not unit_files:
           has_failed = True
+          print("Unit surefire XML unavailable — treating pipeline as failed")
+      else:
+          has_failed = unit_f > 0
 
       title = "❌ Pipeline failed" if has_failed else "✅ Pipeline passed"
       color = "red" if has_failed else "green"
