@@ -191,7 +191,7 @@ notify:webhook:
           has_failed = True
           print("Unit surefire XML unavailable — treating pipeline as failed")
       else:
-          has_failed = unit_f > 0
+          has_failed = (unit_f > 0) or (integ_f is not None and integ_f > 0)
 
       title = "❌ Pipeline failed" if has_failed else "✅ Pipeline passed"
       color = "red" if has_failed else "green"
