@@ -1,11 +1,11 @@
 package com.tigerbrokers.stock.openapi.client.financial;
 
-import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
+import com.tigerbrokers.stock.openapi.client.testsupport.IntegTestConfig;
 import com.tigerbrokers.stock.openapi.client.https.client.TigerHttpClient;
 import com.tigerbrokers.stock.openapi.client.https.domain.financial.item.CorporateSymbolChangeItem;
 import com.tigerbrokers.stock.openapi.client.https.request.financial.CorporateSymbolChangeRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateSymbolChangeResponse;
-import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
+import com.tigerbrokers.stock.openapi.client.struct.enums.CorporateActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -13,9 +13,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+
+import com.tigerbrokers.stock.openapi.client.testsupport.ReadOnlyApi;
 
 /**
  * Integration test for SYMBOL_CHANGE corporate action type.
@@ -25,32 +28,18 @@ import org.junit.Test;
  *   -Dtest.server.url=<server url>/gateway
  */
 
-@Ignore("Integration test — run manually with -Dtest.config.path and -Dtest.server.url")
+@Category(ReadOnlyApi.class)
 public class CorporateSymbolChangeIntegrationTest {
 
   private static TigerHttpClient client;
 
   @BeforeClass
   public static void setUp() throws Exception {
-    String configPath = System.getProperty("test.config.path");
-    Assert.assertNotNull("set -Dtest.config.path=<config dir path>", configPath);
-    // configFilePath expects a directory; SDK will look for tiger_openapi_config.properties inside it
-
-    String serverUrl = System.getProperty("test.server.url", "");
-
-    ClientConfig config = new ClientConfig();
-    config.configFilePath = configPath;
-    config.setEnv(Env.TEST);
-
-    client = TigerHttpClient.getInstance();
-    if (!serverUrl.isEmpty()) {
-      client.useCustomServerUrl(serverUrl);
-    }
-    client.clientConfig(config);
-    // call again after clientConfig — initDomainRefreshTask may overwrite the url
-    if (!serverUrl.isEmpty()) {
-      client.useCustomServerUrl(serverUrl);
-    }
+    // 集成测试门控：默认跳过，CI 与本地都靠 -Dtest.integ=true 显式开启。
+    // 用 Assume 而不是类级 @Ignore，@Ignore 是硬编码的，没法按环境启用。
+    Assume.assumeTrue("integration test; enable with -Dtest.integ=true",
+        Boolean.getBoolean("test.integ"));
+    client = IntegTestConfig.createClient();
   }
 
   @Test
@@ -75,12 +64,25 @@ public class CorporateSymbolChangeIntegrationTest {
     Assert.assertTrue("request failed: " + response.getMessage(), response.isSuccess());
 
     Map<String, List<CorporateSymbolChangeItem>> items = response.getItems();
-    if (items != null && !items.isEmpty()) {
+    Assert.assertNotNull("items should not be null", items);
+    if (!items.isEmpty()) {
       items.forEach((symbol, list) -> {
-        System.out.println("symbol=" + symbol + ", count=" + list.size());
+        Assert.assertNotNull("list for " + symbol + " should not be null", list);
+        Assert.assertFalse("list for " + symbol + " should not be empty", list.isEmpty());
         list.forEach(item -> {
-          System.out.println("  " + item);
-          Assert.assertNotNull(item.getActionType());
+          Assert.assertNotNull("actionType should not be null for " + symbol, item.getActionType());
+          Assert.assertEquals("actionType should be SYMBOL_CHANGE for " + symbol,
+              CorporateActionType.SYMBOL_CHANGE, item.getActionType());
+          Assert.assertNotNull("symbol should not be null", item.getSymbol());
+          Assert.assertTrue("symbol should not be empty for " + symbol,
+              !item.getSymbol().isEmpty());
+          Assert.assertNotNull("market should not be null", item.getMarket());
+          Assert.assertEquals("market should be US for " + symbol, "US", item.getMarket());
+          Assert.assertNotNull("executeDate should not be null", item.getExecuteDate());
+          Assert.assertNotNull("oldSymbol should not be null", item.getOldSymbol());
+          Assert.assertFalse("oldSymbol should not be empty", item.getOldSymbol().isEmpty());
+          Assert.assertNotNull("newSymbol should not be null", item.getNewSymbol());
+          Assert.assertFalse("newSymbol should not be empty", item.getNewSymbol().isEmpty());
         });
       });
     } else {
@@ -104,5 +106,29 @@ public class CorporateSymbolChangeIntegrationTest {
 
     Assert.assertNotNull(response);
     Assert.assertTrue("HK request failed: " + response.getMessage(), response.isSuccess());
+
+    Map<String, List<CorporateSymbolChangeItem>> hkItems = response.getItems();
+    Assert.assertNotNull("HK items should not be null", hkItems);
+    if (hkItems != null && !hkItems.isEmpty()) {
+      hkItems.forEach((symbol, list) -> {
+        Assert.assertNotNull("HK list for " + symbol + " should not be null", list);
+        Assert.assertFalse("HK list for " + symbol + " should not be empty", list.isEmpty());
+        list.forEach(item -> {
+          Assert.assertNotNull("HK actionType should not be null for " + symbol, item.getActionType());
+          Assert.assertEquals("HK actionType should be SYMBOL_CHANGE for " + symbol,
+              CorporateActionType.SYMBOL_CHANGE, item.getActionType());
+          Assert.assertNotNull("HK symbol should not be null", item.getSymbol());
+          Assert.assertTrue("HK symbol should not be empty for " + symbol,
+              !item.getSymbol().isEmpty());
+          Assert.assertNotNull("HK market should not be null", item.getMarket());
+          Assert.assertEquals("HK market should be HK for " + symbol, "HK", item.getMarket());
+          Assert.assertNotNull("HK executeDate should not be null", item.getExecuteDate());
+          Assert.assertNotNull("HK oldSymbol should not be null", item.getOldSymbol());
+          Assert.assertFalse("HK oldSymbol should not be empty", item.getOldSymbol().isEmpty());
+          Assert.assertNotNull("HK newSymbol should not be null", item.getNewSymbol());
+          Assert.assertFalse("HK newSymbol should not be empty", item.getNewSymbol().isEmpty());
+        });
+      });
+    }
   }
 }

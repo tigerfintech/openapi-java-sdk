@@ -67,7 +67,7 @@ public class ClientConfig {
   public String refreshTokenTime;
 
   /**
-   * whether to automatically grab quote permission when the initialization instance is completed
+   * whether to automatically claim market data device access after initialization
    */
   public boolean isAutoGrabPermission = true;
 

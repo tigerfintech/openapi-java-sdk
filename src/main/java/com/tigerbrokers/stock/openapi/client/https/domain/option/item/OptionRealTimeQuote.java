@@ -27,6 +27,12 @@ public class OptionRealTimeQuote implements Serializable {
   private Double theta;
   private Double vega;
   private Double rho;
+  private Double markPrice;
+  private Double preMarkPrice;
+  private Long markTimestamp;
+  private Double midPrice;
+  private Double preMidPrice;
+  private Long midTimestamp;
 
   public String getIdentifier() {
     return identifier;
@@ -180,6 +186,54 @@ public class OptionRealTimeQuote implements Serializable {
     this.rho = rho;
   }
 
+  public Double getMarkPrice() {
+    return markPrice;
+  }
+
+  public void setMarkPrice(Double markPrice) {
+    this.markPrice = markPrice;
+  }
+
+  public Double getPreMarkPrice() {
+    return preMarkPrice;
+  }
+
+  public void setPreMarkPrice(Double preMarkPrice) {
+    this.preMarkPrice = preMarkPrice;
+  }
+
+  public Long getMarkTimestamp() {
+    return markTimestamp;
+  }
+
+  public void setMarkTimestamp(Long markTimestamp) {
+    this.markTimestamp = markTimestamp;
+  }
+
+  public Double getMidPrice() {
+    return midPrice;
+  }
+
+  public void setMidPrice(Double midPrice) {
+    this.midPrice = midPrice;
+  }
+
+  public Double getPreMidPrice() {
+    return preMidPrice;
+  }
+
+  public void setPreMidPrice(Double preMidPrice) {
+    this.preMidPrice = preMidPrice;
+  }
+
+  public Long getMidTimestamp() {
+    return midTimestamp;
+  }
+
+  public void setMidTimestamp(Long midTimestamp) {
+    this.midTimestamp = midTimestamp;
+  }
+
   @Override
   public String toString() {
     return "OptionRealTimeQuote{" +
@@ -202,6 +256,12 @@ public class OptionRealTimeQuote implements Serializable {
         ", theta=" + theta +
         ", vega=" + vega +
         ", rho=" + rho +
+        ", markPrice=" + markPrice +
+        ", preMarkPrice=" + preMarkPrice +
+        ", markTimestamp=" + markTimestamp +
+        ", midPrice=" + midPrice +
+        ", preMidPrice=" + preMidPrice +
+        ", midTimestamp=" + midTimestamp +
         '}';
   }
 }

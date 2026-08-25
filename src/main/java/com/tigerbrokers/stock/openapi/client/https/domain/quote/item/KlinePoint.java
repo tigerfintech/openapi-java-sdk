@@ -20,6 +20,9 @@ public class KlinePoint implements Serializable {
 
   private Long volume;
 
+  /**
+   * Fractional volume, when supplied for assets such as cryptocurrencies.
+   */
   private Double volumeDecimal;
 
   private Double amount;
@@ -76,6 +79,9 @@ public class KlinePoint implements Serializable {
     this.volume = volume;
   }
 
+  /**
+   * Returns the fractional volume, or {@code null} when it is not supplied.
+   */
   public Double getVolumeDecimal() {
     return volumeDecimal;
   }

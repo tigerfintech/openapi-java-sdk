@@ -29,7 +29,7 @@ public class FutureHistoryContractItem extends ApiModel {
 
   @Override
   public String toString() {
-    return "FutureKlineItem{" +
+    return "FutureHistoryContractItem{" +
         "time=" + time +
         ", referContractCode=" + referContractCode +
         '}';

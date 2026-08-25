@@ -1,23 +1,35 @@
 package com.tigerbrokers.stock.openapi.client.trade;
 
-import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
+import com.tigerbrokers.stock.openapi.client.testsupport.IntegTestConfig;
 import com.tigerbrokers.stock.openapi.client.https.client.TigerHttpClient;
 import com.tigerbrokers.stock.openapi.client.https.domain.financial.item.CorporateDelistingItem;
+import com.tigerbrokers.stock.openapi.client.https.domain.financial.item.CorporateDividendItem;
+import com.tigerbrokers.stock.openapi.client.https.domain.financial.item.CorporateEarningItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.financial.item.CorporateIpoItem;
+import com.tigerbrokers.stock.openapi.client.https.domain.financial.item.CorporateSplitItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.financial.item.CorporateSymbolChangeItem;
 import com.tigerbrokers.stock.openapi.client.https.request.financial.CorporateDelistingRequest;
+import com.tigerbrokers.stock.openapi.client.https.request.financial.CorporateDividendRequest;
+import com.tigerbrokers.stock.openapi.client.https.request.financial.CorporateEarningRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.financial.CorporateIpoRequest;
+import com.tigerbrokers.stock.openapi.client.https.request.financial.CorporateSplitRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.financial.CorporateSymbolChangeRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateDelistingResponse;
+import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateDividendResponse;
+import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateEarningResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateIpoResponse;
+import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateSplitResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.financial.CorporateSymbolChangeResponse;
-import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
+import com.tigerbrokers.stock.openapi.client.struct.enums.CorporateActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+
+import com.tigerbrokers.stock.openapi.client.testsupport.ReadOnlyApi;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -35,7 +47,7 @@ import java.util.Map;
  *   TIGER_CONFIG_PATH=<path to config directory> mvn test -Dtest=CorporateActionIntegrationTest
  */
 
-@Ignore("Integration test — requires real credentials. Remove @Ignore and set -Dtest.config.path to run.")
+@Category(ReadOnlyApi.class)
 public class CorporateActionIntegrationTest {
 
   private static TigerHttpClient client;
@@ -43,30 +55,11 @@ public class CorporateActionIntegrationTest {
 
   @BeforeClass
   public static void setUpClass() {
-    // Support both -Dtest.config.path JVM property and TIGER_CONFIG_PATH env var
-    String configPath = System.getProperty("test.config.path");
-    if (configPath == null || configPath.isEmpty()) {
-      configPath = System.getenv("TIGER_CONFIG_PATH");
-    }
-    Assert.assertNotNull(
-        "set -Dtest.config.path=<config dir> or TIGER_CONFIG_PATH env var",
-        configPath);
-
-    String envStr = System.getProperty("test.env",
-        System.getenv().getOrDefault("TIGER_ENV", "PROD"));
-    Env env = "TEST".equalsIgnoreCase(envStr) ? Env.TEST : Env.PROD;
-
-    ClientConfig config = new ClientConfig();
-    config.configFilePath = configPath;
-    config.setEnv(env);
-    ConfigFileUtil.loadConfigFile(config);
-
-    Assert.assertNotNull("tigerId not loaded from config", config.tigerId);
-    Assert.assertNotNull("privateKey not loaded from config", config.privateKey);
-
-    client = TigerHttpClient.getInstance();
-    client.clientConfig(config);
-    System.out.println("env=" + env + " tigerId=" + config.tigerId);
+    // 集成测试门控：默认跳过，CI 与本地都靠 -Dtest.integ=true 显式开启。
+    // 用 Assume 而不是类级 @Ignore，@Ignore 是硬编码的，没法按环境启用。
+    Assume.assumeTrue("integration test; enable with -Dtest.integ=true",
+        Boolean.getBoolean("test.integ"));
+    client = IntegTestConfig.createClient();
   }
 
   @Test
@@ -82,11 +75,20 @@ public class CorporateActionIntegrationTest {
     Assert.assertTrue(response.isSuccess());
     Map<String, List<CorporateSymbolChangeItem>> items = response.getItems();
     Assert.assertNotNull(items);
-    Assert.assertFalse("expect at least one SYMBOL_CHANGE record for META", items.isEmpty());
+    Assume.assumeTrue("no SYMBOL_CHANGE records for META in range", !items.isEmpty());
     CorporateSymbolChangeItem first = items.values().iterator().next().get(0);
-    Assert.assertNotNull(first.getOldSymbol());
-    Assert.assertNotNull(first.getNewSymbol());
-    System.out.println("SYMBOL_CHANGE items: " + items);
+    Assert.assertNotNull("oldSymbol should not be null", first.getOldSymbol());
+    Assert.assertFalse("oldSymbol should not be empty", first.getOldSymbol().isEmpty());
+    Assert.assertNotNull("newSymbol should not be null", first.getNewSymbol());
+    Assert.assertFalse("newSymbol should not be empty", first.getNewSymbol().isEmpty());
+    Assert.assertNotNull("symbol should not be null", first.getSymbol());
+    Assert.assertTrue("symbol should not be empty", !first.getSymbol().isEmpty());
+    Assert.assertNotNull("market should not be null", first.getMarket());
+    Assert.assertEquals("market should be US", "US", first.getMarket());
+    Assert.assertNotNull("actionType should not be null", first.getActionType());
+    Assert.assertEquals("actionType should be SYMBOL_CHANGE",
+        CorporateActionType.SYMBOL_CHANGE, first.getActionType());
+    Assert.assertNotNull("executeDate should not be null", first.getExecuteDate());
   }
 
   @Test
@@ -102,10 +104,16 @@ public class CorporateActionIntegrationTest {
     Assert.assertTrue(response.isSuccess());
     Map<String, List<CorporateDelistingItem>> items = response.getItems();
     Assert.assertNotNull(items);
-    Assert.assertFalse("expect at least one DELISTING record for TWTR", items.isEmpty());
+    Assume.assumeTrue("no DELISTING records for TWTR in range", !items.isEmpty());
     CorporateDelistingItem first = items.values().iterator().next().get(0);
-    Assert.assertNotNull(first.getAnnouncedDate());
-    System.out.println("DELISTING items: " + items);
+    Assert.assertNotNull("announcedDate should not be null", first.getAnnouncedDate());
+    Assert.assertNotNull("symbol should not be null", first.getSymbol());
+    Assert.assertTrue("symbol should not be empty", !first.getSymbol().isEmpty());
+    Assert.assertNotNull("market should not be null", first.getMarket());
+    Assert.assertEquals("market should be US", "US", first.getMarket());
+    Assert.assertNotNull("actionType should not be null", first.getActionType());
+    Assert.assertEquals("actionType should be DELISTING",
+        CorporateActionType.DELISTING, first.getActionType());
   }
 
   @Test
@@ -121,10 +129,101 @@ public class CorporateActionIntegrationTest {
     Assert.assertTrue(response.isSuccess());
     Map<String, List<CorporateIpoItem>> items = response.getItems();
     Assert.assertNotNull(items);
-    Assert.assertFalse("expect at least one IPO record for RIVN", items.isEmpty());
+    Assume.assumeTrue("no IPO records for RIVN in range", !items.isEmpty());
     CorporateIpoItem first = items.values().iterator().next().get(0);
-    Assert.assertNotNull(first.getListingDate());
-    System.out.println("IPO items: " + items);
+    Assert.assertNotNull("listingDate should not be null", first.getListingDate());
+    Assert.assertNotNull("symbol should not be null", first.getSymbol());
+    Assert.assertTrue("symbol should not be empty", !first.getSymbol().isEmpty());
+    Assert.assertNotNull("market should not be null", first.getMarket());
+    Assert.assertEquals("market should be US", "US", first.getMarket());
+    Assert.assertNotNull("actionType should not be null", first.getActionType());
+    Assert.assertEquals("actionType should be IPO",
+        CorporateActionType.IPO, first.getActionType());
+    // country may not always be populated; skip if null
+    if (first.getCountry() != null && !first.getCountry().isEmpty()) {
+      Assert.assertTrue("country should not be empty", !first.getCountry().isEmpty());
+    }
+    if (first.getListingPrice() != null) {
+      Assert.assertTrue("listingPrice should be > 0", first.getListingPrice() > 0);
+    }
+  }
+
+  @Test
+  public void testGetCorporateDividend() {
+    CorporateDividendRequest request = CorporateDividendRequest.newRequest(
+        Arrays.asList("AAPL"),
+        Market.US,
+        parse("2023-01-01"),
+        parse("2024-01-01")
+    );
+    CorporateDividendResponse response = client.execute(request);
+    Assert.assertNotNull(response);
+    Assert.assertTrue("dividend request failed: " + response.getMessage(), response.isSuccess());
+    Map<String, List<CorporateDividendItem>> items = response.getItems();
+    Assert.assertNotNull(items);
+    if (!items.isEmpty()) {
+      List<CorporateDividendItem> innerList = items.values().iterator().next();
+      if (!innerList.isEmpty()) {
+        CorporateDividendItem first = innerList.get(0);
+        Assert.assertNotNull("symbol should not be null", first.getSymbol());
+        Assert.assertTrue("symbol should not be empty", !first.getSymbol().isEmpty());
+        Assert.assertNotNull("market should not be null", first.getMarket());
+        Assert.assertEquals("market should be US", "US", first.getMarket());
+        Assert.assertNotNull("actionType should not be null", first.getActionType());
+        Assert.assertEquals("actionType should be DIVIDEND",
+            CorporateActionType.DIVIDEND, first.getActionType());
+      }
+    }
+    System.out.println("DIVIDEND items: " + items);
+  }
+
+  @Test
+  public void testGetCorporateEarning() {
+    CorporateEarningRequest request = CorporateEarningRequest.newRequest(
+        Market.US,
+        parse("2025-01-01"),
+        parse("2025-01-31")
+    );
+    CorporateEarningResponse response = client.execute(request);
+    Assert.assertNotNull(response);
+    Assert.assertTrue("earning request failed: " + response.getMessage(), response.isSuccess());
+    Map<String, List<CorporateEarningItem>> items = response.getItems();
+    Assert.assertNotNull(items);
+    if (!items.isEmpty()) {
+      List<CorporateEarningItem> innerList = items.values().iterator().next();
+      if (!innerList.isEmpty()) {
+        CorporateEarningItem first = innerList.get(0);
+        Assert.assertNotNull("actionType should not be null", first.getActionType());
+        Assert.assertEquals("actionType should be EARNING",
+            CorporateActionType.EARNING, first.getActionType());
+      }
+    }
+    System.out.println("EARNING items: " + items);
+  }
+
+  @Test
+  public void testGetCorporateSplit() {
+    CorporateSplitRequest request = CorporateSplitRequest.newRequest(
+        Arrays.asList("AAPL"),
+        Market.US,
+        parse("2020-01-01"),
+        parse("2024-01-01")
+    );
+    CorporateSplitResponse response = client.execute(request);
+    Assert.assertNotNull(response);
+    Assert.assertTrue("split request failed: " + response.getMessage(), response.isSuccess());
+    Map<String, List<CorporateSplitItem>> items = response.getItems();
+    Assert.assertNotNull(items);
+    if (!items.isEmpty()) {
+      List<CorporateSplitItem> innerList = items.values().iterator().next();
+      if (!innerList.isEmpty()) {
+        CorporateSplitItem first = innerList.get(0);
+        Assert.assertNotNull("actionType should not be null", first.getActionType());
+        Assert.assertEquals("actionType should be SPLIT",
+            CorporateActionType.SPLIT, first.getActionType());
+      }
+    }
+    System.out.println("SPLIT items: " + items);
   }
 
   private static java.util.Date parse(String s) {

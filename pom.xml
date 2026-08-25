@@ -4,7 +4,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <groupId>io.github.tigerbrokers</groupId>
-  <version>2.6.0</version>
+  <version>2.6.2</version>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>openapi-java-sdk</artifactId>
   <packaging>jar</packaging>
@@ -13,6 +13,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <protobuf.version>3.22.3</protobuf.version>
+    <!-- surefire 与 failsafe 用同一版本，避免两套 provider 行为不一致 -->
+    <surefire.version>3.2.5</surefire.version>
   </properties>
 
   <name>openapi-java-sdk</name>
@@ -110,6 +112,92 @@
           <target>1.8</target>
           <encoding>utf-8</encoding>
         </configuration>
+      </plugin>
+      <!--
+        测试分层：surefire 只跑 L1 单测，failsafe 跑 L2/L3 集成测试。
+        分层说明见 src/test/java/.../TestLayers.java
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire.version}</version>
+        <configuration>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+          <excludes>
+            <!-- 集成测试交给 failsafe，mvn test 不碰 -->
+            <exclude>**/*IntegrationTest.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>${surefire.version}</version>
+        <configuration>
+          <includes>
+            <include>**/*IntegrationTest.java</include>
+          </includes>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.11</version>
+        <configuration>
+          <excludes>
+            <!-- protoc 生成，不手写不测 -->
+            <exclude>com/tigerbrokers/stock/openapi/client/socket/data/pb/**</exclude>
+            <exclude>**/*OuterClass*</exclude>
+            <!-- socket / 异步执行 / watcher 依赖 TCP 连接或运行时组件，
+                 单测环境无法覆盖（实测 0%），排除以免拉低有效覆盖率；由集成测试覆盖。 -->
+            <exclude>com/tigerbrokers/stock/openapi/client/socket/**</exclude>
+            <!-- util/builder 中的无状态工厂类（AccountParamBuilder / HeaderBuilder /
+                 QuoteParamBuilder 等）包含业务逻辑，应被单测覆盖，不整包排除。
+                 仅排除依赖运行时 Netty 组件的类（目前无此类，占位备用）。 -->
+            <!-- <exclude>com/tigerbrokers/stock/openapi/client/util/builder/**</exclude> -->
+            <exclude>com/tigerbrokers/stock/openapi/client/util/watch/**</exclude>
+            <!-- websocket 中依赖 live TCP 的类才排除；纯数据类 / 静态工具类应覆盖。
+                 仅排除真正需要 Netty Channel 的 Handler 类。 -->
+            <exclude>com/tigerbrokers/stock/openapi/client/websocket/WebSocketClient*</exclude>
+            <exclude>com/tigerbrokers/stock/openapi/client/websocket/WebSocketHandshaker*</exclude>
+            <exclude>com/tigerbrokers/stock/openapi/client/websocket/WebSocketStompFrame*</exclude>
+            <!-- 常量类与参数 DTO（纯字段，无业务逻辑） -->
+            <exclude>com/tigerbrokers/stock/openapi/client/constant/**</exclude>
+            <exclude>com/tigerbrokers/stock/openapi/client/struct/param/**</exclude>
+            <!-- 依赖 live API / Netty pipeline / scheduled executor / 网络 / Thread.sleep
+                 的类，纯单测无法覆盖（需运行时组件或真实 API），由集成测试覆盖。 -->
+            <exclude>**/OptionCalcUtils*</exclude>
+            <exclude>**/ApiCallbackDecoderUtils*</exclude>
+            <exclude>**/NetworkUtil*</exclude>
+            <exclude>**/PageTokenUtil*</exclude>
+            <exclude>**/TokenManager*</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

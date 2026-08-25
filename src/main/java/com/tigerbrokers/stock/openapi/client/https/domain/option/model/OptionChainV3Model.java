@@ -42,7 +42,7 @@ public class OptionChainV3Model extends OptionModel {
 
   @Override
   public String toString() {
-    return "OptionChainV2Model{" +
+    return "OptionChainV3Model{" +
         "optionBasic=" + optionBasic +
         ", market=" + market +
         ", optionFilter=" + optionFilter +

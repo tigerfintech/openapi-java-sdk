@@ -38,10 +38,18 @@ public class PlaceOrderRequestValidator implements RequestValidator<TradeOrderMo
       throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "order_type");
     }
     if (SecType.FUND != model.getSecType()) {
-      if (model.getTotalQuantity() == null) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "total_quantity");
-      } else if (model.getTotalQuantity() <= 0) {
-        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "total_quantity");
+      // Amount orders (cashAmount > 0) size the order by dollars, not by
+      // share count — total_quantity is unused and the gateway rejects
+      // requests that carry both fields. Skip the total_quantity check in
+      // that case so buildAmountOrder(...) round-trips through preview /
+      // place cleanly.
+      boolean isAmountOrder = model.getCashAmount() != null && model.getCashAmount() > 0;
+      if (!isAmountOrder) {
+        if (model.getTotalQuantity() == null) {
+          throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "total_quantity");
+        } else if (model.getTotalQuantity() <= 0) {
+          throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_VALUE_ERROR, "total_quantity");
+        }
       }
     }
 

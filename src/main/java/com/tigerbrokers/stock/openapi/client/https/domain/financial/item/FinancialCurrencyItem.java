@@ -38,7 +38,7 @@ public class FinancialCurrencyItem extends ApiModel {
 
   @Override
   public String toString() {
-    return "FinancialDailyItem{" +
+    return "FinancialCurrencyItem{" +
         "symbol='" + symbol + '\'' +
         ", currency=" + currency +
         ", companyCurrency=" + companyCurrency +

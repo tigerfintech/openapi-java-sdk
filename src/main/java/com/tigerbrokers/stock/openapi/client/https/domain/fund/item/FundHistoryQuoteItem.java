@@ -37,7 +37,7 @@ public class FundHistoryQuoteItem extends ApiModel {
 
   @Override
   public String toString() {
-    return "KlineItem{" +
+    return "FundHistoryQuoteItem{" +
         "symbol='" + symbol + '\'' +
         ", items=" + items +
         '}';

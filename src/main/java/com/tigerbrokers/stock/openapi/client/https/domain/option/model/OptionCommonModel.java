@@ -1,7 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.option.model;
 
 import com.tigerbrokers.stock.openapi.client.TigerApiException;
-import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.struct.OptionSymbol;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
@@ -26,6 +25,9 @@ public class OptionCommonModel extends ApiModel {
 
   public OptionCommonModel(String identifier) throws TigerApiException {
     OptionSymbol optionSymbol = SymbolUtil.convertToOptionSymbolObject(identifier);
+    if (optionSymbol == null) {
+      throw new TigerApiException("invalid option identifier: " + identifier);
+    }
     setSymbol(optionSymbol.getSymbol());
     setRight(optionSymbol.getRight());
     setStrike(optionSymbol.getStrike());
