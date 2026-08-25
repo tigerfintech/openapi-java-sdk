@@ -55,22 +55,22 @@ public class QuoteRequestValidator implements RequestValidator<ApiModel> {
       if (quoteSymbolModel.getSymbols() == null || quoteSymbolModel.getSymbols().isEmpty()) {
         throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "symbols");
       }
-      if (model instanceof QuoteContractModel) {
-        QuoteContractModel quoteContractModel = (QuoteContractModel)model;
-        SecType secType = quoteContractModel.getSecType();
-        if (secType == null) {
-          throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "sec_type");
-        }
-        if (SecType.OPT != secType && SecType.WAR != secType && SecType.IOPT != secType) {
-          throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_CONCTRACT_SECTYPE_ERROR, secType.name());
-        }
-        if (SecType.OPT == secType && StringUtils.isEmpty(quoteContractModel.getExpiry())) {
-          throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "expiry");
-        }
-      } else if (model instanceof QuoteHistoryTimelineModel) {
+      if (model instanceof QuoteHistoryTimelineModel) {
         if (StringUtils.isEmpty(((QuoteHistoryTimelineModel)model).getDate())) {
           throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "date");
         }
+      }
+    } else if (model instanceof QuoteContractModel) {
+      QuoteContractModel quoteContractModel = (QuoteContractModel) model;
+      SecType secType = quoteContractModel.getSecType();
+      if (secType == null) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "sec_type");
+      }
+      if (SecType.OPT != secType && SecType.WAR != secType && SecType.IOPT != secType) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_CONCTRACT_SECTYPE_ERROR, secType.name());
+      }
+      if (SecType.OPT == secType && StringUtils.isEmpty(quoteContractModel.getExpiry())) {
+        throw new TigerApiException(TigerApiCode.HTTP_BIZ_PARAM_EMPTY_ERROR, "expiry");
       }
     } else if (model instanceof QuoteStockBrokerModel) {
       QuoteStockBrokerModel quoteStockBrokerModel = (QuoteStockBrokerModel) model;

@@ -69,6 +69,7 @@ public class QuoteContractModel extends ApiModel {
   public QuoteContractModel(String symbol, SecType secType, Language lang) {
     this.symbol = symbol;
     this.secType = secType;
+    this.setLang(lang);
   }
 
   public QuoteContractModel(String symbol, SecType secType, String expiry) {
@@ -86,6 +87,7 @@ public class QuoteContractModel extends ApiModel {
     this.setRight(right);
     this.setStrike(strike);
   }
+
 
   public SecType getSecType() {
     return secType;

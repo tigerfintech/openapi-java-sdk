@@ -5,7 +5,9 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.BizType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.License;
 
+import io.netty.handler.ssl.OpenSsl;
 import io.netty.handler.ssl.SslProvider;
+import java.util.Arrays;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,6 +18,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 
 /**
  * @author liutongping
@@ -41,7 +44,7 @@ public class NetworkUtilTest {
 
     try (MockedStatic<HttpUtils> theMock = Mockito.mockStatic(HttpUtils.class)) {
       ClientConfig config = ClientConfig.DEFAULT_CONFIG;
-      theMock.when(() -> HttpUtils.get(anyString(), config.token)).thenReturn(domainConfigJson);
+      theMock.when(() -> HttpUtils.get(anyString(), nullable(String.class))).thenReturn(domainConfigJson);
       // theMock.when(HttpUtils::get).thenReturn(cgplayJson);
 
       // prod
@@ -92,7 +95,7 @@ public class NetworkUtilTest {
 
     try (MockedStatic<HttpUtils> theMock = Mockito.mockStatic(HttpUtils.class)) {
       ClientConfig config = ClientConfig.DEFAULT_CONFIG;
-      theMock.when(() -> HttpUtils.get(anyString(), config.token)).thenReturn(domainConfigJson02);
+      theMock.when(() -> HttpUtils.get(anyString(), nullable(String.class))).thenReturn(domainConfigJson02);
       // theMock.when(HttpUtils::get).thenReturn(cgplayJson);
 
       // prod
@@ -144,7 +147,7 @@ public class NetworkUtilTest {
 
     try (MockedStatic<HttpUtils> theMock = Mockito.mockStatic(HttpUtils.class)) {
       ClientConfig config = ClientConfig.DEFAULT_CONFIG;
-      theMock.when(() -> HttpUtils.get(anyString(), config.token)).thenReturn(domainConfigJson03);
+      theMock.when(() -> HttpUtils.get(anyString(), nullable(String.class))).thenReturn(domainConfigJson03);
       // theMock.when(HttpUtils::get).thenReturn(cgplayJson);
 
       // prod
@@ -178,17 +181,42 @@ public class NetworkUtilTest {
     }
   }
 
+  /**
+   * 断言的是过滤契约，不是某个平台上的具体协议列表。
+   *
+   * 本地支持的协议集随 JDK 版本和 netty native 库变化：JDK 8 早期版本没有 TLSv1.3，
+   * 新版本又默认禁用 TLSv1 / TLSv1.1；OpenSSL provider 在缺少对应平台 native 库时
+   * （如 macOS aarch64、精简 CI 镜像）拿不到协议集，按约定返回 null。
+   * 断言固定数组会让这个用例的结果取决于跑在哪台机器上。
+   */
   @Test
   public void testGetOpenSslSupportedProtocolsSet() {
-    String[] protocols = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3", "TLSv1.4"};
-    String[] protocolsJdk = NetworkUtil.getSupportedProtocolsSet(protocols, SslProvider.JDK);
+    String[] serverProtocols = new String[] {"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3", "TLSv1.4"};
+
+    // JDK provider 总是可用：服务端声明的协议里，本地不认识的必须被过滤掉
+    String[] protocolsJdk = NetworkUtil.getSupportedProtocolsSet(serverProtocols, SslProvider.JDK);
     ApiLogger.info("JDK: {}", protocolsJdk);
-    Assert.assertArrayEquals(new String[] {"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"}, protocolsJdk);
-    String[] opensslProtocols = NetworkUtil.getSupportedProtocolsSet(protocols, SslProvider.OPENSSL);
-    ApiLogger.info("OPENSSL: {}", opensslProtocols);
-    Assert.assertArrayEquals(new String[] {"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"}, opensslProtocols);
-    String[] opensslProtocols2 = NetworkUtil.getSupportedProtocolsSet(protocols, SslProvider.OPENSSL_REFCNT);
-    ApiLogger.info("OPENSSL_REFCNT: {}", opensslProtocols2);
-    Assert.assertArrayEquals(new String[] {"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"}, opensslProtocols2);
+    Assert.assertNotNull("JDK provider 应始终可用", protocolsJdk);
+    Assert.assertFalse("不存在的 TLSv1.4 应被过滤掉", Arrays.asList(protocolsJdk).contains("TLSv1.4"));
+    Assert.assertTrue("TLSv1.2 在 JDK 8+ 上应始终受支持", Arrays.asList(protocolsJdk).contains("TLSv1.2"));
+
+    // OpenSSL provider 依赖 netty native，不可用时约定返回 null
+    for (SslProvider provider : new SslProvider[] {SslProvider.OPENSSL, SslProvider.OPENSSL_REFCNT}) {
+      String[] result = NetworkUtil.getSupportedProtocolsSet(serverProtocols, provider);
+      ApiLogger.info("{}: {}", provider, result);
+      if (OpenSsl.isAvailable()) {
+        Assert.assertNotNull(provider + " 可用时不应返回 null", result);
+        Assert.assertFalse("不存在的 TLSv1.4 应被过滤掉", Arrays.asList(result).contains("TLSv1.4"));
+      } else {
+        Assert.assertNull(provider + " 不可用时约定返回 null", result);
+      }
+    }
+  }
+
+  @Test
+  public void testGetSupportedProtocolsSetWithEmptyInput() {
+    Assert.assertNull(NetworkUtil.getSupportedProtocolsSet(null, SslProvider.JDK));
+    String[] empty = new String[0];
+    Assert.assertSame(empty, NetworkUtil.getSupportedProtocolsSet(empty, SslProvider.JDK));
   }
 }

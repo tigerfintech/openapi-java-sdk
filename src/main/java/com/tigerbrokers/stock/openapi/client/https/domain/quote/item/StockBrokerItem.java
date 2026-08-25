@@ -53,8 +53,8 @@ public class StockBrokerItem extends ApiModel {
   public String toString() {
     return "StockBrokerItem{" +
         "symbol='" + symbol + '\'' +
-        ", bidBroker=" + bidBroker == null ? null : Arrays.toString(bidBroker.toArray()) +
-        ", askBroker=" + askBroker == null ? null : Arrays.toString(askBroker.toArray()) +
+        ", bidBroker=" + (bidBroker == null ? null : Arrays.toString(bidBroker.toArray())) +
+        ", askBroker=" + (askBroker == null ? null : Arrays.toString(askBroker.toArray())) +
         '}';
   }
 }

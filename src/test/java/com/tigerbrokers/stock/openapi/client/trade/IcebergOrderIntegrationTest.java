@@ -1,6 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.trade;
 
-import com.tigerbrokers.stock.openapi.client.config.ClientConfig;
+import com.tigerbrokers.stock.openapi.client.testsupport.IntegTestConfig;
 import com.tigerbrokers.stock.openapi.client.https.client.TigerHttpClient;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.TradeOrder;
@@ -10,15 +10,18 @@ import com.tigerbrokers.stock.openapi.client.https.request.trade.TradeOrderReque
 import com.tigerbrokers.stock.openapi.client.https.response.trade.SingleOrderResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.TradeOrderResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
-import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.PriceType;
 import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
 import com.tigerbrokers.stock.openapi.client.util.builder.AccountParamBuilder;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+
+import com.tigerbrokers.stock.openapi.client.testsupport.WriteApi;
 
 /**
  * Integration tests for iceberg order APIs (place / modify / cancel / query).
@@ -28,7 +31,8 @@ import org.junit.Test;
  *   -Dtest.server.url=<gateway url>  (optional)
  *   -Dtest.env=PROD|TEST            (optional, default TEST)
  */
-@Ignore("Integration test — requires live config, run manually")
+// 全部用例都会真实下单 / 改单 / 撤单
+@Category(WriteApi.class)
 public class IcebergOrderIntegrationTest {
 
   private static String account;
@@ -36,42 +40,30 @@ public class IcebergOrderIntegrationTest {
 
   @BeforeClass
   public static void setUpClass() {
-    String configPath = System.getProperty("test.config.path");
-    Assert.assertNotNull("set -Dtest.config.path=<config dir>", configPath);
-
-    String envStr = System.getProperty("test.env", "TEST");
-    Env env = "PROD".equalsIgnoreCase(envStr) ? Env.PROD : Env.TEST;
-
-    ClientConfig config = new ClientConfig();
-    config.configFilePath = configPath;
-    config.setEnv(env);
-    ConfigFileUtil.loadConfigFile(config);
-
-    account = config.defaultAccount;
-    // Allow override via -Dtest.account
-    String accountOverride = System.getProperty("test.account");
-    if (accountOverride != null && !accountOverride.isEmpty()) {
-      account = accountOverride;
-    }
-    Assert.assertNotNull("account not loaded from config", account);
-    Assert.assertNotNull("tigerId not loaded from config", config.tigerId);
-    Assert.assertNotNull("privateKey not loaded from config", config.privateKey);
-
-    System.out.println("env=" + env + " account=" + account + " tigerId=" + config.tigerId);
-
-    String serverUrl = System.getProperty("test.server.url");
-
-    client = TigerHttpClient.getInstance();
-    if (serverUrl != null && !serverUrl.isEmpty()) {
-      client.useCustomServerUrl(serverUrl);
-    }
-    client.clientConfig(config);
+    // 集成测试门控：默认跳过，CI 与本地都靠 -Dtest.integ=true 显式开启。
+    // 用 Assume 而不是类级 @Ignore，@Ignore 是硬编码的，没法按环境启用。
+    Assume.assumeTrue("integration test; enable with -Dtest.integ=true",
+        Boolean.getBoolean("test.integ"));
+    client = IntegTestConfig.createClient();
+    account = IntegTestConfig.getAccount();
+    Assert.assertNotNull("TIGEROPEN_ACCOUNT env var required", account);
   }
 
   // ── Place ─────────────────────────────────────────────────────────────────
 
-  /** 下冰山单（最简参数） */
+  /**
+   * 下冰山单（最简参数）
+   *
+   * KNOWN RISK: These three Iceberg tests are permanently @Ignored due to regulatory
+   * restrictions at this venue. They cannot be validated by CI under any circumstances.
+   * Manual verification is required if/when the regulatory restriction is lifted:
+   *   1. Remove @Ignore from all three methods
+   *   2. Run against a test account during US trading hours
+   *   3. Confirm place/modify/cancel round-trip succeeds
+   * Without this manual step, Iceberg order SDK changes are unverified against the live gateway.
+   */
   @Test
+  @Ignore("iceberg orders disabled by regulator for this venue; keep skip regardless of trading hours")
   public void testPlaceIcebergOrder_basic() {
     ContractItem contract = buildAAPLContract();
 
@@ -88,6 +80,7 @@ public class IcebergOrderIntegrationTest {
 
   /** 下冰山单（完整参数，含 start_time/end_time），并查询订单详情验证字段回显 */
   @Test
+  @Ignore("iceberg orders disabled by regulator for this venue; keep skip regardless of trading hours")
   public void testPlaceIcebergOrder_full() {
     ContractItem contract = buildAAPLContract();
 
@@ -138,6 +131,7 @@ public class IcebergOrderIntegrationTest {
 
   /** 下单 → 查询 → 改单 → 撤单 完整流程 */
   @Test
+  @Ignore("iceberg orders disabled by regulator for this venue; keep skip regardless of trading hours")
   public void testPlaceModifyCancel() throws Exception {
     ContractItem contract = buildAAPLContract();
 

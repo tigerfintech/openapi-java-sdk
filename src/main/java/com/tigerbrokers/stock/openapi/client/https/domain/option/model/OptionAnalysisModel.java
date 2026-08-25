@@ -1,5 +1,6 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.option.model;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OptionAnalysisPeriod;
 
@@ -10,6 +11,7 @@ public class OptionAnalysisModel extends ApiModel {
 
   private String symbol;
   private String period;
+  @JSONField(name = "require_volatility_list")
   private Boolean requireVolatilityList;
 
   public OptionAnalysisModel() {

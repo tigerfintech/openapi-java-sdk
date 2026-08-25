@@ -1,0 +1,260 @@
+# Two-stage pipeline: unit (no credentials) / integration (real API).
+# Unit stage does NOT inject any credential variables.
+
+stages:
+  - unit
+  - contract
+  - integration
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
+  MAVEN_CLI_OPTS: "--batch-mode --no-transfer-progress"
+
+.maven_base:
+  image: maven:3.8-eclipse-temurin-8
+  tags:
+    - openapi
+  before_script:
+    - mkdir -p ~/.m2 && echo '<settings><mirrors><mirror><id>aliyun</id><mirrorOf>central</mirrorOf><url>https://maven.aliyun.com/repository/public</url></mirror></mirrors></settings>' > ~/.m2/settings.xml
+  cache:
+    key: maven-repo
+    paths:
+      - .m2/repository
+
+unit:java:
+  extends: .maven_base
+  stage: unit
+  script:
+    # No `mvn clean` anywhere in this pipeline and build dirs are reused, so
+    # stale output from deleted/renamed test classes survives across runs. Two
+    # distinct leftovers, both of which have to go:
+    #   - surefire-reports/  → kept being archived and counted by notify:webhook
+    #   - test-classes/      → maven-compiler-plugin's incremental build does not
+    #     delete the .class of a removed .java, and surefire matches
+    #     `**/*Test.java` against target/test-classes, so an orphaned FooTest
+    #     .class keeps getting executed long after its source is gone.
+    # Not using `mvn clean`: it also deletes target/classes, forcing a full
+    # recompile of main sources on every run. Removing just these two dirs keeps
+    # the incremental main build while eliminating the stale test output.
+    - rm -rf target/surefire-reports target/test-classes
+    - mvn $MAVEN_CLI_OPTS test
+    - >-
+      awk -F, 'NR>0 {miss+=$8; cov+=$9} END {if (cov+miss==0) {print "Total line coverage: 0.0%"; exit} printf "Total line coverage: %.1f%%\n", cov*100/(cov+miss)}'
+      target/site/jacoco/jacoco.csv
+  coverage: '/Total line coverage: ([0-9.]+)%/'
+  artifacts:
+    when: always
+    paths:
+      - target/surefire-reports/
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
+    expire_in: 1 week
+
+contract:java:
+  image: maven:3.8-eclipse-temurin-8
+  tags:
+    - openapi
+  stage: contract
+  allow_failure: false
+  # Same resource_group as integration:java: both write target/failsafe-reports/
+  # to the same fixed path, so they must also be mutually exclusive across pipelines.
+  resource_group: $CI_COMMIT_REF_SLUG
+  before_script:
+    - mkdir -p ~/.m2 && echo '<settings><mirrors><mirror><id>aliyun</id><mirrorOf>central</mirrorOf><url>https://maven.aliyun.com/repository/public</url></mirror></mirrors></settings>' > ~/.m2/settings.xml
+  cache:
+    key: maven-repo
+    paths:
+      - .m2/repository
+  variables:
+    TIGEROPEN_PROPS_PATH: "$TIGEROPEN_PROPS_PATH"
+  script:
+    - test -n "$TIGEROPEN_TIGER_ID" || test -n "$TIGEROPEN_PROPS_PATH" || { echo "No credentials — skipping contract"; exit 0; }
+    # See unit:java — no `mvn clean`, reused build dir. Two leftovers to clear:
+    # failsafe-reports/ (contract:java and integration:java both write it, so
+    # whichever runs second must not inherit the first's files) and
+    # test-classes/ (orphaned *IntegrationTest.class of a deleted source still
+    # gets scanned and run). test-compile below regenerates test-classes.
+    - rm -rf target/failsafe-reports target/test-classes
+    - mvn $MAVEN_CLI_OPTS test-compile
+    - mvn $MAVEN_CLI_OPTS failsafe:integration-test failsafe:verify
+        -Dtest.integ=true
+        -Dgroups=com.tigerbrokers.stock.openapi.client.testsupport.ReadOnlyApi
+        -DexcludedGroups=com.tigerbrokers.stock.openapi.client.testsupport.WriteApi
+  artifacts:
+    when: always
+    paths:
+      - target/failsafe-reports/
+    reports:
+      junit:
+        - target/failsafe-reports/TEST-*.xml
+    expire_in: 1 week
+
+integration:java:
+  extends: .maven_base
+  stage: integration
+  allow_failure: true
+  # Serialize per-branch: concurrent scheduled + manual pipelines would otherwise
+  # write target/failsafe-reports/ concurrently, corrupting notify:webhook's input.
+  resource_group: $CI_COMMIT_REF_SLUG
+  tags:
+    - openapi
+  variables:
+    TIGEROPEN_PROPS_PATH: "$TIGEROPEN_PROPS_PATH"
+  script:
+    - test -n "$TIGEROPEN_TIGER_ID" || test -n "$TIGEROPEN_PROPS_PATH" || { echo "No credentials — skipping integration"; exit 0; }
+    # See unit:java — no `mvn clean`, reused build dir. Two leftovers to clear:
+    # failsafe-reports/ (contract:java and integration:java both write it, so
+    # whichever runs second must not inherit the first's files) and
+    # test-classes/ (orphaned *IntegrationTest.class of a deleted source still
+    # gets scanned and run). test-compile below regenerates test-classes.
+    - rm -rf target/failsafe-reports target/test-classes
+    - mvn $MAVEN_CLI_OPTS test-compile
+    - mvn $MAVEN_CLI_OPTS failsafe:integration-test failsafe:verify -Dtest.integ=true
+  artifacts:
+    when: always
+    paths:
+      - target/failsafe-reports/
+    reports:
+      junit:
+        - target/failsafe-reports/TEST-*.xml
+    expire_in: 1 week
+
+# Pipeline result notification via chat webhook.
+# Parses JUnit XML artifacts directly (no GitLab API dependency).
+notify:webhook:
+  image: python:3.11-slim
+  tags:
+    - openapi
+  stage: .post
+  when: always
+  allow_failure: true
+  needs:
+    - job: unit:java
+      artifacts: true
+    - job: contract:java
+      artifacts: true
+      optional: true
+    - job: integration:java
+      artifacts: true
+      optional: true
+  script:
+    - |
+      python3 << 'PYEOF'
+      import os, json, urllib.request, glob
+      import xml.etree.ElementTree as ET
+
+      webhook_url = os.environ.get("WEBHOOK_URL", "")
+      if not webhook_url:
+          print("WEBHOOK_URL not configured, skipping notification")
+          exit(0)
+      card_content_tag = os.environ["CARD_CONTENT_TAG"]
+
+      def parse_xml(path):
+          """Return (total, passed, failed, skipped) or None on parse error."""
+          t, f, s = 0, 0, 0
+          try:
+              tree = ET.parse(path)
+              root = tree.getroot()
+              for suite in root.iter("testsuite"):
+                  t += int(suite.get("tests", 0))
+                  f += int(suite.get("failures", 0)) + int(suite.get("errors", 0))
+                  s += int(suite.get("skipped", 0))
+          except Exception as e:
+              print(f"Failed to parse {path}: {e}")
+              return None, None, None, None
+          return t, t - f - s, f, s
+
+      # Parse surefire (unit) + failsafe (integration) JUnit XML
+      unit_t, unit_p, unit_f, unit_s = 0, 0, 0, 0
+      unit_files = glob.glob("target/surefire-reports/TEST-*.xml")
+      for xml_file in unit_files:
+          t, p, fl, s = parse_xml(xml_file)
+          if t is None:
+              unit_f = None  # mark as unavailable
+              break
+          unit_t += t; unit_p += p; unit_f += fl; unit_s += s
+
+      integ_t, integ_p, integ_f, integ_s = 0, 0, 0, 0
+      integ_files = glob.glob("target/failsafe-reports/TEST-*.xml")
+      integ_unreadable = False
+      for xml_file in integ_files:
+          t, p, fl, s = parse_xml(xml_file)
+          if t is None:
+              integ_unreadable = True
+              continue
+          integ_t += t; integ_p += p; integ_f += fl; integ_s += s
+
+      unit_stats = f"Unit: {unit_t} tests: {unit_p} passed, {unit_f} failed, {unit_s} skipped" if unit_t and unit_f is not None else ""
+      integ_stats = f"Integration: {integ_t} tests: {integ_p} passed, {integ_f} failed, {integ_s} skipped" if integ_t else ""
+
+      # Determine pass/fail.
+      #   unit_f is None  → XML missing/corrupt; treat as failed (conservative).
+      #   unit_f > 0      → explicit unit failures.
+      #   integration:java exits 0 without running when no credentials are
+      #   configured (fork MRs, unprotected branches), so absent failsafe
+      #   reports are an expected skip there. But when credentials ARE present,
+      #   integration was expected to produce reports — missing or unreadable
+      #   ones mean the job crashed before writing them, which must not be
+      #   scored as a pass now that passes notify nobody.
+      #   CI_PIPELINE_STATUS is unreliable in .post stage (reads "running"),
+      #   so we rely exclusively on parsed XML counts.
+      integ_expected = bool(os.environ.get("TIGEROPEN_TIGER_ID")) or \
+          bool(os.environ.get("TIGEROPEN_PROPS_PATH"))
+
+      if unit_f is None or not unit_files:
+          has_failed = True
+          print("Unit surefire XML unavailable — treating pipeline as failed")
+      elif integ_expected and (not integ_files or integ_unreadable):
+          has_failed = True
+          print("Integration failsafe XML unavailable despite credentials being "
+                "configured — treating pipeline as failed")
+      else:
+          has_failed = (unit_f > 0) or (integ_f > 0)
+
+      # Notify on failure only. A green card every 4 hours is noise nobody
+      # reads, which also desensitises the channel to the red ones.
+      # has_failed already covers "XML missing/corrupt" above, so an
+      # unreadable artifact still notifies — silence here means "we
+      # positively verified everything passed", never "we couldn't tell".
+      if not has_failed:
+          print(f"Pipeline passed — {unit_stats} | {integ_stats} — skipping notification")
+          exit(0)
+
+      title = "❌ Pipeline failed" if has_failed else "✅ Pipeline passed"
+      color = "red" if has_failed else "green"
+      project_name = os.environ.get("CI_PROJECT_NAME", "")
+      branch = os.environ.get("CI_COMMIT_REF_NAME", "")
+      commit = os.environ.get("CI_COMMIT_SHORT_SHA", "")
+      pipeline_iid = os.environ.get("CI_PIPELINE_IID", "")
+      pipeline_url = os.environ.get("CI_PROJECT_URL", "") + "/-/pipelines/" + os.environ.get("CI_PIPELINE_ID", "")
+
+      content = f"**Repo:** {project_name}\n**Branch:** {branch}\n**Commit:** {commit}\n"
+      if unit_stats:
+          content += f"\n**Unit tests:** {unit_stats}\n"
+      if integ_stats:
+          content += f"**Integration tests:** {integ_stats}\n"
+      content += f"[View pipeline]({pipeline_url})"
+
+      payload = {
+          "msg_type": "interactive",
+          "card": {
+              "header": {
+                  "title": {"tag": "plain_text", "content": f"{title} #{pipeline_iid} — {project_name}"},
+                  "template": color
+              },
+              "elements": [
+                  {"tag": "div", "text": {"tag": card_content_tag, "content": content}}
+              ]
+          }
+      }
+
+      data = json.dumps(payload).encode("utf-8")
+      req = urllib.request.Request(webhook_url, data=data, headers={"Content-Type": "application/json"})
+      try:
+          with urllib.request.urlopen(req, timeout=10) as resp:
+              result = json.loads(resp.read())
+              print(f"Webhook response: {result}")
+      except Exception as e:
+          print(f"Webhook request failed: {e}")
+      PYEOF
