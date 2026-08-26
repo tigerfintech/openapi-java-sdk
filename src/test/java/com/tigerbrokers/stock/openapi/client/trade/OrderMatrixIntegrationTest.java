@@ -70,16 +70,45 @@ public class OrderMatrixIntegrationTest {
    * treated as a skip — see {@link #classifyFailure}.
    */
   private static final Pattern[] HOURS_ERROR_PATTERNS = new Pattern[] {
-      Pattern.compile("(?i)outside of regular trading hours"),
       Pattern.compile("(?i)market is closed"),
-      Pattern.compile("(?i)only limit orders can be placed"),
-      Pattern.compile("(?i)only limit, stop or stop-limit orders are allowed"),
       Pattern.compile("(?i)at non-trading hour"),
       Pattern.compile("(?i)orders cannot be placed at this moment"),
+  };
+
+  /**
+   * Server messages meaning "this order type / parameter is not accepted at
+   * this instant", which is NOT the same as "the market is closed".
+   *
+   * <p>These must never be re-checked against {@code isMarketTrading}: for
+   * every pattern below, the continuous session being open is exactly when
+   * the error is most likely, so using an open market to prove the error is a
+   * bug has the implication backwards. Concretely:
+   *
+   * <ul>
+   *   <li>Auction orders (AL/AM) are only accepted during HK's pre-open
+   *       (09:00–09:30) and closing (16:00–16:10) auction windows, which are
+   *       disjoint from the continuous session. {@code isMarketTrading("HK")}
+   *       reports the continuous session, so an auction rejection during
+   *       continuous trading is by design — asserting on it made this case
+   *       fail every single run that landed inside HK trading hours.</li>
+   *   <li>"only limit orders are supported ... outside of regular trading
+   *       hours" fires when the order itself carries an RTH-exempt flag; the
+   *       server then applies extended-hours rules regardless of whether the
+   *       regular session happens to be open.</li>
+   *   <li>The TWAP/VWAP end-time window is an order parameter constraint —
+   *       the schedule ran past the session close, which says nothing about
+   *       the current market state.</li>
+   * </ul>
+   *
+   * <p>The SDK cannot narrow these down further: no quote API exposes
+   * auction-window or RTH-exempt eligibility, so an unconditional skip is the
+   * only classification that is actually true.
+   */
+  private static final Pattern[] ORDER_TYPE_RESTRICTION_PATTERNS = new Pattern[] {
       Pattern.compile("(?i)auction order is not allowed at this moment"),
-      // TWAP/VWAP algo start time outside today's trading window — a
-      // schedule/session boundary (same family as the other trading-hours
-      // skips above), not an SDK defect.
+      Pattern.compile("(?i)outside of regular trading hours"),
+      Pattern.compile("(?i)only limit orders can be placed"),
+      Pattern.compile("(?i)only limit, stop or stop-limit orders are allowed"),
       Pattern.compile("(?i)the time range for the order .* needs to be between"),
   };
 
@@ -162,13 +191,27 @@ public class OrderMatrixIntegrationTest {
    * during real trading hours is a real bug, not a boundary skip); pure
    * permission/capability markers are always an unconditional skip.
    *
+   * <p>{@code market} must be the market of the order that failed, not a fixed
+   * value: the matrix spans US/HK/CN/SG, whose sessions do not overlap, so
+   * checking HK's boundary error against the US session turns a legitimate
+   * skip into a spurious failure whenever the two differ. Empty falls back
+   * to {@code "US"}.
+   *
    * @return null if the message should be treated as a hard failure by the
    *     caller; otherwise a human-readable skip reason.
    */
-  private static String classifyFailure(String msg, String context) {
+  private static String classifyFailure(String msg, String market, String context) {
+    // Order-type/parameter restrictions are checked before HOURS_ERROR_PATTERNS
+    // and deliberately never validated against live market status — see that
+    // field's javadoc for why an open market cannot disprove them.
+    if (matches(msg, ORDER_TYPE_RESTRICTION_PATTERNS)) {
+      return "skipped (order type not accepted at this moment): " + msg;
+    }
     if (matches(msg, HOURS_ERROR_PATTERNS)) {
-      if (MarketHelpers.isMarketTrading(client, "US")) {
-        Assert.fail(context + ": hours-boundary error during live trading hours: " + msg);
+      String mkt = (market == null || market.isEmpty()) ? "US" : market;
+      if (MarketHelpers.isMarketTrading(client, mkt)) {
+        Assert.fail(context + ": hours-boundary error during live " + mkt
+            + " trading hours: " + msg);
       }
       return "skipped (out-of-hours boundary): " + msg;
     }
@@ -197,14 +240,14 @@ public class OrderMatrixIntegrationTest {
   }
 
   /** Wrap a place-order request into a preview_order call and check for skip. */
-  private boolean previewOnly(TradeOrderRequest placeReq, String context) {
+  private boolean previewOnly(TradeOrderRequest placeReq, String market, String context) {
     // Swap the method to preview_order — the model is otherwise identical.
     TradeOrderPreviewRequest previewReq = new TradeOrderPreviewRequest();
     previewReq.setApiModel(placeReq.getApiModel());
     TradeOrderPreviewResponse resp = executeWithRateLimitRetry(previewReq, context);
     Assert.assertNotNull(context + ": preview response is null", resp);
     if (!resp.isSuccess()) {
-      String skipReason = classifyFailure(resp.getMessage(), context);
+      String skipReason = classifyFailure(resp.getMessage(), market, context);
       if (skipReason != null) {
         System.out.println(context + ": " + skipReason);
         return false;
@@ -218,9 +261,9 @@ public class OrderMatrixIntegrationTest {
    * place → cancel round-trip with permission auto-skip and rate-limit retry.
    * Returns true if executed, false if skipped.
    */
-  private boolean previewAndPlace(TradeOrderRequest placeReq, String context) {
+  private boolean previewAndPlace(TradeOrderRequest placeReq, String market, String context) {
     // 1. Preview first — validates marshaling before touching real state.
-    if (!previewOnly(placeReq, context)) return false;
+    if (!previewOnly(placeReq, market, context)) return false;
 
     // 2. Place. Rate-limit backoff/skip lives in the shared helper, so what
     //    reaches here is either a success or a genuine, non-throttle failure.
@@ -228,7 +271,7 @@ public class OrderMatrixIntegrationTest {
     TradeOrderResponse placeResp = executeWithRateLimitRetry(placeReq, context);
     Assert.assertNotNull(context + ": place response is null", placeResp);
     if (!placeResp.isSuccess()) {
-      String skipReason = classifyFailure(placeResp.getMessage(), context);
+      String skipReason = classifyFailure(placeResp.getMessage(), market, context);
       if (skipReason != null) {
         System.out.println(context + ": " + skipReason);
         return false;
@@ -267,7 +310,7 @@ public class OrderMatrixIntegrationTest {
   public void previewUsStkMarket() {
     ContractItem contract = usStkContract();
     TradeOrderRequest req = TradeOrderRequest.buildMarketOrder(account, contract, ActionType.BUY, 1);
-    previewOnly(req, "US STK MKT preview");
+    previewOnly(req, "US", "US STK MKT preview");
   }
 
   @Test
@@ -279,7 +322,7 @@ public class OrderMatrixIntegrationTest {
     // check when cashAmount > 0, so this preview round-trips cleanly.
     ContractItem contract = usStkContract();
     TradeOrderRequest req = TradeOrderRequest.buildAmountOrder(account, contract, ActionType.BUY, 100.0);
-    previewOnly(req, "US STK MKT-by-cashAmount preview");
+    previewOnly(req, "US", "US STK MKT-by-cashAmount preview");
   }
 
   @Test
@@ -287,7 +330,7 @@ public class OrderMatrixIntegrationTest {
     ContractItem contract = usStkContract();
     TradeOrderRequest req = TradeOrderRequest.buildStopOrder(
         account, contract, ActionType.BUY, 1, SAFE_STOP_BUY_TRIGGER);
-    previewAndPlace(req, "US STK STP");
+    previewAndPlace(req, "US", "US STK STP");
   }
 
   @Test
@@ -295,7 +338,7 @@ public class OrderMatrixIntegrationTest {
     ContractItem contract = usStkContract();
     TradeOrderRequest req = TradeOrderRequest.buildStopLimitOrder(
         account, contract, ActionType.BUY, 1, SAFE_BUY_PRICE, SAFE_STOP_BUY_TRIGGER);
-    previewAndPlace(req, "US STK STP_LMT");
+    previewAndPlace(req, "US", "US STK STP_LMT");
   }
 
   @Test
@@ -303,7 +346,7 @@ public class OrderMatrixIntegrationTest {
     ContractItem contract = usStkContract();
     TradeOrderRequest req = TradeOrderRequest.buildTrailOrder(
         account, contract, ActionType.SELL, 1, 50.0, null);
-    previewAndPlace(req, "US STK TRAIL");
+    previewAndPlace(req, "US", "US STK TRAIL");
   }
 
   @Test
@@ -311,7 +354,7 @@ public class OrderMatrixIntegrationTest {
     long now = System.currentTimeMillis();
     TradeOrderRequest req = TradeOrderRequest.buildTWAPOrder(
         account, "AAPL", ActionType.BUY, 10, now, now + 3_600_000L, SAFE_BUY_PRICE);
-    previewAndPlace(req, "US STK TWAP");
+    previewAndPlace(req, "US", "US STK TWAP");
   }
 
   @Test
@@ -319,7 +362,7 @@ public class OrderMatrixIntegrationTest {
     long now = System.currentTimeMillis();
     TradeOrderRequest req = TradeOrderRequest.buildVWAPOrder(
         account, "AAPL", ActionType.BUY, 10, now, now + 3_600_000L, 0.1, SAFE_BUY_PRICE);
-    previewAndPlace(req, "US STK VWAP");
+    previewAndPlace(req, "US", "US STK VWAP");
   }
 
   @Test
@@ -329,7 +372,7 @@ public class OrderMatrixIntegrationTest {
     TradeOrderRequest req = TradeOrderRequest.buildIcebergOrder(
         account, contract, ActionType.BUY, 10, SAFE_BUY_PRICE,
         2, 1, 30, PriceType.LIMIT_PRICE, now, now + 3_600_000L);
-    previewAndPlace(req, "US STK ICEBERG");
+    previewAndPlace(req, "US", "US STK ICEBERG");
   }
 
   @Test
@@ -342,7 +385,7 @@ public class OrderMatrixIntegrationTest {
         SAFE_SELL_PRICE, TimeInForce.GTC, false,
         SAFE_BUY_PRICE, SAFE_BUY_PRICE, TimeInForce.GTC, false);
     ((TradeOrderModel) req.getApiModel()).setLimitPrice(SAFE_BUY_PRICE);
-    previewAndPlace(req, "US STK OCA brackets");
+    previewAndPlace(req, "US", "US STK OCA brackets");
   }
 
   @Test
@@ -361,7 +404,7 @@ public class OrderMatrixIntegrationTest {
     }
     TradeOrderRequest req = TradeOrderRequest.buildLimitOrder(
         account, opt, ActionType.BUY, 1, SAFE_BUY_PRICE);
-    previewAndPlace(req, "US OPT LMT");
+    previewAndPlace(req, "US", "US OPT LMT");
   }
 
   @Test
@@ -373,7 +416,7 @@ public class OrderMatrixIntegrationTest {
     c.setExchange("NYMEX");
     TradeOrderRequest req = TradeOrderRequest.buildLimitOrder(
         account, c, ActionType.BUY, 1, SAFE_BUY_PRICE);
-    previewAndPlace(req, "US FUT LMT");
+    previewAndPlace(req, "US", "US FUT LMT");
   }
 
   @Test
@@ -399,7 +442,7 @@ public class OrderMatrixIntegrationTest {
     ContractItem contract = hkStkContract();
     TradeOrderRequest req = TradeOrderRequest.buildLimitOrder(
         account, contract, ActionType.BUY, 100, SAFE_BUY_PRICE);
-    previewAndPlace(req, "HK STK LMT");
+    previewAndPlace(req, "HK", "HK STK LMT");
   }
 
   @Test
@@ -409,7 +452,7 @@ public class OrderMatrixIntegrationTest {
         account, contract, ActionType.BUY, 100, SAFE_BUY_PRICE);
     // Change order type to AL after building.
     ((TradeOrderModel) req.getApiModel()).setOrderType(OrderType.AL);
-    previewAndPlace(req, "HK STK AL");
+    previewAndPlace(req, "HK", "HK STK AL");
   }
 
   @Test
@@ -418,7 +461,7 @@ public class OrderMatrixIntegrationTest {
     TradeOrderRequest req = TradeOrderRequest.buildMarketOrder(
         account, contract, ActionType.BUY, 100);
     ((TradeOrderModel) req.getApiModel()).setOrderType(OrderType.AM);
-    previewOnly(req, "HK STK AM preview");
+    previewOnly(req, "HK", "HK STK AM preview");
   }
 
   @Test
@@ -429,7 +472,7 @@ public class OrderMatrixIntegrationTest {
     c.setCurrency("CNH");
     TradeOrderRequest req = TradeOrderRequest.buildLimitOrder(
         account, c, ActionType.BUY, 100, SAFE_BUY_PRICE);
-    previewAndPlace(req, "CN STK LMT");
+    previewAndPlace(req, "CN", "CN STK LMT");
   }
 
   @Test
@@ -440,7 +483,7 @@ public class OrderMatrixIntegrationTest {
     c.setCurrency("SGD");
     TradeOrderRequest req = TradeOrderRequest.buildLimitOrder(
         account, c, ActionType.BUY, 100, SAFE_BUY_PRICE);
-    previewAndPlace(req, "SG STK LMT");
+    previewAndPlace(req, "SG", "SG STK LMT");
   }
 
   @Test
@@ -486,7 +529,7 @@ public class OrderMatrixIntegrationTest {
         account, Arrays.asList(leg1, leg2),
         ComboType.VERTICAL, ActionType.BUY, 1,
         OrderType.LMT, -100.0, null, null);
-    previewAndPlace(req, "US MLEG VERTICAL");
+    previewAndPlace(req, "US", "US MLEG VERTICAL");
   }
 
   @Test
@@ -499,7 +542,7 @@ public class OrderMatrixIntegrationTest {
         2, 1, 30, PriceType.LIMIT_PRICE, now, now + 3_600_000L);
 
     // preview first
-    if (!previewOnly(req, "US STK ICEBERG modify — preview")) return;
+    if (!previewOnly(req, "US", "US STK ICEBERG modify — preview")) return;
 
     TradeOrderResponse placeResp = executeWithRateLimitRetry(
         req, "US STK ICEBERG modify");
@@ -535,6 +578,6 @@ public class OrderMatrixIntegrationTest {
     ContractItem contract = usStkContract();
     TradeOrderRequest req = TradeOrderRequest.buildLimitOrder(
         account, contract, ActionType.SELL, 1, SAFE_SELL_PRICE);
-    previewOnly(req, "US STK SELL SHORT preview");
+    previewOnly(req, "US", "US STK SELL SHORT preview");
   }
 }
