@@ -93,7 +93,17 @@ contract:java:
 integration:java:
   extends: .maven_base
   stage: integration
-  allow_failure: true
+  # Was `true`, which made every integration failure invisible at the pipeline
+  # level: the pipeline reported `success` while jobs had been failing for days.
+  # A masked signal is worse than no signal, because it reads as a positive
+  # verification. Genuine environment-dependent boundaries (closed market, order
+  # type not accepted, account rate limit) are already classified as *skips* by
+  # the tests themselves, so a failure that reaches here is a real one.
+  # notify:webhook stays allow_failure:true — a chat outage must not fail the
+  # pipeline — and still runs on failure: `when: always` in `.post` overrides a
+  # failed `needs` (verified on pipelines 1550633 / 1552022 / 1553030, where
+  # contract:java failed and notify:webhook ran and sent its card).
+  allow_failure: false
   # Serialize per-branch: concurrent scheduled + manual pipelines would otherwise
   # write target/failsafe-reports/ concurrently, corrupting notify:webhook's input.
   resource_group: $CI_COMMIT_REF_SLUG
