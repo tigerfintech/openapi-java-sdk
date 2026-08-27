@@ -1,3 +1,7 @@
+## Unreleased
+### New
+- `RealTimeQuoteItem` 新增 `amount` 字段，支持股票和数字货币实时行情成交额。
+
 ## 2.6.2 (2026-08-19)
 ### New
 - `OptionRealTimeQuote` 新增 `markPrice`、`preMarkPrice`、`markTimestamp`、`midPrice`、`preMidPrice`、`midTimestamp` 字段

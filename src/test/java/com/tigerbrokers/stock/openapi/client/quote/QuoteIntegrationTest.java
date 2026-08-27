@@ -434,6 +434,27 @@ public class QuoteIntegrationTest {
         rtResp.getRealTimeQuoteItems().get(0).getLatestPrice());
     Assert.assertTrue("first realtime latestPrice should be > 0",
         rtResp.getRealTimeQuoteItems().get(0).getLatestPrice() > 0);
+    Assert.assertNotNull("first realtime amount should not be null",
+        rtResp.getRealTimeQuoteItems().get(0).getAmount());
+    Assert.assertTrue("first realtime amount should be > 0",
+        rtResp.getRealTimeQuoteItems().get(0).getAmount() > 0);
+  }
+
+  @Test
+  public void testQuoteRealTimeCC() {
+    TigerResponse response = client.execute(QuoteRealTimeQuoteRequest.newCcRequest(java.util.Arrays.asList("BTC.USD")));
+    Assume.assumeTrue("testQuoteRealTimeCC not available: " + (response == null ? "null" : response.getMessage()),
+        response != null && response.isSuccess());
+    com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteRealTimeQuoteResponse rtResp =
+        (com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteRealTimeQuoteResponse) response;
+    Assert.assertNotNull("CC realTimeQuoteItems should not be null", rtResp.getRealTimeQuoteItems());
+    Assert.assertFalse("quote_real_time CC returned empty for BTC.USD", rtResp.getRealTimeQuoteItems().isEmpty());
+    Assert.assertNotNull("CC realtime symbol should not be null",
+        rtResp.getRealTimeQuoteItems().get(0).getSymbol());
+    Assume.assumeNotNull("quote_real_time CC amount not returned by current server",
+        rtResp.getRealTimeQuoteItems().get(0).getAmount());
+    Assert.assertTrue("CC realtime amount should be > 0 when returned",
+        rtResp.getRealTimeQuoteItems().get(0).getAmount() > 0);
   }
 
   @Test
