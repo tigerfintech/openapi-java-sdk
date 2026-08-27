@@ -75,6 +75,13 @@ public class RealTimeQuoteItem extends ApiModel {
   private Long volume;
 
   /**
+   * 当日成交额
+   * <p>Uses Double to stay consistent with existing quote price fields. Convert to BigDecimal before
+   * precision-sensitive monetary calculations.
+   */
+  private Double amount;
+
+  /**
    * 成交量（支持小数，用于数字货币）
    * 数字货币的成交量可能包含小数部分，使用此字段获取精确值
    * 例如：volumeDecimal = 123.456
@@ -199,6 +206,14 @@ public class RealTimeQuoteItem extends ApiModel {
     this.volume = volume;
   }
 
+  public Double getAmount() {
+    return amount;
+  }
+
+  public void setAmount(Double amount) {
+    this.amount = amount;
+  }
+
   public Double getVolumeDecimal() {
     return volumeDecimal;
   }
@@ -263,6 +278,7 @@ public class RealTimeQuoteItem extends ApiModel {
         ", bidPrice=" + bidPrice +
         ", bidSize=" + bidSize +
         ", volume=" + volume +
+        ", amount=" + amount +
         ", volumeDecimal=" + volumeDecimal +
         ", status=" + status +
         ", change=" + change +
