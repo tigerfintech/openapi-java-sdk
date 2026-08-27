@@ -76,6 +76,8 @@ public class RealTimeQuoteItem extends ApiModel {
 
   /**
    * 当日成交额
+   * <p>Uses Double to stay consistent with existing quote price fields. Convert to BigDecimal before
+   * precision-sensitive monetary calculations.
    */
   private Double amount;
 
