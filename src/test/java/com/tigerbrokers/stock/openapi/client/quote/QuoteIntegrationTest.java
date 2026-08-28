@@ -30,6 +30,7 @@ import com.tigerbrokers.stock.openapi.client.testsupport.MarketHelpers;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.regex.Pattern;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
@@ -45,6 +46,9 @@ public class QuoteIntegrationTest {
   private static String cachedOptionIdentifier;
   private static String cachedFutureContract;
   private static String cachedWarrantSymbol;
+  private static final int MAX_DIAGNOSTIC_LENGTH = 3000;
+  private static final Pattern SENSITIVE_DIAGNOSTIC_FIELD = Pattern.compile(
+      "(?i)(\"(?:account|tiger_?id|token|private_?key|sign(?:ature)?|authorization|password|secret|api_?key|api_?secret)\"\\s*:\\s*)\"[^\"]*\"");
 
   @BeforeClass
   public static void setUpClass() {
@@ -52,15 +56,41 @@ public class QuoteIntegrationTest {
     client = IntegTestConfig.createClient();
   }
 
+  private static String redactAndTruncate(String value) {
+    if (value == null) return "null";
+    String redacted = SENSITIVE_DIAGNOSTIC_FIELD.matcher(value).replaceAll("$1\"<redacted>\"");
+    return redacted.length() > MAX_DIAGNOSTIC_LENGTH
+        ? redacted.substring(0, MAX_DIAGNOSTIC_LENGTH) + "...<truncated>"
+        : redacted;
+  }
+
+  private static String responseDiagnostic(TigerResponse resp) {
+    if (resp == null) return "response=null";
+    String data = resp instanceof TigerHttpResponse ? ((TigerHttpResponse) resp).getData() : null;
+    return "responseCode=" + resp.getCode() + " responseMessage=" + resp.getMessage()
+        + " responseData=" + redactAndTruncate(data);
+  }
+
+  private static String requestDiagnostic(TigerHttpRequest request) {
+    return request == null ? "request=null"
+        : "requestMethod=" + request.getApiMethodName() + " requestBizContent="
+            + redactAndTruncate(request.getBizContent());
+  }
+
   private void assertSuccess(TigerResponse resp, String api) {
-    Assert.assertNotNull(api + " returned null", resp);
-    Assert.assertTrue(api + " failed: " + resp.getMessage(), resp.isSuccess());
+    Assert.assertNotNull(api + " returned null; " + responseDiagnostic(resp), resp);
+    Assert.assertTrue(api + " failed; " + responseDiagnostic(resp), resp.isSuccess());
   }
 
   private void assertDataPresent(TigerHttpResponse resp, String api) {
+    assertDataPresent(resp, api, null);
+  }
+
+  private void assertDataPresent(TigerHttpResponse resp, String api, TigerHttpRequest request) {
     assertSuccess(resp, api);
-    Assert.assertNotNull(api + " data should not be null", resp.getData());
-    Assert.assertFalse(api + " data should not be empty",
+    String context = requestDiagnostic(request) + " " + responseDiagnostic(resp);
+    Assert.assertNotNull(api + " data should not be null; " + context, resp.getData());
+    Assert.assertFalse(api + " data should not be empty; " + context,
         resp.getData() == null || resp.getData().trim().isEmpty());
   }
 
@@ -149,7 +179,7 @@ public class QuoteIntegrationTest {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.MARKET_STATE);
     request.setBizContent("{\"market\":\"US\"}");
     TigerHttpResponse response = client.execute(request);
-    assertDataPresent(response, "testMarketState");
+    assertDataPresent(response, "testMarketState", request);
     Assert.assertTrue("market state data should mention US market",
         response.getData().contains("US"));
     // Assert status field presence
@@ -207,7 +237,7 @@ public class QuoteIntegrationTest {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.BRIEF);
     request.setBizContent("{\"symbols\":[\"AAPL\"]}");
     TigerHttpResponse response = client.execute(request);
-    assertDataPresent(response, "testBrief");
+    assertDataPresent(response, "testBrief", request);
     Assert.assertTrue("brief data should contain AAPL", response.getData().contains("AAPL"));
     // Deeper field-level assertions: parse JSON items array
     JSONArray items = JSON.parseObject(response.getData()).getJSONArray("items");
@@ -230,7 +260,7 @@ public class QuoteIntegrationTest {
     TigerHttpRequest request = new TigerHttpRequest(MethodName.STOCK_DETAIL);
     request.setBizContent("{\"symbols\":[\"AAPL\"]}");
     TigerHttpResponse response = client.execute(request);
-    assertDataPresent(response, "testStockDetail");
+    assertDataPresent(response, "testStockDetail", request);
     Assert.assertTrue("stock detail data should contain AAPL",
         response.getData().contains("AAPL"));
     // Assert latestPrice field
