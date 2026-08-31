@@ -110,6 +110,7 @@ public class OrderMatrixIntegrationTest {
       Pattern.compile("(?i)only limit orders can be placed"),
       Pattern.compile("(?i)only limit, stop or stop-limit orders are allowed"),
       Pattern.compile("(?i)the time range for the order .* needs to be between"),
+      Pattern.compile("(?i)please wait for the next trading day to retry"),
   };
 
   /** Server messages recognized as legitimate skips (permission / license / account-state). */
@@ -488,6 +489,9 @@ public class OrderMatrixIntegrationTest {
 
   @Test
   public void placeForexSecSegment() {
+    Assume.assumeTrue("US market is not trading; skipping forex SEC order",
+        MarketHelpers.isMarketTrading(client, "US"));
+
     // place_forex_order on SEC segment
     JSONObject biz = new JSONObject();
     biz.put("account", account);
@@ -501,7 +505,12 @@ public class OrderMatrixIntegrationTest {
     req.setBizContent(biz.toJSONString());
     TradeOrderResponse resp = executeWithRateLimitRetry(req, "placeForex SEC");
     Assert.assertNotNull(resp);
-    if (!resp.isSuccess() && !matches(resp.getMessage(), PERMISSION_ERROR_PATTERNS)) {
+    if (!resp.isSuccess()) {
+      String skipReason = classifyFailure(resp.getMessage(), "US", "placeForex SEC");
+      if (skipReason != null) {
+        System.out.println("placeForex SEC: " + skipReason);
+        return;
+      }
       Assert.fail("placeForex SEC failed: " + resp.getMessage());
     }
     System.out.println("Forex SEC segment: code=" + resp.getCode() + " msg=" + resp.getMessage());
