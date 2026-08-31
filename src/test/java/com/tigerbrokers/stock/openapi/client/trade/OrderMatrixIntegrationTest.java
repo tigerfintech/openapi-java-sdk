@@ -73,7 +73,6 @@ public class OrderMatrixIntegrationTest {
       Pattern.compile("(?i)market is closed"),
       Pattern.compile("(?i)at non-trading hour"),
       Pattern.compile("(?i)orders cannot be placed at this moment"),
-      Pattern.compile("(?i)please wait for the next trading day to retry"),
   };
 
   /**
@@ -111,6 +110,7 @@ public class OrderMatrixIntegrationTest {
       Pattern.compile("(?i)only limit orders can be placed"),
       Pattern.compile("(?i)only limit, stop or stop-limit orders are allowed"),
       Pattern.compile("(?i)the time range for the order .* needs to be between"),
+      Pattern.compile("(?i)please wait for the next trading day to retry"),
   };
 
   /** Server messages recognized as legitimate skips (permission / license / account-state). */
