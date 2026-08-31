@@ -73,6 +73,7 @@ public class OrderMatrixIntegrationTest {
       Pattern.compile("(?i)market is closed"),
       Pattern.compile("(?i)at non-trading hour"),
       Pattern.compile("(?i)orders cannot be placed at this moment"),
+      Pattern.compile("(?i)please wait for the next trading day to retry"),
   };
 
   /**
@@ -501,7 +502,12 @@ public class OrderMatrixIntegrationTest {
     req.setBizContent(biz.toJSONString());
     TradeOrderResponse resp = executeWithRateLimitRetry(req, "placeForex SEC");
     Assert.assertNotNull(resp);
-    if (!resp.isSuccess() && !matches(resp.getMessage(), PERMISSION_ERROR_PATTERNS)) {
+    if (!resp.isSuccess()) {
+      String skipReason = classifyFailure(resp.getMessage(), "US", "placeForex SEC");
+      if (skipReason != null) {
+        System.out.println("placeForex SEC: " + skipReason);
+        return;
+      }
       Assert.fail("placeForex SEC failed: " + resp.getMessage());
     }
     System.out.println("Forex SEC segment: code=" + resp.getCode() + " msg=" + resp.getMessage());
