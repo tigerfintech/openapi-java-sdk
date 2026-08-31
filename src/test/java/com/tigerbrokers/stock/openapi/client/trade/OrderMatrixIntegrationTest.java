@@ -489,6 +489,9 @@ public class OrderMatrixIntegrationTest {
 
   @Test
   public void placeForexSecSegment() {
+    Assume.assumeTrue("US market is not trading; skipping forex SEC order",
+        MarketHelpers.isMarketTrading(client, "US"));
+
     // place_forex_order on SEC segment
     JSONObject biz = new JSONObject();
     biz.put("account", account);
