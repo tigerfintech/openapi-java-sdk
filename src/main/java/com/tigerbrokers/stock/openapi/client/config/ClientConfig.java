@@ -1,9 +1,12 @@
 package com.tigerbrokers.stock.openapi.client.config;
 
+import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.CHARSET_UTF8;
+
+import com.tigerbrokers.stock.openapi.client.auth.Authentication;
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
-import com.tigerbrokers.stock.openapi.client.struct.enums.License;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+import com.tigerbrokers.stock.openapi.client.struct.enums.License;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeZoneId;
 import com.tigerbrokers.stock.openapi.client.util.ApiLogger;
 import com.tigerbrokers.stock.openapi.client.util.ConfigFileUtil;
@@ -12,8 +15,6 @@ import io.netty.handler.ssl.SslProvider;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-
-import static com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants.CHARSET_UTF8;
 
 /**
  * description: Created by liutongping on 2021/11/5
@@ -55,6 +56,12 @@ public class ClientConfig {
    * token(Only Hong Kong license required)
    */
   public volatile String token = null;
+
+  /**
+   * Authentication method for API requests.
+   * If not specified, uses the legacy signature authentication with {@link #tigerId} and {@link #privateKey}.
+   */
+  public Authentication authentication = null;
 
   /**
    * refresh token frequency

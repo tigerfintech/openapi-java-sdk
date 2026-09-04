@@ -43,6 +43,23 @@ public class HttpUtils {
     return post(url, json, token, 0);
   }
   public static String post(String url, String json, String token, int retryCount) throws Exception {
+    return postForResult(url, json, token, retryCount).getBody();
+  }
+
+  /**
+   * Exactly the same request behaviour as {@link #post(String, String, String, int)}, but also
+   * returns the HTTP status.
+   *
+   * <p>OAuth2 mode needs this: an auth failure is a real 401, and {@code post} only hands back
+   * the response body, so the 401 is completely invisible and nothing can trigger a
+   * refresh-and-retry.
+   *
+   * @param token the <b>full value</b> of the {@code Authorization} header. Signature mode
+   *     passes the bare HK license token; OAuth2 mode passes {@code "Bearer " + accessToken}.
+   *     No prefixing is done here.
+   */
+  public static HttpResult postForResult(String url, String json, String token, int retryCount)
+      throws Exception {
     if (url == null || json == null) {
       throw new RuntimeException("request url or json param cannot be null");
     }
@@ -56,6 +73,7 @@ public class HttpUtils {
     okhttp3.Request request = builder.build();
     int requstCount = 0;
     String result = null;
+    int status = 0;
     boolean needRetry = retryCount > 0;
     do {
       requstCount++;
@@ -69,6 +87,7 @@ public class HttpUtils {
           ApiLogger.error("HttpUtils response body is null");
           throw new RuntimeException("http response body is null");
         }
+        status = response.code();
         result = response.body().string();
       } catch (Exception e) {
         ApiLogger.info("HttpUtils execute[{}] times, fail:{}", requstCount, e.getMessage());
@@ -78,7 +97,7 @@ public class HttpUtils {
         }
       } finally {
         if (result != null && result.indexOf("internal_error:A system error occurred, please try again later") < 0) {
-          return result;
+          return new HttpResult(status, result);
         } else {
           needRetry &= requstCount <= retryCount;
           if (needRetry) {
@@ -87,7 +106,7 @@ public class HttpUtils {
         }
       }
     } while(needRetry);
-    return result;
+    return new HttpResult(status, result);
   }
 
   private static void requestWaitInterval(int requstCount) {
