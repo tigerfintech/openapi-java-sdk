@@ -414,6 +414,26 @@ public class TigerHttpClient implements TigerClient {
     }
   }
 
+  /**
+   * Assembles the request body, and in signature mode signs it.
+   *
+   * <p>Three different things are called a "token" around here, and they live in different
+   * places. Mixing them up costs either a failed signature or a clobbered auth header:
+   * <ul>
+   *   <li>{@code licenseToken} (the HK market-data license, {@code clientConfig.token}) --
+   *       goes in the HTTP {@code Authorization} header as a bare value with no
+   *       {@code Bearer } prefix, and is not signed; applied by the caller, not here
+   *   <li>{@code accessToken} (the legacy one) -- a top-level body field, signed
+   *   <li>{@code tradeToken} (obtained with the trading password) -- a top-level body field, signed
+   * </ul>
+   *
+   * <p>Field write order below is load-bearing: {@code sign} covers every field already in
+   * the map, so it has to be written last.
+   *
+   * <p>OAuth2 returns early and puts <b>no signature field at all</b> in the body -- the
+   * gateway takes the signature branch as soon as it sees {@code sign}, which would make it
+   * ignore the Bearer token and then misread it as an HK license token.
+   */
   private Map<String, Object> buildParams(TigerRequest request) {
     Map<String,Object> params = new HashMap<>();
     params.put(METHOD, request.getApiMethodName().getValue());

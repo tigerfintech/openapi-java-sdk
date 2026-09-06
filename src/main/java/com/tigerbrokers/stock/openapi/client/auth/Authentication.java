@@ -8,11 +8,15 @@ import com.tigerbrokers.stock.openapi.client.util.HttpResult;
  * retry after a 401, and release whatever resources it holds.
  *
  * <p>It <b>deliberately has no</b> login, dynamic-registration or open-browser methods --
- * those belong to the control plane ({@code OAuth2SessionManager}). That way
- * {@link com.tigerbrokers.stock.openapi.client.auth.signature.SignatureAuthentication}
- * does not have to write {@code throw UnsupportedOperationException} for a pile of
- * authorization methods that mean nothing to it, and the business client never needs to
- * know what an OAuth flow is.
+ * those belong to the control plane ({@code OAuth2SessionManager}). That way a future
+ * signature implementation does not have to write {@code throw UnsupportedOperationException}
+ * for a pile of authorization methods that mean nothing to it, and the business client never
+ * needs to know what an OAuth flow is.
+ *
+ * <p>Only {@link com.tigerbrokers.stock.openapi.client.auth.oauth2.OAuth2Authentication}
+ * implements this today. Signature auth still runs through {@code TigerHttpClient} directly;
+ * moving it behind this interface needs a test proving the outgoing request stays
+ * byte-identical, so it has not been done.
  *
  * <p>Implementations must be thread-safe: {@code TigerHttpClient} is a JVM singleton, so
  * one instance is shared across threads.

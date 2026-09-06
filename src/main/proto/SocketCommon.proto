@@ -18,6 +18,7 @@ message SocketCommon {
     MESSAGE = 7;
     HEARTBEAT = 8;
     ERROR = 9;
+    REFRESH_TOKEN = 10;
   }
 
   // data type

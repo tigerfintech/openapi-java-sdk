@@ -154,6 +154,12 @@ public class WebSocketClient implements SubscribeAsyncApi {
     }
     if (this.authentication == null) {
       ApiAuthentication authentication = ApiAuthentication.build(clientConfig);
+      if (authentication == null) {
+        // build returns null when signing fails, e.g. a malformed private key. Dereferencing
+        // it here used to throw an NPE that said nothing about the real cause.
+        throw new IllegalArgumentException(
+            "build authentication fail, please check tigerId and privateKey.");
+      }
       if (!StringUtils.isEmpty(clientConfig.version)) {
         authentication.setVersion(clientConfig.version);
       }
@@ -217,6 +223,14 @@ public class WebSocketClient implements SubscribeAsyncApi {
       this.isProtobuf = true;
     } else {
       throw new IllegalArgumentException("please use ApiComposeCallback's instance.");
+    }
+    // The protocol is picked by callback type, not by the auth mode, so an OAuth2 client can
+    // land on the STOMP path by accident. Rejected up front: STOMP has no place to carry a
+    // token and no REFRESH_TOKEN equivalent, so it would otherwise build a connect frame
+    // with a null tigerId and sign and fail with something that names neither cause.
+    if (!this.isProtobuf && this.authentication.isOauth2()) {
+      throw new IllegalArgumentException(
+          "oauth2 is only supported over protobuf, please use ApiComposeCallback's instance.");
     }
     if (connectCountDown.getCount() == 0) {
       connectCountDown = new CountDownLatch(1);

@@ -12,6 +12,7 @@ import com.tigerbrokers.stock.openapi.client.socket.WebSocketHandler;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TigerApiCode;
 import com.tigerbrokers.stock.openapi.client.util.builder.HeaderBuilder;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.stomp.StompFrame;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -149,6 +150,14 @@ public class ApiCallbackDecoderUtils {
         break;
       case MESSAGE:
         decoder.handle(response);
+        break;
+      case REFRESH_TOKEN:
+        // The acknowledgement of a token rotation. Handled by the handler that sent it,
+        // since the pending token lives on the channel.
+        ChannelHandler refreshHandler = ctx.channel().pipeline().get("webSocketHandler");
+        if (refreshHandler instanceof ProtoSocketHandler) {
+          ((ProtoSocketHandler) refreshHandler).onRefreshTokenResponse(ctx, response);
+        }
         break;
       case ERROR:
         processError(ctx, decoder, response);

@@ -37,6 +37,17 @@ class LoopbackReceiver implements AutoCloseable {
   private static final Charset UTF_8 = Charset.forName("UTF-8");
   private static final String CALLBACK_PATH = "/callback";
 
+  /**
+   * Inline SVG rather than an image, an icon font or a unicode glyph: the page has to render
+   * the same everywhere with no network access -- a callback page must not fetch anything, and
+   * the check glyph is missing or ugly in plenty of default fonts.
+   */
+  private static final String CHECK_MARK =
+      "<svg width='64' height='64' viewBox='0 0 64 64' aria-hidden='true'>"
+          + "<circle cx='32' cy='32' r='29' fill='none' stroke='#22c55e' stroke-width='4'/>"
+          + "<path d='M19 33l9.5 9.5L45 22' fill='none' stroke='#22c55e' stroke-width='5'"
+          + " stroke-linecap='round' stroke-linejoin='round'/></svg>";
+
   private final HttpServer server;
   private final CountDownLatch latch = new CountDownLatch(1);
   private final Map<String, String> params = new HashMap<>();
@@ -122,8 +133,10 @@ class LoopbackReceiver implements AutoCloseable {
    */
   private static void respond(HttpExchange exchange, boolean success) throws IOException {
     String message = success
-        ? "<h2>授权完成</h2><p>可以关闭本页，回到应用继续。</p>"
-        : "<h2>授权未完成</h2><p>请回到应用重试。</p>";
+        ? CHECK_MARK + "<h2>Authentication successful</h2>"
+            + "<p>You can close this page and return to the application.</p>"
+        : "<h2>Authentication failed</h2>"
+            + "<p>Please return to the application and try again.</p>";
     String html = "<html><head><meta charset='utf-8'><title>Tiger OpenAPI</title></head>"
         + "<body style=\"font-family:-apple-system,'PingFang SC',sans-serif;"
         + "padding:64px;text-align:center\">" + message + "</body></html>";
