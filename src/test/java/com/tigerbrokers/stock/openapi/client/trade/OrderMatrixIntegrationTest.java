@@ -6,9 +6,11 @@ import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.Contract
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.ContractLeg;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
+import com.tigerbrokers.stock.openapi.client.https.request.quote.QuoteRealTimeQuoteRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.trade.TradeOrderPreviewRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.trade.TradeOrderRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
+import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteRealTimeQuoteResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.TradeOrderPreviewResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.TradeOrderResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
@@ -240,6 +242,25 @@ public class OrderMatrixIntegrationTest {
     return c;
   }
 
+  /**
+   * A BUY limit price far below the current HK quote, but within the
+   * exchange's price-deviation tolerance — unlike a hardcoded absolute
+   * constant, this never falls too far outside whatever range the
+   * exchange currently allows.
+   */
+  private static double safeHkBuyPrice(String symbol) {
+    TigerResponse response = client.execute(QuoteRealTimeQuoteRequest.newRequest(Arrays.asList(symbol)));
+    Assume.assumeTrue("cannot resolve " + symbol + " quote for safe buy price",
+        response.isSuccess());
+    QuoteRealTimeQuoteResponse rtResp = (QuoteRealTimeQuoteResponse) response;
+    Assume.assumeFalse("no live quote for " + symbol + ", cannot compute a safe buy price",
+        rtResp.getRealTimeQuoteItems() == null || rtResp.getRealTimeQuoteItems().isEmpty());
+    Double latestPrice = rtResp.getRealTimeQuoteItems().get(0).getLatestPrice();
+    Assume.assumeTrue("non-positive latestPrice for " + symbol,
+        latestPrice != null && latestPrice > 0);
+    return Math.round(latestPrice * 0.5 * 100) / 100.0;
+  }
+
   /** Wrap a place-order request into a preview_order call and check for skip. */
   private boolean previewOnly(TradeOrderRequest placeReq, String market, String context) {
     // Swap the method to preview_order — the model is otherwise identical.
@@ -442,7 +463,7 @@ public class OrderMatrixIntegrationTest {
   public void placeHkStkLimit() {
     ContractItem contract = hkStkContract();
     TradeOrderRequest req = TradeOrderRequest.buildLimitOrder(
-        account, contract, ActionType.BUY, 100, SAFE_BUY_PRICE);
+        account, contract, ActionType.BUY, 100, safeHkBuyPrice("00700"));
     previewAndPlace(req, "HK", "HK STK LMT");
   }
 
@@ -450,7 +471,7 @@ public class OrderMatrixIntegrationTest {
   public void placeHkStkAuctionLimit() {
     ContractItem contract = hkStkContract();
     TradeOrderRequest req = TradeOrderRequest.buildLimitOrder(
-        account, contract, ActionType.BUY, 100, SAFE_BUY_PRICE);
+        account, contract, ActionType.BUY, 100, safeHkBuyPrice("00700"));
     // Change order type to AL after building.
     ((TradeOrderModel) req.getApiModel()).setOrderType(OrderType.AL);
     previewAndPlace(req, "HK", "HK STK AL");
