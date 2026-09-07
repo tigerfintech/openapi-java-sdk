@@ -480,15 +480,82 @@ public class OAuth2SessionManager {
    * Clears the local token. The client_id is kept, so the next authorization needs no
    * re-registration.
    */
-  public void logout() {
+  /**
+   * Ends the authorization: revokes it on the server (RFC 7009), then clears the local token.
+   *
+   * <p>The registered client_id is <b>kept</b> -- that is this machine's application identity,
+   * not an authorization. Deleting it would register a brand new client on the AS every time
+   * the user logs back in.</p>
+   *
+   * <p><b>The local token is always cleared, even when revocation fails.</b> The user asked to
+   * log out; refusing to do so locally because the network is down would be the wrong answer.
+   * The return value says whether the server side actually happened.</p>
+   *
+   * @return {@code true} if the server confirmed the revocation; {@code false} if only the
+   *     local token was cleared, meaning <b>the credential is still valid on the server</b>
+   *     (up to the refresh_token TTL) and the caller may want to tell the user or retry
+   */
+  public boolean logout() {
     String id = knownClientId();
     if (id == null && this.token != null) {
       id = this.token.getClientId();
     }
+    boolean revoked = revoke(currentToken(), id);
     if (id != null) {
       store.deleteToken(id);
     }
     this.token = null;
+    ApiLogger.info("oauth2 logged out. clientId:{}, serverRevoked:{}", id, revoked);
+    return revoked;
+  }
+
+  /**
+   * Best-effort server-side revocation. <b>Never throws</b> -- logout must not fail because of it.
+   *
+   * <p>Revokes the <b>refresh_token</b> when there is one: RFC 7009 §2.1 says the AS SHOULD also
+   * invalidate the access tokens issued from it, so one call covers both. Falling back to the
+   * access_token alone would leave the refresh_token alive, which is the more dangerous half --
+   * it is the one that lives for 30 days.</p>
+   *
+   * <p>RFC 7009 §2.2 makes the endpoint answer {@code 200} for an unknown or already-revoked
+   * token too, so a success here does not prove the token existed -- only that the server has
+   * no objection. That is exactly what we want to know.</p>
+   */
+  private boolean revoke(OAuth2Token current, String clientId) {
+    if (current == null || clientId == null) {
+      return false;
+    }
+    String value = current.hasRefreshToken() ? current.getRefreshToken() : current.getAccessToken();
+    String hint = current.hasRefreshToken() ? "refresh_token" : "access_token";
+    if (isBlank(value)) {
+      return false;
+    }
+    try {
+      OAuth2Metadata meta = metadata();
+      String endpoint = meta.getRevocationEndpoint();
+      if (isBlank(endpoint)) {
+        // Nothing to call. Not an error -- revocation is optional in RFC 8414.
+        ApiLogger.warn("AS advertises no revocation_endpoint, logging out locally only");
+        return false;
+      }
+      Map<String, String> form = new LinkedHashMap<>();
+      form.put("token", value);
+      form.put("token_type_hint", hint);
+      form.put("client_id", clientId);
+      int status = OAuth2HttpUtils.postFormForStatus(endpoint, form);
+      if (status >= 200 && status < 300) {
+        return true;
+      }
+      // 401/400 here means the AS refused the client, not that the token is fine
+      ApiLogger.warn("oauth2 revoke rejected, httpStatus:{}, logging out locally only", status);
+      return false;
+    } catch (OAuth2Exception e) {
+      ApiLogger.warn("oauth2 revoke failed:{}, logging out locally only", e.getMessage());
+      return false;
+    } catch (RuntimeException e) {
+      ApiLogger.warn("oauth2 revoke error:{}, logging out locally only", e.getMessage());
+      return false;
+    }
   }
 
   /** The current state, with no side effects: no refresh, no authorization, no requests. */

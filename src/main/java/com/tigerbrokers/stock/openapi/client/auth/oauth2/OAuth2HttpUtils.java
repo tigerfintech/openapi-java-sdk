@@ -57,6 +57,38 @@ final class OAuth2HttpUtils {
   }
 
   /**
+   * Posts a form and returns only the HTTP status, tolerating an empty body.
+   *
+   * <p>Needed for RFC 7009 revocation: that endpoint answers {@code 200} with <b>no body</b> on
+   * success, which {@link #postForm} rejects as "empty response". The caller only needs to know
+   * whether the server accepted it, so nothing is parsed.</p>
+   *
+   * @return the HTTP status code
+   * @throws OAuth2Exception only on a connection failure
+   */
+  static int postFormForStatus(String url, Map<String, String> form) {
+    FormBody.Builder builder = new FormBody.Builder();
+    for (Map.Entry<String, String> e : form.entrySet()) {
+      if (e.getValue() != null) {
+        builder.add(e.getKey(), e.getValue());
+      }
+    }
+    Request request = new Request.Builder().url(url).post(builder.build()).build();
+    Response response = null;
+    try {
+      response = CLIENT.newCall(request).execute();
+      return response.code();
+    } catch (IOException e) {
+      throw new OAuth2Exception(OAuth2Exception.Category.TOKEN_REQUEST_FAILED,
+          "request fail: " + url, e);
+    } finally {
+      if (response != null) {
+        response.close();
+      }
+    }
+  }
+
+  /**
    * Sends the request and parses the JSON response.
    *
    * <p>A 4xx also returns its body instead of throwing -- OAuth2 errors
