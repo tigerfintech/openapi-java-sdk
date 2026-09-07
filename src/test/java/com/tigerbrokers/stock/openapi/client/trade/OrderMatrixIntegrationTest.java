@@ -249,9 +249,15 @@ public class OrderMatrixIntegrationTest {
    * exchange currently allows.
    */
   private static double safeHkBuyPrice(String symbol) {
-    TigerResponse response = client.execute(QuoteRealTimeQuoteRequest.newRequest(Arrays.asList(symbol)));
+    TigerResponse response;
+    try {
+      response = client.execute(QuoteRealTimeQuoteRequest.newRequest(Arrays.asList(symbol)));
+    } catch (Exception e) {
+      Assume.assumeNoException("cannot resolve " + symbol + " quote for safe buy price", e);
+      return 0; // unreachable — assumeNoException always throws
+    }
     Assume.assumeTrue("cannot resolve " + symbol + " quote for safe buy price",
-        response.isSuccess());
+        response != null && response.isSuccess());
     QuoteRealTimeQuoteResponse rtResp = (QuoteRealTimeQuoteResponse) response;
     Assume.assumeFalse("no live quote for " + symbol + ", cannot compute a safe buy price",
         rtResp.getRealTimeQuoteItems() == null || rtResp.getRealTimeQuoteItems().isEmpty());
