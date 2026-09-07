@@ -21,7 +21,8 @@ import java.util.concurrent.TimeUnit;
  * <p>With dynamic registration the port is 0, so the system assigns one and it is not
  * persisted -- registration sends {@code http://127.0.0.1/callback} as the redirect_uri, and
  * per RFC 8252 §7.3 the AS ignores the port when matching a loopback URI. With a manual
- * clientId, the fixed port registered in the console must be used.</p>
+ * clientId the port must match the redirect_uri the user registered by hand, which the SDK
+ * cannot know -- hence the agreed default of 18888.</p>
  *
  * <p>It binds only {@code 127.0.0.1}, not {@code 0.0.0.0}: the authorization code must not be
  * exposed to the local network. It uses the IP literal rather than {@code localhost}

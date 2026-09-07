@@ -33,8 +33,8 @@ import java.util.function.Consumer;
  * String token = sessions.getAccessToken();   // refreshes automatically when needed
  * </pre>
  *
- * <p>Using a clientId created in the console (callback port defaults to 18888 and must match
- * what the console has registered):</p>
+ * <p>Using a clientId obtained by registering by hand (curl POST /oauth2/register). The
+ * callback port defaults to 18888 and must match the redirect_uri of that registration:</p>
  * <pre>
  * OAuth2SessionManager sessions = OAuth2SessionManager.builder()
  *     .clientId("your-client-id")
@@ -106,10 +106,11 @@ public class OAuth2SessionManager {
   /**
    * The agreed callback port for manual-clientId mode.
    *
-   * <p>Creating an application by hand in the developer console requires filling in a
-   * redirect_uri, and the port has to be known at that moment, so this mode cannot use a random
-   * port -- there must be a fixed value both sides know. Used when none is specified
-   * explicitly, corresponding to {@code http://127.0.0.1:18888/callback}.</p>
+   * <p>Registering by hand means writing a concrete redirect_uri into the registration
+   * request, so the port has to be known at that moment and this mode cannot use a random
+   * one -- there must be a fixed value both sides know. The SDK only receives a client_id
+   * back and never learns what redirect_uri was registered, hence the agreed default,
+   * corresponding to {@code http://127.0.0.1:18888/callback}.</p>
    *
    * <p>18888 was chosen over the likes of 8080 or 3000 to stay clear of the default Linux
    * ephemeral port range (from 32768) so it cannot collide with a system-assigned port, and
@@ -128,7 +129,16 @@ public class OAuth2SessionManager {
 
   private final String issuer;
 
-  private final String clientName;
+  /**
+   * The application name declared at dynamic registration, shown on the user's authorization
+   * management page.
+   *
+   * <p>Deliberately not configurable. One issuer stores exactly one registration record and the
+   * first registrant wins, so a caller-supplied name would only take effect on a machine that has
+   * never registered -- producing a value that differs between users for no reason. Keeping it
+   * fixed also makes the name a reliable indicator of which SDK created the record.</p>
+   */
+  private static final String CLIENT_NAME = "Tiger Java SDK";
 
   /**
    * The loopback port the application explicitly asked for; 0 means unspecified.
@@ -138,7 +148,6 @@ public class OAuth2SessionManager {
    */
   private final int callbackPort;
   private final OAuth2TokenStore store;
-  private final long refreshAheadMillis;
   private final long authorizeTimeoutMinutes;
 
   /**
@@ -170,9 +179,7 @@ public class OAuth2SessionManager {
     // constructor sends no request, otherwise builder().build() would fail offline
     this.callbackPort = builder.callbackPort;
     this.explicitClientId = isBlank(builder.clientId) ? null : builder.clientId.trim();
-    this.clientName = builder.clientName;
     this.store = builder.store != null ? builder.store : new OAuth2TokenStore(builder.home);
-    this.refreshAheadMillis = builder.refreshAheadMillis;
     this.authorizeTimeoutMinutes = builder.authorizeTimeoutMinutes;
   }
 
@@ -198,7 +205,7 @@ public class OAuth2SessionManager {
    * to open it is the application's decision. Otherwise an unattended script would hang on an
    * authorization page nobody is looking at.</p>
    *
-   * <p>To use a clientId created in the console, or a fixed callback port, use
+   * <p>To use a clientId you registered by hand, or a fixed callback port, use
    * {@link #builder()}.</p>
    *
    * @param onAuthorizationUrl callback that receives the URL when user authorization is needed
@@ -253,9 +260,11 @@ public class OAuth2SessionManager {
       throw new IllegalArgumentException("onAuthorizationUrl is required");
     }
     OAuth2Metadata meta = metadata();
-    String verifier = randomUrlSafe(32);
+    // 64 and 24 bytes, matching the Python SDK and the cross-SDK spec. RFC 7636 allows a
+    // verifier of 43-128 characters; 64 bytes base64url-encodes to 86, comfortably inside.
+    String verifier = randomUrlSafe(64);
     String challenge = s256(verifier);
-    String state = randomUrlSafe(16);
+    String state = randomUrlSafe(24);
 
     // The listener has to be up before the authorization URL is handed out
     try (LoopbackReceiver receiver = new LoopbackReceiver(effectiveCallbackPort())) {
@@ -384,7 +393,7 @@ public class OAuth2SessionManager {
       throw new OAuth2Exception(OAuth2Exception.Category.REAUTHORIZATION_REQUIRED,
           "not authorized yet, call loginIfNeeded() first");
     }
-    if (!current.needsRefresh(refreshAheadMillis)) {
+    if (!current.needsRefresh(DEFAULT_REFRESH_AHEAD_MILLIS)) {
       return current.getAccessToken();
     }
     return refresh(current).getAccessToken();
@@ -543,7 +552,7 @@ public class OAuth2SessionManager {
     if (existing == null) {
       return null;
     }
-    if (!existing.needsRefresh(refreshAheadMillis)) {
+    if (!existing.needsRefresh(DEFAULT_REFRESH_AHEAD_MILLIS)) {
       return existing;
     }
     if (existing.hasRefreshToken()) {
@@ -625,7 +634,7 @@ public class OAuth2SessionManager {
    * <p>An explicit value is used as-is. When unspecified there are two cases: dynamic
    * registration uses 0 (system-assigned, and per RFC 8252 §7.3 the AS ignores the port), while
    * a manual clientId uses {@link #DEFAULT_MANUAL_CALLBACK_PORT} -- filling in the redirect_uri
-   * in the console requires knowing the port, and a random one cannot be written down in
+   * by hand requires knowing the port, and a random one cannot be written down in
    * advance.</p>
    */
   private int effectiveCallbackPort() {
@@ -729,7 +738,7 @@ public class OAuth2SessionManager {
 
   private String register(String registrationEndpoint) {
     Map<String, Object> payload = new LinkedHashMap<>();
-    payload.put("client_name", clientName);
+    payload.put("client_name", CLIENT_NAME);
     // By default no port is written: a random port cannot be registered in advance, so we rely
     // on the AS ignoring the port per RFC 8252 §7.3. When the application fixed a port
     // explicitly we register it verbatim -- that is what an AS doing strict exact matching needs.
@@ -761,7 +770,7 @@ public class OAuth2SessionManager {
     OAuth2ClientRegistration reg = new OAuth2ClientRegistration();
     reg.setIssuer(issuer);
     reg.setClientId(newClientId);
-    reg.setClientName(clientName);
+    reg.setClientName(CLIENT_NAME);
     // Record the range the AS actually granted, not the one we wanted -- the registration
     // request declared no scope, so what we get is the AS's call. Recording it wrong would skew
     // the coverage check below: we would think it suffices and only get rejected at
@@ -933,7 +942,7 @@ public class OAuth2SessionManager {
     result.setAccessToken(json.getString("access_token"));
     result.setRefreshToken(json.getString("refresh_token"));
     // The AS may grant only part of it (the user ticks boxes on the consent page, or the
-    // client's console range is narrower), so the response wins; fall back to what we requested
+    // client's registered range is narrower), so the response wins; fall back to what we requested
     // only when it gives none
     String granted = json.getString("scope");
     result.setScope(isBlank(granted) ? scopes() : granted);
@@ -1034,11 +1043,9 @@ public class OAuth2SessionManager {
   public static class Builder {
     private String issuer = defaultIssuer();
     private String clientId;
-    private String clientName = "Tiger Java SDK";
     private String home;
     private OAuth2TokenStore store;
     private int callbackPort;
-    private long refreshAheadMillis = DEFAULT_REFRESH_AHEAD_MILLIS;
     private long authorizeTimeoutMinutes = DEFAULT_AUTHORIZE_TIMEOUT_MINUTES;
 
     public Builder issuer(String issuer) {
@@ -1047,7 +1054,8 @@ public class OAuth2SessionManager {
     }
 
     /**
-     * Sets the client_id explicitly (created beforehand in the developer console). Leave it
+     * Sets the client_id explicitly (obtained beforehand by calling POST /oauth2/register
+     * yourself, see docs/sdk-integration.md §5.1). Leave it
      * unset for dynamic registration.
      *
      * <p>An explicitly passed clientId is <b>not persisted</b> -- it already lives in the
@@ -1055,11 +1063,11 @@ public class OAuth2SessionManager {
      * cannot find the matching authorization; it has to be passed every time.</p>
      *
      * <p>In this mode the callback port defaults to {@link #DEFAULT_MANUAL_CALLBACK_PORT}, so the
-     * console's redirect_uri must be {@code http://127.0.0.1:18888/callback}. Use
+     * registration's redirect_uri must be {@code http://127.0.0.1:18888/callback}. Use
      * {@link #callbackPort(int)} for a different port.</p>
      *
      * <p>The scope requested at authorization is still everything the AS supports, so this
-     * client's authorized range in the console has to be configured in full -- a narrower one
+     * client's registered scope range has to cover the full set -- a narrower one
      * gets the authorization rejected with {@code invalid_scope}.</p>
      */
     public Builder clientId(String clientId) {
@@ -1068,7 +1076,7 @@ public class OAuth2SessionManager {
     }
 
     /**
-     * Fixes the loopback callback port; it must match the redirect_uri registered in the console.
+     * Fixes the loopback callback port; it must match the redirect_uri of your manual registration.
      *
      * <p>When unset: dynamic registration uses a system-assigned port, a manual clientId uses
      * {@link #DEFAULT_MANUAL_CALLBACK_PORT}。</p>
@@ -1084,12 +1092,6 @@ public class OAuth2SessionManager {
       return this;
     }
 
-    /** The application name declared to the AS at dynamic registration; shown on the user's authorization management page. */
-    public Builder clientName(String clientName) {
-      this.clientName = clientName;
-      return this;
-    }
-
     /** Overrides the storage directory; defaults to {@code ~/.tiger/openapi/}. */
     public Builder home(String home) {
       this.home = home;
@@ -1098,11 +1100,6 @@ public class OAuth2SessionManager {
 
     public Builder store(OAuth2TokenStore store) {
       this.store = store;
-      return this;
-    }
-
-    public Builder refreshAheadMillis(long millis) {
-      this.refreshAheadMillis = millis;
       return this;
     }
 

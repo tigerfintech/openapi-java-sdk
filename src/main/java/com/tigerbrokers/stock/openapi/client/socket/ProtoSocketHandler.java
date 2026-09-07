@@ -38,12 +38,11 @@ public class ProtoSocketHandler extends SimpleChannelInboundHandler<Response> {
    * opens. The two disagreeing just means the extra margin is spent finding the token
    * unchanged and doing nothing.
    *
-   * <p>If that default is ever tuned per client via
-   * {@code OAuth2SessionManager.Builder.refreshAheadMillis}, this constant no longer tracks
-   * it, and the effective window becomes the <i>smaller</i> of the two: a rotation message
-   * goes out only where both agree the token is due, since this check has to fire before the
-   * session manager is even asked, and the session manager has to hand back a changed token
-   * before there is anything to send.
+   * <p>Both are fixed constants and neither is configurable, so they cannot drift apart at
+   * runtime. If either is ever made tunable, the effective window becomes the <i>smaller</i>
+   * of the two: a rotation message goes out only where both agree the token is due, since this
+   * check has to fire before the session manager is even asked, and the session manager has to
+   * hand back a changed token before there is anything to send.
    */
   private static final long REFRESH_AHEAD_MILLIS = 5 * 60 * 1000L;
 

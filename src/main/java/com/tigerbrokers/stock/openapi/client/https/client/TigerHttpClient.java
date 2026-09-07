@@ -330,11 +330,23 @@ public class TigerHttpClient implements TigerClient {
       boolean isPlaceOrder = MethodName.PLACE_ORDER == request.getApiMethodName();
       int retryCounts = isPlaceOrder ? 0 : failRetryCounts;
 
+      // Whether a 401 may be retried with a fresh credential. Forbidden for order placement,
+      // modification and cancellation: the reasoning behind never retrying a place order --
+      // the 401 does not prove the request was not executed -- applies just as much to
+      // cancelling and modifying one, and the Python SDK has always grouped the three.
+      //
+      // Deliberately NOT folded into retryCounts above: that one also governs signature
+      // mode, so widening it would change existing users' connection-retry behaviour.
+      // This flag is only read on the OAuth2 path.
+      boolean retryable = !isPlaceOrder
+          && MethodName.CANCEL_ORDER != request.getApiMethodName()
+          && MethodName.MODIFY_ORDER != request.getApiMethodName();
+
       // Auth header: the bare HK license token in signature mode, "Bearer <jwt>" in OAuth2 mode
       String authorization = this.clientConfig.token;
       AuthenticationAttempt attempt = null;
       if (this.oauth2Mode) {
-        RequestAuthContext authContext = new RequestAuthContext(params, isPlaceOrder);
+        RequestAuthContext authContext = new RequestAuthContext(params, retryable);
         attempt = this.authentication.apply(authContext);
         authorization = authContext.getAuthorizationHeader();
       }
@@ -346,8 +358,9 @@ public class TigerHttpClient implements TigerClient {
       HttpResult result = HttpUtils.postForResult(url, param, authorization, retryCounts);
 
       // 401: the credential is invalid. Refresh once, then retry once -- only once.
-      // Order placement is never retried: a 401 does not prove the order failed, so a retry risks a duplicate.
-      if (result.isUnauthorized() && attempt != null && !isPlaceOrder) {
+      // Order placement / cancellation / modification is never retried: a 401 does not prove
+      // the request failed, so a retry risks a duplicate.
+      if (result.isUnauthorized() && attempt != null && retryable) {
         RetryDecision decision = this.authentication.onUnauthorized(attempt, result);
         if (decision.shouldRetry()) {
           result = HttpUtils.postForResult(url, param, decision.getAuthorizationHeader(), retryCounts);

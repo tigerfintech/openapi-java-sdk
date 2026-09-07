@@ -14,18 +14,18 @@ import java.util.Map;
 public class RequestAuthContext {
 
   private final Map<String, Object> params;
-  private final boolean placeOrder;
+  private final boolean retryable;
   private String authorizationHeader;
 
   /**
    * @param params the body parameters; an authentication implementation may add fields here
    *     (signature mode adds tiger_id, sign and so on)
-   * @param placeOrder whether this is an order-placing request -- those must not be retried
-   *     automatically, see {@link #isPlaceOrder()}
+   * @param retryable whether this request may be retried with a new credential after a 401;
+   *     see {@link #isRetryable()}
    */
-  public RequestAuthContext(Map<String, Object> params, boolean placeOrder) {
+  public RequestAuthContext(Map<String, Object> params, boolean retryable) {
     this.params = params;
-    this.placeOrder = placeOrder;
+    this.retryable = retryable;
   }
 
   public Map<String, Object> getParams() {
@@ -33,16 +33,19 @@ public class RequestAuthContext {
   }
 
   /**
-   * Whether this is an order-placing request.
+   * Whether this request may be retried with a new credential after a 401.
    *
-   * <p>Such requests <b>must not</b> be retried automatically on authentication failure:
-   * unless the server explicitly guarantees that the auth check happens before the business
-   * logic runs, a 401 does not prove the order was not placed, and an automatic retry means
-   * a duplicate order. The existing code already sets the fail-retry count to 0 for order
-   * placement; that semantic has to be preserved.
+   * <p>Named after the constraint rather than the business operation on purpose: an
+   * authentication implementation has no business knowing what an order is, it only needs to
+   * know whether it is allowed to send the request a second time.
+   *
+   * <p>{@code false} for order placement, modification and cancellation. Unless the server
+   * explicitly guarantees that the auth check happens before the business logic runs, a 401
+   * does not prove the request was not executed, and an automatic retry means a duplicate
+   * order. The caller decides which requests fall into this category.
    */
-  public boolean isPlaceOrder() {
-    return placeOrder;
+  public boolean isRetryable() {
+    return retryable;
   }
 
   /** The full {@code Authorization} header value; null means do not send the header. */
