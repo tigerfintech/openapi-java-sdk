@@ -3,12 +3,18 @@ package com.tigerbrokers.stock.openapi.client.trade;
 import com.alibaba.fastjson.JSONObject;
 import com.tigerbrokers.stock.openapi.client.https.client.TigerHttpClient;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
+import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.TickSizeItem;
+import com.tigerbrokers.stock.openapi.client.https.domain.contract.model.ContractModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.ContractLeg;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
+import com.tigerbrokers.stock.openapi.client.https.request.contract.ContractRequest;
+import com.tigerbrokers.stock.openapi.client.https.request.quote.QuoteRealTimeQuoteRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.trade.TradeOrderPreviewRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.trade.TradeOrderRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
+import com.tigerbrokers.stock.openapi.client.https.response.contract.ContractResponse;
+import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteRealTimeQuoteResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.TradeOrderPreviewResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.TradeOrderResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
@@ -26,6 +32,7 @@ import com.tigerbrokers.stock.openapi.client.testsupport.RateLimitRetry;
 import com.tigerbrokers.stock.openapi.client.testsupport.WriteApi;
 import com.tigerbrokers.stock.openapi.client.util.builder.AccountParamBuilder;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 import org.junit.Assert;
 import org.junit.Assume;
@@ -240,6 +247,66 @@ public class OrderMatrixIntegrationTest {
     return c;
   }
 
+  /**
+   * A BUY limit price far below the current HK quote, but within the
+   * exchange's price-deviation tolerance — unlike a hardcoded absolute
+   * constant, this never falls too far outside whatever range the
+   * exchange currently allows.
+   */
+  private static double safeHkBuyPrice(String symbol) {
+    TigerResponse response;
+    try {
+      response = client.execute(QuoteRealTimeQuoteRequest.newRequest(Arrays.asList(symbol)));
+    } catch (Exception e) {
+      Assume.assumeNoException("cannot resolve " + symbol + " quote for safe buy price", e);
+      return 0; // unreachable — assumeNoException always throws
+    }
+    Assume.assumeTrue("cannot resolve " + symbol + " quote for safe buy price",
+        response != null && response.isSuccess());
+    QuoteRealTimeQuoteResponse rtResp = (QuoteRealTimeQuoteResponse) response;
+    Assume.assumeFalse("no live quote for " + symbol + ", cannot compute a safe buy price",
+        rtResp.getRealTimeQuoteItems() == null || rtResp.getRealTimeQuoteItems().isEmpty());
+    Double latestPrice = rtResp.getRealTimeQuoteItems().get(0).getLatestPrice();
+    Assume.assumeTrue("non-positive latestPrice for " + symbol,
+        latestPrice != null && latestPrice > 0);
+
+    // HK's tick size is a price-banded table (e.g. HK$200-500 -> 0.2,
+    // HK$100-200 -> 0.1, ...), not a single fixed value — a price that isn't
+    // a clean multiple of the band it falls into is rejected outright.
+    ContractModel contractModel = new ContractModel(symbol);
+    contractModel.setCurrency("HKD");
+    TigerResponse contractResponse;
+    try {
+      contractResponse = client.execute(ContractRequest.newRequest(contractModel));
+    } catch (Exception e) {
+      Assume.assumeNoException("cannot resolve " + symbol + " contract for tick sizes", e);
+      return 0; // unreachable
+    }
+    Assume.assumeTrue("cannot resolve " + symbol + " contract for tick sizes",
+        contractResponse != null && contractResponse.isSuccess());
+    ContractResponse cResp = (ContractResponse) contractResponse;
+    Assume.assumeTrue("no contract for " + symbol + ", cannot resolve tick sizes", cResp.getItem() != null);
+    List<TickSizeItem> tickSizes = cResp.getItem().getTickSizes();
+    Assume.assumeFalse("no tick sizes for " + symbol + ", cannot compute a safe buy price",
+        tickSizes == null || tickSizes.isEmpty());
+
+    double rawPrice = latestPrice * 0.5;
+    Double tickSize = null;
+    for (TickSizeItem band : tickSizes) {
+      double begin = Double.parseDouble(band.getBegin());
+      double end = "Infinity".equals(band.getEnd()) ? Double.POSITIVE_INFINITY : Double.parseDouble(band.getEnd());
+      if (rawPrice > begin && rawPrice <= end) {
+        tickSize = band.getTickSize();
+        break;
+      }
+    }
+    Assume.assumeTrue("no tick size band covers " + rawPrice + " for " + symbol,
+        tickSize != null && tickSize > 0);
+
+    long ticks = (long) Math.floor(rawPrice / tickSize);
+    return Math.round(ticks * tickSize * 10000) / 10000.0;
+  }
+
   /** Wrap a place-order request into a preview_order call and check for skip. */
   private boolean previewOnly(TradeOrderRequest placeReq, String market, String context) {
     // Swap the method to preview_order — the model is otherwise identical.
@@ -442,7 +509,7 @@ public class OrderMatrixIntegrationTest {
   public void placeHkStkLimit() {
     ContractItem contract = hkStkContract();
     TradeOrderRequest req = TradeOrderRequest.buildLimitOrder(
-        account, contract, ActionType.BUY, 100, SAFE_BUY_PRICE);
+        account, contract, ActionType.BUY, 100, safeHkBuyPrice("00700"));
     previewAndPlace(req, "HK", "HK STK LMT");
   }
 
@@ -450,7 +517,7 @@ public class OrderMatrixIntegrationTest {
   public void placeHkStkAuctionLimit() {
     ContractItem contract = hkStkContract();
     TradeOrderRequest req = TradeOrderRequest.buildLimitOrder(
-        account, contract, ActionType.BUY, 100, SAFE_BUY_PRICE);
+        account, contract, ActionType.BUY, 100, safeHkBuyPrice("00700"));
     // Change order type to AL after building.
     ((TradeOrderModel) req.getApiModel()).setOrderType(OrderType.AL);
     previewAndPlace(req, "HK", "HK STK AL");
