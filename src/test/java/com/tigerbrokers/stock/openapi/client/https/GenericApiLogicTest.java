@@ -5,6 +5,7 @@ import com.tigerbrokers.stock.openapi.client.https.request.TigerHttpRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerHttpResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.testsupport.TestClientFactory;
+import com.tigerbrokers.stock.openapi.client.util.HttpResult;
 import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -28,8 +29,8 @@ public class GenericApiLogicTest {
   public static void setUpClass() {
     httpUtilsMock = Mockito.mockStatic(HttpUtils.class);
     httpUtilsMock.when(() -> HttpUtils.get(anyString(), nullable(String.class))).thenReturn("{}");
-    httpUtilsMock.when(() -> HttpUtils.post(anyString(), anyString(), nullable(String.class), anyInt()))
-        .thenReturn("{\"code\":0,\"message\":\"success\",\"timestamp\":1700000000,\"data\":\"{}\"}");
+    httpUtilsMock.when(() -> HttpUtils.postForResult(anyString(), anyString(), nullable(String.class), anyInt()))
+        .thenReturn(new HttpResult(200, "{\"code\":0,\"message\":\"success\",\"timestamp\":1700000000,\"data\":\"{}\"}"));
     client = TestClientFactory.createOfflineClient();
   }
 

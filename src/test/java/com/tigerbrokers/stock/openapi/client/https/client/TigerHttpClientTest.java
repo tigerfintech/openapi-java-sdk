@@ -14,6 +14,7 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.AccountType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Env;
 import com.tigerbrokers.stock.openapi.client.struct.enums.License;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
+import com.tigerbrokers.stock.openapi.client.util.HttpResult;
 import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
 import com.tigerbrokers.stock.openapi.client.util.TigerSignature;
 import java.lang.reflect.Field;
@@ -108,10 +109,10 @@ public class TigerHttpClientTest {
   @Test
   public void testExecute_emptyResponse() {
     try (MockedStatic<HttpUtils> mocked = Mockito.mockStatic(HttpUtils.class)) {
-      mocked.when(() -> HttpUtils.post(
+      mocked.when(() -> HttpUtils.postForResult(
           Mockito.anyString(), Mockito.anyString(),
           Mockito.anyString(), Mockito.anyInt()))
-          .thenReturn("");
+          .thenReturn(new HttpResult(200, ""));
 
       UserLicenseRequest request = new UserLicenseRequest();
       TigerResponse response = client.execute(request);
@@ -124,10 +125,10 @@ public class TigerHttpClientTest {
   public void testExecute_validResponse() {
     try (MockedStatic<HttpUtils> mocked = Mockito.mockStatic(HttpUtils.class)) {
       String json = "{\"code\":0,\"message\":\"success\",\"timestamp\":12345,\"data\":{\"license\":0,\"expireAt\":9999999999}}";
-      mocked.when(() -> HttpUtils.post(
+      mocked.when(() -> HttpUtils.postForResult(
           Mockito.anyString(), Mockito.anyString(),
           Mockito.anyString(), Mockito.anyInt()))
-          .thenReturn(json);
+          .thenReturn(new HttpResult(200, json));
 
       UserLicenseRequest request = new UserLicenseRequest();
       TigerResponse response = client.execute(request);
@@ -138,10 +139,10 @@ public class TigerHttpClientTest {
   @Test
   public void testExecute_nullResponse() {
     try (MockedStatic<HttpUtils> mocked = Mockito.mockStatic(HttpUtils.class)) {
-      mocked.when(() -> HttpUtils.post(
+      mocked.when(() -> HttpUtils.postForResult(
           Mockito.anyString(), Mockito.anyString(),
           Mockito.anyString(), Mockito.anyInt()))
-          .thenReturn(null);
+          .thenReturn(new HttpResult(200, null));
 
       UserLicenseRequest request = new UserLicenseRequest();
       TigerResponse response = client.execute(request);
@@ -153,7 +154,7 @@ public class TigerHttpClientTest {
   @Test
   public void testExecute_exception() {
     try (MockedStatic<HttpUtils> mocked = Mockito.mockStatic(HttpUtils.class)) {
-      mocked.when(() -> HttpUtils.post(
+      mocked.when(() -> HttpUtils.postForResult(
           Mockito.anyString(), Mockito.anyString(),
           Mockito.anyString(), Mockito.anyInt()))
           .thenThrow(new RuntimeException("network error"));
@@ -180,10 +181,10 @@ public class TigerHttpClientTest {
 
     try (MockedStatic<HttpUtils> mocked = Mockito.mockStatic(HttpUtils.class)) {
       String json = "{\"code\":0,\"message\":\"ok\",\"timestamp\":1,\"data\":{\"items\":[]}}";
-      mocked.when(() -> HttpUtils.post(
+      mocked.when(() -> HttpUtils.postForResult(
           Mockito.anyString(), Mockito.anyString(),
           Mockito.anyString(), Mockito.anyInt()))
-          .thenReturn(json);
+          .thenReturn(new HttpResult(200, json));
 
       // PrimeAssetRequest with empty account → defaultAccount injected by setDefaultAccountIfAbsent,
       // then setDefaultSecretKey fires because account is now non-empty.
@@ -217,12 +218,12 @@ public class TigerHttpClientTest {
 
       // Capture params map passed to HttpUtils.post to verify optional fields were included.
       String[] capturedBody = new String[1];
-      mocked.when(() -> HttpUtils.post(
+      mocked.when(() -> HttpUtils.postForResult(
           Mockito.anyString(), Mockito.anyString(),
           Mockito.anyString(), Mockito.anyInt()))
           .thenAnswer(inv -> {
             capturedBody[0] = inv.getArgument(1);
-            return "{\"code\":0,\"message\":\"ok\",\"timestamp\":1}";
+            return new HttpResult(200, "{\"code\":0,\"message\":\"ok\",\"timestamp\":1}");
           });
 
       UserLicenseRequest request = new UserLicenseRequest();
@@ -245,12 +246,12 @@ public class TigerHttpClientTest {
   public void testExecute_batchApiModel() throws Exception {
     try (MockedStatic<HttpUtils> mocked = Mockito.mockStatic(HttpUtils.class)) {
       String[] capturedBody = new String[1];
-      mocked.when(() -> HttpUtils.post(
+      mocked.when(() -> HttpUtils.postForResult(
           Mockito.anyString(), Mockito.anyString(),
           Mockito.anyString(), Mockito.anyInt()))
           .thenAnswer(inv -> {
             capturedBody[0] = inv.getArgument(1);
-            return "{\"code\":0,\"message\":\"ok\",\"timestamp\":1,\"data\":{}}";
+            return new HttpResult(200, "{\"code\":0,\"message\":\"ok\",\"timestamp\":1,\"data\":{}}");
           });
 
       // Build a TigerCommonRequest and set a BatchApiModel as its apiModel via reflection.
@@ -289,10 +290,10 @@ public class TigerHttpClientTest {
           .thenReturn(true);
 
       String json = "{\"code\":0,\"message\":\"ok\",\"timestamp\":1,\"sign\":\"abc\"}";
-      mocked.when(() -> HttpUtils.post(
+      mocked.when(() -> HttpUtils.postForResult(
           Mockito.anyString(), Mockito.anyString(),
           Mockito.anyString(), Mockito.anyInt()))
-          .thenReturn(json);
+          .thenReturn(new HttpResult(200, json));
 
       UserLicenseRequest request = new UserLicenseRequest();
       TigerResponse response = client.execute(request);
@@ -317,10 +318,10 @@ public class TigerHttpClientTest {
           .thenReturn(false);
 
       String json = "{\"code\":0,\"message\":\"ok\",\"timestamp\":1,\"sign\":\"abc\"}";
-      mocked.when(() -> HttpUtils.post(
+      mocked.when(() -> HttpUtils.postForResult(
           Mockito.anyString(), Mockito.anyString(),
           Mockito.anyString(), Mockito.anyInt()))
-          .thenReturn(json);
+          .thenReturn(new HttpResult(200, json));
 
       UserLicenseRequest request = new UserLicenseRequest();
       TigerResponse response = client.execute(request);
@@ -344,12 +345,12 @@ public class TigerHttpClientTest {
           .thenReturn("s");
       // capture the url passed to HttpUtils.post to verify paper url used
       String[] usedUrl = new String[1];
-      mocked.when(() -> HttpUtils.post(
+      mocked.when(() -> HttpUtils.postForResult(
           Mockito.anyString(), Mockito.anyString(),
           Mockito.anyString(), Mockito.anyInt()))
           .thenAnswer(inv -> {
             usedUrl[0] = inv.getArgument(0);
-            return "{\"code\":0,\"message\":\"ok\",\"timestamp\":1,\"data\":{}}";
+            return new HttpResult(200, "{\"code\":0,\"message\":\"ok\",\"timestamp\":1,\"data\":{}}");
           });
 
       // 17-digit numeric account is treated as virtual
@@ -372,12 +373,12 @@ public class TigerHttpClientTest {
       sigMock.when(() -> TigerSignature.rsaSign(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
           .thenReturn("s");
       String[] usedUrl = new String[1];
-      mocked.when(() -> HttpUtils.post(
+      mocked.when(() -> HttpUtils.postForResult(
           Mockito.anyString(), Mockito.anyString(),
           Mockito.anyString(), Mockito.anyInt()))
           .thenAnswer(inv -> {
             usedUrl[0] = inv.getArgument(0);
-            return "{\"code\":0,\"message\":\"ok\",\"timestamp\":1,\"data\":{}}";
+            return new HttpResult(200, "{\"code\":0,\"message\":\"ok\",\"timestamp\":1,\"data\":{}}");
           });
 
       TigerHttpRequest req = new TigerHttpRequest(MethodName.BRIEF);

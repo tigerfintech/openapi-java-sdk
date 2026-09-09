@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -41,13 +42,77 @@ class LoopbackReceiver implements AutoCloseable {
   /**
    * Inline SVG rather than an image, an icon font or a unicode glyph: the page has to render
    * the same everywhere with no network access -- a callback page must not fetch anything, and
-   * the check glyph is missing or ugly in plenty of default fonts.
+   * these glyphs are missing or ugly in plenty of default fonts.
+   *
+   * <p>All three share one geometry (64x64, r=29 circle) so the pages line up when compared.</p>
    */
-  private static final String CHECK_MARK =
-      "<svg width='64' height='64' viewBox='0 0 64 64' aria-hidden='true'>"
-          + "<circle cx='32' cy='32' r='29' fill='none' stroke='#22c55e' stroke-width='4'/>"
-          + "<path d='M19 33l9.5 9.5L45 22' fill='none' stroke='#22c55e' stroke-width='5'"
-          + " stroke-linecap='round' stroke-linejoin='round'/></svg>";
+  private static String icon(String color, String path) {
+    return "<svg width='64' height='64' viewBox='0 0 64 64' aria-hidden='true'>"
+        + "<circle cx='32' cy='32' r='29' fill='none' stroke='" + color + "' stroke-width='4'/>"
+        + "<path d='" + path + "' fill='none' stroke='" + color + "' stroke-width='5'"
+        + " stroke-linecap='round' stroke-linejoin='round'/></svg>";
+  }
+
+  /** Green tick. */
+  private static final String ICON_SUCCESS = icon("#22c55e", "M19 33l9.5 9.5L45 22");
+
+  /**
+   * Grey dash. Deliberately <b>not</b> a red cross: the user chose to decline, which is a normal
+   * outcome rather than an error, and colouring it like a failure misreports it.
+   */
+  private static final String ICON_CANCELLED = icon("#9ca3af", "M20 32h24");
+
+  /** Red cross, for outcomes that really are failures. */
+  private static final String ICON_FAILED = icon("#ef4444", "M22 22l20 20M42 22L22 42");
+
+  /** The three outcomes a callback can carry. */
+  private enum Outcome {
+    SUCCESS,
+    CANCELLED,
+    FAILED
+  }
+
+  /**
+   * Page copy, keyed by outcome. <b>English only, deliberately.</b>
+   *
+   * <p>The SDK's exceptions, log lines and error messages are all English; a callback page that
+   * switched to the browser's language would be the one localised surface in an otherwise English
+   * toolkit. It is also the page a developer screenshots into a bug report, where a fixed wording
+   * is easier to search for and to quote.</p>
+   *
+   * <p>Kept byte-identical to the Python SDK's table -- same product surface, must not drift.</p>
+   */
+  private static final String TITLE = "Tiger OpenAPI";
+
+  private static final Map<Outcome, String[]> TEXT = buildText();
+
+  private static Map<Outcome, String[]> buildText() {
+    Map<Outcome, String[]> text = new EnumMap<>(Outcome.class);
+    text.put(Outcome.SUCCESS, new String[] {
+        "Authorization successful",
+        "You can close this page and return to the application."});
+    text.put(Outcome.CANCELLED, new String[] {
+        "Authorization cancelled",
+        "You declined this authorization. You can close this page."});
+    text.put(Outcome.FAILED, new String[] {
+        "Authorization failed",
+        "Please return to the application and try again."});
+    return text;
+  }
+
+  /**
+   * Classifies the callback.
+   *
+   * <p>{@code access_denied} is separated from every other error on purpose: it means the user
+   * pressed "decline". Reporting their own choice as a failure -- and telling them to try again
+   * -- describes the wrong thing and nudges them to redo something they meant to refuse.</p>
+   */
+  private static Outcome outcomeOf(Map<String, String> params) {
+    if (params.containsKey("code")) {
+      return Outcome.SUCCESS;
+    }
+    return "access_denied".equals(params.get("error")) ? Outcome.CANCELLED : Outcome.FAILED;
+  }
 
   private final HttpServer server;
   private final CountDownLatch latch = new CountDownLatch(1);
@@ -71,15 +136,15 @@ class LoopbackReceiver implements AutoCloseable {
     server.createContext(CALLBACK_PATH, new HttpHandler() {
       @Override
       public void handle(HttpExchange exchange) throws IOException {
-        boolean success;
+        Map<String, String> params;
         try {
-          synchronized (params) {
+          synchronized (LoopbackReceiver.this.params) {
             if (latch.getCount() > 0) {
-              params.putAll(parseQuery(exchange.getRequestURI().getRawQuery()));
+              LoopbackReceiver.this.params.putAll(parseQuery(exchange.getRequestURI().getRawQuery()));
             }
-            success = params.containsKey("code");
+            params = new HashMap<>(LoopbackReceiver.this.params);
           }
-          respond(exchange, success);
+          respond(exchange, params);
         } finally {
           exchange.close();
           latch.countDown();
@@ -132,15 +197,36 @@ class LoopbackReceiver implements AutoCloseable {
    * read by an extension. The authorization code is single-use, but leaking it before it is
    * redeemed lets someone else exchange it for a token first.</p>
    */
-  private static void respond(HttpExchange exchange, boolean success) throws IOException {
-    String message = success
-        ? CHECK_MARK + "<h2>Authentication successful</h2>"
-            + "<p>You can close this page and return to the application.</p>"
-        : "<h2>Authentication failed</h2>"
-            + "<p>Please return to the application and try again.</p>";
-    String html = "<html><head><meta charset='utf-8'><title>Tiger OpenAPI</title></head>"
-        + "<body style=\"font-family:-apple-system,'PingFang SC',sans-serif;"
-        + "padding:64px;text-align:center\">" + message + "</body></html>";
+  /**
+   * Renders the outcome page.
+   *
+   * <p><b>States the outcome and nothing else.</b> No code, state, error value or description is
+   * displayed: the browser keeps the address bar and history, and the page may be screenshotted
+   * or read by an extension. The authorization code is single-use, but leaking it before it is
+   * redeemed lets someone else exchange it first.</p>
+   *
+   * <p>The caller still gets the full params -- only the <i>page</i> is redacted.</p>
+   */
+  private static void respond(HttpExchange exchange, Map<String, String> params)
+      throws IOException {
+    Outcome outcome = outcomeOf(params);
+    String[] copy = TEXT.get(outcome);
+    String icon = outcome == Outcome.SUCCESS ? ICON_SUCCESS
+        : outcome == Outcome.CANCELLED ? ICON_CANCELLED : ICON_FAILED;
+
+    String html = "<!DOCTYPE html><html><head><meta charset='utf-8'>"
+        + "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+        + "<title>" + TITLE + "</title></head>"
+        + "<body style=\"margin:0;min-height:100vh;display:flex;align-items:center;"
+        + "justify-content:center;"
+        + "font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',"
+        + "sans-serif;background:#fafafa;color:#1f2328\">"
+        + "<main style='text-align:center;padding:48px 24px;max-width:420px'>"
+        + icon
+        + "<h2 style='margin:24px 0 8px;font-size:20px;font-weight:600'>" + copy[0] + "</h2>"
+        + "<p style='margin:0;font-size:14px;line-height:1.6;color:#6b7280'>" + copy[1] + "</p>"
+        + "</main></body></html>";
+
     byte[] bytes = html.getBytes(UTF_8);
     exchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
     exchange.sendResponseHeaders(200, bytes.length);
