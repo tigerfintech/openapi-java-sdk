@@ -4,11 +4,10 @@ import com.alibaba.fastjson.annotation.JSONField;
 import java.util.List;
 
 /**
- * The parts of the AS metadata ({@code /.well-known/oauth-authorization-server}) this SDK uses.
+ * OAuth2 authorization server metadata used by the SDK.
  *
- * <p>Endpoint addresses always come from here and are never hardcoded in the SDK -- with a
- * split frontend the issuer may point at the frontend, and only the server knows which origin
- * the browser should actually open.</p>
+ * <p>Endpoint locations are obtained from
+ * {@code /.well-known/oauth-authorization-server}.</p>
  */
 public class OAuth2Metadata {
 
@@ -32,13 +31,9 @@ public class OAuth2Metadata {
   private String revocationEndpoint;
 
   /**
-   * Every scope the AS supports (RFC 8414 {@code scopes_supported}).
+   * Scopes advertised in RFC 8414 {@code scopes_supported} metadata.
    *
-   * <p>When the application specifies no scope we request all of these. The list does change
-   * -- when the server adds a new scope the SDK keeps up without a code change, whereas a
-   * hardcoded copy would drift.</p>
-   *
-   * <p>The spec marks this field RECOMMENDED rather than REQUIRED, so it may be null.</p>
+   * <p>The field is recommended rather than required by RFC 8414 and may be absent.</p>
    */
   @JSONField(name = "scopes_supported")
   private List<String> scopesSupported;

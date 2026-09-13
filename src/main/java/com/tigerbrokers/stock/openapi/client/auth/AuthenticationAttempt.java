@@ -1,18 +1,10 @@
 package com.tigerbrokers.stock.openapi.client.auth;
 
 /**
- * A snapshot of "which credential did this request use", returned by
- * {@link Authentication#apply} and handed back unchanged to
- * {@link Authentication#onUnauthorized} when a 401 arrives.
+ * Immutable snapshot of the credential applied to a request.
  *
- * <p><b>Why it is needed:</b> without it there is no way to stop a 401 storm. Say 20
- * concurrent requests all go out with token A and A expires right then, so 20 401s come
- * back. If we do not record which credential was used, the 1st 401 refreshes to B, the 2nd
- * comes back and refreshes B to C, the 3rd to D, and so on. After every refresh there is
- * still a batch of in-flight requests holding an older token, so it never converges.
- *
- * <p>Recording it makes this simple: 401s 2 through 20 compare "I used A, current is
- * already B" and retry with B directly. One refresh handles all of them.
+ * <p>The snapshot allows concurrent unauthorized responses to share a single credential refresh
+ * and prevents repeated rotation of an already replaced credential.</p>
  */
 public class AuthenticationAttempt {
 
@@ -29,18 +21,16 @@ public class AuthenticationAttempt {
   }
 
   /**
-   * The credential value actually used for this request (the raw access token in OAuth2 mode).
+   * Returns the credential applied to the request.
    *
-   * <p>Only for equality comparison against the current credential. Do not print it, do not
-   * expose it.
+   * <p>The value is confidential and is intended only for comparison with the current
+   * credential.</p>
    */
   public String getCredential() {
     return credential;
   }
 
-  /**
-   * Never prints the credential value -- it is equivalent to a password.
-   */
+  /** Returns a representation that excludes the credential value. */
   @Override
   public String toString() {
     return "AuthenticationAttempt{type=" + type

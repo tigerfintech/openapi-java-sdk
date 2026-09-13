@@ -29,29 +29,10 @@ public class ProtoSocketHandler extends SimpleChannelInboundHandler<Response> {
   private int clientReceiveInterval = 0;
   public final static int HEART_BEAT_SPAN = 1000;
 
-  /**
-   * How early to rotate the token before it expires.
-   *
-   * <p>Deliberately the same as {@code OAuth2SessionManager}'s default refresh-ahead window.
-   * A wider window here would not buy anything: this check decides only whether to <i>ask</i>
-   * for a token, and the session manager hands back the existing one until its own window
-   * opens. The two disagreeing just means the extra margin is spent finding the token
-   * unchanged and doing nothing.
-   *
-   * <p>Both are fixed constants and neither is configurable, so they cannot drift apart at
-   * runtime. If either is ever made tunable, the effective window becomes the <i>smaller</i>
-   * of the two: a rotation message goes out only where both agree the token is due, since this
-   * check has to fire before the session manager is even asked, and the session manager has to
-   * hand back a changed token before there is anything to send.
-   */
+  /** OAuth2 access-token refresh threshold. */
   private static final long REFRESH_AHEAD_MILLIS = 5 * 60 * 1000L;
 
-  /**
-   * How long to wait for a {@code REFRESH_TOKEN} reply before giving up on that attempt.
-   *
-   * <p>Required, not optional: an old server silently ignores the command, so without a
-   * timeout the pending marker would never clear and no later attempt could ever be made.
-   */
+  /** Timeout for a pending {@code REFRESH_TOKEN} acknowledgement. */
   private static final long REFRESH_REPLY_TIMEOUT_MILLIS = 30 * 1000L;
 
   /**
@@ -68,14 +49,7 @@ public class ProtoSocketHandler extends SimpleChannelInboundHandler<Response> {
   public static final AttributeKey<String> OAUTH_REFRESH_PENDING =
       AttributeKey.valueOf("tigerOauthRefreshPending");
 
-  /**
-   * Placeholder held in {@link #OAUTH_REFRESH_PENDING} while the token exchange is still
-   * running and the new token is not known yet.
-   *
-   * <p>The marker has to be claimed before the exchange starts, or the next heartbeat would
-   * start a second one. Not a real token, and never sent: it is replaced by the actual value
-   * before the {@code REFRESH_TOKEN} message goes out.
-   */
+  /** Marker held while token exchange is in progress; never sent as a credential. */
   private static final String REFRESH_IN_PROGRESS = "__refresh_in_progress__";
 
   /** When the in-flight {@code REFRESH_TOKEN} was sent, for the reply timeout. */
@@ -83,18 +57,10 @@ public class ProtoSocketHandler extends SimpleChannelInboundHandler<Response> {
       AttributeKey.valueOf("tigerOauthRefreshSentAt");
 
   /**
-   * Runs the token exchange, which must not happen on the event loop.
+   * Executor for blocking token exchange operations.
    *
-   * <p>{@code OAuth2SessionManager.refresh} is a synchronous HTTP call under a lock, and the
-   * socket runs on a single-threaded {@code NioEventLoopGroup}. Left inline it would stall
-   * every read and write on this connection for as long as the exchange takes -- long enough
-   * to trip the read-idle timeout, so a rotation meant to keep the connection alive would be
-   * what kills it.
-   *
-   * <p>Static and lazily created: shared by every connection in the process, and never
-   * started at all unless some connection actually rotates a token. Daemon, so it does not
-   * hold up JVM exit; single-threaded, so the exchanges it runs stay serialized just as the
-   * session manager's own lock would have them.
+   * <p>The daemon executor is shared across connections and serialized to preserve the session
+   * manager's single-flight behavior without blocking the socket event loop.</p>
    */
   private static volatile ExecutorService refreshExecutor;
 
@@ -134,18 +100,10 @@ public class ProtoSocketHandler extends SimpleChannelInboundHandler<Response> {
 
   @Override
   public void channelActive(ChannelHandlerContext ctx) throws Exception {
-    // Fetched here rather than cached at build time: every reconnect goes through
-    // channelActive, and a reconnect must present the token that is valid now.
-    // Null in signature mode, which is what makes the legacy connect message unchanged.
-    //
-    // Kept inline even though this can trigger a blocking token exchange, unlike the
-    // rotation path. There is no established connection yet to stall: nothing has been
-    // subscribed, no heartbeat is running, and the only thing delayed is this connect
-    // attempt, which the caller already treats as asynchronous.
+    // Resolve the current token for each connection attempt. Signature mode returns null.
     String accessToken = authentication.getAccessToken();
     if (authentication.isOauth2() && accessToken == null) {
-      // Connecting without a credential would just get rejected by the server, and the
-      // reason (never authorized / refresh failed) would be lost by then
+      // Reject connections that cannot obtain an OAuth2 access token.
       ApiLogger.error("no oauth2 access token available, cannot connect. channel:{}",
           ctx.channel().id().asShortText());
       ctx.close();
@@ -177,20 +135,11 @@ public class ProtoSocketHandler extends SimpleChannelInboundHandler<Response> {
   }
 
   /**
-   * Rotates this connection's access token if the current one is close to expiry.
+   * Rotates the connection access token near expiry.
    *
-   * <p>Driven by the heartbeat rather than a timer of its own: the heartbeat already runs on
-   * a live connection at a known interval, and a token with a day-long TTL does not need
-   * finer granularity than that. A separate timer would have to track connection liveness
-   * all over again.
-   *
-   * <p>Silent on an old server. {@code REFRESH_TOKEN} lands in the default branch of the
-   * server's command switch and no reply ever comes, so a pending rotation is abandoned
-   * after {@link #REFRESH_REPLY_TIMEOUT_MILLIS} instead of blocking further attempts
-   * forever. The connection keeps working until the server drops it.
-   *
-   * <p>Runs on the event loop and stays cheap: everything here is an in-memory check. The
-   * one part that can block -- obtaining the token -- is handed to {@link #refreshExecutor()}.
+   * <p>Heartbeat processing performs only in-memory checks. Blocking token exchange is delegated
+   * to {@link #refreshExecutor()}. Pending rotations expire after
+   * {@link #REFRESH_REPLY_TIMEOUT_MILLIS} when no acknowledgement is received.</p>
    */
   public void refreshTokenIfNeeded(ChannelHandlerContext ctx) {
     if (!authentication.isOauth2()) {
@@ -205,8 +154,7 @@ public class ProtoSocketHandler extends SimpleChannelInboundHandler<Response> {
         // is still running on the refresh executor, since the marker is set before it starts.
         return;
       }
-      // No reply within the window: either an old server that ignores the command, the reply
-      // was lost, or the exchange itself is stuck. Clear it so a later attempt can happen.
+      // Clear a timed-out refresh claim so a later attempt can proceed.
       ApiLogger.info("refresh token got no reply within {}ms, channel:{}",
           REFRESH_REPLY_TIMEOUT_MILLIS, channel.id().asShortText());
       channel.attr(OAUTH_REFRESH_PENDING).set(null);

@@ -3,11 +3,10 @@ package com.tigerbrokers.stock.openapi.client.auth.oauth2;
 import com.alibaba.fastjson.annotation.JSONField;
 
 /**
- * The complete result of one authorization, and also the on-disk format.
+ * OAuth2 token response and persisted token representation.
  *
- * <p>{@code issuer} and {@code clientId} have to be recorded: the filename only carries the
- * clientId, so after switching environments (production to staging) a missing issuer check
- * would send a staging token to production, showing up as an inexplicable 401.</p>
+ * <p>The issuer and client ID bind persisted credentials to the originating authorization
+ * server and client.</p>
  */
 public class OAuth2Token {
 
@@ -122,10 +121,7 @@ public class OAuth2Token {
   }
 
   /**
-   * Prints no token values.
-   *
-   * <p>This object shows up in logs and exceptions, and an access token is equivalent to a
-   * password.</p>
+   * Returns a representation that excludes access and refresh token values.
    */
   @Override
   public String toString() {

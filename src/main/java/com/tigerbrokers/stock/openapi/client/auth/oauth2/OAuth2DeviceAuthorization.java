@@ -3,19 +3,14 @@ package com.tigerbrokers.stock.openapi.client.auth.oauth2;
 import com.alibaba.fastjson.annotation.JSONField;
 
 /**
- * The device authorization response (RFC 8628 §3.2) -- the values meant to be shown to the user.
+ * OAuth2 device authorization response defined by RFC 8628.
  *
- * <p>Once the application has it, it is responsible for displaying {@link #getUserCode()} and
- * {@link #getVerificationUri()} (or turning {@link #getVerificationUriComplete()} straight into
- * a QR code). The SDK then starts polling for the user's approval.</p>
- *
- * <p>{@code deviceCode} is the credential the SDK polls with, not something to show a person --
- * it is equivalent to a one-time password, so do not display it and do not log it.
- * {@link #toString()} therefore omits it.</p>
+ * <p>The user code and verification URI are intended for presentation. The device code is a
+ * credential used only for token polling and must not be displayed or logged.</p>
  */
 public class OAuth2DeviceAuthorization {
 
-  /** The credential used to poll the token endpoint. Equivalent to a password; do not leak it. */
+  /** Credential used to poll the token endpoint; excluded from logs and display. */
   @JSONField(name = "device_code")
   private String deviceCode;
 
@@ -42,10 +37,10 @@ public class OAuth2DeviceAuthorization {
   private long expiresIn;
 
   /**
-   * The suggested polling interval in seconds. OPTIONAL in RFC 8628.
+   * Suggested polling interval in seconds, as defined by RFC 8628.
    *
-   * <p>Tiger's AS <b>does not return this field</b>, in which case the spec's 5-second default
-   * applies. See {@link OAuth2SessionManager#DEFAULT_DEVICE_POLL_INTERVAL_SECONDS}.</p>
+   * <p>A missing value uses
+   * {@link OAuth2SessionManager#DEFAULT_DEVICE_POLL_INTERVAL_SECONDS}.</p>
    */
   @JSONField(name = "interval")
   private Long interval;
@@ -98,11 +93,7 @@ public class OAuth2DeviceAuthorization {
     this.interval = interval;
   }
 
-  /**
-   * Prefers the complete link, falling back to the verification page address.
-   *
-   * <p>Lets the application display it in one line without null-checking itself.</p>
-   */
+  /** Returns the complete verification URI when available, otherwise the base URI. */
   public String getBestVerificationUri() {
     return verificationUriComplete != null && !verificationUriComplete.isEmpty()
         ? verificationUriComplete : verificationUri;

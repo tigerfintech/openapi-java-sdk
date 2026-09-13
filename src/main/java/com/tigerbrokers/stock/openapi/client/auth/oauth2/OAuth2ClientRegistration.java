@@ -3,12 +3,9 @@ package com.tigerbrokers.stock.openapi.client.auth.oauth2;
 import com.alibaba.fastjson.annotation.JSONField;
 
 /**
- * The client_id obtained via dynamic registration (RFC 7591), one per issuer.
+ * Persisted OAuth2 dynamic client registration defined by RFC 7591.
  *
- * <p>It is stored separately so that logout can clear only the token and keep the client_id
- * -- the next authorization then needs no re-registration. Otherwise junk clients pile up on
- * the AS and the user sees dozens of identically named applications on the authorization
- * management page.</p>
+ * <p>Registrations are stored per issuer and retained when authorization tokens are removed.</p>
  */
 public class OAuth2ClientRegistration {
 
@@ -25,13 +22,10 @@ public class OAuth2ClientRegistration {
   private String clientName;
 
   /**
-   * The scope the AS granted this client in the registration response.
+   * Scope granted to the client by the authorization server during registration.
    *
-   * <p>Not what we asked for -- the registration request declares no scope, so what we get is
-   * the AS's policy. Recording it is what lets us tell whether "the scope we need now is
-   * still within range": if the server later adds a new scope this one is no longer enough
-   * and we have to register a fresh client, otherwise authorization is rejected with
-   * {@code invalid_scope}.</p>
+   * <p>A registration that no longer covers the requested scopes must be replaced to avoid an
+   * {@code invalid_scope} response.</p>
    */
   @JSONField(name = "registered_scopes")
   private String registeredScopes;

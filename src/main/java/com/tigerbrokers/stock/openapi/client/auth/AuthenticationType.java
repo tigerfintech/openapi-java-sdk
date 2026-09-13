@@ -1,19 +1,15 @@
 package com.tigerbrokers.stock.openapi.client.auth;
 
 /**
- * How a request authenticates.
+ * Supported request authentication methods.
  *
- * <p>The two are mutually exclusive: {@link #SIGNATURE} puts {@code tiger_id} and an RSA
- * signature in the request body, {@link #OAUTH2} puts a Bearer token in the
- * {@code Authorization} header and puts <b>no signature field at all</b> in the body.
- *
- * <p>Sending both "just in case" does not work: the gateway takes the signature branch as
- * soon as it sees {@code sign}, so the Bearer token is ignored and then misread as an HK
- * license token, producing an error that has nothing to do with the auth method.
+ * <p>Signature authentication adds {@code tiger_id} and {@code sign} to the request body.
+ * OAuth2 authentication sends a Bearer token in the {@code Authorization} header and omits the
+ * signature fields.</p>
  */
 public enum AuthenticationType {
 
-  /** The legacy way: tigerId + RSA signature with a private key. */
+  /** RSA signature authentication using tigerId and a private key. */
   SIGNATURE,
 
   /** OAuth2: {@code Authorization: Bearer <access_token>}. */

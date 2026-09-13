@@ -15,24 +15,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- * The local callback receiver (RFC 8252 loopback).
+ * Receives an OAuth2 loopback callback as defined by RFC 8252.
  *
- * <p>Binds a port on {@code 127.0.0.1} and closes after receiving a single callback.</p>
- *
- * <p>With dynamic registration the port is 0, so the system assigns one and it is not
- * persisted -- registration sends {@code http://127.0.0.1/callback} as the redirect_uri, and
- * per RFC 8252 §7.3 the AS ignores the port when matching a loopback URI. With a manual
- * clientId the port must match the redirect_uri the user registered by hand, which the SDK
- * cannot know -- hence the agreed default of 18888.</p>
- *
- * <p>It binds only {@code 127.0.0.1}, not {@code 0.0.0.0}: the authorization code must not be
- * exposed to the local network. It uses the IP literal rather than {@code localhost}
- * (RFC 8252 §8.3) -- the latter depends on hosts resolution and can be redirected elsewhere,
- * and in testing the AS only waives port matching for the IP literal.</p>
- *
- * <p>It must be started <b>before</b> the authorization URL is handed to the user, otherwise
- * there is a race: a fast user can finish approving before the listener is up, and the
- * browser redirect then arrives at a port with nobody listening.</p>
+ * <p>The receiver binds only to {@code 127.0.0.1} to avoid exposing the authorization code to
+ * the local network. Dynamic registration uses a system-assigned port under the loopback port
+ * matching rules in RFC 8252, while explicit registration requires the configured port to match
+ * the registered redirect URI.</p>
  */
 class LoopbackReceiver implements AutoCloseable {
 
@@ -56,10 +44,7 @@ class LoopbackReceiver implements AutoCloseable {
   /** Green tick. */
   private static final String ICON_SUCCESS = icon("#22c55e", "M19 33l9.5 9.5L45 22");
 
-  /**
-   * Grey dash. Deliberately <b>not</b> a red cross: the user chose to decline, which is a normal
-   * outcome rather than an error, and colouring it like a failure misreports it.
-   */
+  /** Icon for a cancelled authorization. */
   private static final String ICON_CANCELLED = icon("#9ca3af", "M20 32h24");
 
   /** Red cross, for outcomes that really are failures. */
@@ -72,16 +57,7 @@ class LoopbackReceiver implements AutoCloseable {
     FAILED
   }
 
-  /**
-   * Page copy, keyed by outcome. <b>English only, deliberately.</b>
-   *
-   * <p>The SDK's exceptions, log lines and error messages are all English; a callback page that
-   * switched to the browser's language would be the one localised surface in an otherwise English
-   * toolkit. It is also the page a developer screenshots into a bug report, where a fixed wording
-   * is easier to search for and to quote.</p>
-   *
-   * <p>Kept byte-identical to the Python SDK's table -- same product surface, must not drift.</p>
-   */
+  /** Fixed English callback page content keyed by outcome. */
   private static final String TITLE = "Tiger OpenAPI";
 
   private static final Map<Outcome, String[]> TEXT = buildText();
@@ -100,13 +76,7 @@ class LoopbackReceiver implements AutoCloseable {
     return text;
   }
 
-  /**
-   * Classifies the callback.
-   *
-   * <p>{@code access_denied} is separated from every other error on purpose: it means the user
-   * pressed "decline". Reporting their own choice as a failure -- and telling them to try again
-   * -- describes the wrong thing and nudges them to redo something they meant to refuse.</p>
-   */
+  /** Classifies {@code access_denied} as cancellation and other OAuth2 errors as failures. */
   private static Outcome outcomeOf(Map<String, String> params) {
     if (params.containsKey("code")) {
       return Outcome.SUCCESS;
@@ -125,8 +95,7 @@ class LoopbackReceiver implements AutoCloseable {
     try {
       server = HttpServer.create(new InetSocketAddress("127.0.0.1", port), 0);
     } catch (IOException e) {
-      // Only a fixed port can be taken, and then we must say which port and what to do about
-      // it; a system-assigned port never collides
+      // A fixed port may already be in use; system-assigned ports avoid this conflict.
       String hint = port == 0 ? ""
           : " (port " + port + " is in use; free it or set another callbackPort"
               + " matching the redirect_uri registered for your client)";
@@ -191,21 +160,10 @@ class LoopbackReceiver implements AutoCloseable {
   }
 
   /**
-   * The callback page states the outcome only and displays no parameters.
+   * Renders an outcome page without callback parameters.
    *
-   * <p>The browser address bar and history keep a trace, and the page may be screenshotted or
-   * read by an extension. The authorization code is single-use, but leaking it before it is
-   * redeemed lets someone else exchange it for a token first.</p>
-   */
-  /**
-   * Renders the outcome page.
-   *
-   * <p><b>States the outcome and nothing else.</b> No code, state, error value or description is
-   * displayed: the browser keeps the address bar and history, and the page may be screenshotted
-   * or read by an extension. The authorization code is single-use, but leaking it before it is
-   * redeemed lets someone else exchange it first.</p>
-   *
-   * <p>The caller still gets the full params -- only the <i>page</i> is redacted.</p>
+   * <p>Authorization codes and OAuth2 error details are excluded to prevent disclosure through
+   * browser history, screenshots, or extensions.</p>
    */
   private static void respond(HttpExchange exchange, Map<String, String> params)
       throws IOException {

@@ -330,14 +330,9 @@ public class TigerHttpClient implements TigerClient {
       boolean isPlaceOrder = MethodName.PLACE_ORDER == request.getApiMethodName();
       int retryCounts = isPlaceOrder ? 0 : failRetryCounts;
 
-      // Whether a 401 may be retried with a fresh credential. Forbidden for order placement,
-      // modification and cancellation: the reasoning behind never retrying a place order --
-      // the 401 does not prove the request was not executed -- applies just as much to
-      // cancelling and modifying one, and the Python SDK has always grouped the three.
-      //
-      // Deliberately NOT folded into retryCounts above: that one also governs signature
-      // mode, so widening it would change existing users' connection-retry behaviour.
-      // This flag is only read on the OAuth2 path.
+      // Authentication retries are disabled for order placement, modification, and
+      // cancellation because an unauthorized response does not prove the operation was not
+      // executed. This flag affects only OAuth2 authentication.
       boolean retryable = !isPlaceOrder
           && MethodName.CANCEL_ORDER != request.getApiMethodName()
           && MethodName.MODIFY_ORDER != request.getApiMethodName();
@@ -357,9 +352,8 @@ public class TigerHttpClient implements TigerClient {
       String url = getServerUrl(request);
       HttpResult result = HttpUtils.postForResult(url, param, authorization, retryCounts);
 
-      // 401: the credential is invalid. Refresh once, then retry once -- only once.
-      // Order placement / cancellation / modification is never retried: a 401 does not prove
-      // the request failed, so a retry risks a duplicate.
+      // Retry an unauthorized response once with a replacement credential. Non-retryable
+      // requests are excluded because the response does not prove the operation was not executed.
       if (result.isUnauthorized() && attempt != null && retryable) {
         RetryDecision decision = this.authentication.onUnauthorized(attempt, result);
         if (decision.shouldRetry()) {
@@ -428,24 +422,11 @@ public class TigerHttpClient implements TigerClient {
   }
 
   /**
-   * Assembles the request body, and in signature mode signs it.
+   * Builds request parameters and adds signature fields only in signature mode.
    *
-   * <p>Three different things are called a "token" around here, and they live in different
-   * places. Mixing them up costs either a failed signature or a clobbered auth header:
-   * <ul>
-   *   <li>{@code licenseToken} (the HK market-data license, {@code clientConfig.token}) --
-   *       goes in the HTTP {@code Authorization} header as a bare value with no
-   *       {@code Bearer } prefix, and is not signed; applied by the caller, not here
-   *   <li>{@code accessToken} (the legacy one) -- a top-level body field, signed
-   *   <li>{@code tradeToken} (obtained with the trading password) -- a top-level body field, signed
-   * </ul>
-   *
-   * <p>Field write order below is load-bearing: {@code sign} covers every field already in
-   * the map, so it has to be written last.
-   *
-   * <p>OAuth2 returns early and puts <b>no signature field at all</b> in the body -- the
-   * gateway takes the signature branch as soon as it sees {@code sign}, which would make it
-   * ignore the Bearer token and then misread it as an HK license token.
+   * <p>The Hong Kong license token is sent as an unsigned authorization header. Legacy access
+   * and trade tokens are signed body fields. OAuth2 mode omits all signature fields. Signature
+   * fields must be added after all signed fields.</p>
    */
   private Map<String, Object> buildParams(TigerRequest request) {
     Map<String,Object> params = new HashMap<>();

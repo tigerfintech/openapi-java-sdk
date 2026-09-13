@@ -14,11 +14,10 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 /**
- * HTTP calls dedicated to the OAuth2 endpoints.
+ * HTTP operations for OAuth2 endpoints.
  *
- * <p>{@code HttpUtils} is not reused for two reasons: the token endpoint needs
- * form-encoded bodies (that one only sends JSON), and here we must be able to read 4xx
- * response bodies -- that is where the OAuth2 errors live.</p>
+ * <p>Supports form-encoded requests and preserves OAuth2 error responses returned with non-success
+ * HTTP status codes.</p>
  */
 final class OAuth2HttpUtils {
 
@@ -57,14 +56,12 @@ final class OAuth2HttpUtils {
   }
 
   /**
-   * Posts a form and returns only the HTTP status, tolerating an empty body.
+   * Posts a form and returns the HTTP status without requiring a response body.
    *
-   * <p>Needed for RFC 7009 revocation: that endpoint answers {@code 200} with <b>no body</b> on
-   * success, which {@link #postForm} rejects as "empty response". The caller only needs to know
-   * whether the server accepted it, so nothing is parsed.</p>
+   * <p>RFC 7009 token revocation may return an empty successful response.</p>
    *
-   * @return the HTTP status code
-   * @throws OAuth2Exception only on a connection failure
+   * @return HTTP status code
+   * @throws OAuth2Exception on a connection failure
    */
   static int postFormForStatus(String url, Map<String, String> form) {
     FormBody.Builder builder = new FormBody.Builder();

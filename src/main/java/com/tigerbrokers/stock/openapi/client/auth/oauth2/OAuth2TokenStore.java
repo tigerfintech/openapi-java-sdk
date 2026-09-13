@@ -14,23 +14,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Local file storage for tokens and client_ids.
+ * Local storage for OAuth2 tokens and dynamic client registrations.
  *
- * <pre>
- * ~/.tiger/openapi/
- *   tokens/{clientId}.json      <- authorization state, 0600, cleared on logout
- *   clients/{issuerHash}.json   <- client_id from dynamic registration, kept across logout
- * </pre>
- *
- * <p>The two directories are keyed differently: {@code clients/} is looked up <b>before</b> a
- * clientId is in hand (using the issuer to find a reusable registration), and at that point
- * there is no clientId to key on. So the sequence is: find the clientId by issuer, then find
- * the token by clientId.</p>
- *
- * <p>Directory precedence: an explicitly passed home &gt; the {@code TIGEROPEN_HOME}
- * environment variable &gt; {@code ~/.tiger/openapi/}. It deliberately does not follow the
- * current working directory -- otherwise "which directory the script was started from" would
- * decide which token gets read.</p>
+ * <p>Tokens are keyed by client ID and registrations by issuer. Token files are restricted to
+ * the owner on POSIX file systems. The storage directory is selected from the explicit home,
+ * {@code TIGEROPEN_HOME}, or {@code ~/.tiger/openapi/}, in that order.</p>
  */
 public class OAuth2TokenStore {
 
@@ -59,15 +47,12 @@ public class OAuth2TokenStore {
     return home;
   }
 
-  // ---------------------------------------------------------------- token
-
   /**
    * Reads the authorization state for a given clientId.
    *
    * @param expectedIssuer the expected issuer; a mismatch with the one recorded in the file is
    *     treated as a cache miss (returns null)
-   * @return null when absent or unreadable, without throwing -- the caller's next step is
-   *     "re-authorize" either way
+   * @return token state, or {@code null} when the file is absent or unreadable
    */
   public OAuth2Token loadToken(String clientId, String expectedIssuer) {
     Path file = tokenFile(clientId);
@@ -80,7 +65,7 @@ public class OAuth2TokenStore {
         return null;
       }
       if (token.getSchemaVersion() != 1) {
-        // Fail loudly rather than guess at the format
+        // Reject unsupported schemas instead of inferring their structure.
         throw new OAuth2Exception(OAuth2Exception.Category.STORAGE_FAILED,
             "unsupported token schema_version: " + token.getSchemaVersion()
                 + ", file: " + file);
@@ -115,8 +100,6 @@ public class OAuth2TokenStore {
     }
   }
 
-  // --------------------------------------------------------------- client
-
   /**
    * Reads the client_id previously obtained by dynamic registration for a given issuer.
    *
@@ -150,13 +133,9 @@ public class OAuth2TokenStore {
   }
 
   /**
-   * Discards the client_id stored for an issuer.
+   * Removes a dynamic client registration after an {@code invalid_client} response.
    *
-   * <p>Only for when the AS explicitly says it does not recognize the client
-   * ({@code invalid_client}). Once a stored clientId no longer exists on the AS, every
-   * subsequent authorization keeps using it and keeps getting rejected, with no way for the
-   * user to recover; deleting it is what lets the next attempt re-register. Do not call this
-   * during a normal logout.</p>
+   * <p>Normal logout retains the registration.</p>
    */
   public void deleteClientRegistration(String issuer) {
     try {
@@ -165,8 +144,6 @@ public class OAuth2TokenStore {
       ApiLogger.error("delete client file fail. issuer:{}", issuer, e);
     }
   }
-
-  // ------------------------------------------------------------- internal
 
   Path tokenFile(String clientId) {
     return home.resolve("tokens").resolve(safeFileName(clientId) + ".json");
@@ -192,8 +169,7 @@ public class OAuth2TokenStore {
           || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '.';
       sb.append(ok ? c : '_');
     }
-    // Separators are already replaced so the path cannot escape; consecutive dots are still
-    // collapsed to avoid producing a name like "."
+    // Path separators and consecutive dots are normalized to keep the result within the directory.
     String name = sb.toString();
     while (name.contains("..")) {
       name = name.replace("..", "__");
@@ -226,9 +202,8 @@ public class OAuth2TokenStore {
   }
 
   /**
-   * Writes a temp file in the same directory and then renames it. Overwriting in place means
-   * that if the process is killed halfway through, the next read gets half a JSON document.
-   * Same directory is required -- a cross-directory rename is not guaranteed to be atomic.
+   * Writes through a same-directory temporary file and atomically replaces the target when
+   * supported.
    */
   private static void writeAtomic(Path target, String content) {
     try {
@@ -251,7 +226,9 @@ public class OAuth2TokenStore {
     }
   }
 
-  /** A token is equivalent to a password; nobody else on a multi-user machine may read it. Silently skipped on non-POSIX filesystems. */
+  /**
+   * Restricts a token file to owner read and write access on POSIX file systems.
+   */
   private static void restrictFile(Path file) {
     try {
       Set<PosixFilePermission> perms = new HashSet<>();
@@ -259,7 +236,7 @@ public class OAuth2TokenStore {
       perms.add(PosixFilePermission.OWNER_WRITE);
       Files.setPosixFilePermissions(file, perms);
     } catch (Exception ignore) {
-      // Windows and similar do not support POSIX permissions
+      // POSIX permissions are unavailable on some file systems.
     }
   }
 
@@ -271,7 +248,7 @@ public class OAuth2TokenStore {
       perms.add(PosixFilePermission.OWNER_EXECUTE);
       Files.setPosixFilePermissions(dir, perms);
     } catch (Exception ignore) {
-      // As above
+      // POSIX permissions are unavailable on some file systems.
     }
   }
 }

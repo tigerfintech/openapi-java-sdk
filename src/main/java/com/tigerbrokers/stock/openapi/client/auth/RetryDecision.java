@@ -1,11 +1,9 @@
 package com.tigerbrokers.stock.openapi.client.auth;
 
 /**
- * Whether to retry after a 401, and which credential to retry with.
+ * Authentication retry decision and replacement credential.
  *
- * <p>There is deliberately no "retry with the same credential" option: sending an already
- * rejected credential again is pure waste and just earns another 401. So {@link #retry}
- * always carries a new credential.
+ * <p>A retry must use a credential different from the rejected credential.</p>
  */
 public class RetryDecision {
 

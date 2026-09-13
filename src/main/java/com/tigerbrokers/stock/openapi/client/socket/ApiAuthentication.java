@@ -11,19 +11,9 @@ import com.tigerbrokers.stock.openapi.client.util.TigerSignature;
 import com.tigerbrokers.stock.openapi.client.util.builder.HeaderBuilder;
 
 /**
- * Description:
- * Created by lijiawen on 2018/06/06.
+ * Authentication credentials for a socket connection.
  *
- * <p>Carries the credential the socket connect message needs. Two mutually exclusive shapes:
- * <b>tigerId + sign</b> (the legacy way) or <b>access_token</b> (OAuth2).
- *
- * <p>The two are never sent together. The server decides which branch to take by asking
- * "is {@code sign} blank" -- send both and it takes the signature branch, so the token is
- * ignored. Keeping them exclusive here means the decision is made in one place.
- *
- * <p>Signature mode behaves exactly as before: {@link #getSign()} returns the RSA signature
- * computed at build time and {@link #getAccessToken()} returns null, so the connect message
- * is byte-for-byte what it always was.
+ * <p>Signature credentials and OAuth2 access tokens are mutually exclusive.</p>
  */
 public class ApiAuthentication {
 
@@ -32,13 +22,7 @@ public class ApiAuthentication {
   private String sign;
   private String version = HeaderBuilder.DEFAULT_VERSION;
 
-  /**
-   * The OAuth2 session, non-null only in OAuth2 mode.
-   *
-   * <p>The session rather than a token string: a socket connection can outlive a token, and
-   * every reconnect has to ask for the token that is valid <b>now</b>. Caching the string
-   * here is what would make a reconnect present an expired credential.
-   */
+  /** OAuth2 session used to resolve a token for each connection attempt. */
   private OAuth2SessionManager sessions;
 
   public ApiAuthentication(ClientConfig clientConfig) {
@@ -80,14 +64,10 @@ public class ApiAuthentication {
   }
 
   /**
-   * A currently valid access token, or null in signature mode.
+   * Returns a current access token, or {@code null} in signature mode.
    *
-   * <p>Fetched on every call rather than cached, so a reconnect always presents a fresh
-   * credential. Refreshes synchronously when the token is close to expiry (single-flight).
-   *
-   * <p>Returns null instead of throwing when no authorization exists yet: this sits on the
-   * netty connect path, where an exception would surface as a bare channel failure. Null
-   * lets the caller log the real reason.
+   * <p>The token is resolved for each connection attempt and refreshed synchronously using the
+   * session manager's single-flight refresh.</p>
    */
   public String getAccessToken() {
     if (sessions == null) {
@@ -102,11 +82,7 @@ public class ApiAuthentication {
   }
 
   /**
-   * Builds the credential from the config, picking the mode from
-   * {@link ClientConfig#authentication}.
-   *
-   * <p>OAuth2 when that field holds an {@link OAuth2Authentication}, signature otherwise --
-   * including when it is null, which is every existing caller.
+   * Builds socket authentication from the configured authentication implementation.
    */
   public static ApiAuthentication build(ClientConfig clientConfig) {
     return build(clientConfig, clientConfig.privateKey, HeaderBuilder.DEFAULT_VERSION);
@@ -152,13 +128,7 @@ public class ApiAuthentication {
     return authentication;
   }
 
-  /**
-   * Extracts the session manager when the config asks for OAuth2.
-   *
-   * <p>Recognizes {@link OAuth2Authentication} specifically rather than just the
-   * {@code OAUTH2} type: the session manager is what the socket path needs, and only that
-   * class exposes one. Another OAUTH2 implementation would have nothing to hand over.
-   */
+  /** Returns the session manager from a configured {@link OAuth2Authentication}. */
   private static OAuth2SessionManager oauth2SessionOf(ClientConfig clientConfig) {
     if (clientConfig == null || clientConfig.authentication == null) {
       return null;
@@ -174,11 +144,7 @@ public class ApiAuthentication {
     return null;
   }
 
-  /**
-   * Prints no credential value: neither the signature nor the token.
-   *
-   * <p>Both are usable credentials, and this object shows up in logs.
-   */
+  /** Returns a representation that excludes signature and access-token values. */
   @Override
   public String toString() {
     return "ApiAuthentication{tigerId=" + tigerId

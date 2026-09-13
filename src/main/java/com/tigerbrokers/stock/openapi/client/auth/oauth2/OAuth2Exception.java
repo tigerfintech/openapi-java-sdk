@@ -1,11 +1,10 @@
 package com.tigerbrokers.stock.openapi.client.auth.oauth2;
 
 /**
- * A failure during OAuth2 authorization.
+ * OAuth2 authorization or token-management failure.
  *
- * <p>It carries a {@link Category} rather than an error-code string because the only
- * distinctions a caller actually acts on are "retry", "re-authorize" and "fix your config".
- * The raw error returned by the AS goes in the message for diagnosis.</p>
+ * <p>The category identifies the required recovery action. Server error details are retained in
+ * the exception message.</p>
  */
 public class OAuth2Exception extends RuntimeException {
 
@@ -22,20 +21,13 @@ public class OAuth2Exception extends RuntimeException {
     CALLBACK_FAILED,
 
     /**
-     * Device flow: the user did not approve within the user_code's lifetime, or explicitly denied.
+     * Device authorization did not complete before expiration or was denied.
      *
-     * <p>Kept separate from {@link #REAUTHORIZATION_REQUIRED} because the action differs: this
-     * one only needs <b>a fresh device authorization</b> (a new user_code). The local token was
-     * not touched, and this is not "authorization became invalid".</p>
+     * <p>A new device authorization is required; existing persisted tokens are not affected.</p>
      */
     DEVICE_AUTHORIZATION_FAILED,
 
-    /**
-     * The user has to go through authorization again.
-     *
-     * <p>The refresh_token expired, authorization was revoked, or it never happened at all.
-     * Retrying is pointless.</p>
-     */
+    /** Authorization must be performed again before a token can be obtained. */
     REAUTHORIZATION_REQUIRED,
 
     /** The token endpoint call failed, and not in the terminal way above. */
@@ -61,7 +53,7 @@ public class OAuth2Exception extends RuntimeException {
     return category;
   }
 
-  /** Whether this means "re-authorization is the only option" -- callers use it to decide whether to prompt. */
+  /** Returns whether reauthorization is required. */
   public boolean isReauthorizationRequired() {
     return category == Category.REAUTHORIZATION_REQUIRED;
   }

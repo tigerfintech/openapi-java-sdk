@@ -19,105 +19,32 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
- * OAuth2 session management: authorization, persistence, refresh.
+ * Manages OAuth2 authorization, token persistence, and token refresh.
  *
- * <p>Transport-agnostic -- it only handles "how to obtain and keep a valid access token" and
- * knows nothing about business requests. Applying the token to a request is the next layer's
- * job.</p>
- *
- * <p>Simplest usage (dynamic registration, requesting every scope the AS supports):</p>
- * <pre>
- * OAuth2SessionManager sessions = OAuth2SessionManager.loginWithDefaults(
- *     url -&gt; System.out.println("open: " + url));
- *
- * String token = sessions.getAccessToken();   // refreshes automatically when needed
- * </pre>
- *
- * <p>Using a clientId obtained by registering by hand (curl POST /oauth2/register). The
- * callback port defaults to 18888 and must match the redirect_uri of that registration:</p>
- * <pre>
- * OAuth2SessionManager sessions = OAuth2SessionManager.builder()
- *     .clientId("your-client-id")
- *     .callbackPort(18888)          // optional; this is the manual-mode default
- *     .build();
- * sessions.loginIfNeeded(callback);
- * </pre>
- *
- * <p>With no local browser (a server, a container, a machine reached over SSH), use the device
- * flow -- loopback cannot receive the callback in those environments:</p>
- * <pre>
- * OAuth2SessionManager sessions = OAuth2SessionManager.builder().build();
- * sessions.loginWithDeviceCodeIfNeeded(d -&gt; {
- *   System.out.println("open " + d.getVerificationUri());
- *   System.out.println("enter " + d.getUserCode());
- * });
- * </pre>
- *
- * <p>The scope is not chosen by the application: authorization always requests every
- * {@code scopes_supported} entry from the AS metadata, in both modes. Dynamic registration
- * itself declares no scope (the AS decides the range). See {@code docs/oauth2.md}.</p>
- *
- * <p>Thread safety: {@link #getAccessToken()} may be called concurrently, and refresh is
- * single-flight (only one thread actually hits the token endpoint at a time).</p>
+ * <p>Authorization requests all scopes advertised by the authorization server. Access-token
+ * refresh is thread-safe and single-flight for concurrent callers.</p>
  */
 public class OAuth2SessionManager {
 
-  /**
-   * Environment-variable override for the default issuer.
-   *
-   * <p>The server's production issuer is itself injected as {@code ${OAUTH2_ISSUER}}, so we
-   * leave the same hook here to avoid a code change per environment.</p>
-   */
+  /** Environment-variable override for the default issuer. */
   public static final String ENV_ISSUER = "TIGEROPEN_OAUTH2_ISSUER";
 
-  /**
-   * Production authorization server. Override with the {@link #ENV_ISSUER} environment
-   * variable, or by passing an issuer explicitly to the builder, to point at another
-   * environment.
-   */
+  /** Production authorization server. */
   private static final String BUILTIN_ISSUER = "https://openapi-oauth2.tigerfintech.com";
 
-  /** Refresh early once inside this window before expiry. */
+  /** Access-token refresh-ahead window. */
   private static final long DEFAULT_REFRESH_AHEAD_MILLIS = 300_000L;
 
-  /** Overall timeout for the user completing authorization in the browser. */
+  /** Authorization completion timeout in minutes. */
   private static final long DEFAULT_AUTHORIZE_TIMEOUT_MINUTES = 5;
 
-  /**
-   * Device-flow polling interval in seconds. The default mandated by RFC 8628 §3.5.
-   *
-   * <p>Tiger's AS <b>does not return {@code interval}</b> in the device authorization response
-   * (verified in testing), so this value is used essentially always. If the AS starts returning
-   * one, that takes precedence.</p>
-   */
+  /** Default device-flow polling interval from RFC 8628, in seconds. */
   public static final long DEFAULT_DEVICE_POLL_INTERVAL_SECONDS = 5;
 
-  /**
-   * How many seconds to add to the interval on {@code slow_down} (RFC 8628 §3.5).
-   *
-   * <p>The spec says "increase" without giving a number; 5 seconds is its own example and the
-   * common practice. It accumulates rather than applying once -- repeated slow_down means we
-   * are still going too fast.</p>
-   */
+  /** Polling interval increment for an RFC 8628 {@code slow_down} response. */
   private static final long DEVICE_SLOW_DOWN_INCREMENT_SECONDS = 5;
 
-  /**
-   * The agreed callback port for manual-clientId mode.
-   *
-   * <p>Registering by hand means writing a concrete redirect_uri into the registration
-   * request, so the port has to be known at that moment and this mode cannot use a random
-   * one -- there must be a fixed value both sides know. The SDK only receives a client_id
-   * back and never learns what redirect_uri was registered, hence the agreed default,
-   * corresponding to {@code http://127.0.0.1:18888/callback}.</p>
-   *
-   * <p>18888 was chosen over the likes of 8080 or 3000 to stay clear of the default Linux
-   * ephemeral port range (from 32768) so it cannot collide with a system-assigned port, and
-   * clear of common development ports so it does not fight the user's own services.</p>
-   *
-   * <p>Dynamic registration is unaffected and still uses a system-assigned random port -- there
-   * the redirect_uri is sent by the SDK itself without a port, so there is nothing to agree on
-   * in advance.</p>
-   */
+  /** Default loopback port for clients with an explicitly registered redirect URI. */
   public static final int DEFAULT_MANUAL_CALLBACK_PORT = 18888;
 
   private static final String GRANT_TYPE_DEVICE_CODE =
@@ -127,34 +54,15 @@ public class OAuth2SessionManager {
 
   private final String issuer;
 
-  /**
-   * The application name declared at dynamic registration, shown on the user's authorization
-   * management page.
-   *
-   * <p>Deliberately not configurable. One issuer stores exactly one registration record and the
-   * first registrant wins, so a caller-supplied name would only take effect on a machine that has
-   * never registered -- producing a value that differs between users for no reason. Keeping it
-   * fixed also makes the name a reliable indicator of which SDK created the record.</p>
-   */
+  /** Client name used for dynamic registration. */
   private static final String CLIENT_NAME = "Tiger Java SDK";
 
-  /**
-   * The loopback port the application explicitly asked for; 0 means unspecified.
-   *
-   * <p>When unspecified: dynamic registration uses a system-assigned port, manual clientId uses
-   * {@link #DEFAULT_MANUAL_CALLBACK_PORT}. See {@link #effectiveCallbackPort()}.</p>
-   */
+  /** Configured loopback port, or {@code 0} when unspecified. */
   private final int callbackPort;
   private final OAuth2TokenStore store;
   private final long authorizeTimeoutMinutes;
 
-  /**
-   * The clientId the application specified explicitly; null means dynamic registration.
-   *
-   * <p>Final -- its origin must not be overwritten by a later assignment. It used to share one
-   * mutable field with dynamic registration, which lost track at runtime of "who supplied this
-   * clientId".</p>
-   */
+  /** Explicit client ID, or {@code null} when dynamic registration is used. */
   private final String explicitClientId;
 
   /** The clientId from dynamic registration or read back from {@code clients/}. Always null in explicit mode. */
@@ -173,8 +81,7 @@ public class OAuth2SessionManager {
       throw new IllegalArgumentException("issuer is required");
     }
     this.issuer = trimTrailingSlash(builder.issuer);
-    // The scope is always the full set, but "which set" has to be asked of the AS. The
-    // constructor sends no request, otherwise builder().build() would fail offline
+    // Resolve advertised scopes lazily so construction remains available offline.
     this.callbackPort = builder.callbackPort;
     this.explicitClientId = isBlank(builder.clientId) ? null : builder.clientId.trim();
     this.store = builder.store != null ? builder.store : new OAuth2TokenStore(builder.home);
@@ -192,21 +99,12 @@ public class OAuth2SessionManager {
   }
 
   /**
-   * One-line authorization: default issuer, default storage, dynamic registration, and a
-   * browser only when needed.
+   * Authorizes with default settings and dynamic client registration when no reusable token
+   * exists.
    *
-   * <p>If authorization already happened it reuses the local token (refreshing it when close to
-   * expiry), and only calls {@code onAuthorizationUrl} when the user genuinely has to consent.
-   * So a second run usually pops up nothing.</p>
+   * <p>The callback receives the authorization URL; this method does not open a browser.</p>
    *
-   * <p><b>It does not open a browser by itself</b> -- the URL goes to the callback and whether
-   * to open it is the application's decision. Otherwise an unattended script would hang on an
-   * authorization page nobody is looking at.</p>
-   *
-   * <p>To use a clientId you registered by hand, or a fixed callback port, use
-   * {@link #builder()}.</p>
-   *
-   * @param onAuthorizationUrl callback that receives the URL when user authorization is needed
+   * @param onAuthorizationUrl callback invoked when interactive authorization is required
    */
   public static OAuth2SessionManager loginWithDefaults(
       Consumer<String> onAuthorizationUrl) {
@@ -216,13 +114,10 @@ public class OAuth2SessionManager {
   }
 
   /**
-   * One-line device-flow authorization: default issuer, default storage, dynamic registration.
+   * Authorizes through the device flow with default settings and dynamic client registration
+   * when no reusable token exists.
    *
-   * <p>For environments with no local browser. If authorization already happened it reuses the
-   * local token without bothering the user. See
-   * {@link #loginWithDeviceCodeIfNeeded(Consumer)} for the trade-offs.</p>
-   *
-   * @param onDeviceAuthorization callback that receives the user_code and verification page address
+   * @param onDeviceAuthorization callback receiving the user code and verification URI
    */
   public static OAuth2SessionManager loginWithDeviceCodeDefaults(
       Consumer<OAuth2DeviceAuthorization> onDeviceAuthorization) {
@@ -230,8 +125,6 @@ public class OAuth2SessionManager {
     sessions.loginWithDeviceCodeIfNeeded(onDeviceAuthorization);
     return sessions;
   }
-
-  // ------------------------------------------------------------ public API
 
   /**
    * Uses the existing local authorization if it is usable, otherwise runs a full loopback +
@@ -258,20 +151,17 @@ public class OAuth2SessionManager {
       throw new IllegalArgumentException("onAuthorizationUrl is required");
     }
     OAuth2Metadata meta = metadata();
-    // 64 and 24 bytes, matching the Python SDK and the cross-SDK spec. RFC 7636 allows a
-    // verifier of 43-128 characters; 64 bytes base64url-encodes to 86, comfortably inside.
+    // Generate an RFC 7636-compliant verifier and a high-entropy state value.
     String verifier = randomUrlSafe(64);
     String challenge = s256(verifier);
     String state = randomUrlSafe(24);
 
-    // The listener has to be up before the authorization URL is handed out
+    // Start the listener before exposing the authorization URL.
     try (LoopbackReceiver receiver = new LoopbackReceiver(effectiveCallbackPort())) {
       String redirectUri = receiver.getRedirectUri();
       String effectiveClientId = resolveClientId(meta);
 
-      // Always send the scope, and always the full set: an authorization-code request has to
-      // state the range it wants, and that holds in both modes (where the clientId came from
-      // makes no difference here)
+      // Request the complete advertised scope set in both client registration modes.
       String url = meta.getAuthorizationEndpoint() + "?"
           + query("response_type", "code")
           + "&" + query("client_id", effectiveClientId)
@@ -315,31 +205,13 @@ public class OAuth2SessionManager {
   }
 
   /**
-   * Uses the existing local authorization if it is usable, otherwise runs a device-flow
-   * authorization (RFC 8628).
+   * Uses a reusable token or performs OAuth2 device authorization as defined by RFC 8628.
    *
-   * <p>For when the machine running the SDK has no browser -- a server, a container, a remote
-   * machine reached over SSH. The loopback route does not work in those environments (not
-   * "worse experience", it simply cannot receive the callback): the user opens the authorization
-   * link on their own laptop, the browser redirects to <b>the laptop's</b> 127.0.0.1, and the
-   * SDK is listening on the server where nothing is listening.</p>
+   * <p>Device authorization is intended for environments that cannot receive a loopback browser
+   * callback. It lacks the redirect binding provided by loopback authorization with PKCE and is
+   * more susceptible to phishing.</p>
    *
-   * <p>The device flow needs no redirect_uri, no local listener and no port negotiation. The
-   * user opens the verification page on <b>any</b> device with a browser and enters the
-   * user_code.</p>
-   *
-   * <p>Blocks until the user approves, denies, or the user_code expires (the {@code expires_in}
-   * from the AS, measured at 600 seconds).</p>
-   *
-   * <p><b>Less secure than loopback + PKCE</b>: the device flow has no redirect binding and no
-   * proof that the initiator and the redeemer are the same party, so it can be phished -- an
-   * attacker starts their own device authorization and tricks the user into entering that code,
-   * so what the user approves is the attacker's session. Prefer
-   * {@link #loginIfNeeded(Consumer)} when a local browser exists; this method is for
-   * environments that genuinely have none.</p>
-   *
-   * @param onDeviceAuthorization callback receiving the user_code and verification page address;
-   *     the application is responsible for displaying them to the user
+   * @param onDeviceAuthorization callback receiving the user code and verification URI
    */
   public OAuth2Token loginWithDeviceCodeIfNeeded(
       Consumer<OAuth2DeviceAuthorization> onDeviceAuthorization) {
@@ -370,7 +242,7 @@ public class OAuth2SessionManager {
     OAuth2DeviceAuthorization device =
         requestDeviceAuthorization(meta.getDeviceAuthorizationEndpoint(), effectiveClientId);
 
-    // Hand out the code first so the user can start, and only then begin polling
+    // Deliver the user code before polling begins.
     onDeviceAuthorization.accept(device);
 
     OAuth2Token fresh = pollForDeviceToken(meta.getTokenEndpoint(), device, effectiveClientId);
@@ -379,11 +251,10 @@ public class OAuth2SessionManager {
   }
 
   /**
-   * Returns a currently usable access token, refreshing it when close to expiry.
+   * Returns a usable access token and refreshes it when required.
    *
-   * <p>Throws {@link OAuth2Exception.Category#REAUTHORIZATION_REQUIRED} when authorization has
-   * never happened -- it <b>never opens a browser implicitly</b>. Authorization is a user
-   * interaction and must be initiated explicitly by the application.</p>
+   * <p>This method does not start interactive authorization. Missing or invalid authorization
+   * raises {@link OAuth2Exception.Category#REAUTHORIZATION_REQUIRED}.</p>
    */
   public String getAccessToken() {
     OAuth2Token current = currentToken();
@@ -430,10 +301,7 @@ public class OAuth2SessionManager {
       OAuth2Token refreshed =
           exchange(metadata().getTokenEndpoint(), form, current.getClientId());
 
-      // We are a public client, so the server's reuseRefreshTokens(!isPublic) is false -- the
-      // refresh_token rotates on every refresh and a normal response always carries the new one.
-      // This covers the case where the response omits it: carrying the old one forward is safer
-      // than dropping it, since dropping it leaves only re-authorization.
+      // Preserve the current refresh token if the authorization server omits a replacement.
       if (!refreshed.hasRefreshToken()) {
         refreshed.setRefreshToken(current.getRefreshToken());
       }
@@ -443,55 +311,36 @@ public class OAuth2SessionManager {
   }
 
   /**
-   * Recovery after a 401: refresh using <b>the access token value that failed</b>.
+   * Refreshes after an unauthorized response using the access token applied to the request.
    *
-   * <p>The difference from {@link #refresh} is the parameter -- this only needs "the token
-   * string we just used", not an {@link OAuth2Token} object. That string is exactly what the
-   * request side recorded.
+   * <p>Concurrent responses for an already replaced token reuse the current token, ensuring a
+   * single-flight refresh.</p>
    *
-   * <p>This is what prevents a 401 storm: the moment token A expires there may be 20 in-flight
-   * requests all using A, and 20 401s come back one after another. Comparing "I used A, current
-   * is already B" returns B directly, so only the first one actually triggers a refresh.
-   *
-   * @param failedAccessToken the access token value actually used for the request
-   * @return a usable token, possibly one another thread just refreshed
-   * @throws OAuth2Exception when refresh fails; category {@code REAUTHORIZATION_REQUIRED} means
-   *     only re-authorization will help
+   * @param failedAccessToken access token applied to the unauthorized request
+   * @return current usable token
+   * @throws OAuth2Exception when refresh fails
    */
   public OAuth2Token refreshAfterUnauthorized(String failedAccessToken) {
     synchronized (refreshLock) {
       OAuth2Token current = currentToken();
-      // Already replaced by another thread -- do not refresh, just use the new one
+      // Reuse a token already replaced by another thread.
       if (current != null && failedAccessToken != null
           && !equalsToken(current.getAccessToken(), failedAccessToken)) {
         return current;
       }
-      // Reaching here means current IS the one that failed (or there is none at all). The
-      // same-looking check inside refresh() can never fire on this path (it would compare
-      // current against itself); the real check is the one above -- and since we already hold
-      // refreshLock, the current we read cannot change under us.
+      // The lock preserves the token comparison until refresh completes.
       return refresh(current);
     }
   }
 
   /**
-   * Clears the local token. The client_id is kept, so the next authorization needs no
-   * re-registration.
-   */
-  /**
-   * Ends the authorization: revokes it on the server (RFC 7009), then clears the local token.
+   * Ends authorization by attempting RFC 7009 revocation and removing the local token.
    *
-   * <p>The registered client_id is <b>kept</b> -- that is this machine's application identity,
-   * not an authorization. Deleting it would register a brand new client on the AS every time
-   * the user logs back in.</p>
+   * <p>The dynamic client registration is retained. Local token removal occurs even if server
+   * revocation fails.</p>
    *
-   * <p><b>The local token is always cleared, even when revocation fails.</b> The user asked to
-   * log out; refusing to do so locally because the network is down would be the wrong answer.
-   * The return value says whether the server side actually happened.</p>
-   *
-   * @return {@code true} if the server confirmed the revocation; {@code false} if only the
-   *     local token was cleared, meaning <b>the credential is still valid on the server</b>
-   *     (up to the refresh_token TTL) and the caller may want to tell the user or retry
+   * @return {@code true} when server revocation succeeds; {@code false} when only local state is
+   *     cleared
    */
   public boolean logout() {
     String id = knownClientId();
@@ -508,16 +357,11 @@ public class OAuth2SessionManager {
   }
 
   /**
-   * Best-effort server-side revocation. <b>Never throws</b> -- logout must not fail because of it.
+   * Attempts server-side token revocation without failing local logout.
    *
-   * <p>Revokes the <b>refresh_token</b> when there is one: RFC 7009 §2.1 says the AS SHOULD also
-   * invalidate the access tokens issued from it, so one call covers both. Falling back to the
-   * access_token alone would leave the refresh_token alive, which is the more dangerous half --
-   * it is the one that lives for 30 days.</p>
-   *
-   * <p>RFC 7009 §2.2 makes the endpoint answer {@code 200} for an unknown or already-revoked
-   * token too, so a success here does not prove the token existed -- only that the server has
-   * no objection. That is exactly what we want to know.</p>
+   * <p>The refresh token is preferred so the authorization server can invalidate associated
+   * access tokens as described by RFC 7009. An unknown or previously revoked token may still
+   * produce a successful response under RFC 7009.</p>
    */
   private boolean revoke(OAuth2Token current, String clientId) {
     if (current == null || clientId == null) {
@@ -532,7 +376,7 @@ public class OAuth2SessionManager {
       OAuth2Metadata meta = metadata();
       String endpoint = meta.getRevocationEndpoint();
       if (isBlank(endpoint)) {
-        // Nothing to call. Not an error -- revocation is optional in RFC 8414.
+        // RFC 8414 defines the revocation endpoint as optional.
         ApiLogger.warn("AS advertises no revocation_endpoint, logging out locally only");
         return false;
       }
@@ -590,10 +434,9 @@ public class OAuth2SessionManager {
   }
 
   /**
-   * The client_id currently in use, or null when it has not been settled yet.
+   * Returns the current client ID without performing network operations.
    *
-   * <p>Sends no request and registers nothing. Use it when diagnosing "which client is actually
-   * being used".</p>
+   * @return client ID, or {@code null} before dynamic registration
    */
   public String getClientId() {
     return knownClientId();
@@ -603,8 +446,6 @@ public class OAuth2SessionManager {
   public boolean hasExplicitClientId() {
     return explicitClientId != null;
   }
-
-  // ------------------------------------------------------------- internal
 
   /**
    * Whether the local token is directly usable, refreshing it if necessary.
@@ -634,13 +475,9 @@ public class OAuth2SessionManager {
   }
 
   /**
-   * Which clientId to use right now, with no side effects: no registration, no requests.
+   * Returns the configured or persisted client ID without performing network operations.
    *
-   * <p>In explicit mode this is whatever the application supplied and <b>{@code clients/} is not
-   * consulted</b> -- the application declared its own identity, so the SDK neither memorizes it
-   * on its behalf nor substitutes someone else's registration.</p>
-   *
-   * @return null when it cannot be settled yet (unspecified and never registered on this machine)
+   * @return client ID, or {@code null} before dynamic registration
    */
   private String knownClientId() {
     if (explicitClientId != null) {
@@ -675,9 +512,7 @@ public class OAuth2SessionManager {
 
   private void persist(OAuth2Token fresh) {
     this.token = fresh;
-    // Explicit mode leaves registeredClientId alone: it records "what was dynamically
-    // registered", and overwriting it with an explicit clientId would mean a later run that
-    // passes no clientId reads someone else's authorization
+    // Preserve the distinction between explicit and dynamically registered client IDs.
     if (explicitClientId == null) {
       this.registeredClientId = fresh.getClientId();
     }
@@ -694,13 +529,10 @@ public class OAuth2SessionManager {
   }
 
   /**
-   * Which loopback port this authorization uses.
+   * Selects the configured loopback port.
    *
-   * <p>An explicit value is used as-is. When unspecified there are two cases: dynamic
-   * registration uses 0 (system-assigned, and per RFC 8252 §7.3 the AS ignores the port), while
-   * a manual clientId uses {@link #DEFAULT_MANUAL_CALLBACK_PORT} -- filling in the redirect_uri
-   * by hand requires knowing the port, and a random one cannot be written down in
-   * advance.</p>
+   * <p>Dynamic registration uses a system-assigned port under RFC 8252. Explicit registration
+   * uses {@link #DEFAULT_MANUAL_CALLBACK_PORT} unless a port is configured.</p>
    */
   private int effectiveCallbackPort() {
     if (callbackPort > 0) {
@@ -710,17 +542,10 @@ public class OAuth2SessionManager {
   }
 
   /**
-   * The scope requested at authorization: every {@code scopes_supported} entry from the AS metadata.
+   * Returns all scopes advertised in {@code scopes_supported} metadata.
    *
-   * <p>The list is not hardcoded -- when the server adds a new scope the SDK keeps up without a
-   * code change. The application cannot specify it either: the SDK serves the "hold a token and
-   * call whatever endpoint" case, does not know in advance which will be used, and one missing
-   * scope means a 403 at runtime.</p>
-   *
-   * <p>{@code scopes_supported} is RECOMMENDED rather than REQUIRED in RFC 8414. When the AS
-   * omits it we must not substitute a guessed hardcoded list (guess wrong and you either lack
-   * permission or request permissions the user never intended to give) -- the only option is to
-   * fail loudly.</p>
+   * <p>RFC 8414 permits omission of this field; this client requires it instead of substituting
+   * a hardcoded scope list.</p>
    */
   private String scopes() {
     String cached = this.resolvedScopes;
@@ -765,17 +590,10 @@ public class OAuth2SessionManager {
   }
 
   /**
-   * Settles the client_id before authorization: explicitly provided &gt; registered on this
-   * machine &gt; register a new one.
+   * Resolves an explicit or persisted client ID, or performs dynamic registration.
    *
-   * <p>An explicitly provided one is returned immediately and <b>{@code clients/} is not touched
-   * at all</b>: not read (no substituting a dynamically registered one) and not written (the
-   * application config already has it, so the SDK keeps no second copy). As a result
-   * {@code clients/} only ever holds dynamic registrations.</p>
-   *
-   * <p>Dynamic registration happens once and is then persisted. Registering a new one on every
-   * startup is not acceptable -- junk client_ids would pile up on the AS and the user would see
-   * dozens of identically named applications on the authorization management page.</p>
+   * <p>Explicit client IDs are not read from or written to registration storage. Dynamic
+   * registrations are persisted and reused while their granted scopes remain sufficient.</p>
    */
   private String resolveClientId(OAuth2Metadata meta) {
     if (explicitClientId != null) {
@@ -788,9 +606,7 @@ public class OAuth2SessionManager {
       return this.registeredClientId;
     }
     if (saved != null) {
-      // What is stored is the range the AS originally granted this client. We land here once the
-      // server has added a new scope -- authorizing with the old client would just be rejected
-      // with invalid_scope, so a fresh registration is needed.
+      // Register again when the stored client no longer covers the advertised scopes.
       ApiLogger.info("registered scopes no longer cover all scopes supported by AS,"
           + " re-registering");
     }
@@ -804,26 +620,17 @@ public class OAuth2SessionManager {
   private String register(String registrationEndpoint) {
     Map<String, Object> payload = new LinkedHashMap<>();
     payload.put("client_name", CLIENT_NAME);
-    // By default no port is written: a random port cannot be registered in advance, so we rely
-    // on the AS ignoring the port per RFC 8252 §7.3. When the application fixed a port
-    // explicitly we register it verbatim -- that is what an AS doing strict exact matching needs.
+    // RFC 8252 permits dynamic loopback redirects to use a system-assigned port.
     String registeredRedirect = callbackPort > 0
         ? "http://127.0.0.1:" + callbackPort + "/callback"
         : "http://127.0.0.1/callback";
     payload.put("redirect_uris", Collections.singletonList(registeredRedirect));
-    // Declare both grants so one client covers loopback and the device flow. clients/ keeps a
-    // single record per issuer, so registering them separately would mean that using loopback
-    // first and the device flow later sends a client without device_code support and gets
-    // rejected by the AS, with no visible reason for the user.
+    // Register both grants so one persisted client supports loopback and device authorization.
     payload.put("grant_types", Arrays.asList(
         "authorization_code", "refresh_token", GRANT_TYPE_DEVICE_CODE));
     payload.put("response_types", Collections.singletonList("code"));
     payload.put("token_endpoint_auth_method", "none");
-    // Declare no scope: registration only records "who this client is", and the range is the
-    // AS's own policy (in testing, a client registered without a scope receives all of
-    // scopes_supported). Declaring one would instead pin the client to whatever list the SDK saw
-    // at the time -- once the server adds a new scope that client could never request it, and
-    // since the registration is persisted and reused, one registration lasts a long time.
+    // Registration omits scope so the authorization server determines the permitted range.
 
     JSONObject json = OAuth2HttpUtils.postJson(registrationEndpoint, payload);
     String newClientId = json.getString("client_id");
@@ -836,11 +643,7 @@ public class OAuth2SessionManager {
     reg.setIssuer(issuer);
     reg.setClientId(newClientId);
     reg.setClientName(CLIENT_NAME);
-    // Record the range the AS actually granted, not the one we wanted -- the registration
-    // request declared no scope, so what we get is the AS's call. Recording it wrong would skew
-    // the coverage check below: we would think it suffices and only get rejected at
-    // authorization. If the response omits the scope, fall back to the full set, otherwise every
-    // startup would decide it is insufficient and register again.
+    // Persist the granted scope, falling back to the advertised scope when omitted.
     String grantedAtRegistration = json.getString("scope");
     reg.setRegisteredScopes(
         isBlank(grantedAtRegistration) ? scopes() : normalizeScopes(grantedAtRegistration));
@@ -867,8 +670,7 @@ public class OAuth2SessionManager {
               + " " + json.getString("error_description"));
     }
     if (isBlank(device.getVerificationUri())) {
-      // With no verification page address the user has nowhere to go -- fail early rather than
-      // leave them staring at a lone code
+      // A verification URI is required to complete device authorization.
       throw new OAuth2Exception(OAuth2Exception.Category.DEVICE_AUTHORIZATION_FAILED,
           "device authorization response missing verification_uri");
     }
@@ -878,24 +680,17 @@ public class OAuth2SessionManager {
   }
 
   /**
-   * Polls the token endpoint waiting for the user's approval.
+   * Polls for a device token according to RFC 8628.
    *
-   * <p><b>Deliberately does not reuse {@link #exchange}</b>: the same {@code error} means
-   * different things in the two places. During a token exchange or refresh,
-   * {@code invalid_grant} means "authorization is gone, delete the local token", whereas during
-   * polling it only means "this device_code expired or was denied" -- the local token has nothing
-   * to do with this attempt, so deleting it would be collateral damage (the user may still have
-   * a perfectly good authorization on disk). Cramming both into one method behind a flag means
-   * somebody eventually breaks one side.</p>
-   *
-   * <p>The interval comes from the AS's {@code interval}, falling back to RFC 8628's 5-second
-   * default -- Tiger's AS does not return that field in practice.</p>
+   * <p>Device polling errors are handled separately from refresh errors so an invalid device
+   * code does not remove an existing persisted token. The server-provided polling interval is
+   * used when present; otherwise the RFC 8628 default applies.</p>
    */
   private OAuth2Token pollForDeviceToken(String tokenEndpoint,
       OAuth2DeviceAuthorization device, String usedClientId) {
     long intervalSeconds = device.getInterval() != null && device.getInterval() > 0
         ? device.getInterval() : DEFAULT_DEVICE_POLL_INTERVAL_SECONDS;
-    // Trust the lifetime the AS gave us; fall back to a conservative value only if it gave none
+    // Use the server-provided lifetime, with a conservative fallback when omitted.
     long ttlSeconds = device.getExpiresIn() > 0 ? device.getExpiresIn() : 600;
     long deadline = System.currentTimeMillis() + ttlSeconds * 1000L;
 
@@ -905,10 +700,7 @@ public class OAuth2SessionManager {
     form.put("client_id", usedClientId);
 
     while (true) {
-      // Wait before polling: the user cannot possibly have approved in the instant after device
-      // authorization was issued. Never sleep past the deadline -- otherwise we would sit through
-      // a full interval after the user_code has already expired, wasting the user's time and
-      // possibly making one more doomed poll.
+      // Poll only within the device code lifetime.
       long leftMillis = deadline - System.currentTimeMillis();
       if (leftMillis > 0) {
         sleepMillis(Math.min(intervalSeconds * 1000L, leftMillis));
@@ -930,15 +722,12 @@ public class OAuth2SessionManager {
         continue;
       }
       if ("slow_down".equals(error)) {
-        // Accumulate rather than adding once: still getting slow_down means still too fast
+        // Apply the RFC 8628 incremental backoff for each slow_down response.
         intervalSeconds += DEVICE_SLOW_DOWN_INCREMENT_SECONDS;
         ApiLogger.info("device polling too fast, interval raised to {}s", intervalSeconds);
         continue;
       }
-      // Everything else is terminal. expired_token and access_denied are defined by RFC 8628;
-      // invalid_grant here also means the device_code is dead (an invalid device_code returns
-      // exactly this in testing), which is not the same as the identically named error during a
-      // refresh, so the local token is left alone.
+      // RFC 8628 terminal errors end this device attempt without modifying persisted tokens.
       String detail = error + (json.getString("error_description") == null ? ""
           : ": " + json.getString("error_description"));
       if ("access_denied".equals(error)) {
@@ -971,20 +760,12 @@ public class OAuth2SessionManager {
     JSONObject json = OAuth2HttpUtils.postForm(tokenEndpoint, form);
     if (json.getString("access_token") == null) {
       String error = json.getString("error");
-      // Both of these are terminal: retrying is pointless and only re-authorization helps.
-      //   invalid_grant  -- the refresh_token expired, or the user revoked authorization
-      //   invalid_client -- the client no longer exists on the AS (cleaned up, or wrong environment)
-      // Without clearing the local token, the next startup would pick it up and refresh again,
-      // failing for nothing every time.
+      // invalid_grant and invalid_client require reauthorization. Clear rejected local state
+      // to prevent repeated refresh failures; dynamic clients may register again.
       if ("invalid_grant".equals(error) || "invalid_client".equals(error)) {
         store.deleteToken(usedClientId);
         this.token = null;
-        // The AS no longer recognizes this client. A dynamically registered one must have its
-        // record cleared, otherwise the next authorization sends it again, gets rejected again,
-        // and the user has no way to recover. But an explicitly passed one must not touch
-        // clients/ -- that holds a different thing entirely (dynamic registrations), so deleting
-        // it would punish an innocent party; a misconfigured application is the application's own
-        // to fix.
+        // Remove a rejected dynamic registration so a later authorization can register again.
         if ("invalid_client".equals(error) && explicitClientId == null) {
           store.deleteClientRegistration(issuer);
           this.registeredClientId = null;
@@ -1006,9 +787,7 @@ public class OAuth2SessionManager {
     result.setClientId(usedClientId);
     result.setAccessToken(json.getString("access_token"));
     result.setRefreshToken(json.getString("refresh_token"));
-    // The AS may grant only part of it (the user ticks boxes on the consent page, or the
-    // client's registered range is narrower), so the response wins; fall back to what we requested
-    // only when it gives none
+    // Prefer the granted scope from the token response; use the requested scope when omitted.
     String granted = json.getString("scope");
     result.setScope(isBlank(granted) ? scopes() : granted);
     String type = json.getString("token_type");
@@ -1021,7 +800,7 @@ public class OAuth2SessionManager {
     return result;
   }
 
-  /** Whether the scope declared at registration covers what we need this time. */
+  /** Returns whether the registered scope contains every requested scope. */
   private static boolean scopesCover(String registered, String requested) {
     if (registered == null) {
       return false;
@@ -1035,12 +814,7 @@ public class OAuth2SessionManager {
     return true;
   }
 
-  /**
-   * Normalizes a scope: sorted and deduplicated.
-   *
-   * <p>Otherwise {@code "b a"} and {@code "a b"} would count as two different sets, making every
-   * startup decide that re-registration is needed.</p>
-   */
+  /** Returns a sorted, deduplicated, space-delimited scope string. */
   private static String normalizeScopes(String raw) {
     if (raw == null || raw.trim().isEmpty()) {
       throw new IllegalArgumentException("scopes is required");
@@ -1103,8 +877,6 @@ public class OAuth2SessionManager {
     }
   }
 
-  // -------------------------------------------------------------- builder
-
   public static class Builder {
     private String issuer = defaultIssuer();
     private String clientId;
@@ -1119,21 +891,11 @@ public class OAuth2SessionManager {
     }
 
     /**
-     * Sets the client_id explicitly (obtained beforehand by calling POST /oauth2/register
-     * yourself, see docs/sdk-integration.md §5.1). Leave it
-     * unset for dynamic registration.
+     * Sets an explicitly registered client ID.
      *
-     * <p>An explicitly passed clientId is <b>not persisted</b> -- it already lives in the
-     * application config and the SDK keeps no second copy. So a later construction that omits it
-     * cannot find the matching authorization; it has to be passed every time.</p>
-     *
-     * <p>In this mode the callback port defaults to {@link #DEFAULT_MANUAL_CALLBACK_PORT}, so the
-     * registration's redirect_uri must be {@code http://127.0.0.1:18888/callback}. Use
-     * {@link #callbackPort(int)} for a different port.</p>
-     *
-     * <p>The scope requested at authorization is still everything the AS supports, so this
-     * client's registered scope range has to cover the full set -- a narrower one
-     * gets the authorization rejected with {@code invalid_scope}.</p>
+     * <p>The value is not persisted and must be supplied for each session. Its registered scopes
+     * must cover all scopes advertised by the authorization server. The default redirect URI is
+     * {@code http://127.0.0.1:18888/callback} unless {@link #callbackPort(int)} is set.</p>
      */
     public Builder clientId(String clientId) {
       this.clientId = clientId;
@@ -1141,12 +903,12 @@ public class OAuth2SessionManager {
     }
 
     /**
-     * Fixes the loopback callback port; it must match the redirect_uri of your manual registration.
+     * Sets the loopback callback port.
      *
-     * <p>When unset: dynamic registration uses a system-assigned port, a manual clientId uses
-     * {@link #DEFAULT_MANUAL_CALLBACK_PORT}。</p>
+     * <p>The port must match the redirect URI of an explicitly registered client. Dynamic
+     * registration uses a system-assigned port when this value is unset.</p>
      *
-     * @param port 1024-65535; 0 means unspecified
+     * @param port port in the range 1024-65535, or {@code 0} when unspecified
      */
     public Builder callbackPort(int port) {
       if (port != 0 && (port < 1024 || port > 65535)) {
