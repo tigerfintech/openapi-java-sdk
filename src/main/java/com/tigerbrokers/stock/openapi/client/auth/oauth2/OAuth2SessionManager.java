@@ -71,13 +71,11 @@ public class OAuth2SessionManager {
   public static final String ENV_ISSUER = "TIGEROPEN_OAUTH2_ISSUER";
 
   /**
-   * WARNING: still a placeholder. This is the test environment -- the production issuer is
-   * injected as an environment variable on the server side, so there is no official value to
-   * copy here. This must be changed before launch, or the application must pass an issuer
-   * explicitly.
+   * Production authorization server. Override with the {@link #ENV_ISSUER} environment
+   * variable, or by passing an issuer explicitly to the builder, to point at another
+   * environment.
    */
-  private static final String BUILTIN_ISSUER =
-      "https://openapi-oauth2-test.qa.tigerbrokers.net";
+  private static final String BUILTIN_ISSUER = "https://openapi-oauth2.tigerfintech.com";
 
   /** Refresh early once inside this window before expiry. */
   private static final long DEFAULT_REFRESH_AHEAD_MILLIS = 300_000L;
