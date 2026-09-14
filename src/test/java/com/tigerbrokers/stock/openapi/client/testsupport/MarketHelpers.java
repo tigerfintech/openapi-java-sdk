@@ -12,11 +12,13 @@ import com.tigerbrokers.stock.openapi.client.https.request.option.OptionChainQue
 import com.tigerbrokers.stock.openapi.client.https.request.option.OptionExpirationQueryRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.quote.QuoteMarketRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.quote.QuoteRealTimeQuoteRequest;
+import com.tigerbrokers.stock.openapi.client.https.request.quote.QuoteStockTradeRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.option.OptionChainResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.option.OptionExpirationResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteMarketResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteRealTimeQuoteResponse;
+import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteStockTradeResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,7 +39,64 @@ public final class MarketHelpers {
   private static final ConcurrentHashMap<String, MarketItem> MARKET_STATE_CACHE =
       new ConcurrentHashMap<>();
 
+  /**
+   * Safe buy prices per symbol. Each miss costs two RPCs (real-time quote + trade meta) and
+   * several order tests place on the same symbol.
+   */
+  private static final ConcurrentHashMap<String, Double> SAFE_BUY_PRICE_CACHE =
+      new ConcurrentHashMap<>();
+
+  /**
+   * Fraction of the live price used for a "far from market" buy limit.
+   *
+   * <p>Half the market price is low enough that the order never fills, while staying inside
+   * the exchange's price-deviation tolerance. An absolute constant cannot do both: 0.01 never
+   * fills but is rejected outright on a stock trading in the hundreds.</p>
+   */
+  private static final double SAFE_BUY_PRICE_RATIO = 0.5;
+
   private MarketHelpers() {}
+
+  /**
+   * A BUY limit price far below {@code symbol}'s current quote but still within the
+   * exchange's price-deviation tolerance, aligned down to the symbol's tick size.
+   *
+   * <p>Both halves matter. A hardcoded constant such as {@code 0.01} is rejected with
+   * "Order price deviates too much" on anything but a penny stock, and a price that is not a
+   * clean multiple of the tick is rejected outright -- HK tick size varies by price band, so
+   * it cannot be assumed either.</p>
+   *
+   * @return the price, or null when no live quote or tick size is available -- the caller
+   *     should skip rather than guess a price that may or may not be accepted
+   */
+  public static Double safeBuyPrice(TigerHttpClient client, String symbol) {
+    if (client == null || symbol == null || symbol.isEmpty()) {
+      return null;
+    }
+    Double cached = SAFE_BUY_PRICE_CACHE.get(symbol);
+    if (cached != null) {
+      return cached;
+    }
+
+    Double latestPrice = getLatestPrice(client, symbol);
+    if (latestPrice == null || latestPrice <= 0) {
+      return null;
+    }
+    Double minTick = getMinTick(client, symbol);
+    if (minTick == null || minTick <= 0) {
+      return null;
+    }
+
+    // Round down: rounding up could land above the deviation band's lower edge on a
+    // wide-tick symbol
+    double ticks = Math.floor(latestPrice * SAFE_BUY_PRICE_RATIO / minTick);
+    if (ticks < 1) {
+      return null;
+    }
+    double price = Math.round(ticks * minTick * 10000d) / 10000d;
+    SAFE_BUY_PRICE_CACHE.put(symbol, price);
+    return price;
+  }
 
   /**
    * Returns the cached {@link MarketItem} for {@code market}, fetching it via
@@ -307,6 +366,19 @@ public final class MarketHelpers {
     }
     RealTimeQuoteItem item = rt.getRealTimeQuoteItems().get(0);
     return item.getLatestPrice();
+  }
+
+  private static Double getMinTick(TigerHttpClient client, String symbol) {
+    TigerResponse resp = client.execute(
+        QuoteStockTradeRequest.newRequest(Arrays.asList(symbol)));
+    if (resp == null || !resp.isSuccess()) {
+      return null;
+    }
+    QuoteStockTradeResponse trade = (QuoteStockTradeResponse) resp;
+    if (trade.getStockTradeItems() == null || trade.getStockTradeItems().isEmpty()) {
+      return null;
+    }
+    return trade.getStockTradeItems().get(0).getMinTick();
   }
 
   private static OptionRealTimeQuote pickAtm(

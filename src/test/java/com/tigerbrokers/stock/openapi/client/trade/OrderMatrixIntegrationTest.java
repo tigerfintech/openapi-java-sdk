@@ -59,7 +59,13 @@ import org.junit.experimental.categories.Category;
 @Category(WriteApi.class)
 public class OrderMatrixIntegrationTest {
 
-  /** Safe prices — kept far from market so BUY/SELL orders never fill. */
+  /**
+   * Safe prices — kept far from market so BUY/SELL orders never fill.
+   *
+   * <p>Fine for US symbols, whose deviation band is wide enough to accept it. For HK / CN / SG
+   * use {@link #safeBuyPrice} instead: a constant this far below a stock trading in the tens or
+   * hundreds is rejected with "Order price deviates too much" before it ever reaches the book.
+   */
   private static final double SAFE_BUY_PRICE = 0.01;
   private static final double SAFE_SELL_PRICE = 999_999.0;
   private static final double SAFE_STOP_BUY_TRIGGER = 999_999.0;
@@ -136,6 +142,20 @@ public class OrderMatrixIntegrationTest {
       Pattern.compile("(?i)cash order by market order"),
       Pattern.compile("(?i)^system error$"),
       Pattern.compile("(?i)bad_request:System error"),
+  };
+
+  /**
+   * The exchange refused the limit price for being too far from the market.
+   *
+   * <p>HK / CN / SG now derive the price from a live quote, so this should not fire for them.
+   * It remains a skip rather than a failure because a deviation band is a market-state
+   * property: it narrows out of hours and around auctions, and no quote API exposes its
+   * current width, so a price that was acceptable a minute ago can be refused now. Treating
+   * that as a test failure reports a market condition as an SDK defect.</p>
+   */
+  private static final Pattern[] PRICE_DEVIATION_PATTERNS = new Pattern[] {
+      Pattern.compile("(?i)price deviates too much"),
+      Pattern.compile("(?i)price is too far"),
   };
 
   /** Order-state race — cancel/modify may hit terminal state during test. */
@@ -218,7 +238,27 @@ public class OrderMatrixIntegrationTest {
     if (matches(msg, PERMISSION_ERROR_PATTERNS)) {
       return "skipped (permission boundary): " + msg;
     }
+    if (matches(msg, PRICE_DEVIATION_PATTERNS)) {
+      return "skipped (price-deviation band): " + msg;
+    }
     return null;
+  }
+
+  /**
+   * A buy limit price derived from {@code symbol}'s live quote, or skips the test when there
+   * is no quote to derive it from.
+   *
+   * <p>Skipping rather than falling back to a constant is deliberate: out of hours there is no
+   * way to tell a price the exchange would accept, and guessing produces exactly the failure
+   * this replaces.</p>
+   */
+  private static double safeBuyPrice(String symbol, String context) {
+    Double price = MarketHelpers.safeBuyPrice(client, symbol);
+    Assume.assumeTrue(
+        context + ": no live quote or tick size for " + symbol
+            + ", cannot derive an acceptable limit price (likely out of hours)",
+        price != null);
+    return price;
   }
 
   /** Build a US STK contract on AAPL. */
@@ -441,7 +481,8 @@ public class OrderMatrixIntegrationTest {
   public void placeHkStkLimit() {
     ContractItem contract = hkStkContract();
     TradeOrderRequest req = TradeOrderRequest.buildLimitOrder(
-        account, contract, ActionType.BUY, 100, SAFE_BUY_PRICE);
+        account, contract, ActionType.BUY, 100,
+        safeBuyPrice(contract.getSymbol(), "HK STK LMT"));
     previewAndPlace(req, "HK", "HK STK LMT");
   }
 
@@ -449,7 +490,8 @@ public class OrderMatrixIntegrationTest {
   public void placeHkStkAuctionLimit() {
     ContractItem contract = hkStkContract();
     TradeOrderRequest req = TradeOrderRequest.buildLimitOrder(
-        account, contract, ActionType.BUY, 100, SAFE_BUY_PRICE);
+        account, contract, ActionType.BUY, 100,
+        safeBuyPrice(contract.getSymbol(), "HK STK AL"));
     // Change order type to AL after building.
     ((TradeOrderModel) req.getApiModel()).setOrderType(OrderType.AL);
     previewAndPlace(req, "HK", "HK STK AL");
@@ -471,7 +513,7 @@ public class OrderMatrixIntegrationTest {
     c.setSecType("STK");
     c.setCurrency("CNH");
     TradeOrderRequest req = TradeOrderRequest.buildLimitOrder(
-        account, c, ActionType.BUY, 100, SAFE_BUY_PRICE);
+        account, c, ActionType.BUY, 100, safeBuyPrice(c.getSymbol(), "CN STK LMT"));
     previewAndPlace(req, "CN", "CN STK LMT");
   }
 
@@ -482,7 +524,7 @@ public class OrderMatrixIntegrationTest {
     c.setSecType("STK");
     c.setCurrency("SGD");
     TradeOrderRequest req = TradeOrderRequest.buildLimitOrder(
-        account, c, ActionType.BUY, 100, SAFE_BUY_PRICE);
+        account, c, ActionType.BUY, 100, safeBuyPrice(c.getSymbol(), "SG STK LMT"));
     previewAndPlace(req, "SG", "SG STK LMT");
   }
 
