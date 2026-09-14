@@ -308,12 +308,98 @@ public class OAuth2TokenStoreTest {
   }
 
   @Test
-  public void registrationFileNameIsTheIssuerHash() {
+  public void registrationFileNameIsTheIssuerHashAndSurface() {
     store.saveClientRegistration(aRegistration());
     String[] names = home.resolve("clients").toFile().list();
     assertNotNull(names);
     assertEquals(1, names.length);
-    assertEquals(OAuth2TokenStore.hash(ISSUER) + ".json", names[0]);
+    assertEquals(OAuth2TokenStore.hash(ISSUER) + "-" + OAuth2TokenStore.DEFAULT_SURFACE + ".json",
+        names[0]);
+  }
+
+  /**
+   * Each entry point owns its own registration.
+   *
+   * <p>Without this, whichever entry point ran first would own the registration and every
+   * other one would silently inherit its identity -- one name on the authorization page, one
+   * revocation switch for all of them, and one shared token file whose refresh-token rotation
+   * they would race over.</p>
+   */
+  @Test
+  public void eachSurfaceRegistersItsOwnClient() {
+    String[][] cases = {{"sdk-java", "java-1"}, {"sdk-python", "py-1"},
+        {"cli", "cli-1"}, {"mcp", "mcp-1"}};
+    for (String[] each : cases) {
+      OAuth2ClientRegistration registration = new OAuth2ClientRegistration();
+      registration.setIssuer(ISSUER);
+      registration.setClientId(each[1]);
+      new OAuth2TokenStore(home.toString(), each[0]).saveClientRegistration(registration);
+    }
+    for (String[] each : cases) {
+      assertEquals(each[0], each[1],
+          new OAuth2TokenStore(home.toString(), each[0]).loadClientId(ISSUER));
+    }
+  }
+
+  @Test
+  public void oneSurfaceDoesNotSeeAnothersRegistration() {
+    OAuth2ClientRegistration registration = new OAuth2ClientRegistration();
+    registration.setIssuer(ISSUER);
+    registration.setClientId("cli-1");
+    new OAuth2TokenStore(home.toString(), "cli").saveClientRegistration(registration);
+
+    assertNull(new OAuth2TokenStore(home.toString(), "mcp").loadClientId(ISSUER));
+    assertNull(new OAuth2TokenStore(home.toString(), "sdk-java").loadClientId(ISSUER));
+  }
+
+  /** An {@code invalid_client} on one entry point must not unregister the rest. */
+  @Test
+  public void deletingOneSurfaceLeavesTheOthers() {
+    for (String[] each : new String[][] {{"cli", "cli-1"}, {"mcp", "mcp-1"}}) {
+      OAuth2ClientRegistration registration = new OAuth2ClientRegistration();
+      registration.setIssuer(ISSUER);
+      registration.setClientId(each[1]);
+      new OAuth2TokenStore(home.toString(), each[0]).saveClientRegistration(registration);
+    }
+
+    new OAuth2TokenStore(home.toString(), "cli").deleteClientRegistration(ISSUER);
+
+    assertNull(new OAuth2TokenStore(home.toString(), "cli").loadClientId(ISSUER));
+    assertEquals("mcp-1", new OAuth2TokenStore(home.toString(), "mcp").loadClientId(ISSUER));
+  }
+
+  @Test
+  public void defaultSurfaceIsTheJavaSdk() {
+    assertEquals("sdk-java", OAuth2TokenStore.DEFAULT_SURFACE);
+    assertEquals(OAuth2TokenStore.DEFAULT_SURFACE, new OAuth2TokenStore(home.toString()).getSurface());
+  }
+
+  /**
+   * Rejected rather than sanitised: silently rewriting would file two entry points under one
+   * name, which is exactly what the surface exists to prevent.
+   */
+  @Test
+  public void surfaceMustBeUsableVerbatimAsAFileName() {
+    for (String bad : new String[] {"SDK-Java", "sdk_python", "../etc", "", null, "a b",
+        "-leading"}) {
+      try {
+        new OAuth2TokenStore(home.toString(), bad);
+        fail("expected rejection for: " + bad);
+      } catch (OAuth2Exception expected) {
+        assertEquals(OAuth2Exception.Category.STORAGE_FAILED, expected.getCategory());
+      }
+    }
+  }
+
+  /** Token files need no surface -- distinct clients already mean distinct file names. */
+  @Test
+  public void tokenFilesAreNotKeyedBySurface() {
+    OAuth2Token token = aToken();
+    token.setClientId("shared-manual-id");
+    new OAuth2TokenStore(home.toString(), "cli").saveToken(token);
+
+    assertNotNull("a manually configured client ID is shared on purpose: one ID, one application",
+        new OAuth2TokenStore(home.toString(), "mcp").loadToken("shared-manual-id", ISSUER));
   }
 
   /** I-15 / D-14: otherwise every logout piles up a new client on the server. */
@@ -338,7 +424,8 @@ public class OAuth2TokenStoreTest {
   @Test
   public void malformedRegistrationIsTreatedAsAbsent() throws IOException {
     store.saveClientRegistration(aRegistration());
-    Path file = home.resolve("clients").resolve(OAuth2TokenStore.hash(ISSUER) + ".json");
+    Path file = home.resolve("clients")
+        .resolve(OAuth2TokenStore.hash(ISSUER) + "-" + OAuth2TokenStore.DEFAULT_SURFACE + ".json");
     Files.write(file, "{broken".getBytes(UTF_8));
     assertNull(store.loadClientRegistration(ISSUER));
   }

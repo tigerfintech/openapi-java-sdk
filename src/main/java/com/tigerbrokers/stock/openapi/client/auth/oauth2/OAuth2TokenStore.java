@@ -16,22 +16,64 @@ import java.util.Set;
 /**
  * Local storage for OAuth2 tokens and dynamic client registrations.
  *
- * <p>Tokens are keyed by client ID and registrations by issuer. Token files are restricted to
- * the owner on POSIX file systems. The storage directory is selected from the explicit home,
- * {@code TIGEROPEN_HOME}, or {@code ~/.tiger/openapi/}, in that order.</p>
+ * <pre>
+ * ~/.tiger/openapi/
+ *   tokens/{clientId}.json                &lt;- authorization state, cleared on logout
+ *   clients/{issuerHash}-{surface}.json   &lt;- dynamic registration, kept across logout
+ * </pre>
+ *
+ * <p>Registrations are keyed by issuer because the client ID is not yet known at lookup time,
+ * and by surface so that each entry point registers its own client. Without the surface,
+ * whichever entry point ran first would own the registration and every other one would
+ * silently inherit its identity: one name on the user's authorization page, one revocation
+ * switch for all of them, and one shared token file whose refresh-token rotation they would
+ * race over.</p>
+ *
+ * <p>Token files need no surface: each surface registers a distinct client ID, so their token
+ * files are already distinct. A manually configured client ID is shared on purpose -- one
+ * client ID means one application.</p>
+ *
+ * <p>Token files are restricted to the owner on POSIX file systems. The storage directory is
+ * selected from the explicit home, {@code TIGEROPEN_HOME}, or {@code ~/.tiger/openapi/}, in
+ * that order.</p>
  */
 public class OAuth2TokenStore {
 
   private static final Charset UTF_8 = Charset.forName("UTF-8");
   private static final String ENV_HOME = "TIGEROPEN_HOME";
 
+  /**
+   * Entry point owning a registration. Tools built on this SDK must pass their own value,
+   * otherwise they would be filed as the Java SDK and share its client. Keep in step with the
+   * Python SDK's {@code sdk-python}.
+   */
+  public static final String DEFAULT_SURFACE = "sdk-java";
+
+  /**
+   * Surfaces become part of a file name, so they are restricted rather than sanitised: a
+   * silently rewritten surface would file two entry points under one name.
+   */
+  private static final java.util.regex.Pattern SURFACE_PATTERN =
+      java.util.regex.Pattern.compile("^[a-z0-9][a-z0-9-]*$");
+
   private final Path home;
+  private final String surface;
 
   public OAuth2TokenStore() {
-    this(null);
+    this(null, DEFAULT_SURFACE);
   }
 
   public OAuth2TokenStore(String customHome) {
+    this(customHome, DEFAULT_SURFACE);
+  }
+
+  /**
+   * @param customHome storage root; falls back to {@code TIGEROPEN_HOME} then
+   *     {@code ~/.tiger/openapi}
+   * @param surface entry point owning the registration, e.g. {@code sdk-java}, {@code cli}.
+   *     Lowercase alphanumerics and hyphens only
+   */
+  public OAuth2TokenStore(String customHome, String surface) {
     String dir = customHome;
     if (dir == null || dir.isEmpty()) {
       dir = System.getenv(ENV_HOME);
@@ -41,10 +83,24 @@ public class OAuth2TokenStore {
           + File.separator + "openapi";
     }
     this.home = new File(dir).toPath();
+    this.surface = validateSurface(surface);
+  }
+
+  private static String validateSurface(String surface) {
+    if (surface == null || !SURFACE_PATTERN.matcher(surface).matches()) {
+      throw new OAuth2Exception(OAuth2Exception.Category.STORAGE_FAILED,
+          "invalid surface '" + surface
+              + "': expected lowercase alphanumerics and hyphens, e.g. 'cli'");
+    }
+    return surface;
   }
 
   public Path getHome() {
     return home;
+  }
+
+  public String getSurface() {
+    return surface;
   }
 
   /**
@@ -150,7 +206,7 @@ public class OAuth2TokenStore {
   }
 
   Path clientFile(String issuer) {
-    return home.resolve("clients").resolve(hash(issuer) + ".json");
+    return home.resolve("clients").resolve(hash(issuer) + "-" + surface + ".json");
   }
 
   /**

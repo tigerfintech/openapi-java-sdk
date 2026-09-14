@@ -84,7 +84,8 @@ public class OAuth2SessionManager {
     // Resolve advertised scopes lazily so construction remains available offline.
     this.callbackPort = builder.callbackPort;
     this.explicitClientId = isBlank(builder.clientId) ? null : builder.clientId.trim();
-    this.store = builder.store != null ? builder.store : new OAuth2TokenStore(builder.home);
+    this.store = builder.store != null
+        ? builder.store : new OAuth2TokenStore(builder.home, builder.surface);
     this.authorizeTimeoutMinutes = builder.authorizeTimeoutMinutes;
   }
 
@@ -882,6 +883,7 @@ public class OAuth2SessionManager {
     private String clientId;
     private String home;
     private OAuth2TokenStore store;
+    private String surface = OAuth2TokenStore.DEFAULT_SURFACE;
     private int callbackPort;
     private long authorizeTimeoutMinutes = DEFAULT_AUTHORIZE_TIMEOUT_MINUTES;
 
@@ -927,6 +929,19 @@ public class OAuth2SessionManager {
 
     public Builder store(OAuth2TokenStore store) {
       this.store = store;
+      return this;
+    }
+
+    /**
+     * Entry point owning the dynamic registration, e.g. {@code sdk-java}, {@code cli}.
+     *
+     * <p>Each surface registers its own client, so it appears separately on the user's
+     * authorization page and can be revoked on its own. Tools built on this SDK must pass
+     * their own value. Ignored when an explicit {@link #store} is supplied -- that store
+     * carries its own surface.</p>
+     */
+    public Builder surface(String surface) {
+      this.surface = surface;
       return this;
     }
 
