@@ -61,4 +61,23 @@ public class QuoteItemTest {
     Assert.assertNull(absent.getVolumeDecimal());
     Assert.assertNull(explicitNull.getVolumeDecimal());
   }
+
+  @Test
+  public void deserializeRealTimeQuoteAmount() {
+    RealTimeQuoteItem stockQuote = JSON.parseObject(
+        "{\"symbol\":\"AAPL\",\"volume\":123,\"amount\":4567.89,\"volumeDecimal\":123.456}",
+        RealTimeQuoteItem.class);
+
+    Assert.assertEquals("AAPL", stockQuote.getSymbol());
+    Assert.assertEquals(Long.valueOf(123), stockQuote.getVolume());
+    Assert.assertEquals(Double.valueOf(4567.89), stockQuote.getAmount());
+    Assert.assertEquals(Double.valueOf(123.456), stockQuote.getVolumeDecimal());
+
+    RealTimeQuoteItem ccQuote = JSON.parseObject(
+        "{\"symbol\":\"BTCUSD\",\"volume\":0,\"amount\":987654.32,\"volumeDecimal\":0.123456}",
+        RealTimeQuoteItem.class);
+
+    Assert.assertEquals("BTCUSD", ccQuote.getSymbol());
+    Assert.assertEquals(Double.valueOf(987654.32), ccQuote.getAmount());
+  }
 }
