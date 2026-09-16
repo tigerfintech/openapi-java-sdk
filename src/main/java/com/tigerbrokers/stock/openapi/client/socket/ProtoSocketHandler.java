@@ -33,6 +33,16 @@ public class ProtoSocketHandler extends SimpleChannelInboundHandler<Response> {
   private static final long REFRESH_REPLY_TIMEOUT_MILLIS = 30 * 1000L;
 
   /**
+   * Timeout for the token exchange that precedes the frame.
+   *
+   * <p>Must outlast the exchange's own HTTP timeouts, or a slow authorization server looks
+   * like a lost acknowledgement and a second exchange starts while the first is still
+   * running. {@code OAuth2HttpUtils} is not visible from here, so the relationship is
+   * asserted by a test rather than derived.</p>
+   */
+  public static final long REFRESH_EXCHANGE_TIMEOUT_MILLIS = 25 * 1000L;
+
+  /**
    * The access token this channel is currently authenticated with.
    *
    * <p>Per-channel rather than per-client because it describes the state of one connection:
@@ -151,14 +161,17 @@ public class ProtoSocketHandler extends SimpleChannelInboundHandler<Response> {
     String pending = channel.attr(OAUTH_REFRESH_PENDING).get();
     if (pending != null) {
       Long sentAt = channel.attr(OAUTH_REFRESH_SENT_AT).get();
-      if (sentAt != null && System.currentTimeMillis() - sentAt < REFRESH_REPLY_TIMEOUT_MILLIS) {
-        // Still waiting for a reply; do not send a second one. Also covers an exchange that
-        // is still running on the refresh executor, since the marker is set before it starts.
+      // Two phases with different budgets: the marker is set before the token exchange
+      // starts, and the acknowledgement is only awaited once the frame has gone out. The
+      // timestamp is re-taken at that point.
+      boolean inProgress = REFRESH_IN_PROGRESS.equals(pending);
+      long limit = inProgress ? REFRESH_EXCHANGE_TIMEOUT_MILLIS : REFRESH_REPLY_TIMEOUT_MILLIS;
+      if (sentAt != null && System.currentTimeMillis() - sentAt < limit) {
         return;
       }
       // Clear a timed-out refresh claim so a later attempt can proceed.
-      ApiLogger.info("refresh token got no reply within {}ms, channel:{}",
-          REFRESH_REPLY_TIMEOUT_MILLIS, channel.id().asShortText());
+      ApiLogger.info("refresh token {} did not finish within {}ms, channel:{}",
+          inProgress ? "exchange" : "reply", limit, channel.id().asShortText());
       channel.attr(OAUTH_REFRESH_PENDING).set(null);
       channel.attr(OAUTH_REFRESH_SENT_AT).set(null);
     }

@@ -49,6 +49,10 @@ public class FakeAuthorizationServer implements AutoCloseable {
   /** Counts down when a held token request has arrived and is waiting on the gate. */
   private volatile CountDownLatch tokenRequestArrived;
 
+  /** Ordinal of the token request that should run {@link #tokenRequestHook} before replying. */
+  private volatile int hookOnTokenRequest;
+  private volatile Runnable tokenRequestHook;
+
   public volatile int revokeStatus = 200;
   public volatile boolean advertiseRevocation = true;
   public volatile boolean advertiseDevice = true;
@@ -107,6 +111,22 @@ public class FakeAuthorizationServer implements AutoCloseable {
 
   public List<Call> tokenCalls() {
     return callsTo("/token");
+  }
+
+  /**
+   * Runs {@code hook} just before the reply to the {@code ordinal}-th token request, standing
+   * in for another process changing shared state mid-exchange.
+   */
+  public void onTokenRequest(int ordinal, Runnable hook) {
+    this.hookOnTokenRequest = ordinal;
+    this.tokenRequestHook = hook;
+  }
+
+  private void runTokenRequestHook() {
+    Runnable hook = this.tokenRequestHook;
+    if (hook != null && tokenCalls().size() == hookOnTokenRequest) {
+      hook.run();
+    }
   }
 
   /**
@@ -226,6 +246,7 @@ public class FakeAuthorizationServer implements AutoCloseable {
         respond(exchange, 200, nextDevice());
       } else {
         awaitTokenGate();
+        runTokenRequestHook();
         respond(exchange, 200, nextToken());
       }
     }

@@ -326,6 +326,45 @@ public class OAuth2SessionManagerTest {
         1, server.tokenCalls().size());
   }
 
+  /**
+   * A credential written by another process during the retry was never refused, so it must
+   * survive.
+   *
+   * <p>Refresh tokens rotate, so a rejection means "the value I presented was rotated away"
+   * just as often as it means "the authorization is gone". The retry can be refused for the
+   * first reason too, and deleting then takes down a working credential that every other user
+   * of this store depends on.</p>
+   */
+  @Test
+  public void secondRejectionKeepsACredentialStoredMeanwhile() {
+    OAuth2SessionManager sessions = session();
+    seed(sessions, 60, "RT0", "AT0", "cid");
+    assertEquals("AT0", sessions.status().getAccessToken());
+
+    // Another process rotated first, leaving RT1 behind.
+    seed(sessions, 60, "RT1", "AT1", "cid");
+    server.queueTokenError("invalid_grant");   // refuses our RT0
+    server.queueTokenError("invalid_grant");   // refuses the adopted RT1
+    // A third rotation lands on disk while the retry is in flight.
+    server.onTokenRequest(2, new Runnable() {
+      @Override
+      public void run() {
+        seed(sessions, 3600, "RT2", "AT2", "cid");
+      }
+    });
+
+    try {
+      sessions.getAccessToken();
+      fail("expected OAuth2Exception");
+    } catch (OAuth2Exception e) {
+      assertEquals(OAuth2Exception.Category.REAUTHORIZATION_REQUIRED, e.getCategory());
+    }
+    assertEquals(2, server.tokenCalls().size());
+    OAuth2Token survivor = new OAuth2TokenStore(home.toString()).loadToken("cid", server.getIssuer());
+    assertNotNull("a credential stored meanwhile must not be deleted", survivor);
+    assertEquals("AT2", survivor.getAccessToken());
+  }
+
   /** A rejection surviving the newest stored credential ends the authorization. */
   @Test
   public void rejectionOfTheStoredTokenTooEndsTheAuthorization() {

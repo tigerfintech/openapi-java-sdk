@@ -36,6 +36,9 @@ public class ProtoSocketOAuth2Test {
 
   private static final long REFRESH_REPLY_TIMEOUT_MILLIS = 30_000L;
 
+  /** Mirrors the handler's private in-progress marker. */
+  private static final String REFRESH_IN_PROGRESS = "__refresh_in_progress__";
+
   /**
    * PKCS8 DER base64. A real key is needed even for the signature-mode cases:
    * {@code ApiAuthentication.build} returns null when signing fails.
@@ -165,7 +168,67 @@ public class ProtoSocketOAuth2Test {
         .build();
   }
 
+  /**
+   * The exchange budget has to outlast the token exchange's own HTTP timeouts.
+   *
+   * <p>The two values live in different packages and cannot reference each other, so this is
+   * what keeps them in step: raising the read timeout without raising the budget brings back
+   * duplicate exchanges under a slow authorization server.</p>
+   */
+  @Test
+  public void theExchangeBudgetOutlastsTheHttpTimeouts() {
+    long httpWorstCaseMillis =
+        (OAuth2HttpUtils.CONNECT_TIMEOUT_SECONDS + OAuth2HttpUtils.READ_TIMEOUT_SECONDS) * 1000L;
+    assertTrue("exchange budget " + ProtoSocketHandler.REFRESH_EXCHANGE_TIMEOUT_MILLIS
+            + "ms must exceed the token exchange's own " + httpWorstCaseMillis + "ms",
+        ProtoSocketHandler.REFRESH_EXCHANGE_TIMEOUT_MILLIS > httpWorstCaseMillis);
+  }
+
   // ------------------------------------------------------------- triggering
+
+  /**
+   * An exchange still inside its budget must not be released.
+   *
+   * <p>Releasing it starts a second exchange while the first is still going, and the second
+   * presents a refresh token the first has already rotated away.</p>
+   */
+  @Test
+  public void anExchangeInsideItsBudgetIsLeftAlone() throws Exception {
+    seed(60, "AT-old");
+    ChannelHandlerContext ctx = connect(sessions());
+    channel.attr(ProtoSocketHandler.OAUTH_ACCESS_TOKEN).set("AT-old");
+    channel.attr(ProtoSocketHandler.OAUTH_REFRESH_PENDING).set(REFRESH_IN_PROGRESS);
+    // Inside the exchange budget.
+    channel.attr(ProtoSocketHandler.OAUTH_REFRESH_SENT_AT)
+        .set(System.currentTimeMillis() - ProtoSocketHandler.REFRESH_EXCHANGE_TIMEOUT_MILLIS
+            + 2_000L);
+
+    handler.refreshTokenIfNeeded(ctx);
+    settle();
+
+    assertTrue("a second exchange must not be started while the first is running",
+        server.tokenCalls().isEmpty());
+    assertEquals(REFRESH_IN_PROGRESS,
+        channel.attr(ProtoSocketHandler.OAUTH_REFRESH_PENDING).get());
+  }
+
+  /** The exchange budget still has to expire, or a dead exchange would block every retry. */
+  @Test
+  public void anExchangePastItsOwnBudgetFreesTheNextAttempt() throws Exception {
+    seed(60, "AT-old");
+    ChannelHandlerContext ctx = connect(sessions());
+    channel.attr(ProtoSocketHandler.OAUTH_ACCESS_TOKEN).set("AT-old");
+    channel.attr(ProtoSocketHandler.OAUTH_REFRESH_PENDING).set(REFRESH_IN_PROGRESS);
+    channel.attr(ProtoSocketHandler.OAUTH_REFRESH_SENT_AT)
+        .set(System.currentTimeMillis() - ProtoSocketHandler.REFRESH_EXCHANGE_TIMEOUT_MILLIS
+            - 1_000L);
+
+    handler.refreshTokenIfNeeded(ctx);
+    List<Request> frames = awaitRefreshFrames();
+
+    assertEquals(1, frames.size());
+    assertEquals("AT1", frames.get(0).getRefreshToken().getAccessToken());
+  }
 
   /** C-13: a fresh token needs no rotation, so nothing is sent. */
   @Test

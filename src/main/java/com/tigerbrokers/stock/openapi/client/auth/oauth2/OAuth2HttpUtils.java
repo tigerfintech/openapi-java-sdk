@@ -24,10 +24,18 @@ final class OAuth2HttpUtils {
   private static final MediaType JSON_TYPE =
       MediaType.parse("application/json; charset=utf-8");
 
-  /** Calls in the authorization flow are interactive, so the timeouts are generous. */
+  /**
+   * Connect timeout for authorization-server calls. Every call here is a small JSON exchange,
+   * so a request that has not answered in this long is not going to.
+   */
+  static final long CONNECT_TIMEOUT_SECONDS = 5;
+
+  /** Read timeout for authorization-server calls. */
+  static final long READ_TIMEOUT_SECONDS = 10;
+
   private static final OkHttpClient CLIENT = new OkHttpClient.Builder()
-      .connectTimeout(10, TimeUnit.SECONDS)
-      .readTimeout(30, TimeUnit.SECONDS)
+      .connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+      .readTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
       .build();
 
   private OAuth2HttpUtils() {

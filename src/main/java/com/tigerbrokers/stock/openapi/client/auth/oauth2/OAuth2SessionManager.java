@@ -383,7 +383,7 @@ public class OAuth2SessionManager {
         && !equalsToken(stored.getAccessToken(), rejectedToken.getAccessToken());
     if (!superseded) {
       // Nothing newer exists, so the rejection is about the current state of the authorization.
-      forgetRejectedAuthorization(rejected, rejectedToken.getClientId());
+      forgetRejectedAuthorization(rejected, rejectedToken);
       throw rejected;
     }
 
@@ -395,14 +395,14 @@ public class OAuth2SessionManager {
       return stored;
     }
     if (!stored.hasRefreshToken()) {
-      forgetRejectedAuthorization(rejected, rejectedToken.getClientId());
+      forgetRejectedAuthorization(rejected, rejectedToken);
       throw rejected;
     }
     try {
       return exchangeRefreshToken(stored);
     } catch (RejectedGrant secondRejection) {
-      // The newest credential on disk was refused too: the authorization really is gone.
-      forgetRejectedAuthorization(secondRejection, stored.getClientId());
+      // The credential adopted above was refused too.
+      forgetRejectedAuthorization(secondRejection, stored);
       throw secondRejection;
     }
   }
@@ -943,10 +943,17 @@ public class OAuth2SessionManager {
    * Discards the local authorization the server just refused, so later calls fail fast instead
    * of replaying a credential that is known to be dead.
    */
-  private void forgetRejectedAuthorization(RejectedGrant rejected, String usedClientId) {
-    if (usedClientId != null) {
-      store.deleteToken(usedClientId);
+  private void forgetRejectedAuthorization(RejectedGrant rejected, OAuth2Token rejectedToken) {
+    String clientId = rejectedToken == null ? null : rejectedToken.getClientId();
+    OAuth2Token stored = clientId == null ? null : reloadFromStore(clientId);
+    if (stored != null && !equalsToken(stored.getAccessToken(), rejectedToken.getAccessToken())) {
+      ApiLogger.info("a newer credential was stored while this one was refused,"
+          + " keeping it. clientId:{}", clientId);
+    } else if (clientId != null) {
+      store.deleteToken(clientId);
     }
+    // The in-memory copy is the refused one either way. Dropping it makes the next call read
+    // whatever is on disk.
     this.token = null;
     forgetRejectedRegistration(rejected);
   }
