@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 /**
@@ -34,6 +35,16 @@ public class OAuth2SessionManager {
 
   /** Access-token refresh-ahead window. */
   private static final long DEFAULT_REFRESH_AHEAD_MILLIS = 300_000L;
+
+  /**
+   * Remaining lifetime below which a token is no longer handed out.
+   *
+   * <p>Between this and {@link #DEFAULT_REFRESH_AHEAD_MILLIS} a refresh is due but the current
+   * token still works, so callers get it immediately rather than waiting on an exchange that
+   * may take tens of seconds. Below this the token can expire mid-request, so a caller has to
+   * wait for a new one.</p>
+   */
+  private static final long MIN_USABLE_REMAINING_MILLIS = 30_000L;
 
   /** Authorization completion timeout in minutes. */
   private static final long DEFAULT_AUTHORIZE_TIMEOUT_MINUTES = 5;
@@ -74,7 +85,15 @@ public class OAuth2SessionManager {
   /** The full scope parsed from the metadata, cached after the first parse. */
   private volatile String resolvedScopes;
 
-  private final Object refreshLock = new Object();
+  /**
+   * Guards token exchange so concurrent callers produce one request, not one each.
+   *
+   * <p>An explicit lock rather than {@code synchronized} because a caller holding a still-usable
+   * token needs to ask whether a refresh is already running without waiting for it -- see
+   * {@link #getAccessToken()}. Reentrant, since {@link #refreshAfterUnauthorized(String)} calls
+   * {@link #refresh(OAuth2Token)} while holding it.</p>
+   */
+  private final ReentrantLock refreshLock = new ReentrantLock();
 
   private OAuth2SessionManager(Builder builder) {
     if (builder.issuer == null || builder.issuer.isEmpty()) {
@@ -199,7 +218,16 @@ public class OAuth2SessionManager {
       form.put("client_id", effectiveClientId);
       form.put("code_verifier", verifier);
 
-      OAuth2Token fresh = exchange(meta.getTokenEndpoint(), form, effectiveClientId);
+      OAuth2Token fresh;
+      try {
+        fresh = exchange(meta.getTokenEndpoint(), form, effectiveClientId);
+      } catch (RejectedGrant rejected) {
+        // A refused authorization code says nothing about the persisted token, so that is left
+        // alone -- a failed re-authorization must not cost the user a working one. A refused
+        // client registration does have to go, or every later attempt reuses it.
+        forgetRejectedRegistration(rejected);
+        throw rejected;
+      }
       persist(fresh);
       return fresh;
     }
@@ -256,6 +284,12 @@ public class OAuth2SessionManager {
    *
    * <p>This method does not start interactive authorization. Missing or invalid authorization
    * raises {@link OAuth2Exception.Category#REAUTHORIZATION_REQUIRED}.</p>
+   *
+   * <p>A refresh being due does not make the caller wait for one. While the current token still
+   * has {@link #MIN_USABLE_REMAINING_MILLIS} of life, an exchange already running elsewhere is
+   * left to finish and the current token is returned straight away. Waiting would buy nothing --
+   * the token in hand works -- and would charge an unrelated caller for a token exchange that
+   * can take tens of seconds against a slow authorization server.</p>
    */
   public String getAccessToken() {
     OAuth2Token current = currentToken();
@@ -266,7 +300,32 @@ public class OAuth2SessionManager {
     if (!current.needsRefresh(DEFAULT_REFRESH_AHEAD_MILLIS)) {
       return current.getAccessToken();
     }
+    if (current.remainingMillis() > MIN_USABLE_REMAINING_MILLIS) {
+      // Refresh due, token still good. Take on the exchange only if nobody else has it.
+      if (!refreshLock.tryLock()) {
+        return current.getAccessToken();
+      }
+      try {
+        return refresh(current).getAccessToken();
+      } finally {
+        refreshLock.unlock();
+      }
+    }
+    // Too close to expiry to hand out: this caller has to wait for a usable token.
     return refresh(current).getAccessToken();
+  }
+
+  /**
+   * Whether asking for a token right now would trigger a refresh. Reads memory only.
+   *
+   * <p>Exists so that no other component needs a refresh-ahead window of its own. A second copy
+   * of that window silently couples to this one -- whoever later tunes either value changes
+   * which side wins the race to refresh first, with no compiler error and no failing test to
+   * show it.</p>
+   */
+  public boolean shouldRefreshSoon() {
+    OAuth2Token current = currentToken();
+    return current != null && current.needsRefresh(DEFAULT_REFRESH_AHEAD_MILLIS);
   }
 
   /**
@@ -279,7 +338,8 @@ public class OAuth2SessionManager {
    *     the new one is returned directly
    */
   public OAuth2Token refresh(OAuth2Token failed) {
-    synchronized (refreshLock) {
+    refreshLock.lock();
+    try {
       OAuth2Token current = this.token;
       // Another thread already refreshed -- compare access token values, not timestamps
       if (current != null && failed != null
@@ -293,21 +353,96 @@ public class OAuth2SessionManager {
         throw new OAuth2Exception(OAuth2Exception.Category.REAUTHORIZATION_REQUIRED,
             "no refresh_token available, re-authorization required");
       }
-
-      Map<String, String> form = new LinkedHashMap<>();
-      form.put("grant_type", "refresh_token");
-      form.put("refresh_token", current.getRefreshToken());
-      form.put("client_id", current.getClientId());
-
-      OAuth2Token refreshed =
-          exchange(metadata().getTokenEndpoint(), form, current.getClientId());
-
-      // Preserve the current refresh token if the authorization server omits a replacement.
-      if (!refreshed.hasRefreshToken()) {
-        refreshed.setRefreshToken(current.getRefreshToken());
+      try {
+        return exchangeRefreshToken(current);
+      } catch (RejectedGrant rejected) {
+        return recoverOrGiveUp(current, rejected);
       }
-      persist(refreshed);
-      return refreshed;
+    } finally {
+      refreshLock.unlock();
+    }
+  }
+
+  /**
+   * Decides whether a rejected refresh means the authorization is gone, or merely that this
+   * process was holding a superseded credential.
+   *
+   * <p>Refresh tokens rotate: one use invalidates the previous value. So another process sharing
+   * this token store may have refreshed first, leaving the value we just presented legitimately
+   * dead while the authorization itself is perfectly alive -- and its replacement already on
+   * disk. Treating that rejection as terminal would delete a working token and force the user
+   * through the browser again, and because it also wipes the shared credential it would take
+   * every other user of this session down with it.</p>
+   *
+   * <p>So the store is re-read before anything is deleted. Only a rejection that survives the
+   * newest stored credential is accepted as the end of the authorization.</p>
+   */
+  private OAuth2Token recoverOrGiveUp(OAuth2Token rejectedToken, RejectedGrant rejected) {
+    OAuth2Token stored = reloadFromStore(rejectedToken.getClientId());
+    boolean superseded = stored != null
+        && !equalsToken(stored.getAccessToken(), rejectedToken.getAccessToken());
+    if (!superseded) {
+      // Nothing newer exists, so the rejection is about the current state of the authorization.
+      forgetRejectedAuthorization(rejected, rejectedToken.getClientId());
+      throw rejected;
+    }
+
+    ApiLogger.info("refresh was rejected but the token store holds a newer credential,"
+        + " adopting it. clientId:{}", rejectedToken.getClientId());
+    this.token = stored;
+    if (!stored.needsRefresh(DEFAULT_REFRESH_AHEAD_MILLIS)) {
+      // Whoever wrote it already did the work; no second request needed.
+      return stored;
+    }
+    if (!stored.hasRefreshToken()) {
+      forgetRejectedAuthorization(rejected, rejectedToken.getClientId());
+      throw rejected;
+    }
+    try {
+      return exchangeRefreshToken(stored);
+    } catch (RejectedGrant secondRejection) {
+      // The newest credential on disk was refused too: the authorization really is gone.
+      forgetRejectedAuthorization(secondRejection, stored.getClientId());
+      throw secondRejection;
+    }
+  }
+
+  /** Exchanges {@code base}'s refresh token for a new access token and persists the result. */
+  private OAuth2Token exchangeRefreshToken(OAuth2Token base) {
+    Map<String, String> form = new LinkedHashMap<>();
+    form.put("grant_type", "refresh_token");
+    form.put("refresh_token", base.getRefreshToken());
+    form.put("client_id", base.getClientId());
+
+    OAuth2Token refreshed = exchange(metadata().getTokenEndpoint(), form, base.getClientId());
+
+    // Preserve the current refresh token if the authorization server omits a replacement.
+    if (!refreshed.hasRefreshToken()) {
+      refreshed.setRefreshToken(base.getRefreshToken());
+    }
+    persist(refreshed);
+    return refreshed;
+  }
+
+  /**
+   * Reads the stored token straight from disk, bypassing the in-memory copy.
+   *
+   * <p>The cached token is exactly what is under suspicion here, so it cannot be consulted.</p>
+   *
+   * @return the stored token, or null when there is none or it cannot be read
+   */
+  private OAuth2Token reloadFromStore(String clientId) {
+    if (clientId == null) {
+      return null;
+    }
+    try {
+      return store.loadToken(clientId, issuer);
+    } catch (RuntimeException e) {
+      // An unreadable store says nothing either way about whether the grant is still alive,
+      // so fall through to treating the rejection at face value.
+      ApiLogger.warn("could not re-read the token store while checking a rejected refresh:{}",
+          e.getMessage());
+      return null;
     }
   }
 
@@ -322,7 +457,8 @@ public class OAuth2SessionManager {
    * @throws OAuth2Exception when refresh fails
    */
   public OAuth2Token refreshAfterUnauthorized(String failedAccessToken) {
-    synchronized (refreshLock) {
+    refreshLock.lock();
+    try {
       OAuth2Token current = currentToken();
       // Reuse a token already replaced by another thread.
       if (current != null && failedAccessToken != null
@@ -331,6 +467,8 @@ public class OAuth2SessionManager {
       }
       // The lock preserves the token comparison until refresh completes.
       return refresh(current);
+    } finally {
+      refreshLock.unlock();
     }
   }
 
@@ -755,30 +893,73 @@ public class OAuth2SessionManager {
     }
   }
 
-  /** Calls the token endpoint and converts the response into an {@link OAuth2Token}. */
+  /**
+   * Calls the token endpoint and converts the response into an {@link OAuth2Token}.
+   *
+   * <p>A rejected grant is reported, not acted on. Only the caller knows what the rejected
+   * credential was and whether it is still the current one, and deleting local state here would
+   * take that decision away -- see {@link #recoverOrGiveUp(OAuth2Token, RejectedGrant)}.</p>
+   */
   private OAuth2Token exchange(String tokenEndpoint, Map<String, String> form,
       String usedClientId) {
     JSONObject json = OAuth2HttpUtils.postForm(tokenEndpoint, form);
     if (json.getString("access_token") == null) {
       String error = json.getString("error");
-      // invalid_grant and invalid_client require reauthorization. Clear rejected local state
-      // to prevent repeated refresh failures; dynamic clients may register again.
       if ("invalid_grant".equals(error) || "invalid_client".equals(error)) {
-        store.deleteToken(usedClientId);
-        this.token = null;
-        // Remove a rejected dynamic registration so a later authorization can register again.
-        if ("invalid_client".equals(error) && explicitClientId == null) {
-          store.deleteClientRegistration(issuer);
-          this.registeredClientId = null;
-        }
-        throw new OAuth2Exception(OAuth2Exception.Category.REAUTHORIZATION_REQUIRED,
-            error + ": " + json.getString("error_description"));
+        throw new RejectedGrant(error, json.getString("error_description"));
       }
       throw new OAuth2Exception(OAuth2Exception.Category.TOKEN_REQUEST_FAILED,
           "token endpoint returned error: " + error
               + " " + json.getString("error_description"));
     }
     return toToken(json, usedClientId);
+  }
+
+  /**
+   * A grant the authorization server refused outright.
+   *
+   * <p>Carries the raw error code so a caller can tell a dead credential from a dead client
+   * registration. It is an {@link OAuth2Exception} with
+   * {@link OAuth2Exception.Category#REAUTHORIZATION_REQUIRED}, so application code that catches
+   * the public type and switches on the category is unaffected by its existence.</p>
+   */
+  private static final class RejectedGrant extends OAuth2Exception {
+
+    private static final long serialVersionUID = 1L;
+
+    private final String error;
+
+    RejectedGrant(String error, String description) {
+      super(Category.REAUTHORIZATION_REQUIRED, error + ": " + description);
+      this.error = error;
+    }
+
+    boolean isClientRejected() {
+      return "invalid_client".equals(error);
+    }
+  }
+
+  /**
+   * Discards the local authorization the server just refused, so later calls fail fast instead
+   * of replaying a credential that is known to be dead.
+   */
+  private void forgetRejectedAuthorization(RejectedGrant rejected, String usedClientId) {
+    if (usedClientId != null) {
+      store.deleteToken(usedClientId);
+    }
+    this.token = null;
+    forgetRejectedRegistration(rejected);
+  }
+
+  /**
+   * Discards a dynamic client registration the server refused, so the next authorization
+   * registers a new one. Explicit client IDs come from the application and are left alone.
+   */
+  private void forgetRejectedRegistration(RejectedGrant rejected) {
+    if (rejected.isClientRejected() && explicitClientId == null) {
+      store.deleteClientRegistration(issuer);
+      this.registeredClientId = null;
+    }
   }
 
   /** Token response to {@link OAuth2Token}. */

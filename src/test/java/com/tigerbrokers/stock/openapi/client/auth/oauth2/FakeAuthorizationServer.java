@@ -18,7 +18,9 @@ import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Fake authorization server for the OAuth2 tests: discovery, registration, token, device
@@ -40,6 +42,12 @@ public class FakeAuthorizationServer implements AutoCloseable {
   public final Deque<String> tokenResponses = new ArrayDeque<>();
   public final Deque<String> deviceResponses = new ArrayDeque<>();
   public final Deque<String> registerResponses = new ArrayDeque<>();
+
+  /** When set, a token request blocks on this until released. See {@link #holdTokenEndpoint()}. */
+  private volatile CountDownLatch tokenGate;
+
+  /** Counts down when a held token request has arrived and is waiting on the gate. */
+  private volatile CountDownLatch tokenRequestArrived;
 
   public volatile int revokeStatus = 200;
   public volatile boolean advertiseRevocation = true;
@@ -99,6 +107,27 @@ public class FakeAuthorizationServer implements AutoCloseable {
 
   public List<Call> tokenCalls() {
     return callsTo("/token");
+  }
+
+  /**
+   * Makes the next token request block until {@link #releaseTokenEndpoint()} is called, standing
+   * in for a slow authorization server.
+   *
+   * @return a latch that counts down once a token request has actually arrived and is waiting
+   */
+  public CountDownLatch holdTokenEndpoint() {
+    tokenRequestArrived = new CountDownLatch(1);
+    tokenGate = new CountDownLatch(1);
+    return tokenRequestArrived;
+  }
+
+  /** Lets a held token request complete. */
+  public void releaseTokenEndpoint() {
+    CountDownLatch gate = this.tokenGate;
+    this.tokenGate = null;
+    if (gate != null) {
+      gate.countDown();
+    }
   }
 
   public List<Call> revokeCalls() {
@@ -196,8 +225,27 @@ public class FakeAuthorizationServer implements AutoCloseable {
       } else if ("/device".equals(path)) {
         respond(exchange, 200, nextDevice());
       } else {
+        awaitTokenGate();
         respond(exchange, 200, nextToken());
       }
+    }
+  }
+
+  /**
+   * Blocks a token request until the gate is opened, so a test can hold an exchange in flight
+   * and observe what other callers do meanwhile.
+   */
+  private void awaitTokenGate() {
+    CountDownLatch gate = this.tokenGate;
+    if (gate == null) {
+      return;
+    }
+    tokenRequestArrived.countDown();
+    try {
+      // Bounded so a mistake in a test fails as a test rather than hanging the build.
+      gate.await(30, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
     }
   }
 

@@ -181,6 +181,55 @@ public class ProtoSocketOAuth2Test {
     assertTrue(server.tokenCalls().isEmpty());
   }
 
+  /**
+   * A token advanced elsewhere must reach this connection, even though the session's own token
+   * now looks perfectly fresh.
+   *
+   * <p>What the server checks is the token pinned on this connection, not whatever the session
+   * holds. Anything else sharing the session advances it without touching this channel: an HTTP
+   * request refreshing first, a 401 retry, another connection rotating, application code asking
+   * for a token. Judging by the session alone misses all of those -- by the time the heartbeat
+   * looks, the session's token has a full lifetime ahead of it and reports no refresh due, while
+   * this connection is still pinned to one that is minutes from being dropped.</p>
+   *
+   * <p>That was the failure: rotation never fired on the path it was built for, and the
+   * connection was left to expire and reconnect, losing its subscriptions on the way.</p>
+   */
+  @Test
+  public void tokenAdvancedElsewhereIsPushedToTheConnection() throws Exception {
+    // The session's token is nowhere near expiry, as just after an HTTP request refreshed it.
+    seed(3600, "AT-refreshed-by-http");
+    ChannelHandlerContext ctx = connect(sessions());
+    // This connection still presents the token it connected with -- the one the server holds.
+    channel.attr(ProtoSocketHandler.OAUTH_ACCESS_TOKEN).set("AT-pinned-at-connect");
+
+    handler.refreshTokenIfNeeded(ctx);
+    List<Request> frames = awaitRefreshFrames();
+
+    assertEquals("the connection must be told about the token the session already holds",
+        1, frames.size());
+    assertEquals("AT-refreshed-by-http", frames.get(0).getRefreshToken().getAccessToken());
+    assertTrue("the session's token is already fresh, so no exchange is needed",
+        server.tokenCalls().isEmpty());
+  }
+
+  /**
+   * A connection that never pinned a token gives no basis for guessing what the server holds,
+   * so it falls back to the session's refresh window instead of rotating on every heartbeat.
+   */
+  @Test
+  public void connectionWithoutAPinnedTokenFallsBackToTheRefreshWindow() throws Exception {
+    seed(3600, "AT-current");
+    ChannelHandlerContext ctx = connect(sessions());
+    // OAUTH_ACCESS_TOKEN deliberately left unset.
+
+    handler.refreshTokenIfNeeded(ctx);
+    settle();
+
+    assertTrue(refreshFrames().isEmpty());
+    assertTrue(server.tokenCalls().isEmpty());
+  }
+
   /** C-13: inside the window the token is rotated in place, without reconnecting. */
   @Test
   public void expiringTokenIsRotatedInPlace() throws Exception {

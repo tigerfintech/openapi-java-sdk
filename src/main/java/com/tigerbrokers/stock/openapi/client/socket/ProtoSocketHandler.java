@@ -29,9 +29,6 @@ public class ProtoSocketHandler extends SimpleChannelInboundHandler<Response> {
   private int clientReceiveInterval = 0;
   public final static int HEART_BEAT_SPAN = 1000;
 
-  /** OAuth2 access-token refresh threshold. */
-  private static final long REFRESH_AHEAD_MILLIS = 5 * 60 * 1000L;
-
   /** Timeout for a pending {@code REFRESH_TOKEN} acknowledgement. */
   private static final long REFRESH_REPLY_TIMEOUT_MILLIS = 30 * 1000L;
 
@@ -135,7 +132,12 @@ public class ProtoSocketHandler extends SimpleChannelInboundHandler<Response> {
   }
 
   /**
-   * Rotates the connection access token near expiry.
+   * Brings the token pinned on this connection back in line with the session's.
+   *
+   * <p>Acts when this connection's token is no longer the session's, or when the session says a
+   * refresh is due. The first condition is what keeps a shared session from silently stranding a
+   * connection on an expiring token; the second is what gets the rotation started at all on a
+   * connection that is the only thing using the session.</p>
    *
    * <p>Heartbeat processing performs only in-memory checks. Blocking token exchange is delegated
    * to {@link #refreshExecutor()}. Pending rotations expire after
@@ -163,7 +165,19 @@ public class ProtoSocketHandler extends SimpleChannelInboundHandler<Response> {
 
     OAuth2SessionManager sessions = authentication.getSessionManager();
     OAuth2Token current = sessions == null ? null : sessions.status();
-    if (current == null || !current.needsRefresh(REFRESH_AHEAD_MILLIS)) {
+    if (current == null) {
+      return;
+    }
+    // What decides this connection's fate is the token pinned on it, which is the one the server
+    // is holding and checking -- not whatever the session happens to hold now. The two diverge
+    // as soon as anything else advances the session: an HTTP request refreshing first, a 401
+    // retry, another connection rotating, application code asking for a token. Judging by the
+    // session alone misses every one of those cases, because by then the session's token looks
+    // perfectly fresh while this connection is still pinned to one about to expire.
+    String pinned = channel.attr(OAUTH_ACCESS_TOKEN).get();
+    boolean diverged = pinned != null && !pinned.equals(current.getAccessToken());
+    // Refresh-ahead is the session's own window, asked for rather than duplicated here.
+    if (!diverged && !sessions.shouldRefreshSoon()) {
       return;
     }
 

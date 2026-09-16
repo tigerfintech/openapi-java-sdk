@@ -13,9 +13,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.After;
 import org.junit.Before;
@@ -180,7 +185,167 @@ public class OAuth2SessionManagerTest {
     assertEquals(threads, results.size());
     assertEquals("single-flight must collapse concurrent refreshes into one call",
         1, server.tokenCalls().size());
-    assertEquals(1, new java.util.HashSet<>(results).size());
+    // Whoever takes the exchange returns the new token; the rest return the one they already
+    // hold, which has 60s of life left, rather than queueing behind an exchange that can take
+    // tens of seconds. Both values are usable and nothing else may appear.
+    Set<String> unexpected = new HashSet<>(results);
+    unexpected.removeAll(Arrays.asList("AT0", "AT1"));
+    assertTrue("every caller must get a usable token, got " + results, unexpected.isEmpty());
+    assertTrue("the refreshed token must at least reach the caller that fetched it",
+        results.contains("AT1"));
+  }
+
+  /**
+   * C-13: a caller holding a still-usable token must not wait for someone else's exchange.
+   *
+   * <p>Waiting there charges an unrelated request for a token exchange that can take tens of
+   * seconds against a slow authorization server -- to obtain a token it does not yet need. This
+   * is what let one connection's heartbeat stall an unrelated order request: HTTP and the push
+   * connection share one session, so whichever side started the refresh held the other up.</p>
+   */
+  @Test
+  public void usableTokenIsReturnedWithoutWaitingForAnInFlightRefresh() throws Exception {
+    final OAuth2SessionManager sessions = session();
+    seed(sessions, 60);
+    CountDownLatch exchangeStarted = server.holdTokenEndpoint();
+
+    // Stand in for the heartbeat: starts a refresh and is stuck inside the token endpoint.
+    Thread refresher = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          sessions.getAccessToken();
+        } catch (RuntimeException ignored) {
+          // Only the timing of the other caller matters here.
+        }
+      }
+    });
+    refresher.setDaemon(true);
+    refresher.start();
+    assertTrue("the refresh should have reached the token endpoint",
+        exchangeStarted.await(10, TimeUnit.SECONDS));
+
+    // Stand in for a business request arriving mid-exchange. It must come straight back with
+    // the token it already has, not block until the held exchange finishes.
+    long startedAt = System.currentTimeMillis();
+    String token = sessions.getAccessToken();
+    long waitedMillis = System.currentTimeMillis() - startedAt;
+
+    assertEquals("must reuse the token in hand, not wait for the new one", "AT0", token);
+    assertTrue("returned after " + waitedMillis + "ms, so it waited on the exchange",
+        waitedMillis < 2000);
+    assertEquals("the second caller must not start an exchange of its own",
+        1, server.tokenCalls().size());
+
+    server.releaseTokenEndpoint();
+    refresher.join(10_000);
+  }
+
+  /**
+   * A token too close to expiry to be worth handing out makes the caller wait for a new one.
+   *
+   * <p>The counterpart to the case above: not blocking is only correct while the token in hand
+   * still works. Below that, returning it would hand out a credential that can expire mid-flight,
+   * so waiting is the lesser cost.</p>
+   */
+  @Test
+  public void nearlyExpiredTokenMakesTheCallerWaitForTheNewOne() {
+    OAuth2SessionManager sessions = session();
+    seed(sessions, 5);
+    assertEquals("AT1", sessions.getAccessToken());
+    assertEquals(1, server.tokenCalls().size());
+  }
+
+  // ------------------------------------------- rejected refresh vs rotated refresh token
+
+  /**
+   * A rejected refresh must not be taken as the end of the authorization until the store has
+   * been re-read.
+   *
+   * <p>Refresh tokens rotate, so a second process sharing this store can refresh first and
+   * legitimately kill the value this one is holding -- while the authorization itself is alive
+   * and its replacement already on disk. Deleting on the first rejection would throw away a
+   * working token and, because the credential is shared, take every other user of it down too:
+   * the push connection keeps running while every HTTP call starts demanding a browser
+   * re-authorization.</p>
+   */
+  @Test
+  public void rejectedRefreshAdoptsTheTokenAnotherProcessLeftOnDisk() {
+    OAuth2SessionManager sessions = session();
+    seed(sessions, 60, "RT0", "AT0", "cid");
+    // Pull it into memory: this stale copy is what the session will present.
+    assertEquals("AT0", sessions.status().getAccessToken());
+
+    // Another process refreshes first, rotating RT0 away and leaving a fresh token behind.
+    seed(sessions, 3600, "RT-rotated", "AT-other-process", "cid");
+    server.queueTokenError("invalid_grant");
+
+    assertEquals("must adopt what is on disk rather than declare the grant dead",
+        "AT-other-process", sessions.getAccessToken());
+    assertEquals("the stored token was already fresh, so no second exchange was needed",
+        1, server.tokenCalls().size());
+    assertNotNull("a valid token must survive our own copy being stale",
+        new OAuth2TokenStore(home.toString()).loadToken("cid", server.getIssuer()));
+  }
+
+  /** The same recovery, when the token found on disk is itself due for a refresh. */
+  @Test
+  public void rejectedRefreshRetriesWithTheRefreshTokenFoundOnDisk() {
+    OAuth2SessionManager sessions = session();
+    seed(sessions, 60, "RT0", "AT0", "cid");
+    assertEquals("AT0", sessions.status().getAccessToken());
+
+    seed(sessions, 60, "RT-rotated", "AT-other-process", "cid");
+    server.queueTokenError("invalid_grant");
+
+    assertEquals("AT1", sessions.getAccessToken());
+    assertEquals(2, server.tokenCalls().size());
+    assertEquals("the retry must present the refresh token that was on disk",
+        "RT-rotated", server.tokenCalls().get(1).form.get("refresh_token"));
+  }
+
+  /**
+   * With nothing newer on disk the rejection is about the authorization itself, so the local
+   * state is cleared as before. Recovery must not turn a genuinely revoked grant into a loop.
+   */
+  @Test
+  public void rejectedRefreshWithNothingNewerOnDiskStillClearsTheAuthorization() {
+    OAuth2SessionManager sessions = session();
+    seed(sessions, 60, "RT0", "AT0", "cid");
+    server.queueTokenError("invalid_grant");
+
+    try {
+      sessions.getAccessToken();
+      fail("expected OAuth2Exception");
+    } catch (OAuth2Exception e) {
+      assertEquals(OAuth2Exception.Category.REAUTHORIZATION_REQUIRED, e.getCategory());
+    }
+    assertNull("a genuinely dead authorization must still be cleared",
+        new OAuth2TokenStore(home.toString()).loadToken("cid", server.getIssuer()));
+    assertEquals("one rejection with nothing newer must not be retried",
+        1, server.tokenCalls().size());
+  }
+
+  /** A rejection surviving the newest stored credential ends the authorization. */
+  @Test
+  public void rejectionOfTheStoredTokenTooEndsTheAuthorization() {
+    OAuth2SessionManager sessions = session();
+    seed(sessions, 60, "RT0", "AT0", "cid");
+    assertEquals("AT0", sessions.status().getAccessToken());
+
+    seed(sessions, 60, "RT-rotated", "AT-other-process", "cid");
+    server.queueTokenError("invalid_grant");
+    server.queueTokenError("invalid_grant");
+
+    try {
+      sessions.getAccessToken();
+      fail("expected OAuth2Exception");
+    } catch (OAuth2Exception e) {
+      assertEquals(OAuth2Exception.Category.REAUTHORIZATION_REQUIRED, e.getCategory());
+    }
+    assertEquals(2, server.tokenCalls().size());
+    assertNull("both credentials were refused, so the grant really is gone",
+        new OAuth2TokenStore(home.toString()).loadToken("cid", server.getIssuer()));
   }
 
   /** C-01: 20 threads all reporting the same failed credential. */
