@@ -172,8 +172,25 @@ public class OAuth2HttpClientTest {
     }
   }
 
-  private TigerHttpClient oauth2Client(Authentication authentication) {
+  /**
+   * A config that talks to nothing but the fake gateway.
+   *
+   * <p>{@code isAutoGrabPermission} defaults to true, which makes {@code clientConfig()} fire a
+   * {@code grab_quote_permission} request through {@code execute()} while the client is still
+   * being built -- before {@link TigerHttpClient#useCustomServerUrl(String)} has pointed it at
+   * the fake gateway. That request therefore goes to the real production gateway, which answers
+   * 401 to the fabricated Bearer token, and the OAuth2 retry path reacts by refreshing: the
+   * authentication under test is already one refresh in before the test has sent anything.
+   * Every assertion here counting refreshes or requests then measures that instead.</p>
+   */
+  private static ClientConfig newClientConfig() {
     ClientConfig config = new ClientConfig();
+    config.isAutoGrabPermission = false;
+    return config;
+  }
+
+  private TigerHttpClient oauth2Client(Authentication authentication) {
+    ClientConfig config = newClientConfig();
     config.authentication = authentication;
     TigerHttpClient client = new TigerHttpClient();
     client.clientConfig(config);
@@ -308,7 +325,7 @@ public class OAuth2HttpClientTest {
    */
   @Test
   public void signatureBodyStillCarriesTheSignatureFields() {
-    ClientConfig config = new ClientConfig();
+    ClientConfig config = newClientConfig();
     config.tigerId = "123456";
     config.privateKey = TEST_PRIVATE_KEY;
     config.setEnv(Env.SANDBOX);
@@ -328,7 +345,7 @@ public class OAuth2HttpClientTest {
   /** H-04: signature mode sends the bare license token, with no scheme prefix. */
   @Test
   public void signatureModeSendsTheLicenseTokenUnprefixed() {
-    ClientConfig config = new ClientConfig();
+    ClientConfig config = newClientConfig();
     config.tigerId = "123456";
     config.privateKey = TEST_PRIVATE_KEY;
     config.setEnv(Env.SANDBOX);
@@ -346,7 +363,7 @@ public class OAuth2HttpClientTest {
   /** H-05: a 401 in signature mode must not go anywhere near the OAuth2 retry path. */
   @Test
   public void signatureModeDoesNotRetryOn401() {
-    ClientConfig config = new ClientConfig();
+    ClientConfig config = newClientConfig();
     config.tigerId = "123456";
     config.privateKey = TEST_PRIVATE_KEY;
     config.setEnv(Env.SANDBOX);
@@ -395,7 +412,7 @@ public class OAuth2HttpClientTest {
   /** Signature mode with no credentials must still fail loudly, as it always has. */
   @Test
   public void signatureModeStillRequiresATigerId() {
-    ClientConfig config = new ClientConfig();
+    ClientConfig config = newClientConfig();
     try {
       new TigerHttpClient().clientConfig(config);
       fail("expected RuntimeException");
