@@ -165,6 +165,15 @@ public class TigerHttpClient implements TigerClient {
     }
   }
 
+  /**
+   * Sets up an OAuth2 client.
+   *
+   * <p>{@code initLicense()} is deliberately not called. The licence only selects a
+   * per-licence gateway path, and the common gateway serves every licence, so the null-licence
+   * branch of {@code refreshUrl()} is the right answer here. Querying it would work -- under
+   * OAuth2 that request carries a Bearer token like any other -- but it would cost a round trip
+   * during construction for nothing.</p>
+   */
   private void initWithoutSignature() {
     initCommon();
     refreshUrl();
