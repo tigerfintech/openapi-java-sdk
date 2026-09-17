@@ -11,6 +11,11 @@ message Request {
   uint32 id = 2;
   optional Subscribe subscribe = 3;
   optional Connect connect = 4;
+  optional RefreshToken refreshToken = 5;
+
+  message RefreshToken {
+    string accessToken = 1;
+  }
 
   message Connect {
     string tigerId = 1;
@@ -20,6 +25,8 @@ message Request {
     optional uint32 sendInterval = 5;
     optional uint32 receiveInterval = 6;
     optional bool useFullTick = 7;
+    reserved 8, 9;
+    optional string accessToken = 10;
   }
 
   message Subscribe {

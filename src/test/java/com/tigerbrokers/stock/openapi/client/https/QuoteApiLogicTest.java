@@ -15,6 +15,7 @@ import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteSymbolRes
 import com.tigerbrokers.stock.openapi.client.struct.enums.KType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.testsupport.TestClientFactory;
+import com.tigerbrokers.stock.openapi.client.util.HttpResult;
 import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,8 +52,8 @@ public class QuoteApiLogicTest {
 
   private void mockResponse(Object data) {
     String wire = JSON.toJSONString(new WireResponse(0, "success", data));
-    httpUtilsMock.when(() -> HttpUtils.post(anyString(), anyString(), nullable(String.class), anyInt()))
-        .thenReturn(wire);
+    httpUtilsMock.when(() -> HttpUtils.postForResult(anyString(), anyString(), nullable(String.class), anyInt()))
+        .thenReturn(new HttpResult(200, wire));
   }
 
   // ---------- 行情接口逐个覆盖 ----------

@@ -179,6 +179,7 @@ import com.tigerbrokers.stock.openapi.client.https.response.user.UserTradePasswo
 import com.tigerbrokers.stock.openapi.client.https.response.user.UserTradePasswordVerifyResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.user.UserTradeTokenResponse;
 import com.tigerbrokers.stock.openapi.client.testsupport.TestClientFactory;
+import com.tigerbrokers.stock.openapi.client.util.HttpResult;
 import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
 import java.lang.reflect.Constructor;
 import org.junit.AfterClass;
@@ -209,7 +210,7 @@ public class AllApiLogicTest {
 
   private void mockResponse(String dataJson) {
     String wire = "{\"code\":0,\"message\":\"success\",\"timestamp\":1700000000,\"data\":" + dataJson + "}";
-    httpUtilsMock.when(() -> HttpUtils.post(anyString(), anyString(), nullable(String.class), anyInt())).thenReturn(wire);
+    httpUtilsMock.when(() -> HttpUtils.postForResult(anyString(), anyString(), nullable(String.class), anyInt())).thenReturn(new HttpResult(200, wire));
   }
 
   @SuppressWarnings("unchecked")

@@ -27,3 +27,4 @@ target/
 
 # local memory / ephemeral data (not for version control)
 .data/
+docs/
