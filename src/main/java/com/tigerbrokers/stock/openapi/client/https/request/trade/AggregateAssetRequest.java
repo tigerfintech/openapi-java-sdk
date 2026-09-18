@@ -56,6 +56,17 @@ public class AggregateAssetRequest extends TigerCommonRequest implements TigerRe
     }
 
     public static AggregateAssetRequest buildAggregateAssetRequest(String account, String segType, String secretKey,
+                                                                   AssetQuoteType assetQuoteType) {
+        AggregateAssetRequest request = new AggregateAssetRequest();
+        AggregateAssetModel model = new AggregateAssetModel(account, segType, secretKey);
+        if (assetQuoteType != null) {
+            model.setAssetQuoteType(assetQuoteType.name());
+        }
+        request.setApiModel(model);
+        return request;
+    }
+
+    public static AggregateAssetRequest buildAggregateAssetRequest(String account, String segType, String secretKey,
                                                                    Currency baseCurrency,
                                                                    AssetQuoteType assetQuoteType) {
         AggregateAssetRequest request = new AggregateAssetRequest();

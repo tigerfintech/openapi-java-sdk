@@ -72,6 +72,13 @@ public class TradeRequestTest {
     Assert.assertEquals("USD", full.getBaseCurrency());
     Assert.assertEquals("secret", full.getSecretKey());
 
+    // 只带 secretKey、不带 baseCurrency 的存量签名也要能追加口径，与 PrimeAssetRequest 的重载矩阵对齐
+    AggregateAssetModel withSecret = AggregateAssetRequest
+        .buildAggregateAssetRequest(ACCOUNT, "ALL", "secret", AssetQuoteType.OVERNIGHT).getApiModel();
+    Assert.assertEquals("OVERNIGHT", withSecret.getAssetQuoteType());
+    Assert.assertEquals("secret", withSecret.getSecretKey());
+    Assert.assertNull(withSecret.getBaseCurrency());
+
     // null 不落参数，保持服务端默认
     Assert.assertNull(AggregateAssetRequest.buildAggregateAssetRequest(ACCOUNT, "ALL", (AssetQuoteType) null)
         .getApiModel().getAssetQuoteType());
