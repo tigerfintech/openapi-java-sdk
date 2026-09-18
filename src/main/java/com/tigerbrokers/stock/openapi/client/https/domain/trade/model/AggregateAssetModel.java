@@ -16,6 +16,9 @@ public class AggregateAssetModel extends ApiModel {
     private String secretKey;
     @JSONField(name = "seg_type")
     private String segType;
+    /** enum name of {@link com.tigerbrokers.stock.openapi.client.struct.enums.AssetQuoteType} */
+    @JSONField(name = "asset_quote_type")
+    private String assetQuoteType;
 
     public AggregateAssetModel(String account, String segType) {
         this.account = account;
@@ -67,5 +70,13 @@ public class AggregateAssetModel extends ApiModel {
 
     public void setSegType(String segType) {
         this.segType = segType;
+    }
+
+    public String getAssetQuoteType() {
+        return assetQuoteType;
+    }
+
+    public void setAssetQuoteType(String assetQuoteType) {
+        this.assetQuoteType = assetQuoteType;
     }
 }

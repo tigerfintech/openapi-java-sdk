@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.socket;
 
 import com.tigerbrokers.stock.openapi.client.struct.Indicator;
+import com.tigerbrokers.stock.openapi.client.struct.enums.AssetQuoteType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
@@ -28,6 +29,18 @@ public interface SubscribeAsyncApi {
    * @return string id
    */
   String subscribe(String account, Subject subject);
+
+  /**
+   * subscribe trade data with the specified quote-type, only {@link Subject#Asset} and
+   * {@link Subject#Position} take the quote-type into account. Protobuf protocol only,
+   * the quote-type is ignored when the client runs on the STOMP protocol.
+   *
+   * @param account subscribe account
+   * @param subject trade subject
+   * @param assetQuoteType quote-type used to value the pushed data, null means server default
+   * @return string id
+   */
+  String subscribe(String account, Subject subject, AssetQuoteType assetQuoteType);
 
   /**
    * cancel subscribe trade data , include order / position / asset

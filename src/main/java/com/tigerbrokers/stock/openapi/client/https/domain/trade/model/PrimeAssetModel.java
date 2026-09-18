@@ -16,6 +16,9 @@ public class PrimeAssetModel extends ApiModel {
     @JSONField(name = "secret_key")
     private String secretKey;
     private Boolean consolidated;
+    /** enum name of {@link com.tigerbrokers.stock.openapi.client.struct.enums.AssetQuoteType} */
+    @JSONField(name = "asset_quote_type")
+    private String assetQuoteType;
 
     public PrimeAssetModel(String account) {
         this.account = account;
@@ -62,5 +65,13 @@ public class PrimeAssetModel extends ApiModel {
 
     public void setConsolidated(Boolean consolidated) {
         this.consolidated = consolidated;
+    }
+
+    public String getAssetQuoteType() {
+        return assetQuoteType;
+    }
+
+    public void setAssetQuoteType(String assetQuoteType) {
+        this.assetQuoteType = assetQuoteType;
     }
 }

@@ -1,5 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.request.trade;
 
+import com.alibaba.fastjson.JSON;
+import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.AggregateAssetModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.DepositWithdrawModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.EstimateTradableQuantityModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.ForexTradeOrderModel;
@@ -7,6 +9,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.OptionExer
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.OptionExerciseRecordModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.PrimeAnalyticsAssetModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.PositionTransferModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.PrimeAssetModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.SegmentFundModel;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.AggregateAssetResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.BatchOrderResponse;
@@ -31,6 +34,7 @@ import com.tigerbrokers.stock.openapi.client.https.response.trade.SegmentFundRes
 import com.tigerbrokers.stock.openapi.client.https.response.trade.SegmentFundsResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.SingleOrderResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
+import com.tigerbrokers.stock.openapi.client.struct.enums.AssetQuoteType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OptionExerciseType;
@@ -55,6 +59,24 @@ public class TradeRequestTest {
     Assert.assertEquals(AggregateAssetResponse.class, req.getResponseClass());
     Assert.assertNotNull(AggregateAssetRequest.buildAggregateAssetRequest(ACCOUNT, "ALL", "secret").getApiModel());
     Assert.assertNotNull(AggregateAssetRequest.buildAggregateAssetRequest(ACCOUNT, "ALL", "secret", Currency.USD).getApiModel());
+  }
+  @Test public void testAggregateAssetRequestAssetQuoteType() {
+    AggregateAssetModel model =
+        AggregateAssetRequest.buildAggregateAssetRequest(ACCOUNT, "ALL", AssetQuoteType.RTH).getApiModel();
+    Assert.assertEquals("RTH", model.getAssetQuoteType());
+    Assert.assertEquals("RTH", JSON.parseObject(JSON.toJSONString(model)).getString("asset_quote_type"));
+
+    AggregateAssetModel full = AggregateAssetRequest
+        .buildAggregateAssetRequest(ACCOUNT, "ALL", "secret", Currency.USD, AssetQuoteType.OVERNIGHT).getApiModel();
+    Assert.assertEquals("OVERNIGHT", full.getAssetQuoteType());
+    Assert.assertEquals("USD", full.getBaseCurrency());
+    Assert.assertEquals("secret", full.getSecretKey());
+
+    // null 不落参数，保持服务端默认
+    Assert.assertNull(AggregateAssetRequest.buildAggregateAssetRequest(ACCOUNT, "ALL", (AssetQuoteType) null)
+        .getApiModel().getAssetQuoteType());
+    Assert.assertFalse(JSON.toJSONString(
+        AggregateAssetRequest.buildAggregateAssetRequest(ACCOUNT, "ALL").getApiModel()).contains("asset_quote_type"));
   }
   @Test public void testDepositWithdrawRequest() {
     DepositWithdrawRequest req = DepositWithdrawRequest.newRequest();
@@ -221,6 +243,32 @@ public class TradeRequestTest {
     Assert.assertNotNull(PrimeAssetRequest.buildPrimeAssetRequest(ACCOUNT, "secret").getApiModel());
     Assert.assertNotNull(PrimeAssetRequest.buildPrimeAssetRequest(ACCOUNT, Currency.USD).getApiModel());
     Assert.assertNotNull(PrimeAssetRequest.buildPrimeAssetRequest(ACCOUNT, Currency.USD, "secret").getApiModel());
+  }
+  @Test public void testPrimeAssetRequestAssetQuoteType() {
+    PrimeAssetModel model = PrimeAssetRequest.buildPrimeAssetRequest(ACCOUNT, AssetQuoteType.ETH).getApiModel();
+    Assert.assertEquals("ETH", model.getAssetQuoteType());
+    Assert.assertEquals("ETH", JSON.parseObject(JSON.toJSONString(model)).getString("asset_quote_type"));
+
+    PrimeAssetModel withCurrency =
+        PrimeAssetRequest.buildPrimeAssetRequest(ACCOUNT, Currency.USD, AssetQuoteType.RTH).getApiModel();
+    Assert.assertEquals("RTH", withCurrency.getAssetQuoteType());
+    Assert.assertEquals("USD", withCurrency.getBaseCurrency());
+
+    PrimeAssetModel full =
+        PrimeAssetRequest.buildPrimeAssetRequest(ACCOUNT, Currency.USD, "secret", AssetQuoteType.OVERNIGHT)
+            .getApiModel();
+    Assert.assertEquals("OVERNIGHT", full.getAssetQuoteType());
+    Assert.assertEquals("secret", full.getSecretKey());
+
+    PrimeAssetRequest setterReq = PrimeAssetRequest.buildPrimeAssetRequest(ACCOUNT);
+    setterReq.setAssetQuoteType(AssetQuoteType.ETH);
+    Assert.assertEquals("ETH", setterReq.getApiModel().getAssetQuoteType());
+    setterReq.setAssetQuoteType(null);
+    Assert.assertNull(setterReq.getApiModel().getAssetQuoteType());
+
+    // 老签名零改动：不传就不落参数
+    Assert.assertFalse(JSON.toJSONString(PrimeAssetRequest.buildPrimeAssetRequest(ACCOUNT).getApiModel())
+        .contains("asset_quote_type"));
   }
   @Test public void testQueryOrderRequest() {
     Assert.assertEquals(MethodName.ORDERS, new QueryOrderRequest().getApiMethodName());

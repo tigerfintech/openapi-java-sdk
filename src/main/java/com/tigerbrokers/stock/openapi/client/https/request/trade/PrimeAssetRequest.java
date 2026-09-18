@@ -6,6 +6,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.PrimeAsset
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.PrimeAssetResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.AssetQuoteType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 
@@ -47,6 +48,39 @@ public class PrimeAssetRequest extends TigerCommonRequest implements TigerReques
         return primeAssetRequest;
     }
 
+    public static PrimeAssetRequest buildPrimeAssetRequest(String account, AssetQuoteType assetQuoteType) {
+        PrimeAssetRequest primeAssetRequest = new PrimeAssetRequest();
+        PrimeAssetModel primeAssetModel = new PrimeAssetModel(account);
+        if (assetQuoteType != null) {
+            primeAssetModel.setAssetQuoteType(assetQuoteType.name());
+        }
+        primeAssetRequest.setApiModel(primeAssetModel);
+        return primeAssetRequest;
+    }
+
+    public static PrimeAssetRequest buildPrimeAssetRequest(String account, Currency baseCurrency,
+                                                           AssetQuoteType assetQuoteType) {
+        PrimeAssetRequest primeAssetRequest = new PrimeAssetRequest();
+        PrimeAssetModel primeAssetModel = new PrimeAssetModel(account);
+        primeAssetModel.setBaseCurrency(baseCurrency.name());
+        if (assetQuoteType != null) {
+            primeAssetModel.setAssetQuoteType(assetQuoteType.name());
+        }
+        primeAssetRequest.setApiModel(primeAssetModel);
+        return primeAssetRequest;
+    }
+
+    public static PrimeAssetRequest buildPrimeAssetRequest(String account, Currency baseCurrency, String secretKey,
+                                                           AssetQuoteType assetQuoteType) {
+        PrimeAssetRequest primeAssetRequest = new PrimeAssetRequest();
+        PrimeAssetModel primeAssetModel = new PrimeAssetModel(account, baseCurrency.name(), secretKey);
+        if (assetQuoteType != null) {
+            primeAssetModel.setAssetQuoteType(assetQuoteType.name());
+        }
+        primeAssetRequest.setApiModel(primeAssetModel);
+        return primeAssetRequest;
+    }
+
     public PrimeAssetModel getApiModel() {
         if (apiModel == null) {
             apiModel = new PrimeAssetModel(ClientConfig.DEFAULT_CONFIG.defaultAccount);
@@ -56,6 +90,10 @@ public class PrimeAssetRequest extends TigerCommonRequest implements TigerReques
 
     public void setConsolidated(Boolean consolidated) {
         getApiModel().setConsolidated(consolidated);
+    }
+
+    public void setAssetQuoteType(AssetQuoteType assetQuoteType) {
+        getApiModel().setAssetQuoteType(assetQuoteType == null ? null : assetQuoteType.name());
     }
 
     @Override
