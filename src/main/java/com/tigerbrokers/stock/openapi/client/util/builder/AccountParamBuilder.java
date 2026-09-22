@@ -286,7 +286,7 @@ public class AccountParamBuilder {
     return this;
   }
 
-  /** only for position query */
+  /** only for position query and asset query (assets / prime_assets / aggregate_assets) */
   public AccountParamBuilder assetQuoteType(AssetQuoteType assetQuoteType) {
     if (assetQuoteType != null) {
       paramMap.put("asset_quote_type", assetQuoteType.name());

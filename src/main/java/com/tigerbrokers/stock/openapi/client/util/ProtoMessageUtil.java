@@ -5,6 +5,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.SocketCommon;
+import com.tigerbrokers.stock.openapi.client.struct.enums.AssetQuoteType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
@@ -173,6 +174,18 @@ public class ProtoMessageUtil {
   }
 
   public static Request buildSubscribeMessage(String account, Subject subject) {
+    return buildSubscribeMessage(account, subject, null);
+  }
+
+  /**
+   * @param account subscribe account, null means the default account of the connection
+   * @param subject trade subject
+   * @param assetQuoteType quote-type used to value the pushed data, the enum name is sent on the
+   *     wire. Only {@link Subject#Asset} and {@link Subject#Position} read it; null leaves the
+   *     field unset and keeps the server default.
+   * @return Request
+   */
+  public static Request buildSubscribeMessage(String account, Subject subject, AssetQuoteType assetQuoteType) {
     Request.Builder builder = Request.newBuilder();
     builder.setCommand(SocketCommon.Command.SUBSCRIBE)
         .setId(increment.addAndGet(1));
@@ -181,6 +194,9 @@ public class ProtoMessageUtil {
     subBuild.setDataType(SocketCommon.DataType.valueOf(subject.name()));
     if (account != null) {
       subBuild.setAccount(account);
+    }
+    if (assetQuoteType != null) {
+      subBuild.setAssetQuoteType(assetQuoteType.name());
     }
 
     builder.setSubscribe(subBuild.build());

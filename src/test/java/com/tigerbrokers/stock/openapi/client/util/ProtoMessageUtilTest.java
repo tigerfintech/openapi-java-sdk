@@ -2,6 +2,7 @@ package com.tigerbrokers.stock.openapi.client.util;
 
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.Request;
 import com.tigerbrokers.stock.openapi.client.socket.data.pb.SocketCommon;
+import com.tigerbrokers.stock.openapi.client.struct.enums.AssetQuoteType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
@@ -80,6 +81,40 @@ public class ProtoMessageUtilTest {
   public void testBuildSubscribeMessage_nullAccount() {
     Request req = ProtoMessageUtil.buildSubscribeMessage(null, Subject.Asset);
     Assert.assertEquals(SocketCommon.Command.SUBSCRIBE, req.getCommand());
+  }
+
+  @Test
+  public void testBuildSubscribeMessage_assetQuoteType() {
+    Request req = ProtoMessageUtil.buildSubscribeMessage("acct1", Subject.Asset, AssetQuoteType.ETH);
+    Assert.assertEquals(SocketCommon.Command.SUBSCRIBE, req.getCommand());
+    Assert.assertEquals("acct1", req.getSubscribe().getAccount());
+    Assert.assertTrue(req.getSubscribe().hasAssetQuoteType());
+    // the enum name goes on the wire, not the ordinal
+    Assert.assertEquals("ETH", req.getSubscribe().getAssetQuoteType());
+
+    Request overnight = ProtoMessageUtil.buildSubscribeMessage(null, Subject.Position, AssetQuoteType.OVERNIGHT);
+    Assert.assertEquals("OVERNIGHT", overnight.getSubscribe().getAssetQuoteType());
+    Assert.assertTrue(ProtoMessageUtil.toJson(overnight).contains("\"assetQuoteType\":\"OVERNIGHT\""));
+  }
+
+  @Test
+  public void testBuildSubscribeMessage_nullAssetQuoteTypeLeavesFieldUnset() {
+    Request req = ProtoMessageUtil.buildSubscribeMessage("acct1", Subject.Asset, null);
+    Assert.assertFalse(req.getSubscribe().hasAssetQuoteType());
+    // the old two-arg overload must stay byte-identical for existing callers
+    Assert.assertArrayEquals(ProtoMessageUtil.buildSubscribeMessage("acct1", Subject.Asset).getSubscribe().toByteArray(),
+        req.getSubscribe().toByteArray());
+  }
+
+  /**
+   * Pins the wire contract agreed with the server: field number 5, length-delimited string.
+   * Tag byte 0x2A == (5 &lt;&lt; 3) | 2.
+   */
+  @Test
+  public void testAssetQuoteType_wireFormat() {
+    Assert.assertEquals(5, Request.Subscribe.ASSETQUOTETYPE_FIELD_NUMBER);
+    byte[] bytes = Request.Subscribe.newBuilder().setAssetQuoteType("ETH").build().toByteArray();
+    Assert.assertArrayEquals(new byte[] {0x2A, 0x03, 'E', 'T', 'H'}, bytes);
   }
 
   @Test

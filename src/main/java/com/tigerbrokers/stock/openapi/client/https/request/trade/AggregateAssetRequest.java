@@ -8,6 +8,7 @@ import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.AggregateAssetResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.trade.PrimeAssetResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.AssetQuoteType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Currency;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 
@@ -39,6 +40,40 @@ public class AggregateAssetRequest extends TigerCommonRequest implements TigerRe
         AggregateAssetRequest request = new AggregateAssetRequest();
         AggregateAssetModel model = new AggregateAssetModel(account, segType, baseCurrency.name(), secretKey);
         model.setBaseCurrency(baseCurrency.name());
+        request.setApiModel(model);
+        return request;
+    }
+
+    public static AggregateAssetRequest buildAggregateAssetRequest(String account, String segType,
+                                                                   AssetQuoteType assetQuoteType) {
+        AggregateAssetRequest request = new AggregateAssetRequest();
+        AggregateAssetModel model = new AggregateAssetModel(account, segType);
+        if (assetQuoteType != null) {
+            model.setAssetQuoteType(assetQuoteType.name());
+        }
+        request.setApiModel(model);
+        return request;
+    }
+
+    public static AggregateAssetRequest buildAggregateAssetRequest(String account, String segType, String secretKey,
+                                                                   AssetQuoteType assetQuoteType) {
+        AggregateAssetRequest request = new AggregateAssetRequest();
+        AggregateAssetModel model = new AggregateAssetModel(account, segType, secretKey);
+        if (assetQuoteType != null) {
+            model.setAssetQuoteType(assetQuoteType.name());
+        }
+        request.setApiModel(model);
+        return request;
+    }
+
+    public static AggregateAssetRequest buildAggregateAssetRequest(String account, String segType, String secretKey,
+                                                                   Currency baseCurrency,
+                                                                   AssetQuoteType assetQuoteType) {
+        AggregateAssetRequest request = new AggregateAssetRequest();
+        AggregateAssetModel model = new AggregateAssetModel(account, segType, baseCurrency.name(), secretKey);
+        if (assetQuoteType != null) {
+            model.setAssetQuoteType(assetQuoteType.name());
+        }
         request.setApiModel(model);
         return request;
     }
