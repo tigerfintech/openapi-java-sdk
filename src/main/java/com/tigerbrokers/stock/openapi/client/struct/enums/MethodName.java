@@ -75,6 +75,7 @@ public enum MethodName {
   QUOTE_DEPTH("quote_depth", MethodType.QUOTE),
   QUOTE_DELAY("quote_delay", MethodType.QUOTE),
   QUOTE_OVERNIGHT("quote_overnight", MethodType.QUOTE),
+  SEARCH_SYMBOL("search_symbol", MethodType.QUOTE),
   /** trading calendar */
   TRADING_CALENDAR("trading_calendar", MethodType.QUOTE),
   STOCK_BROKER("stock_broker", MethodType.QUOTE),
