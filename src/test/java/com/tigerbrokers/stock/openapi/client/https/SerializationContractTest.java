@@ -37,7 +37,7 @@ public class SerializationContractTest {
 
   /** S3 例外：Item 上确实需要 snake_case 的字段（服务端该字段返回的就是 snake_case）。 */
   private static final Set<String> S3_EXEMPT_FIELDS = new HashSet<>(Arrays.asList(
-      // 占位：目前无例外
+      // 占位：目前无例外（news 系列响应曾为 snake_case，后随服务端决策 #13 统一为 camelCase）
   ));
 
   /** S5 例外：Response 声明的字段不是 data 载荷（如客户端本地补充的字段）。 */
