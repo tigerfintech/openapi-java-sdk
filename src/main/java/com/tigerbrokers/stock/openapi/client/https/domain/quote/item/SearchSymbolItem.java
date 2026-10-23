@@ -10,7 +10,7 @@ public class SearchSymbolItem {
   private String nameCN;
   private Integer type;
   private Float halted;
-  public List<String> labels;
+  private List<String> labels;
 
   public String getSymbol() {
     return symbol;
