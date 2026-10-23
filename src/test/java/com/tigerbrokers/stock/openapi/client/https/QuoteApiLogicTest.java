@@ -6,6 +6,7 @@ import com.tigerbrokers.stock.openapi.client.https.domain.quote.item.NewsItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.item.NewsPageItem;
 import com.tigerbrokers.stock.openapi.client.https.request.news.NewsHighlightListRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.news.NewsStockListRequest;
+import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.quote.QuoteKlineRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.quote.QuoteMarketRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.quote.QuoteStockTradeRequest;
@@ -188,6 +189,34 @@ public class QuoteApiLogicTest {
     Assert.assertEquals("789", item.getId());
     Assert.assertEquals("Fed cuts rates", item.getTitle());
     Assert.assertEquals(Long.valueOf(1761429600), item.getPubTimestamp());
+  }
+
+  /**
+   * news（MethodType.NEWS）必须路由到主网关（serverUrl），不得走行情域名（quoteServerUrl）——
+   * 域名花园对 TBNZ/TBSG 配置了 <license>-QUOTE 分流（/hkg-quote 路径），标错 MethodType
+   * 会把资讯流量打进行情集群。对照断言：QUOTE 类型仍走行情域名，防止路由逻辑被误改。
+   */
+  @Test
+  public void testNewsRoutesToMainGatewayNotQuote() throws Exception {
+    TigerHttpClient newsClient = TestClientFactory.createOfflineClient();
+    java.lang.reflect.Field quoteUrlField = TigerHttpClient.class.getDeclaredField("quoteServerUrl");
+    quoteUrlField.setAccessible(true);
+    quoteUrlField.set(newsClient, "http://localhost:0/hkg-quote/gateway");
+
+    java.lang.reflect.Method getServerUrl =
+        TigerHttpClient.class.getDeclaredMethod("getServerUrl", TigerRequest.class);
+    getServerUrl.setAccessible(true);
+
+    Assert.assertEquals("news 请求必须走主网关",
+        "http://localhost:0/gateway",
+        getServerUrl.invoke(newsClient, NewsStockListRequest.newRequest(
+            Collections.singletonList("AAPL"), Language.zh_CN, 1, 20)));
+    Assert.assertEquals("news 请求必须走主网关",
+        "http://localhost:0/gateway",
+        getServerUrl.invoke(newsClient, NewsHighlightListRequest.newRequest(Language.en_US, null)));
+    Assert.assertEquals("QUOTE 类型应走行情域名（对照组）",
+        "http://localhost:0/hkg-quote/gateway",
+        getServerUrl.invoke(newsClient, QuoteMarketRequest.newRequest(Market.US)));
   }
 
   // ---------- 辅助类 ----------
