@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.quote.item;
 
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
+import com.tigerbrokers.stock.openapi.client.struct.enums.HaltedStatus;
 import java.util.List;
 
 public class SearchSymbolItem extends ApiModel {
@@ -10,7 +11,8 @@ public class SearchSymbolItem extends ApiModel {
   private String market;
   private String nameCN;
   private Integer type;
-  private Float halted;
+  /** halted。0: Normal 3: Suspension 4: Delisted */
+  private HaltedStatus halted;
   private List<String> labels;
 
   public String getSymbol() {
@@ -53,11 +55,11 @@ public class SearchSymbolItem extends ApiModel {
     this.type = type;
   }
 
-  public Float getHalted() {
+  public HaltedStatus getHalted() {
     return halted;
   }
 
-  public void setHalted(Float halted) {
+  public void setHalted(HaltedStatus halted) {
     this.halted = halted;
   }
 
