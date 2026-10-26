@@ -1,8 +1,9 @@
 package com.tigerbrokers.stock.openapi.client.https.domain.quote.item;
 
+import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import java.util.List;
 
-public class SearchSymbolItem {
+public class SearchSymbolItem  extends ApiModel {
 
   private String symbol;
   private String name;
@@ -66,5 +67,18 @@ public class SearchSymbolItem {
 
   public void setLabels(List<String> labels) {
     this.labels = labels;
+  }
+
+  @Override
+  public String toString() {
+    return "SearchSymbolItem{" +
+        "symbol='" + symbol + '\'' +
+        ", name='" + name + '\'' +
+        ", market='" + market + '\'' +
+        ", nameCN='" + nameCN + '\'' +
+        ", type=" + type +
+        ", halted=" + halted +
+        ", labels=" + labels +
+        '}';
   }
 }
