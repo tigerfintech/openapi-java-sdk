@@ -3,7 +3,7 @@ package com.tigerbrokers.stock.openapi.client.https.domain.quote.item;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import java.util.List;
 
-public class SearchSymbolItem  extends ApiModel {
+public class SearchSymbolItem extends ApiModel {
 
   private String symbol;
   private String name;
