@@ -1,13 +1,13 @@
 package com.tigerbrokers.stock.openapi.client.testsupport;
 
 import com.tigerbrokers.stock.openapi.client.https.client.TigerHttpClient;
-import com.tigerbrokers.stock.openapi.client.https.domain.option.item.OptionChainItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.item.OptionExpirationItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.item.OptionRealTimeQuote;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.item.OptionRealTimeQuoteGroup;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionChainModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.item.MarketItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.quote.item.RealTimeQuoteItem;
+import com.tigerbrokers.stock.openapi.client.https.domain.trade.item.ContractLeg;
 import com.tigerbrokers.stock.openapi.client.https.request.option.OptionChainQueryRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.option.OptionExpirationQueryRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.quote.QuoteMarketRequest;
@@ -19,10 +19,15 @@ import com.tigerbrokers.stock.openapi.client.https.response.option.OptionExpirat
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteMarketResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteRealTimeQuoteResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteStockTradeResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.ActionType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Right;
+import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -169,59 +174,12 @@ public final class MarketHelpers {
     if (client == null) {
       return null;
     }
-    // 1) earliest expiry
-    TigerResponse expResp = client.execute(
-        OptionExpirationQueryRequest.of(Collections.singletonList("AAPL")));
-    if (expResp == null || !expResp.isSuccess()) {
-      return null;
-    }
-    OptionExpirationResponse oe = (OptionExpirationResponse) expResp;
-    if (oe.getOptionExpirationItems() == null || oe.getOptionExpirationItems().isEmpty()) {
-      return null;
-    }
-    OptionExpirationItem expItem = oe.getOptionExpirationItems().get(0);
-    if (expItem.getDates() == null || expItem.getDates().isEmpty()) {
-      return null;
-    }
-    // Pick an expiry > 14 days out — the nearest expiry can already be
-    // expired or expiring same-day (untradable), mirroring Python's
-    // _resolve_us_option_contract mid-range-expiry selection.
-    List<String> dates = expItem.getDates();
-    // The expiry dates are US exchange calendar dates, so "today" must be
-    // resolved in the exchange's zone rather than the CI runner's default zone.
-    // A UTC or Asia/Shanghai runner is up to a day ahead of New York, which
-    // shifts the 14-day boundary and can pick a different contract on the same
-    // wall-clock run.
-    java.time.LocalDate today =
-        java.time.LocalDate.now(java.time.ZoneId.of("America/New_York"));
-    String expiry = null;
-    for (String d : dates) {
-      try {
-        java.time.LocalDate parsed = java.time.LocalDate.parse(d);
-        if (java.time.temporal.ChronoUnit.DAYS.between(today, parsed) > 14) {
-          expiry = d;
-          break;
-        }
-      } catch (java.time.format.DateTimeParseException ignored) {
-        // fall through to fallback below
-      }
-    }
+    // 1) earliest expiry, 2) chain
+    String expiry = resolveUsOptionExpiry(client);
     if (expiry == null) {
-      expiry = dates.get(dates.size() - 1);
-    }
-
-    // 2) chain
-    OptionChainModel chainModel = new OptionChainModel("AAPL", expiry);
-    TigerResponse chainResp = client.execute(OptionChainQueryRequest.of(chainModel));
-    if (chainResp == null || !chainResp.isSuccess()) {
       return null;
     }
-    OptionChainResponse oc = (OptionChainResponse) chainResp;
-    if (oc.getOptionChainItems() == null || oc.getOptionChainItems().isEmpty()) {
-      return null;
-    }
-    OptionChainItem chainItem = oc.getOptionChainItems().get(0);
-    List<OptionRealTimeQuoteGroup> groups = chainItem.getItems();
+    List<OptionRealTimeQuoteGroup> groups = fetchUsOptionChain(client, expiry);
     if (groups == null || groups.isEmpty()) {
       return null;
     }
@@ -247,6 +205,148 @@ public final class MarketHelpers {
       }
     }
     return null;
+  }
+
+  /**
+   * The two legs of an AAPL call vertical spread — buy the strike at or just
+   * above the money, sell the next one up, same expiry — in the shape the combo
+   * order recipe documents for {@code ComboType.VERTICAL}. A net debit.
+   *
+   * <p>Both legs have to be contracts the exchange actually lists. A
+   * synthesised expiry ("today + 45 days") lands on a date Apple usually does
+   * not list — weeklies stop roughly six weeks out — and the server rejects the
+   * preview with {@code 合约不正确} before it ever looks at the price, which
+   * says nothing about the SDK.
+   *
+   * @return {longLeg, shortLeg}, or null when the expiry cannot be resolved or
+   *     the chain lists fewer than two strikes
+   */
+  public static List<ContractLeg> resolveUsOptionVerticalLegs(TigerHttpClient client) {
+    if (client == null) {
+      return null;
+    }
+    String expiry = resolveUsOptionExpiry(client);
+    if (expiry == null) {
+      return null;
+    }
+    List<OptionRealTimeQuoteGroup> groups = fetchUsOptionChain(client, expiry);
+    if (groups == null || groups.isEmpty()) {
+      return null;
+    }
+
+    // Only strikes whose call side carries an identifier are tradable; a chain
+    // group with an empty call may still have a put, but this is a call spread.
+    TreeMap<Double, OptionRealTimeQuote> calls = new TreeMap<>();
+    for (OptionRealTimeQuoteGroup g : groups) {
+      OptionRealTimeQuote call = g.getCall();
+      if (call == null || call.getIdentifier() == null || call.getIdentifier().isEmpty()
+          || call.getStrike() == null || call.getStrike().isEmpty()) {
+        continue;
+      }
+      try {
+        calls.put(Double.parseDouble(call.getStrike()), call);
+      } catch (NumberFormatException ignore) {
+        // skip malformed strike
+      }
+    }
+    if (calls.size() < 2) {
+      return null;
+    }
+
+    // Anchor on the money; without a quote the lowest listed strike is as good
+    // an anchor as any and still yields a valid pair.
+    Double latestPrice = getLatestPrice(client, "AAPL");
+    double anchor = latestPrice != null && latestPrice > 0 ? latestPrice : calls.firstKey();
+    Map.Entry<Double, OptionRealTimeQuote> lower = calls.ceilingEntry(anchor);
+    Map.Entry<Double, OptionRealTimeQuote> higher;
+    if (lower == null) {
+      // Anchor sits above the whole chain — buy the second-highest strike and
+      // sell the highest.
+      lower = calls.lowerEntry(calls.lastKey());
+      if (lower == null) {
+        return null;
+      }
+      higher = calls.lastEntry();
+    } else {
+      higher = calls.higherEntry(lower.getKey());
+      if (higher == null) {
+        // Anchor was the top strike: step down one so the pair is still
+        // lower-bought / higher-sold.
+        higher = calls.lastEntry();
+        lower = calls.lowerEntry(higher.getKey());
+        if (lower == null) {
+          return null;
+        }
+      }
+    }
+
+    // ContractLeg carries the expiry without separators ("20261218").
+    String legExpiry = expiry.replace("-", "");
+    return Arrays.asList(
+        new ContractLeg(SecType.OPT, "AAPL", lower.getValue().getStrike(), legExpiry,
+            Right.CALL, ActionType.BUY, 1),
+        new ContractLeg(SecType.OPT, "AAPL", higher.getValue().getStrike(), legExpiry,
+            Right.CALL, ActionType.SELL, 1));
+  }
+
+  /**
+   * Earliest AAPL expiry more than 14 days out, as the exchange's own
+   * {@code yyyy-MM-dd} string.
+   *
+   * <p>The nearest expiry can already be expired or expiring same-day
+   * (untradable), so it is skipped, mirroring Python's
+   * {@code _resolve_us_option_contract} mid-range-expiry selection. When every
+   * listed date falls inside that window the latest one is used rather than
+   * returning nothing.
+   */
+  private static String resolveUsOptionExpiry(TigerHttpClient client) {
+    TigerResponse expResp = client.execute(
+        OptionExpirationQueryRequest.of(Collections.singletonList("AAPL")));
+    if (expResp == null || !expResp.isSuccess()) {
+      return null;
+    }
+    OptionExpirationResponse oe = (OptionExpirationResponse) expResp;
+    if (oe.getOptionExpirationItems() == null || oe.getOptionExpirationItems().isEmpty()) {
+      return null;
+    }
+    OptionExpirationItem expItem = oe.getOptionExpirationItems().get(0);
+    if (expItem.getDates() == null || expItem.getDates().isEmpty()) {
+      return null;
+    }
+    List<String> dates = expItem.getDates();
+    // The expiry dates are US exchange calendar dates, so "today" must be
+    // resolved in the exchange's zone rather than the CI runner's default zone.
+    // A UTC or Asia/Shanghai runner is up to a day ahead of New York, which
+    // shifts the 14-day boundary and can pick a different contract on the same
+    // wall-clock run.
+    java.time.LocalDate today =
+        java.time.LocalDate.now(java.time.ZoneId.of("America/New_York"));
+    for (String d : dates) {
+      try {
+        java.time.LocalDate parsed = java.time.LocalDate.parse(d);
+        if (java.time.temporal.ChronoUnit.DAYS.between(today, parsed) > 14) {
+          return d;
+        }
+      } catch (java.time.format.DateTimeParseException ignored) {
+        // keep scanning
+      }
+    }
+    return dates.get(dates.size() - 1);
+  }
+
+  /** Contract groups of the AAPL option chain for {@code expiry}. */
+  private static List<OptionRealTimeQuoteGroup> fetchUsOptionChain(
+      TigerHttpClient client, String expiry) {
+    OptionChainModel chainModel = new OptionChainModel("AAPL", expiry);
+    TigerResponse chainResp = client.execute(OptionChainQueryRequest.of(chainModel));
+    if (chainResp == null || !chainResp.isSuccess()) {
+      return null;
+    }
+    OptionChainResponse oc = (OptionChainResponse) chainResp;
+    if (oc.getOptionChainItems() == null || oc.getOptionChainItems().isEmpty()) {
+      return null;
+    }
+    return oc.getOptionChainItems().get(0).getItems();
   }
 
   /**
