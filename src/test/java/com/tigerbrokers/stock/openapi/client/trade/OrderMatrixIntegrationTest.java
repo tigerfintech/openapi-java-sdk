@@ -515,10 +515,11 @@ public class OrderMatrixIntegrationTest {
 
   @Test
   public void placeUsFutLimit() {
+    // A standard account sends no expiry for FUT orders, so the month has to
+    // come from the symbol: the product root "CL" is rejected (合约不正确) and
+    // the continuous "CLmain" is a quote-only code (symbol error).
     ContractItem c = new ContractItem();
-    // 主力连续合约。标准（综合）账号下单时 expiry 会被清空，只能用合约代码
-    // 本身定位合约，裸品种根代码 "CL" 会被服务端拒绝（合约不正确）。
-    c.setSymbol("CLmain");
+    c.setSymbol("CL2712");
     c.setSecType("FUT");
     c.setCurrency("USD");
     c.setExchange("NYMEX");
