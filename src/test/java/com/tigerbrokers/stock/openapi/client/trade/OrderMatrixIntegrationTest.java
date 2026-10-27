@@ -22,8 +22,6 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.ComboType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 import com.tigerbrokers.stock.openapi.client.struct.enums.OrderType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.PriceType;
-import com.tigerbrokers.stock.openapi.client.struct.enums.Right;
-import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.SegmentType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
 import com.tigerbrokers.stock.openapi.client.testsupport.IntegTestConfig;
@@ -518,7 +516,9 @@ public class OrderMatrixIntegrationTest {
   @Test
   public void placeUsFutLimit() {
     ContractItem c = new ContractItem();
-    c.setSymbol("CL");
+    // 主力连续合约。标准（综合）账号下单时 expiry 会被清空，只能用合约代码
+    // 本身定位合约，裸品种根代码 "CL" 会被服务端拒绝（合约不正确）。
+    c.setSymbol("CLmain");
     c.setSecType("FUT");
     c.setCurrency("USD");
     c.setExchange("NYMEX");
@@ -629,22 +629,18 @@ public class OrderMatrixIntegrationTest {
 
   @Test
   public void placeUsMlegVerticalSpread() {
-    // AAPL PUT vertical spread — best-effort using two adjacent strikes.
-    // Uses the same pattern as the docstring example in trade_client.py.
-    long msDay = 24L * 3600L * 1000L;
-    long future = System.currentTimeMillis() + 45 * msDay;
-    java.util.Date d = new java.util.Date(future);
-    String expiry = String.format("%tY%tm%td", d, d, d);
+    // AAPL call vertical — buy the lower strike, sell the next one up. Both the
+    // expiry and the strikes come from the live chain: a synthesised expiry
+    // ("today + 45 days") usually falls on a date Apple does not list, and the
+    // server answers 合约不正确 before it ever looks at the price.
+    List<ContractLeg> legs = MarketHelpers.resolveUsOptionVerticalLegs(client);
+    Assume.assumeTrue("could not resolve two listed AAPL strikes for a vertical spread",
+        legs != null && legs.size() == 2);
 
-    ContractLeg leg1 = new ContractLeg(SecType.OPT, "AAPL", "200", expiry,
-        Right.PUT, ActionType.BUY, 1);
-    ContractLeg leg2 = new ContractLeg(SecType.OPT, "AAPL", "205", expiry,
-        Right.PUT, ActionType.SELL, 1);
-
+    // Net debit at the price floor: never marketable, so place→cancel cannot fill.
     TradeOrderRequest req = TradeOrderRequest.buildMultiLegOrder(
-        account, Arrays.asList(leg1, leg2),
-        ComboType.VERTICAL, ActionType.BUY, 1,
-        OrderType.LMT, -100.0, null, null);
+        account, legs, ComboType.VERTICAL, ActionType.BUY, 1,
+        OrderType.LMT, SAFE_BUY_PRICE, null, null);
     previewAndPlace(req, "US", "US MLEG VERTICAL");
   }
 
