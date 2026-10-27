@@ -1,4 +1,4 @@
-package com.tigerbrokers.stock.openapi.client.https.domain.quote.item;
+package com.tigerbrokers.stock.openapi.client.https.domain.news.item;
 
 import java.util.List;
 

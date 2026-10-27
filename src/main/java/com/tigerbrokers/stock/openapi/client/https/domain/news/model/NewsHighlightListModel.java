@@ -1,4 +1,4 @@
-package com.tigerbrokers.stock.openapi.client.https.domain.quote.model;
+package com.tigerbrokers.stock.openapi.client.https.domain.news.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;

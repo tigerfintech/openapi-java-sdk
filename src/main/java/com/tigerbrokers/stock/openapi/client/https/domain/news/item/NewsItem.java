@@ -1,4 +1,4 @@
-package com.tigerbrokers.stock.openapi.client.https.domain.quote.item;
+package com.tigerbrokers.stock.openapi.client.https.domain.news.item;
 
 /**
  * 资讯条目，news_stock_list 与 news_highlight_list 共用。

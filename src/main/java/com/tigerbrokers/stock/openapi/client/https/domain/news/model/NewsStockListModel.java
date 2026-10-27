@@ -1,12 +1,12 @@
-package com.tigerbrokers.stock.openapi.client.https.domain.quote.model;
+package com.tigerbrokers.stock.openapi.client.https.domain.news.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
-import java.util.List;
 
 /**
  * news_stock_list 请求参数。
- * 服务端校验：1 <= symbols.size() <= 20（必填）；page_count / page_size 可选
+ * symbol 单标的（必填、非空）——下游资讯接口实际不支持批量查询，只收一个标的；
+ * page_count / page_size 可选
  * （缺省默认 1 / 20；page_count >= 1，page_size 1-50）。
  * lang 为两接口共用可选参数，见父类 ApiModel.lang
  * （Language 枚举值 zh_CN/zh_TW/en_US 与服务端值域一致；不设置 = 空串 = 中英混合内容，
@@ -14,7 +14,8 @@ import java.util.List;
  */
 public class NewsStockListModel extends ApiModel {
 
-  private List<String> symbols;
+  /** 必填。单标的：下游资讯接口实际不支持批量查询。 */
+  private String symbol;
 
   @JSONField(name = "page_count")
   private Integer pageCount;
@@ -22,18 +23,18 @@ public class NewsStockListModel extends ApiModel {
   @JSONField(name = "page_size")
   private Integer pageSize;
 
-  public NewsStockListModel(List<String> symbols, Integer pageCount, Integer pageSize) {
-    this.symbols = symbols;
+  public NewsStockListModel(String symbol, Integer pageCount, Integer pageSize) {
+    this.symbol = symbol;
     this.pageCount = pageCount;
     this.pageSize = pageSize;
   }
 
-  public List<String> getSymbols() {
-    return symbols;
+  public String getSymbol() {
+    return symbol;
   }
 
-  public void setSymbols(List<String> symbols) {
-    this.symbols = symbols;
+  public void setSymbol(String symbol) {
+    this.symbol = symbol;
   }
 
   public Integer getPageCount() {

@@ -1,9 +1,9 @@
 package com.tigerbrokers.stock.openapi.client.https.request.news;
 
-import com.tigerbrokers.stock.openapi.client.https.domain.quote.model.NewsHighlightListModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.news.model.NewsHighlightListModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerRequest;
-import com.tigerbrokers.stock.openapi.client.https.response.quote.NewsHighlightListResponse;
+import com.tigerbrokers.stock.openapi.client.https.response.news.NewsHighlightListResponse;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
 import com.tigerbrokers.stock.openapi.client.struct.enums.MethodName;
 

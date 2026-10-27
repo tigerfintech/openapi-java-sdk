@@ -1,11 +1,11 @@
-package com.tigerbrokers.stock.openapi.client.https.response.quote;
+package com.tigerbrokers.stock.openapi.client.https.response.news;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.tigerbrokers.stock.openapi.client.https.domain.quote.item.NewsPageItem;
+import com.tigerbrokers.stock.openapi.client.https.domain.news.item.NewsPageItem;
 import com.tigerbrokers.stock.openapi.client.https.response.TigerResponse;
 
-/** 个股新闻列表响应（method=news_stock_list）。 */
-public class NewsStockListResponse extends TigerResponse {
+/** 市场要闻列表响应（method=news_highlight_list）。 */
+public class NewsHighlightListResponse extends TigerResponse {
 
   @JSONField(name = "data")
   private NewsPageItem newsPageItem;
