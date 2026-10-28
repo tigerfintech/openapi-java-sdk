@@ -15,6 +15,7 @@ import com.tigerbrokers.stock.openapi.client.https.response.quote.QuoteSymbolRes
 import com.tigerbrokers.stock.openapi.client.struct.enums.KType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.testsupport.TestClientFactory;
+import com.tigerbrokers.stock.openapi.client.testsupport.WireResponse;
 import com.tigerbrokers.stock.openapi.client.util.HttpResult;
 import com.tigerbrokers.stock.openapi.client.util.HttpUtils;
 import java.util.Arrays;
@@ -128,20 +129,6 @@ public class QuoteApiLogicTest {
   }
 
   // ---------- 辅助类 ----------
-
-  /** wire 信封格式，与服务端一致 */
-  static class WireResponse {
-    public int code;
-    public String message;
-    public Object data;
-    public long timestamp = 1700000000;
-
-    WireResponse(int code, String message, Object data) {
-      this.code = code;
-      this.message = message;
-      this.data = data;
-    }
-  }
 
   /** 简化的 MarketItem，只含必要字段用于 mock */
   static class MarketItem {
