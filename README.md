@@ -290,7 +290,7 @@ if (response.isSuccess()) {
 | 参数 | 必填 | 说明 |
 |------|:----:|------|
 | `symbol` | 是 | 股票代码，**仅支持单只**（该接口不支持批量查询） |
-| `lang` | 否 | `zh_CN` / `zh_TW` / `en_US`；传 `null` 返回中英混合内容，非法值回退 `en_US` |
+| `lang` | 否 | `zh_CN` / `zh_TW` / `en_US` |
 | `pageCount` | 否 | 页码，默认 1，取值 >= 1 |
 | `pageSize` | 否 | 每页条数，默认 20，取值 1–50 |
 
@@ -572,7 +572,7 @@ Parameters:
 | Parameter | Required | Description |
 |-----------|:--------:|-------------|
 | `symbol` | Yes | Stock symbol. **Single symbol only** (batch queries are not supported) |
-| `lang` | No | `zh_CN` / `zh_TW` / `en_US`; `null` returns mixed Chinese/English content, invalid values fall back to `en_US` |
+| `lang` | No | `zh_CN` / `zh_TW` / `en_US` |
 | `pageCount` | No | Page number, default 1, must be >= 1 |
 | `pageSize` | No | Page size, default 20, range 1–50 |
 
