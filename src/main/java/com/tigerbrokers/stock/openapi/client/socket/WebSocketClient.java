@@ -8,6 +8,7 @@ import com.tigerbrokers.stock.openapi.client.socket.data.pb.Response;
 import com.tigerbrokers.stock.openapi.client.socket.executor.MessageCallbackExecutor;
 import com.tigerbrokers.stock.openapi.client.struct.ClientHeartBeatData;
 import com.tigerbrokers.stock.openapi.client.struct.Indicator;
+import com.tigerbrokers.stock.openapi.client.struct.enums.AssetQuoteType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Market;
 import com.tigerbrokers.stock.openapi.client.struct.enums.QuoteSubject;
 import com.tigerbrokers.stock.openapi.client.struct.enums.Subject;
@@ -548,6 +549,11 @@ public class WebSocketClient implements SubscribeAsyncApi {
 
   @Override
   public String subscribe(String account, Subject subject) {
+    return subscribe(account, subject, null);
+  }
+
+  @Override
+  public String subscribe(String account, Subject subject, AssetQuoteType assetQuoteType) {
     if (!isConnected()) {
       notConnect();
       return null;
@@ -555,9 +561,15 @@ public class WebSocketClient implements SubscribeAsyncApi {
     String returnStr;
     Object subscribeData;
     if (this.isProtobuf) {
-      subscribeData = ProtoMessageUtil.buildSubscribeMessage(account, subject);
+      subscribeData = ProtoMessageUtil.buildSubscribeMessage(account, subject, assetQuoteType);
       returnStr = String.valueOf(((Request)subscribeData).getId());
     } else {
+      if (assetQuoteType != null) {
+        // the STOMP protocol is no longer maintained and carries no quote-type field,
+        // the subscription still goes out but the server falls back to its default
+        ApiLogger.warn("assetQuoteType:{} is ignored, it is only supported by the protobuf protocol",
+            assetQuoteType.name());
+      }
       subscribeData = StompMessageUtil.buildSubscribeMessage(account, subject, null);
       returnStr = ((StompFrame)subscribeData).headers().getAsString(StompHeaders.ID);
     }

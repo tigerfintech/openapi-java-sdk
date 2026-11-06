@@ -75,6 +75,7 @@ public enum MethodName {
   QUOTE_DEPTH("quote_depth", MethodType.QUOTE),
   QUOTE_DELAY("quote_delay", MethodType.QUOTE),
   QUOTE_OVERNIGHT("quote_overnight", MethodType.QUOTE),
+  SEARCH_SYMBOL("search_symbol", MethodType.QUOTE),
   /** trading calendar */
   TRADING_CALENDAR("trading_calendar", MethodType.QUOTE),
   STOCK_BROKER("stock_broker", MethodType.QUOTE),
@@ -83,6 +84,8 @@ public enum MethodName {
   CAPITAL_FLOW("capital_flow", MethodType.QUOTE),
   MARKET_SCANNER("market_scanner", MethodType.QUOTE),
   MARKET_SCANNER_TAGS("market_scanner_tags", MethodType.QUOTE),
+  NEWS_STOCK_LIST("news_stock_list", MethodType.NEWS),
+  NEWS_HIGHLIGHT_LIST("news_highlight_list", MethodType.NEWS),
 
   /**
    * option quote
@@ -168,7 +171,7 @@ public enum MethodName {
   ;
 
   private String value;
-  /** method type，TRADE, QUOTE, OTHER */
+  /** method type，TRADE, QUOTE, OTHER, NEWS */
   private MethodType type;
 
   MethodName(String value, MethodType type) {
@@ -181,7 +184,7 @@ public enum MethodName {
   }
 
   /**
-   * get method type. TRADE, QUOTE, OTHER
+   * get method type. TRADE, QUOTE, OTHER, NEWS
    */
   public MethodType getType() {
     return type;

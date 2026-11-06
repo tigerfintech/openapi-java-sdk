@@ -7,9 +7,9 @@
 </p>
 
 <p align="center">
-  老虎证券 OpenAPI Java SDK — 行情、交易、账户、推送一站式接入
+  老虎证券 OpenAPI Java SDK — 行情、资讯、交易、账户、推送一站式接入
   <br>
-  Tiger Brokers OpenAPI Java SDK — Market data, trading, account & push in one package
+  Tiger Brokers OpenAPI Java SDK — Market data, news, trading, account & push in one package
 </p>
 
 <p align="center">
@@ -34,6 +34,7 @@
 TigerOpen Java SDK 是老虎证券开放平台的官方 Java SDK，为个人开发者和机构客户提供完整的证券交易接口服务：
 
 - **行情数据** — 股票/期权/期货实时行情、K 线、逐笔成交、盘口深度
+- **资讯数据** — 个股新闻、市场要闻列表，支持分页与游标翻页
 - **交易服务** — 下单、改单、撤单，支持市价/限价/止损/跟踪止损/算法订单 (TWAP/VWAP)
 - **账户管理** — 资产查询、持仓管理、成交记录
 - **实时推送** — WebSocket 行情推送、订单状态、持仓与资产变动
@@ -252,6 +253,97 @@ symbols.add("TSLA");
 wsClient.subscribeQuote(symbols);
 ```
 
+### 6. 查询资讯
+
+SDK 提供两个资讯查询接口，均为 HTTP 请求：
+
+| 接口 | method | 说明 |
+|------|--------|------|
+| 个股新闻 | `news_stock_list` | 查询单只股票的资讯列表，按 `pageCount` / `pageSize` 翻页 |
+| 市场要闻 | `news_highlight_list` | 查询市场要闻列表，按 `lastId` 游标翻页 |
+
+#### 个股新闻
+
+```java
+import com.tigerbrokers.stock.openapi.client.https.domain.news.item.NewsItem;
+import com.tigerbrokers.stock.openapi.client.https.domain.news.item.NewsPageItem;
+import com.tigerbrokers.stock.openapi.client.https.request.news.NewsStockListRequest;
+import com.tigerbrokers.stock.openapi.client.https.response.news.NewsStockListResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+
+NewsStockListRequest request =
+    NewsStockListRequest.newRequest("AAPL", Language.zh_CN, 1, 20);
+
+NewsStockListResponse response = client.execute(request);
+if (response.isSuccess()) {
+    NewsPageItem page = response.getNewsPageItem();
+    for (NewsItem item : page.getItems()) {
+        System.out.println(item.getTitle() + " — " + item.getUrl());
+    }
+} else {
+    System.out.println("Error: " + response.getMessage());
+}
+```
+
+参数说明：
+
+| 参数 | 必填 | 说明 |
+|------|:----:|------|
+| `symbol` | 是 | 股票代码，**仅支持单只**（该接口不支持批量查询） |
+| `lang` | 否 | `zh_CN` / `zh_TW` / `en_US` |
+| `pageCount` | 否 | 页码，默认 1，取值 >= 1 |
+| `pageSize` | 否 | 每页条数，默认 20，取值 1–50 |
+
+#### 市场要闻
+
+```java
+import com.tigerbrokers.stock.openapi.client.https.domain.news.item.NewsItem;
+import com.tigerbrokers.stock.openapi.client.https.domain.news.item.NewsPageItem;
+import com.tigerbrokers.stock.openapi.client.https.request.news.NewsHighlightListRequest;
+import com.tigerbrokers.stock.openapi.client.https.response.news.NewsHighlightListResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+
+NewsHighlightListRequest request = NewsHighlightListRequest.newRequest(Language.zh_CN, null);
+
+NewsHighlightListResponse response = client.execute(request);
+if (response.isSuccess()) {
+    NewsPageItem page = response.getNewsPageItem();
+    // 下一页：把本页最后一条的 id 作为 lastId 传回
+    String nextLastId = page.getItems().isEmpty()
+        ? null
+        : page.getItems().get(page.getItems().size() - 1).getId();
+}
+```
+
+参数说明：
+
+| 参数 | 必填 | 说明 |
+|------|:----:|------|
+| `lang` | 否 | 同上 |
+| `lastId` | 否 | 游标。传 `null` 从最新开始；下一页传本页 `items` 最后一条的 `id` |
+
+#### 响应结构
+
+两个接口的响应都通过 `getNewsPageItem()` 取回 `NewsPageItem`：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `items` | `List<NewsItem>` | 当前页资讯列表 |
+| `pageCount` | Integer | 当前页码 |
+| `pageSize` | Integer | 每页条数 |
+| `totalPage` | Integer | 总页数 |
+| `totalSize` | Integer | 总条数 |
+
+`NewsItem`：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `id` | String | 资讯 ID |
+| `title` | String | 标题 |
+| `summary` | String | 摘要 |
+| `pubTimestamp` | Long | 发布时间戳（秒级） |
+| `url` | String | 原文链接 |
+
 ## 示例代码
 
 更多示例代码请参考 [src/test/java/](src/test/java/) 目录。
@@ -285,6 +377,7 @@ wsClient.subscribeQuote(symbols);
 TigerOpen Java SDK is the official Java SDK for Tiger Brokers' Open Platform, providing developers and institutional clients with comprehensive securities trading interfaces:
 
 - **Market Data** — Real-time quotes, candlesticks, tick data, order book depth for stocks, options & futures
+- **News** — Per-symbol news and market highlights with page and cursor pagination
 - **Trading** — Place, modify, cancel orders; supports market/limit/stop/trailing-stop/algo orders (TWAP/VWAP)
 - **Account Management** — Asset queries, position tracking, transaction history
 - **Real-time Push** — WebSocket streaming for quotes, order status, position & asset changes
@@ -441,6 +534,97 @@ symbols.add("AAPL");
 symbols.add("TSLA");
 wsClient.subscribeQuote(symbols);
 ```
+
+### 6. Query News
+
+The SDK exposes two news query APIs over HTTP:
+
+| API | method | Description |
+|-----|--------|-------------|
+| Stock news | `news_stock_list` | News list for a single symbol, paged by `pageCount` / `pageSize` |
+| Market highlights | `news_highlight_list` | Market highlights, paged by the `lastId` cursor |
+
+#### Stock News
+
+```java
+import com.tigerbrokers.stock.openapi.client.https.domain.news.item.NewsItem;
+import com.tigerbrokers.stock.openapi.client.https.domain.news.item.NewsPageItem;
+import com.tigerbrokers.stock.openapi.client.https.request.news.NewsStockListRequest;
+import com.tigerbrokers.stock.openapi.client.https.response.news.NewsStockListResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+
+NewsStockListRequest request =
+    NewsStockListRequest.newRequest("AAPL", Language.en_US, 1, 20);
+
+NewsStockListResponse response = client.execute(request);
+if (response.isSuccess()) {
+    NewsPageItem page = response.getNewsPageItem();
+    for (NewsItem item : page.getItems()) {
+        System.out.println(item.getTitle() + " — " + item.getUrl());
+    }
+} else {
+    System.out.println("Error: " + response.getMessage());
+}
+```
+
+Parameters:
+
+| Parameter | Required | Description |
+|-----------|:--------:|-------------|
+| `symbol` | Yes | Stock symbol. **Single symbol only** (batch queries are not supported) |
+| `lang` | No | `zh_CN` / `zh_TW` / `en_US` |
+| `pageCount` | No | Page number, default 1, must be >= 1 |
+| `pageSize` | No | Page size, default 20, range 1–50 |
+
+#### Market Highlights
+
+```java
+import com.tigerbrokers.stock.openapi.client.https.domain.news.item.NewsItem;
+import com.tigerbrokers.stock.openapi.client.https.domain.news.item.NewsPageItem;
+import com.tigerbrokers.stock.openapi.client.https.request.news.NewsHighlightListRequest;
+import com.tigerbrokers.stock.openapi.client.https.response.news.NewsHighlightListResponse;
+import com.tigerbrokers.stock.openapi.client.struct.enums.Language;
+
+NewsHighlightListRequest request = NewsHighlightListRequest.newRequest(Language.en_US, null);
+
+NewsHighlightListResponse response = client.execute(request);
+if (response.isSuccess()) {
+    NewsPageItem page = response.getNewsPageItem();
+    // Next page: pass the id of the last item as lastId
+    String nextLastId = page.getItems().isEmpty()
+        ? null
+        : page.getItems().get(page.getItems().size() - 1).getId();
+}
+```
+
+Parameters:
+
+| Parameter | Required | Description |
+|-----------|:--------:|-------------|
+| `lang` | No | Same as above |
+| `lastId` | No | Cursor. `null` starts from the newest; pass the `id` of the last item of the current page to get the next page |
+
+#### Response Structure
+
+Both APIs return a `NewsPageItem` via `getNewsPageItem()`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `items` | `List<NewsItem>` | News items on the current page |
+| `pageCount` | Integer | Current page number |
+| `pageSize` | Integer | Page size |
+| `totalPage` | Integer | Total number of pages |
+| `totalSize` | Integer | Total number of items |
+
+`NewsItem`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | String | News ID |
+| `title` | String | Title |
+| `summary` | String | Summary |
+| `pubTimestamp` | Long | Publish timestamp in seconds |
+| `url` | String | Link to the original article |
 
 ## Examples
 
