@@ -1,6 +1,6 @@
-## 2.8.0 (2026-10-22)
+## 2.7.2 (2026-11-02)
 ### New
-- 新增个股新闻列表接口 `news_stock_list`：`NewsStockListRequest.newRequest(List<String> symbols, Language lang, Integer pageCount, Integer pageSize)` 查询指定股票（1-20 个代码）的资讯列表；`page_count` / `page_size` 可选（传 `null` = 服务端默认 1 / 20，`page_count` >= 1，`page_size` 1-50）
+- 新增个股新闻列表接口 `news_stock_list`：`NewsStockListRequest.newRequest(String symbol, Language lang, Integer pageCount, Integer pageSize)` 查询指定股票（单只代码）的资讯列表；`page_count` / `page_size` 可选（传 `null` = 服务端默认 1 / 20，`page_count` >= 1，`page_size` 1-50）
 - 新增市场要闻列表接口 `news_highlight_list`：`NewsHighlightListRequest.newRequest(Language lang, String lastId)` 查询市场要闻，无必填参数；翻页只走 `lastId` 游标（取上一页最后一条的 `id`，传 `null` 从最新开始）
 - `lang` 为两接口共用可选参数（`zh_CN` / `zh_TW` / `en_US`，传 `null` = 中英混合内容；服务端对非法值回退 `en_US`）
 - 两接口响应共用 `NewsPageItem`（`items` + `pageCount` / `pageSize` / `totalPage` / `totalSize`），条目 `NewsItem` 含 `id` / `title` / `summary` / `pubTimestamp` / `url`
