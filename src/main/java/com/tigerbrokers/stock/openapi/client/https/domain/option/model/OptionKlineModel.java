@@ -25,6 +25,8 @@ public class OptionKlineModel extends OptionCommonModel {
   /** sort directions  */
   @JSONField(name = "sort_dir")
   private SortDir sortDir;
+  @JSONField(name = "with_hour_trading")
+  private Boolean withHourTrading;
 
   public OptionKlineModel() {
 
@@ -100,6 +102,14 @@ public class OptionKlineModel extends OptionCommonModel {
     this.sortDir = sortDir;
   }
 
+  public Boolean getWithHourTrading() {
+    return withHourTrading;
+  }
+
+  public void setWithHourTrading(Boolean withHourTrading) {
+    this.withHourTrading = withHourTrading;
+  }
+
   @Override
   public String toString() {
     return "OptionKlineModel{" +
@@ -111,6 +121,7 @@ public class OptionKlineModel extends OptionCommonModel {
         ", expiry='" + expiry + '\'' +
         ", period='" + period + '\'' +
         ", sortDir='" + sortDir + '\'' +
+        ", withHourTrading=" + withHourTrading +
         '}';
   }
 }

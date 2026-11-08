@@ -18,6 +18,9 @@ public class OptionBriefItem extends ApiModel {
   private Integer askSize;
   private Double latestPrice;
   private Integer volume;
+  private Integer cumVolume;
+  private Double cumAmount;
+  private OptionHourTrading hourTrading;
   private Double high;
   private Double low;
   private Double open;
@@ -108,6 +111,30 @@ public class OptionBriefItem extends ApiModel {
 
   public void setVolume(Integer volume) {
     this.volume = volume;
+  }
+
+  public Integer getCumVolume() {
+    return cumVolume;
+  }
+
+  public void setCumVolume(Integer cumVolume) {
+    this.cumVolume = cumVolume;
+  }
+
+  public Double getCumAmount() {
+    return cumAmount;
+  }
+
+  public void setCumAmount(Double cumAmount) {
+    this.cumAmount = cumAmount;
+  }
+
+  public OptionHourTrading getHourTrading() {
+    return hourTrading;
+  }
+
+  public void setHourTrading(OptionHourTrading hourTrading) {
+    this.hourTrading = hourTrading;
   }
 
   public Double getHigh() {
@@ -277,6 +304,9 @@ public class OptionBriefItem extends ApiModel {
         ", askSize=" + askSize +
         ", latestPrice=" + latestPrice +
         ", volume=" + volume +
+        ", cumVolume=" + cumVolume +
+        ", cumAmount=" + cumAmount +
+        ", hourTrading=" + hourTrading +
         ", high=" + high +
         ", low=" + low +
         ", open=" + open +

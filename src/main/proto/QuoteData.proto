@@ -13,17 +13,21 @@ message QuoteData {
   optional uint64 serverTimestamp = 4;
   optional double avgPrice = 5; // Options data not support
   optional double latestPrice = 6; // required when type is 'BASIC'
-  optional uint64 latestPriceTimestamp = 7; // required when type is 'BASIC', Pre/Post-Mkt data not support
+  // Actual last-trade time (epoch ms) for the quoted session; 0 means no trade.
+  optional uint64 latestPriceTimestamp = 7;
   optional string latestTime = 8; // required when type is 'BASIC'
   optional double preClose = 9; // required when type is 'BASIC'
-  optional sint64 volume = 10; // required when type is 'BASIC'
-  optional double amount = 11; // required when type is 'BASIC', Futures and Options data not support
+  // Volume of the quoted session; cumulative option volume is cumVolume.
+  optional sint64 volume = 10;
+  // Amount of the quoted session; cumulative option amount is cumAmount.
+  optional double amount = 11;
 
   optional double open = 12; // required when symbol in HK market
   optional double high = 13; // required when symbol in HK market
   optional double low = 14; // required when symbol in HK market
 
-  optional string hourTradingTag = 15; // Pre/Post-Mkt
+  // Extended-session marker: PreMarket / AfterHours; absent for RTH.
+  optional string hourTradingTag = 15;
   optional string marketStatus = 16;
 
   optional double askPrice = 17; // required when type is 'BBO'
@@ -45,6 +49,13 @@ message QuoteData {
 
   // Decimal value encoded as a string to avoid precision loss
   optional double volumeDecimal = 29;
+
+  // cumulative volume of CURB + RTH + GTH, only Options support
+  optional sint64 cumVolume = 30;
+  // cumulative amount of CURB + RTH + GTH, only Options support
+  optional double cumAmount = 31;
+  // Quoted option session (GTH / CURB); absent when not provided.
+  optional string session = 32;
 
   message Minute {
     double p = 1; // last price of the minute bar

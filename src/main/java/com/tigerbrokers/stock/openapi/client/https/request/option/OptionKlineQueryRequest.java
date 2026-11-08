@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.request.option;
 
 import com.tigerbrokers.stock.openapi.client.constant.TigerApiConstants;
+import com.tigerbrokers.stock.openapi.client.https.domain.ApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.BatchApiModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionKlineModel;
 import com.tigerbrokers.stock.openapi.client.https.request.TigerCommonRequest;
@@ -49,6 +50,20 @@ public class OptionKlineQueryRequest extends TigerCommonRequest implements Tiger
     items.add(item2);
     items.add(item3);
     return new OptionKlineQueryRequest(items);
+  }
+
+  public OptionKlineQueryRequest withHourTrading(Boolean withHourTrading) {
+    if (getApiModel() instanceof BatchApiModel) {
+      List<? extends ApiModel> items = ((BatchApiModel<?>)getApiModel()).getItems();
+      if (items != null) {
+        for (ApiModel item : items) {
+          if (item instanceof OptionKlineModel) {
+            ((OptionKlineModel)item).setWithHourTrading(withHourTrading);
+          }
+        }
+      }
+    }
+    return this;
   }
 
   @Override
