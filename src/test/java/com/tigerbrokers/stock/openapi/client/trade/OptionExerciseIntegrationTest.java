@@ -30,7 +30,8 @@ import com.tigerbrokers.stock.openapi.client.testsupport.WriteApi;
 /**
  * Integration tests for option exercise APIs.
  *
- * Run with:
+ * Disabled by default. Run with:
+ *   -Dtest.integ=true
  *   -Dtest.config.path=<path to config directory>
  *   -Dtest.account=<trade account>
  *   -Dtest.contract.id=<exercisable contract id>
