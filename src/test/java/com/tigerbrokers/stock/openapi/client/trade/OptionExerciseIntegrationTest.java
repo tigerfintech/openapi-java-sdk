@@ -47,8 +47,8 @@ public class OptionExerciseIntegrationTest {
 
   @BeforeClass
   public static void setUpClass() {
-    // test.integ gate removed: ReadOnlyApi tests are controlled by -Dgroups=ReadOnlyApi alone.
-    // WriteApi tests are additionally excluded via -DexcludedGroups=WriteApi in contract jobs.
+    Assume.assumeTrue("integration test; enable with -Dtest.integ=true",
+        Boolean.getBoolean("test.integ"));
     client = IntegTestConfig.createClient();
     account = IntegTestConfig.getAccount();
     Assert.assertNotNull("TIGEROPEN_ACCOUNT env var required", account);
