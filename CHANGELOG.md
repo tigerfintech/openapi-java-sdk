@@ -1,3 +1,14 @@
+## 2.7.3 (2026-11-09)
+### New
+- 支持美股期权 GTH/CURB 延长交易时段行情：Protobuf 期权回调通过已有字段提供当前时段价格、成交时间、参考昨收及成交量/额，以 `hourTradingTag` 标识时段（GTH 为 `PreMarket`，CURB 为 `AfterHours`），并提供 `session`、独立累计量/额 `cumVolume` / `cumAmount`
+- HTTP 期权快照 `OptionBriefItem` 和期权链 `OptionRealTimeQuote` 新增 `cumVolume` / `cumAmount` 及延长时段行情对象 `hourTrading`
+- 期权分钟 K 线查询 `OptionKlineQueryRequest` / `OptionKlineQueryV2Request` 新增 `withHourTrading(Boolean)`：`true` 包含 GTH/CURB，`false` 排除，`null` 不传参数并保留服务端默认行为
+### 兼容性
+- 原有方法签名保留，未设置延长时段开关时既有调用行为不变
+- 基础行情回调保留可选字段的缺失状态和显式零值，并透传 `volumeDecimal`；当前时段成交量/额与累计量/额分别提供
+- 推送使用平铺字段，HTTP 快照和期权链使用 `hourTrading` 对象；期权 GTH 推送回调仅支持 Protobuf
+
+
 ## 2.7.2 (2026-11-02)
 ### New
 - 新增个股新闻列表接口 `news_stock_list`：`NewsStockListRequest.newRequest(String symbol, Language lang, Integer pageCount, Integer pageSize)` 查询指定股票（单只代码）的资讯列表；`page_count` / `page_size` 可选（传 `null` = 服务端默认 1 / 20，`page_count` >= 1，`page_size` 1-50）
