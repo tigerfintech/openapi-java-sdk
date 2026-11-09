@@ -146,6 +146,37 @@ public class QuoteDataUtilTest {
   }
 
   @Test
+  public void testConvertToBasicDataOptionGthFields() {
+    QuoteData data = QuoteData.newBuilder()
+        .setSymbol("SPXW  260723P07380000")
+        .setType(SocketCommon.QuoteType.BASIC)
+        .setIdentifier("SPXW  260723P07380000")
+        .setCumVolume(83322L)
+        .setCumAmount(158877.00128555298)
+        .setSession("GTH")
+        .setHourTradingTag("PreMarket")
+        .setLatestPrice(1.5)
+        .setLatestPriceTimestamp(1784796380425L)
+        .setVolume(83322L)
+        .setAmount(158877.00128555298)
+        .setPreClose(1.1)
+        .build();
+
+    QuoteBasicData result = QuoteDataUtil.convertToBasicData(data);
+    Assert.assertNotNull(result);
+    Assert.assertEquals(83322L, result.getCumVolume());
+    Assert.assertEquals(158877.00128555298, result.getCumAmount(), 0.0000001);
+    Assert.assertEquals("GTH", result.getSession());
+    Assert.assertNull(result.getDescriptorForType().findFieldByName("hourTrading"));
+    Assert.assertEquals("PreMarket", result.getHourTradingTag());
+    Assert.assertEquals(1.5, result.getLatestPrice(), 0.001);
+    Assert.assertEquals(1784796380425L, result.getLatestPriceTimestamp());
+    Assert.assertEquals(83322L, result.getVolume());
+    Assert.assertEquals(158877.00128555298, result.getAmount(), 0.0000001);
+    Assert.assertEquals(1.1, result.getPreClose(), 0.001);
+  }
+
+  @Test
   public void testConvertToBasicDataTypeBasic() {
     QuoteData data = QuoteData.newBuilder()
         .setSymbol("00700")
@@ -166,5 +197,25 @@ public class QuoteDataUtilTest {
     Assert.assertEquals("2023-06-01 14:30:00", result.getLatestTime());
     Assert.assertEquals(295.0, result.getPreClose(), 0.001);
     Assert.assertEquals(500000, result.getVolume());
+  }
+
+  @Test public void testServerGthWirePreservesZeroFields() throws Exception {
+    String hex = "0a185350585720323032363037323320373338302e3020505554100118a4fb9df1f83331000000000000f83f3889fa9df1f833499a9999999999f13f50005900000000000000007a095072654d61726b6574e9010000000000000000f00100f9010000000000000000820203475448";
+    byte[] bytes = new byte[hex.length() / 2];
+    for (int i = 0; i < bytes.length; i++) bytes[i] = (byte)Integer.parseInt(hex.substring(i * 2, i * 2 + 2), 16);
+    QuoteBasicData basic = QuoteDataUtil.convertToBasicData(QuoteData.parseFrom(bytes));
+    Assert.assertTrue(basic.hasCumVolume());
+    Assert.assertEquals(0L, basic.getCumVolume());
+    Assert.assertTrue(basic.hasCumAmount());
+    Assert.assertEquals("GTH", basic.getSession());
+    Assert.assertNull(basic.getDescriptorForType().findFieldByName("hourTrading"));
+    Assert.assertEquals(1784796380425L, basic.getLatestPriceTimestamp());
+    Assert.assertTrue(basic.hasVolume());
+    Assert.assertEquals(0L, basic.getVolume());
+    Assert.assertEquals(1.5, basic.getLatestPrice(), 0);
+    Assert.assertEquals(1.1, basic.getPreClose(), 0);
+    QuoteBasicData regular = QuoteDataUtil.convertToBasicData(QuoteData.newBuilder().setType(SocketCommon.QuoteType.BASIC).build());
+    Assert.assertFalse(regular.hasCumVolume());
+    Assert.assertNull(regular.getDescriptorForType().findFieldByName("hourTrading"));
   }
 }

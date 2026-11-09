@@ -34,6 +34,13 @@ public interface SubscribeApiCallback {
   void quoteChange(QuoteBasicData data);
   void quoteAskBidChange(QuoteBBOData data);
 
+  /**
+   * Option quote update. For GTH/CURB, latest price, last-trade timestamp,
+   * previous close and volume/amount belong to the extended session.
+   * hourTradingTag is PreMarket/AfterHours; cumVolume/cumAmount remain cumulative.
+   * Callbacks expose flattened quote fields only.
+   * session comes from the quoted session, not an inferred market-open/closed state.
+   */
   void optionChange(QuoteBasicData data);
   void optionAskBidChange(QuoteBBOData data);
 

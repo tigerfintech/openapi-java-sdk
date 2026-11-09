@@ -38,7 +38,10 @@ import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionCha
 import com.tigerbrokers.stock.openapi.client.https.request.option.OptionChainQueryRequest;
 import com.tigerbrokers.stock.openapi.client.https.response.option.OptionChainResponse;
 
-/** Integration tests for trade/account/asset APIs. */
+/**
+ * Integration tests for trade/account/asset APIs.
+ * Disabled by default; enable with {@code -Dtest.integ=true}.
+ */
 @Category(ReadOnlyApi.class)
 public class TradeAccountIntegrationTest {
 
@@ -47,7 +50,8 @@ public class TradeAccountIntegrationTest {
 
   @BeforeClass
   public static void setUpClass() {
-    // test.integ gate removed: ReadOnlyApi tests are controlled by -Dgroups=ReadOnlyApi alone.
+    Assume.assumeTrue("integration test; enable with -Dtest.integ=true",
+        Boolean.getBoolean("test.integ"));
     client = IntegTestConfig.createClient();
     account = IntegTestConfig.getAccount();
     Assert.assertNotNull("TIGEROPEN_ACCOUNT required", account);

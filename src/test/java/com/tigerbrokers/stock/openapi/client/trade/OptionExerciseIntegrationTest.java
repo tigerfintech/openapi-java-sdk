@@ -30,7 +30,8 @@ import com.tigerbrokers.stock.openapi.client.testsupport.WriteApi;
 /**
  * Integration tests for option exercise APIs.
  *
- * Run with:
+ * Disabled by default. Run with:
+ *   -Dtest.integ=true
  *   -Dtest.config.path=<path to config directory>
  *   -Dtest.account=<trade account>
  *   -Dtest.contract.id=<exercisable contract id>
@@ -47,8 +48,8 @@ public class OptionExerciseIntegrationTest {
 
   @BeforeClass
   public static void setUpClass() {
-    // test.integ gate removed: ReadOnlyApi tests are controlled by -Dgroups=ReadOnlyApi alone.
-    // WriteApi tests are additionally excluded via -DexcludedGroups=WriteApi in contract jobs.
+    Assume.assumeTrue("integration test; enable with -Dtest.integ=true",
+        Boolean.getBoolean("test.integ"));
     client = IntegTestConfig.createClient();
     account = IntegTestConfig.getAccount();
     Assert.assertNotNull("TIGEROPEN_ACCOUNT env var required", account);

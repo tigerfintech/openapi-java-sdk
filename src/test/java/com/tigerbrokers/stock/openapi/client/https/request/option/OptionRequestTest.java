@@ -5,7 +5,9 @@ import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionCha
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionChainModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionCommonModel;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionKlineModel;
+import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionKlineV2Model;
 import com.tigerbrokers.stock.openapi.client.https.domain.option.model.OptionTimelineModel;
+import com.alibaba.fastjson.JSON;
 import com.tigerbrokers.stock.openapi.client.https.response.option.OptionAnalysisResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.option.OptionBriefResponse;
 import com.tigerbrokers.stock.openapi.client.https.response.option.OptionChainResponse;
@@ -130,6 +132,19 @@ public class OptionRequestTest {
     OptionKlineQueryV2Request chained = OptionKlineQueryV2Request.of(m).market(Market.HK);
     Assert.assertNotNull(chained.getApiModel());
   }
+  @Test public void testOptionKlineWithHourTrading() {
+    OptionKlineModel v2Model = new OptionKlineModel();
+    OptionKlineQueryV2Request v2 = OptionKlineQueryV2Request.of(v2Model).withHourTrading(true);
+    Assert.assertEquals(Boolean.TRUE, v2Model.getWithHourTrading());
+    Assert.assertEquals(Boolean.TRUE,
+        ((OptionKlineV2Model) v2.getApiModel()).getOptionQuery().get(0).getWithHourTrading());
+    Assert.assertTrue(JSON.toJSONString(v2Model).contains("\"with_hour_trading\":true"));
+
+    OptionKlineModel v1Model = new OptionKlineModel();
+    OptionKlineQueryRequest v1 = OptionKlineQueryRequest.of(v1Model).withHourTrading(true);
+    Assert.assertEquals(Boolean.TRUE, v1Model.getWithHourTrading());
+    Assert.assertNotNull(v1.getApiModel());
+  }
   @Test public void testOptionSymbolRequest() {
     Assert.assertEquals(MethodName.ALL_HK_OPTION_SYMBOLS, new OptionSymbolRequest().getApiMethodName());
     Assert.assertEquals(OptionSymbolResponse.class, new OptionSymbolRequest().getResponseClass());
@@ -239,5 +254,20 @@ public class OptionRequestTest {
   @Test public void testWarrantFilterRequest_getApiModelLazyInit() {
     WarrantFilterRequest req = new WarrantFilterRequest();
     Assert.assertNotNull(req.getApiModel());
+  }
+
+  @Test public void testOptionKlineHourTradingFalseAndOmission() {
+    for (Boolean flag : new Boolean[]{null, Boolean.TRUE, Boolean.FALSE}) {
+      OptionKlineModel first = new OptionKlineModel();
+      OptionKlineModel second = new OptionKlineModel();
+      OptionKlineQueryV2Request request = OptionKlineQueryV2Request.of(first, second).withHourTrading(flag);
+      for (OptionKlineModel item : ((OptionKlineV2Model)request.getApiModel()).getOptionQuery()) {
+        com.alibaba.fastjson.JSONObject json = JSON.parseObject(JSON.toJSONString(item));
+        if (flag == null) Assert.assertFalse(json.containsKey("with_hour_trading"));
+        else Assert.assertEquals(flag, json.getBoolean("with_hour_trading"));
+      }
+      OptionKlineQueryRequest.of(first).withHourTrading(flag);
+      Assert.assertEquals(flag, first.getWithHourTrading());
+    }
   }
 }

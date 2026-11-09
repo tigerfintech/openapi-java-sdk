@@ -18,6 +18,9 @@ public class OptionRealTimeQuote implements Serializable {
   private Integer volume;
   private Double latestPrice;
   private Double preClose;
+  private Integer cumVolume;
+  private Double cumAmount;
+  private OptionHourTrading hourTrading;
   private Integer openInterest;
   private Integer multiplier;
   private Long lastTimestamp;
@@ -112,6 +115,30 @@ public class OptionRealTimeQuote implements Serializable {
 
   public void setPreClose(Double preClose) {
     this.preClose = preClose;
+  }
+
+  public Integer getCumVolume() {
+    return cumVolume;
+  }
+
+  public void setCumVolume(Integer cumVolume) {
+    this.cumVolume = cumVolume;
+  }
+
+  public Double getCumAmount() {
+    return cumAmount;
+  }
+
+  public void setCumAmount(Double cumAmount) {
+    this.cumAmount = cumAmount;
+  }
+
+  public OptionHourTrading getHourTrading() {
+    return hourTrading;
+  }
+
+  public void setHourTrading(OptionHourTrading hourTrading) {
+    this.hourTrading = hourTrading;
   }
 
   public Integer getOpenInterest() {
@@ -247,6 +274,9 @@ public class OptionRealTimeQuote implements Serializable {
         ", volume=" + volume +
         ", latestPrice=" + latestPrice +
         ", preClose=" + preClose +
+        ", cumVolume=" + cumVolume +
+        ", cumAmount=" + cumAmount +
+        ", hourTrading=" + hourTrading +
         ", openInterest=" + openInterest +
         ", multiplier=" + multiplier +
         ", lastTimestamp=" + lastTimestamp +
