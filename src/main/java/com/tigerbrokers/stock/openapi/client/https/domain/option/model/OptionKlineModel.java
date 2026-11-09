@@ -25,6 +25,10 @@ public class OptionKlineModel extends OptionCommonModel {
   /** sort directions  */
   @JSONField(name = "sort_dir")
   private SortDir sortDir;
+  /**
+   * Whether to include GTH/CURB data in option minute bars.
+   * {@code null} keeps the server default; {@code true} includes it; {@code false} excludes it.
+   */
   @JSONField(name = "with_hour_trading")
   private Boolean withHourTrading;
 
