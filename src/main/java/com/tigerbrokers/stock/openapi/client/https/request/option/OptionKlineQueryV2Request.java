@@ -39,6 +39,16 @@ public class OptionKlineQueryV2Request extends TigerCommonRequest implements Tig
     return this;
   }
 
+  public OptionKlineQueryV2Request withHourTrading(Boolean withHourTrading) {
+    OptionKlineV2Model model = (OptionKlineV2Model)getApiModel();
+    if (model != null && model.getOptionQuery() != null) {
+      for (OptionKlineModel item : model.getOptionQuery()) {
+        item.setWithHourTrading(withHourTrading);
+      }
+    }
+    return this;
+  }
+
   public static OptionKlineQueryV2Request of(List<OptionKlineModel> items) {
     return new OptionKlineQueryV2Request(items);
   }

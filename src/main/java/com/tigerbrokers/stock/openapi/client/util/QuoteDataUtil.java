@@ -55,14 +55,24 @@ public class QuoteDataUtil {
     if (quoteData.hasAvgPrice()) {
       builder.setAvgPrice(quoteData.getAvgPrice());
     }
-    builder.setLatestPrice(quoteData.getLatestPrice());
+    if (quoteData.hasLatestPrice()) {
+      builder.setLatestPrice(quoteData.getLatestPrice());
+    }
     if (quoteData.hasLatestPriceTimestamp()) {
       builder.setLatestPriceTimestamp(quoteData.getLatestPriceTimestamp());
     }
-    builder.setLatestTime(quoteData.getLatestTime());
-    builder.setPreClose(quoteData.getPreClose());
-    builder.setVolume(quoteData.getVolume());
-    builder.setVolumeDecimal(quoteData.getVolumeDecimal());
+    if (quoteData.hasLatestTime()) {
+      builder.setLatestTime(quoteData.getLatestTime());
+    }
+    if (quoteData.hasPreClose()) {
+      builder.setPreClose(quoteData.getPreClose());
+    }
+    if (quoteData.hasVolume()) {
+      builder.setVolume(quoteData.getVolume());
+    }
+    if (quoteData.hasVolumeDecimal()) {
+      builder.setVolumeDecimal(quoteData.getVolumeDecimal());
+    }
     if (quoteData.hasAmount()) {
       builder.setAmount(quoteData.getAmount());
     }
@@ -82,6 +92,17 @@ public class QuoteDataUtil {
     }
     if (quoteData.hasMarketStatus()) {
       builder.setMarketStatus(quoteData.getMarketStatus());
+    }
+
+    // extended-session fields, only Options support
+    if (quoteData.hasCumVolume()) {
+      builder.setCumVolume(quoteData.getCumVolume());
+    }
+    if (quoteData.hasCumAmount()) {
+      builder.setCumAmount(quoteData.getCumAmount());
+    }
+    if (quoteData.hasSession()) {
+      builder.setSession(quoteData.getSession());
     }
 
     // only Options support
@@ -111,4 +132,5 @@ public class QuoteDataUtil {
 
     return builder.build();
   }
+
 }
