@@ -66,6 +66,9 @@ public class ContractItem extends ApiModel {
 
   private Boolean supportFractionalShare;
 
+  /** Supported order combinations; null when the server provides no special capabilities. */
+  private List<OrderCapabilityItem> orderCapabilities;
+
   public Integer getContractId() {
     return contractId;
   }
@@ -423,6 +426,14 @@ public class ContractItem extends ApiModel {
     this.supportFractionalShare = supportFractionalShare;
   }
 
+  public List<OrderCapabilityItem> getOrderCapabilities() {
+    return orderCapabilities;
+  }
+
+  public void setOrderCapabilities(List<OrderCapabilityItem> orderCapabilities) {
+    this.orderCapabilities = orderCapabilities;
+  }
+
   @Override
   public String toString() {
     return "ContractItem{" +
@@ -463,6 +474,7 @@ public class ContractItem extends ApiModel {
             ", tickSizes=" + tickSizes +
             ", isEtf=" + isEtf +
             ", etfLeverage=" + etfLeverage +
+            ", orderCapabilities=" + orderCapabilities +
             '}';
   }
 
