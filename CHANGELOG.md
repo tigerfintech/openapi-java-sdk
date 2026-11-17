@@ -1,95 +1,73 @@
-# Changelog
-
 ## 2.7.4 (2026-11-18)
 
 ### New
 
-- Contract responses expose supported combinations of order types, time in force, and trading sessions through order capabilities.
+- 合约查询新增订单能力信息，可查看支持的订单类型、订单有效期和交易时段组合。
 
 ## 2.7.3 (2026-11-09)
-
 ### New
+- 支持美股期权 GTH/CURB 延长交易时段行情：Protobuf 期权回调通过已有字段提供当前时段价格、成交时间、参考昨收及成交量/额，以 `hourTradingTag` 标识时段（GTH 为 `PreMarket`，CURB 为 `AfterHours`），并提供 `session`、独立累计量/额 `cumVolume` / `cumAmount`
+- HTTP 期权快照 `OptionBriefItem` 和期权链 `OptionRealTimeQuote` 新增 `cumVolume` / `cumAmount` 及延长时段行情对象 `hourTrading`
+- 期权分钟 K 线查询 `OptionKlineQueryRequest` / `OptionKlineQueryV2Request` 新增 `withHourTrading(Boolean)`：`true` 包含 GTH/CURB，`false` 排除，`null` 不传参数并保留服务端默认行为
+### 兼容性
+- 原有方法签名保留，未设置延长时段开关时既有调用行为不变
+- 基础行情回调保留可选字段的缺失状态和显式零值，并透传 `volumeDecimal`；当前时段成交量/额与累计量/额分别提供
+- 推送使用平铺字段，HTTP 快照和期权链使用 `hourTrading` 对象；期权 GTH 推送回调仅支持 Protobuf
 
-- US option snapshots and option chains provide GTH/CURB extended-session quotes and independent cumulative volume and turnover.
-- Protobuf option callbacks provide current-session prices, trade timestamps, reference previous closes, volume, and turnover, with `PreMarket` / `AfterHours` session tags and independent cumulative totals.
-- Option minute-bar requests support `withHourTrading` to include or exclude GTH/CURB data.
-
-### Changed
-
-- Existing method signatures and server defaults remain unchanged when no extended-session option is set.
-- Quote callbacks preserve missing optional values and explicit zeros, including fractional volume.
-- Extended-session option callbacks require Protobuf; HTTP snapshots and option chains expose extended-session data through `hourTrading`.
 
 ## 2.7.2 (2026-11-02)
-
 ### New
-
-- `NewsStockListRequest` queries news for one stock with page-number pagination.
-- `NewsHighlightListRequest` queries market highlights with cursor pagination.
-- News queries support simplified Chinese, traditional Chinese, and English. Omitting the language returns mixed-language content; unsupported language values fall back to English.
-- News responses provide pagination details, article titles, summaries, publication timestamps, and URLs.
+- 新增个股新闻列表接口 `news_stock_list`：`NewsStockListRequest.newRequest(String symbol, Language lang, Integer pageCount, Integer pageSize)` 查询指定股票（单只代码）的资讯列表；`page_count` / `page_size` 可选（传 `null` = 服务端默认 1 / 20，`page_count` >= 1，`page_size` 1-50）
+- 新增市场要闻列表接口 `news_highlight_list`：`NewsHighlightListRequest.newRequest(Language lang, String lastId)` 查询市场要闻，无必填参数；翻页只走 `lastId` 游标（取上一页最后一条的 `id`，传 `null` 从最新开始）
+- `lang` 为两接口共用可选参数（`zh_CN` / `zh_TW` / `en_US`，传 `null` = 中英混合内容；服务端对非法值回退 `en_US`）
+- 两接口响应共用 `NewsPageItem`（`items` + `pageCount` / `pageSize` / `totalPage` / `totalSize`），条目 `NewsItem` 含 `id` / `title` / `summary` / `pubTimestamp` / `url`
+### 兼容性
+- 纯新增接口，不影响既有方法
+- 出入参与平台惯例对齐：请求 snake_case、响应 camelCase，无特殊映射
 
 ## 2.7.1 (2026-09-23)
-
 ### New
-
-- Asset queries support `AssetQuoteType` values `ETH`, `RTH`, and `OVERNIGHT` for session-specific valuations.
-- Asset and position subscriptions support the same quote basis through a new `SubscribeAsyncApi.subscribe` overload.
-
-### Changed
-
-- Existing method signatures and behavior remain unchanged when `AssetQuoteType` is omitted.
-- Subscription quote-basis selection requires Protobuf. STOMP callbacks ignore the parameter and log a warning.
+- 资产查询新增 `AssetQuoteType` 参数（`ETH` / `RTH` / `OVERNIGHT`），可按夜盘口径估值：`PrimeAssetRequest.buildPrimeAssetRequest(...)` 与 `AggregateAssetRequest.buildAggregateAssetRequest(...)` 各新增带该参数的重载，`PrimeAssetModel` / `AggregateAssetModel` 新增对应字段
+- 推送订阅新增资产行情口径：`SubscribeAsyncApi.subscribe(String account, Subject subject, AssetQuoteType assetQuoteType)`，仅对 `Subject.Asset` / `Subject.Position` 生效
+### 兼容性
+- 原有方法签名不变，不传 `AssetQuoteType`（或传 `null`）时行为与此前完全一致
+- 订阅侧的口径参数只随 protobuf 协议上线；使用 `ApiComposeCallback4Stomp`（STOMP 协议）时该参数会被忽略并打印 warn 日志
 
 ## 2.7.0 (2026-09-17)
-
 ### New
-
-- OAuth2 authentication supports automatic token storage and renewal through `OAuth2SessionManager` and `OAuth2Authentication`.
-- Push connections renew OAuth2 tokens without reconnecting.
-
-### Changed
-
-- Existing tigerId and private-key authentication remains available when no alternative authentication is configured.
+- 新增 OAuth2 授权方式，可替代 tigerId + 私钥签名：`OAuth2SessionManager.builder()` 完成授权并管理令牌，`clientConfig.authentication = new OAuth2Authentication(sessions)` 接入客户端。令牌保存在 `~/.tiger/openapi/`，过期自动续期，代码与配置中都不再需要私钥
+- 推送支持 OAuth2，令牌临近过期时在连接上直接续期，不断开重连
+### 兼容性
+- 已有的 tigerId + 私钥签名方式不受影响；不设置 `ClientConfig.authentication` 即沿用签名方式
 
 ## 2.6.3 (2026-08-27)
-
 ### New
-
-- Real-time stock and cryptocurrency quotes provide turnover through `RealTimeQuoteItem.amount`.
+- `RealTimeQuoteItem` 新增 `amount` 字段，支持股票和数字货币实时行情成交额。
 
 ## 2.6.2 (2026-08-19)
-
 ### New
-
-- Option quotes provide current and previous mark prices, midpoint prices, and their timestamps.
-- Overnight quotes provide trading status.
+- `OptionRealTimeQuote` 新增 `markPrice`、`preMarkPrice`、`markTimestamp`、`midPrice`、`preMidPrice`、`midTimestamp` 字段
+- `QuoteOvernight` 新增 `tradingStatus` 字段
 
 ## 2.6.1 (2026-08-03)
 
 ### Fixed
 
-- Option analysis now honors `requireVolatilityList` and returns the requested volatility data.
-- Option timelines now honor `beginTime` when filtering results.
+- 修复期权分析接口 `requireVolatilityList` 参数未生效的问题，此前请求该参数会被服务端忽略，无法返回波动率列表数据
+- 修复期权分时接口 `beginTime` 参数未生效的问题，此前设置起始时间不会过滤返回结果
 
 ## 2.6.0 (2026-07-23)
-
 ### New
-
-- Corporate-action queries support symbol changes, delistings, and IPOs.
-- `CorporateActionType` includes `SYMBOL_CHANGE`, `DELISTING`, and `IPO`.
+- `CorporateActionType` 新增：`SYMBOL_CHANGE`、`DELISTING`、`IPO`
+- 新增公司行为 / 股票代码变更查询接口
 
 ## 2.5.1 (2026-06-24)
-
 ### New
-
-- `TradeOrderModel.buildIcebergOrder` creates iceberg orders with minimum display size, check intervals, and price type.
-- `IcebergPriceType` supports `LIMIT_PRICE` and `OPPONENT_PRICE`.
+- 新增冰山单构建方法 `TradeOrderModel.buildIcebergOrder`，支持设置最小展示数量、检查间隔和价格类型
+- 新增 `IcebergPriceType` 枚举（`LIMIT_PRICE`、`OPPONENT_PRICE`）
 
 ## 2.5.0 (2026-06-08)
-
 ### New
-
-- Option-exercise APIs support checking eligible positions, submitting requests, querying records, and cancelling requests.
-- `OptionExerciseType` supports early exercise and lapse requests.
-- `OptionExerciseCheckRequest.setItmRate` accepts in-the-money thresholds from 0 to 10 for lapse requests.
+- 新增期权提前行权相关接口，支持检查可行权持仓、提交行权、分页查询记录和取消行权
+- 新增 `OptionExerciseType` 枚举（`Exercise` 提前行权 / `Expire` 提前放弃行权）
+- `OptionExerciseCheckRequest` 新增 `setItmRate(Integer)` 方法，支持 Expire 类型传入价内率阈值（0-10）
