@@ -51,14 +51,14 @@ public class ContractOrderCapabilitiesTest {
   }
 
   @Test
-  public void preservesAdditionalTradingSessionValues() {
+  public void preservesExtendedTradingSession() {
     ContractItem item = parseSingle("{\"orderCapabilities\":[{\"orderType\":\"LMT\","
-        + "\"timeInForce\":\"GTC\",\"tradingSessionType\":\"GTH_RTH_CURB\"}]}").getItem();
+        + "\"timeInForce\":\"GTC\",\"tradingSessionType\":\"PRE_RTH_POST\"}]}").getItem();
 
-    assertEquals("GTH_RTH_CURB", item.getOrderCapabilities().get(0).getTradingSessionType());
+    assertEquals("PRE_RTH_POST", item.getOrderCapabilities().get(0).getTradingSessionType());
     JSONObject capability = serialized(item).getJSONArray("orderCapabilities").getJSONObject(0);
     assertEquals(3, capability.size());
-    assertEquals("GTH_RTH_CURB", capability.getString("tradingSessionType"));
+    assertEquals("PRE_RTH_POST", capability.getString("tradingSessionType"));
   }
 
   @Test
