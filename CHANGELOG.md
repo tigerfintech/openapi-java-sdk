@@ -1,11 +1,11 @@
 ## 2.7.4 (2026-11-18)
 
-### New
+### 新增
 
 - 合约查询新增订单能力信息，可查看支持的订单类型、订单有效期和交易时段组合。
 
 ## 2.7.3 (2026-11-09)
-### New
+### 新增
 - 支持美股期权 GTH/CURB 延长交易时段行情：Protobuf 期权回调通过已有字段提供当前时段价格、成交时间、参考昨收及成交量/额，以 `hourTradingTag` 标识时段（GTH 为 `PreMarket`，CURB 为 `AfterHours`），并提供 `session`、独立累计量/额 `cumVolume` / `cumAmount`
 - HTTP 期权快照 `OptionBriefItem` 和期权链 `OptionRealTimeQuote` 新增 `cumVolume` / `cumAmount` 及延长时段行情对象 `hourTrading`
 - 期权分钟 K 线查询 `OptionKlineQueryRequest` / `OptionKlineQueryV2Request` 新增 `withHourTrading(Boolean)`：`true` 包含 GTH/CURB，`false` 排除，`null` 不传参数并保留服务端默认行为
@@ -16,7 +16,7 @@
 
 
 ## 2.7.2 (2026-11-02)
-### New
+### 新增
 - 新增个股新闻列表接口 `news_stock_list`：`NewsStockListRequest.newRequest(String symbol, Language lang, Integer pageCount, Integer pageSize)` 查询指定股票（单只代码）的资讯列表；`page_count` / `page_size` 可选（传 `null` = 服务端默认 1 / 20，`page_count` >= 1，`page_size` 1-50）
 - 新增市场要闻列表接口 `news_highlight_list`：`NewsHighlightListRequest.newRequest(Language lang, String lastId)` 查询市场要闻，无必填参数；翻页只走 `lastId` 游标（取上一页最后一条的 `id`，传 `null` 从最新开始）
 - `lang` 为两接口共用可选参数（`zh_CN` / `zh_TW` / `en_US`，传 `null` = 中英混合内容；服务端对非法值回退 `en_US`）
