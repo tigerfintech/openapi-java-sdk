@@ -1,3 +1,9 @@
+## 2.7.4 (2026-11-18)
+
+### New
+
+- 合约查询新增订单能力信息，可查看支持的订单类型、订单有效期和交易时段组合。
+
 ## 2.7.3 (2026-11-09)
 ### New
 - 支持美股期权 GTH/CURB 延长交易时段行情：Protobuf 期权回调通过已有字段提供当前时段价格、成交时间、参考昨收及成交量/额，以 `hourTradingTag` 标识时段（GTH 为 `PreMarket`，CURB 为 `AfterHours`），并提供 `session`、独立累计量/额 `cumVolume` / `cumAmount`
