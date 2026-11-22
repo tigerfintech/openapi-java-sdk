@@ -6,6 +6,8 @@ package com.tigerbrokers.stock.openapi.client.struct.enums;
  */
 public enum TradingSessionType {
   PRE_RTH_POST,
+  PRE_RTH,
+  RTH_POST,
   OVERNIGHT,
   RTH,
   FULL,

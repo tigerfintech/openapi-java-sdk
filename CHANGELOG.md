@@ -3,6 +3,7 @@
 ### New
 
 - 合约查询新增订单能力信息，可查看支持的订单类型、订单有效期和交易时段组合。
+- 综合和模拟账号下单、订单预览新增交易时段 `TradingSessionType.PRE_RTH`（盘前/盘中）和 `TradingSessionType.RTH_POST`（盘中/盘后）。
 
 ## 2.7.3 (2026-11-09)
 ### New
