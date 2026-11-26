@@ -62,7 +62,7 @@ TigerOpen Java SDK 是老虎证券开放平台的官方 Java SDK，为个人开�
 <dependency>
     <groupId>io.github.tigerbrokers</groupId>
     <artifactId>openapi-java-sdk</artifactId>
-    <version>2.5.0</version>
+    <version>2.7.5</version>
 </dependency>
 ```
 
