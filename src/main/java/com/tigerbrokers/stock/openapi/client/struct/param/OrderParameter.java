@@ -127,7 +127,7 @@ public class OrderParameter implements Serializable {
   @JSONField(name = "outside_rth")
   private Boolean outsideRth;
   /**
-   * set place overnight order in the US market. value: OverNight
+   * Trading session for omnibus and paper accounts. See {@link TradingSessionType}.
    */
   @JSONField(name = "trading_session_type")
   private TradingSessionType tradingSessionType;

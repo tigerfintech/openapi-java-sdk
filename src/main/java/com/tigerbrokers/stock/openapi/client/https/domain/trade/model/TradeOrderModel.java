@@ -120,7 +120,7 @@ public class TradeOrderModel extends ApiModel {
   @JSONField(name = "outside_rth")
   private Boolean outsideRth = Boolean.TRUE;
   /**
-   * set place overnight order in the US market. value: OverNight
+   * Trading session for omnibus and paper accounts. See {@link TradingSessionType}.
    */
   @JSONField(name = "trading_session_type")
   private TradingSessionType tradingSessionType;
