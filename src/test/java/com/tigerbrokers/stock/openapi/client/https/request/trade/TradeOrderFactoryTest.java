@@ -1,6 +1,7 @@
 package com.tigerbrokers.stock.openapi.client.https.request.trade;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.tigerbrokers.stock.openapi.client.https.domain.contract.item.ContractItem;
 import com.tigerbrokers.stock.openapi.client.https.domain.trade.model.TradeOrderModel;
@@ -17,6 +18,8 @@ import com.tigerbrokers.stock.openapi.client.struct.enums.SecType;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TimeInForce;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TradeSession;
 import com.tigerbrokers.stock.openapi.client.struct.enums.TradingSessionType;
+import com.tigerbrokers.stock.openapi.client.struct.param.OrderParameter;
+import com.tigerbrokers.stock.openapi.client.util.builder.TradeParamBuilder;
 import java.util.Arrays;
 import java.util.Collections;
 import org.junit.Assert;
@@ -318,6 +321,38 @@ public class TradeOrderFactoryTest {
     TradeOrderRequest req = TradeOrderRequest.buildMarketOrder(ACCOUNT, STOCK, ActionType.BUY, 100);
     req.setTradingSessionType(TradeSession.Regular);
     Assert.assertNull(((TradeOrderModel)req.getApiModel()).getTradingSessionType());
+  }
+  @Test public void testNewTradingSessions_placeAndPreviewSerializeCorrectly() {
+    for (String account : new String[]{"600021175417", "20220101000000001"}) {
+      for (TradingSessionType session : new TradingSessionType[]{TradingSessionType.PRE_RTH, TradingSessionType.RTH_POST}) {
+        TradeOrderRequest order = TradeOrderRequest.buildLimitOrder(account, STOCK, ActionType.BUY, 100, 150.0)
+            .setOutsideRth(true).setTradingSessionType(session);
+        TradeOrderPreviewRequest preview = TradeOrderPreviewRequest.buildLimitOrder(account, STOCK, ActionType.BUY, 100, 150.0)
+            .setOutsideRth(true).setTradingSessionType(session);
+
+        for (TradeOrderModel model : new TradeOrderModel[]{(TradeOrderModel) order.getApiModel(),
+            (TradeOrderModel) preview.getApiModel()}) {
+          JSONObject payload = JSON.parseObject(JSON.toJSONString(model, SerializerFeature.WriteEnumUsingToString));
+          Assert.assertEquals(account, payload.getString("account"));
+          Assert.assertEquals(session.name(), payload.getString("trading_session_type"));
+          Assert.assertEquals(Boolean.TRUE, payload.getBoolean("outside_rth"));
+          Assert.assertFalse(payload.containsKey("tradingSessionType"));
+          Assert.assertEquals(session, payload.toJavaObject(TradeOrderModel.class).getTradingSessionType());
+        }
+      }
+    }
+  }
+  @Test public void testNewTradingSessions_paramBuilderSerializesCorrectly() {
+    for (TradingSessionType session : new TradingSessionType[]{TradingSessionType.PRE_RTH, TradingSessionType.RTH_POST}) {
+      String json = TradeParamBuilder.instance().account(ACCOUNT).symbol("AAPL")
+          .orderType(OrderType.LMT).limitPrice(150.0).outsideRth(true)
+          .tradingSessionType(session).buildJson(null);
+      JSONObject payload = JSON.parseObject(json);
+      Assert.assertEquals(session.name(), payload.getString("trading_session_type"));
+      Assert.assertEquals(Boolean.TRUE, payload.getBoolean("outside_rth"));
+      Assert.assertFalse(payload.containsKey("tradingSessionType"));
+      Assert.assertEquals(session, JSON.parseObject(json, OrderParameter.class).getTradingSessionType());
+    }
   }
   @Test public void testTradeOrderRequestGetResponseClass() {
     Assert.assertEquals(com.tigerbrokers.stock.openapi.client.https.response.trade.TradeOrderResponse.class,

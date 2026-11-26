@@ -1,3 +1,9 @@
+## 2.7.5 (Unreleased)
+
+### New
+
+- 综合和模拟账号下单、订单预览新增交易时段 `TradingSessionType.PRE_RTH`（盘前/盘中）和 `TradingSessionType.RTH_POST`（盘中/盘后）。
+
 ## 2.7.4 (2026-11-18)
 
 ### New
